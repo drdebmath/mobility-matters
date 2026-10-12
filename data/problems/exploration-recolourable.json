@@ -1,0 +1,2393 @@
+{
+  "id": "exploration-recolourable",
+  "model": "mobile-agents-on-graphs",
+  "name": "Exploration of recolourable graphs",
+  "origin": {
+    "ref": "Bockenhauer2023Inports",
+    "year": 2023,
+    "note": "Böckenhauer, Frei, Unger and Wehner posed exploration by an oblivious agent without port numbers that colours nodes and sees its neighbours' colours (SIROCCO 2023; arXiv January 2023), first with each node coloured once and, in a last section, with recolouring. Fixed colours chosen by a designer (2005) and the rotor-router pointer (1996, 2003) are earlier node-side precursors."
+  },
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "variant of",
+    "relation": "The same task for one agent (visit every node; with return, stop or perpetually), but every node holds a colour from a palette of $c$ colours that the agent at the node reads and, unless the colours are fixed, overwrites; the agent itself may have no memory at all, and in the main model it has no port numbers and sees its neighbours' colours instead. With $c = 1$ the colours carry nothing: an algorithm of the parent problem that uses no markers works here whenever this setting grants its ports, entry port and memory, and a lower bound of this problem proved for any number of colours holds for the parent setting with the same view. The parent's pebbles are movable markers carried by the agent [Pattanayak2024Memoryless] [Disser2019Pebbles]; here the marks stay in the nodes and there is one per node."
+  },
+  "related": [
+    {
+      "problem": "exploration-luminous",
+      "relation": "Flag on the robot versus flag on the node: a luminous robot carries its coloured light with it and shows it to the robots in sight, whereas here the colour stays planted in the node and is read by whoever arrives."
+    }
+  ],
+  "summary": "A single agent with little or no memory must visit every node of an anonymous graph whose nodes carry colours it can read and rewrite; how many colours are needed, and how much does it help to recolour, to see neighbours or to have port numbers?",
+  "statement": "A single deterministic agent starts at a node $s$ of a connected, simple, undirected, anonymous graph $G=(V,E)$ with $n$ nodes, $m$ edges, maximum degree $\\Delta$ and diameter $D$. Every node $v$ holds a colour $\\psi(v)$ from a palette of $c$ colours that persists between visits. In each step the agent at $v$ observes $\\psi(v)$ (and, depending on the setting, $\\deg(v)$, port numbers, the entry port, and the multiset of its neighbours' colours), sets $\\psi(v)$ to a new colour if the setting allows it, and then moves to a neighbour or stops. In the main model [Bockenhauer2023Inports] there are no port numbers: the agent names a colour and the adversary moves it to any neighbour of that colour; the agent is oblivious; all nodes start with the initial colour $c_0$; and the agent must **visit every node, return to $s$ and stop there**, from every start and against every adversary. Other settings fix the colours in advance (label-guided exploration), give port numbers, or ask only for perpetual exploration. **Measures:** the number of colours $c$, counting $c_0$ (the main measure); time, the number of moves until termination (or until every node is visited, for perpetual exploration); and the agent's memory. All known results are for one agent.",
+  "history": "**A flag planted in the node.** Picture every node with a flagpole. The flag shows one of $c$ colours, and it stays up when the agent leaves: whoever arrives later, the same agent included, sees it, and in the main model an agent also sees the flags on the neighbouring nodes. Compare the three other ways the catalogue leaves information behind. A luminous robot's light is a flag on the robot's own mast: it moves with its owner and is a message to the robots in sight and a memory for the owner [Das2016Lights] (problem *Exploration by luminous robots*); here the flag stays in place and is a memory of the *place*, read by whoever comes by. A whiteboard is the same idea with an unbounded or $O(\\log n)$-bit board [Dobrev2006Searching]; a recolourable node is a whiteboard of $\\log_2 c$ bits with $c$ a constant. A pebble or token is a marker the agent carries and drops [Blum1978Compass] [Disser2019Pebbles] [Dobrev2013Tokens]: there are few of them and they move, whereas every node has its own flag and none ever moves.\\n\\n**Where it started.** Fixed flags came first: Cohen, Fraigniaud, Ilcinkas, Korman and Peleg let a designer colour the nodes in advance, and three colours (depth mod 3 from a root) let a finite automaton explore every graph [Cohen2008Label], although no finite automaton explores all graphs without help [Fraigniaud2005Automaton]. The rotor-router, from the Eulerian walkers of physics [Priezzhev1996Eulerian] and the patrolling ants of Yanovski, Wagner and Bruckstein [Yanovski2003Ant], is a node colour that the agent rewrites by a fixed rule: a pointer to the next port to use, which explores any graph from any initial pointers in $O(mD)$ moves, and no oblivious agent that is not told its entry port does better in the worst case [Menc2017Rotor]. Böckenhauer, Frei, Unger and Wehner then posed the problem in its present form: no port numbers, no memory, the agent colours nodes and sees its neighbours' colours. If each node can be coloured only once, $n$ colours are necessary and sufficient, four for trees; with recolouring, eight suffice for every graph [Bockenhauer2023Inports]. Takahashi, Kanaya, Hiraoka, Eguchi and Sudo brought this down to six with a depth-first search whose return path never has a chord [Takahashi2025Recolorable], and Hiraoka, Imori, Takahashi and Sudo proved the first lower bound, four colours, by a computer-checked argument, which is tight for cacti, and three colours for trees [Hiraoka2026Block].\\n\\n**What the colours do.** In every algorithm the colours give the agent a sense of direction that the anonymous graph lacks: depth mod 3 tells parent from child [Cohen2008Label] [Bockenhauer2023Inports], a path colour marks the way back [Takahashi2025Recolorable], a pointer tells which port is next [Menc2017Rotor]. Recolouring is what makes the palette constant: a once-coloured node must keep a colour that distinguishes it forever, and that costs $n$ colours [Bockenhauer2023Inports]. All known results are for a single agent.",
+  "primer": {
+    "intro": "Imagine exploring a town of identical squares joined by streets, with no street signs and no memory at all: after each step you forget everything. What you do have is a box of coloured flags, one flagpole on every square, and good eyes: standing on a square you see its flag and the flags on the squares next to it. You may change the flag where you stand, then name a colour and walk to a neighbouring square showing that colour; if several do, an **adversary** (an imagined opponent) picks which one. We model the town as a graph: squares are **nodes**, streets are **edges**, $n$ is the number of nodes. In the basic version every flag starts with the same colour $0$, you may change flags as often as you like, and you must visit every node, come back to where you started and stop there. The question is how many colours $c$ are needed for every possible town.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Colour by depth mod 3 (trees)",
+        "variant": "once-trees",
+        "ref": "Bockenhauer2023Inports",
+        "idea": "For a town without loops (a **tree**):\n1. On an uncoloured node, give it the colour one more than the largest colour among its neighbours, counting cyclically 1, 2, 3, 1, ... (at the start all neighbours are 0, so the start gets 1).\n2. If a neighbour is uncoloured, walk to one.\n3. Otherwise, if your node has colour 1 and no neighbour of colour 3, stop.\n4. Otherwise walk to the neighbour whose colour is one less than yours (cyclically): it is your parent.",
+        "analysis": "A node at distance $j$ from the start gets colour $(j \\bmod 3)+1$, so its parent has the previous colour and its children the next one; in a tree the parent is the only neighbour with the previous colour, so the way back is never ambiguous. The start is the only node of colour 1 without a neighbour of colour 3. Each edge is walked once down and once up, so the walk has $2(n-1)$ moves. Three colours plus the initial one are needed: on a path of seven nodes two colours (plus 0) always leave the agent unable to tell the way back [Bockenhauer2023Inports]. With recolouring allowed, three colours in all suffice on trees [Hiraoka2026Block].",
+        "why_it_matters": "Depth mod 3 is the basic trick of the whole area: a designer uses it in label-guided exploration [Cohen2008Label], and the general eight-colour algorithm is this idea with a phase colour on top [Bockenhauer2023Inports]."
+      },
+      {
+        "kind": "algorithm",
+        "title": "The rotor-router: a pointer as the flag",
+        "variant": "rotor-router",
+        "ref": "Menc2017Rotor",
+        "idea": "Now the streets at each square are numbered $1, \\dots, d$, but you are not told by which street you arrived. The flag at a square of degree $d$ shows a number $\\pi$ between 1 and $d$.\n1. Leave by street $\\pi$.\n2. Before leaving, change the flag to $\\pi + 1$ (and after $d$ back to 1).\n3. Repeat forever.",
+        "analysis": "Each square sends you out along its streets in turn, so no street is neglected for long. Whatever the flags show at the start, after $O(mD)$ moves ($m$ streets, $D$ the largest distance between two squares) the walk follows a fixed tour that uses every street once in each direction, so every square is visited [Yanovski2003Ant] [Menc2017Rotor]. A square of degree $d$ needs $d$ flag colours, since otherwise some street can never be chosen, and no memoryless rule without the arrival street is faster in the worst case, even with unlimited flags [Menc2017Rotor].",
+        "why_it_matters": "It shows that memory can live entirely in the nodes, and that the flags can even start in a mess (self-stabilization)."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Flags that can never be changed cost $n$ colours",
+        "variant": "once",
+        "ref": "Bockenhauer2023Inports",
+        "idea": "Suppose a flag, once set, stays forever. To return to the start the agent must always recognise which neighbour it came from. The adversary builds graphs with a long path whose nodes have extra edges between them, so that a node on the way back sees several coloured neighbours, and any repeated colour lets the adversary send the agent the wrong way or around in a loop.",
+        "analysis": "Böckenhauer et al. turn this into a proof that for every $n$ some $n$-node graph forces $n$ colours, counting the initial one, and a depth-first search that gives each new node a colour larger than its coloured neighbours achieves it [Bockenhauer2023Inports]. With recolouring the agent can erase and reuse colours, and six colours suffice for all graphs [Takahashi2025Recolorable]; at least four are needed [Hiraoka2026Block].",
+        "why_it_matters": "The gap between $n$ and a constant is the measure of what the right to recolour is worth."
+      }
+    ]
+  },
+  "measures": [
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "number $c$ of node colours, counting the initial colour $c_0$ (for the rotor-router: per node)"
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "moves until the agent stops (perpetual: until every node is visited)"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits of agent memory; 0 for an oblivious agent"
+    }
+  ],
+  "axes": [
+    {
+      "id": "ports",
+      "name": "Port numbers",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no port numbers: the agent names a colour, the adversary picks the neighbour",
+          "short": "no ports",
+          "definition": "Edges carry no port numbers. To move, the agent at $v$ names a colour $x$; the adversary moves it to any neighbour $u$ of $v$ with $\\psi(u) = x$ (if the agent sees no neighbour colours, to any neighbour). The agent never learns by which edge it arrived."
+        },
+        {
+          "id": "ports",
+          "level": 1,
+          "label": "port numbers, entry port unknown",
+          "short": "ports, no entry port",
+          "definition": "The edges at $v$ carry port numbers $1,\\dots,\\deg(v)$, assigned by an adversary independently at each endpoint ($\\mathrm{port}_v$). The agent chooses the port by which it leaves, but on arrival it is not told the port by which it entered (*unknown inport*)."
+        },
+        {
+          "id": "inport",
+          "level": 2,
+          "label": "port numbers and the entry port",
+          "short": "ports + entry port",
+          "definition": "As for port numbers, and on arrival at $v$ the agent also reads the port $\\mathrm{port}_v(e)$ of the edge $e$ by which it entered. This is the standard convention of single-agent exploration."
+        }
+      ],
+      "origin": "Port numbers are the usual way an agent tells the edges at a node apart [Fraigniaud2005Automaton] [Pelc2019Survey], and most exploration papers also give the agent the port by which it entered. The rotor-router drops the entry port: the agent only follows and advances a pointer stored at the node, which works from any initial pointers [Yanovski2003Ant] [Menc2017Rotor]. Menc, Pająk and Uznański call this model feature an *unknown inport* and prove that it costs time even with unbounded node memory [Menc2017Rotor]. Böckenhauer, Frei, Unger and Wehner removed the port numbers altogether: the agent names a colour and the adversary chooses among the neighbours of that colour, so the colours are the only way to address an edge [Bockenhauer2023Inports]. Takahashi, Kanaya, Hiraoka, Eguchi and Sudo note that without port numbers \\\"most commonly used techniques for graph exploration and related problems are no longer applicable\\\" [Takahashi2025Recolorable]. The scale runs from no ports, through ports without the entry port, to ports with it."
+    },
+    {
+      "id": "view",
+      "name": "View",
+      "values": [
+        {
+          "id": "own",
+          "level": 0,
+          "label": "the agent sees its own node only",
+          "short": "own node",
+          "definition": "At node $v$ the agent observes $\\psi(v)$, $\\deg(v)$ and nothing about its neighbours (and, where ports exist, what the port axis grants)."
+        },
+        {
+          "id": "neighbours",
+          "level": 1,
+          "label": "the agent also sees the colours of its neighbours",
+          "short": "neighbour colours",
+          "definition": "At node $v$ the agent observes $\\psi(v)$ and the multiset $\\{\\!\\{\\psi(u) : u \\in N(v)\\}\\!\\}$ of its neighbours' colours (hence also $\\deg(v)$), without knowing which edge leads to which colour unless ports say so."
+        }
+      ],
+      "origin": "In label-guided exploration [Cohen2008Label] and in the rotor-router [Menc2017Rotor] the agent reads only the node it stands on, as in all of single-agent exploration. Böckenhauer, Frei, Unger and Wehner observe that colouring alone \\\"is still utterly useless for an oblivious agent that has to return to the start vertex\\\" when it cannot tell edges apart, and therefore let the agent see the colours of the neighbouring nodes [Bockenhauer2023Inports]; every later paper on recolourable exploration keeps this one-hop view [Takahashi2025Recolorable] [Hiraoka2026Block]. It is the graph analogue of the one-hop visibility of myopic luminous robots, except that what is seen are flags in nodes, not robots."
+    },
+    {
+      "id": "memory",
+      "name": "Agent memory",
+      "values": [
+        {
+          "id": "oblivious",
+          "level": 0,
+          "label": "oblivious (no memory, one state)",
+          "short": "oblivious",
+          "definition": "The agent has no internal state: its action (new colour of $v$, then a move, *stay* or *stop*) is a function of its current observation only. Called *zero-memory*, *memoryless* or a *1-state* robot."
+        },
+        {
+          "id": "finite",
+          "level": 1,
+          "label": "finite automaton (a constant number $K$ of states)",
+          "short": "finite automaton",
+          "definition": "The agent is a deterministic automaton with $K$ states, $K$ independent of the graph; its action and next state depend on its state and its observation."
+        },
+        {
+          "id": "log",
+          "level": 2,
+          "label": "$O(\\log n)$ bits of memory",
+          "short": "$O(\\log n)$ bits",
+          "definition": "The agent has $b = O(\\log n)$ bits of memory, enough to hold a counter up to a polynomial in $n$. No variant is catalogued here yet."
+        }
+      ],
+      "origin": "How little memory an exploring agent needs is the oldest question of the area: no finite automaton explores all graphs [Budach1978Labyrinths] [Fraigniaud2005Automaton], and the remedies are markers [Blum1978Compass] [Disser2019Pebbles] or help from a designer [Cohen2008Label]. Recolourable exploration pushes this to the extreme: the agent is oblivious and all memory lives in the nodes [Bockenhauer2023Inports], as in the rotor-router [Menc2017Rotor] and the memoryless automaton with pebbles [Pattanayak2024Memoryless]. Both later papers ask what a constant number of bits of agent memory would buy [Bockenhauer2023Inports] [Takahashi2025Recolorable]; Inoue, Kitamura, Izumi and Masuzawa compare an oblivious agent with a one-bit agent when nodes hold $O(\\log\\Delta)$ bits [Inoue2022Oblivious]."
+    },
+    {
+      "id": "recolouring",
+      "name": "Recolouring",
+      "values": [
+        {
+          "id": "fixed",
+          "level": 0,
+          "label": "colours fixed: the agent reads but cannot change them",
+          "short": "fixed colours",
+          "definition": "The colouring $\\psi : V \\to \\{1,\\dots,c\\}$ never changes; the agent reads $\\psi(v)$ (and, with neighbour view, its neighbours' colours) but cannot write."
+        },
+        {
+          "id": "once",
+          "level": 1,
+          "label": "each node may be coloured once",
+          "short": "colour once",
+          "definition": "Every node starts with the initial colour $c_0$. The agent at $v$ may change $\\psi(v)$ only while $\\psi(v) = c_0$; once $v$ has a colour other than $c_0$ it keeps it forever. This is the main model of [Bockenhauer2023Inports]."
+        },
+        {
+          "id": "unrestricted",
+          "level": 2,
+          "label": "recolourable: any colour, any number of times",
+          "short": "recolourable",
+          "definition": "At every step the agent at $v$ may set $\\psi(v)$ to any colour of the palette, including back to $c_0$, any number of times (the convention of [Takahashi2025Recolorable] and [Hiraoka2026Block])."
+        }
+      ],
+      "origin": "Fixed colours are the label-guided exploration of Cohen, Fraigniaud, Ilcinkas, Korman and Peleg: a designer writes 2-bit labels at the nodes in advance and a finite automaton reads them [Cohen2008Label]. Böckenhauer, Frei, Unger and Wehner let the agent write the colour itself while exploring, once per node, and showed in a last section that allowing recolouring \\\"radically changes our model\\\": seven colours (eight with the initial one) then explore every graph, against $n$ without it [Bockenhauer2023Inports]. A recolourable node is a whiteboard of $\\log_2 c$ bits; the rotor-router is the special case in which the colour is a pointer that the agent advances on every visit [Yanovski2003Ant] [Menc2017Rotor]. Whether a colour may return to $c_0$ matters for exact counts: Böckenhauer et al. intended that it may not, Takahashi et al. allow it, and their six-colour algorithm needs seven colours without it [Takahashi2025Recolorable]."
+    },
+    {
+      "id": "colouring",
+      "name": "Initial colouring",
+      "values": [
+        {
+          "id": "adversarial",
+          "level": 0,
+          "label": "arbitrary initial colours (chosen by the adversary)",
+          "short": "arbitrary colours",
+          "definition": "The initial colouring $\\psi_0 : V \\to \\{1,\\dots,c\\}$ is chosen by the adversary; an algorithm must work from every $\\psi_0$ (as with a rotor-router whose pointers are set arbitrarily)."
+        },
+        {
+          "id": "uniform",
+          "level": 1,
+          "label": "uniform: every node has the initial colour $c_0$",
+          "short": "uniform $c_0$",
+          "definition": "Initially $\\psi(v) = c_0$ for every node $v$ (*clean* node memory). The colour $c_0$ counts as one of the $c$ colours."
+        },
+        {
+          "id": "designer",
+          "level": 2,
+          "label": "colours chosen by a designer who knows the graph",
+          "short": "designer's colours",
+          "definition": "Before the agent starts, a designer who knows $G$ (and the start node) chooses $\\psi_0$. Used with fixed colours this is label-guided exploration [Cohen2008Label]."
+        }
+      ],
+      "origin": "The rotor-router is studied from arbitrary pointers, which makes it self-stabilizing [Yanovski2003Ant] [Bampas2009LockIn] [Menc2017Rotor]; Bojko, Gotfryd, Kowalski and Pająk call arbitrary initial node memory *dirty*: with one bit at the agent and one bit per node it can force quadratic time on paths, whereas with *clean* (uniformly initialised) logarithmic node memory and constant agent memory trees are explored in linear time [Bojko2022Dual]. Recolourable exploration starts from a uniform colouring: \\\"at the start of exploration, all nodes are assigned a common initial color\\\" [Takahashi2025Recolorable]. A designer's colouring is the preprocessing of label-guided exploration [Cohen2008Label]. The scale is arbitrary < uniform < designer: an algorithm that works from every colouring works from the uniform one, and a designer may choose the uniform one."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known about the graph",
+          "short": "nothing known",
+          "definition": "The algorithm is the same for all graphs: it knows neither $n$ nor $\\Delta$ nor any other parameter (a *uniform* algorithm in [Bockenhauer2023Inports])."
+        },
+        {
+          "id": "exact-n",
+          "level": 1,
+          "label": "the exact number of nodes $n$ is known",
+          "short": "$n$ known",
+          "definition": "The algorithm may depend on $n$: it must explore every graph with exactly $n$ nodes (a *non-uniform* algorithm)."
+        }
+      ],
+      "origin": "Böckenhauer, Frei, Unger and Wehner note that their general lower bound \\\"relies heavily on the uniformity of the algorithm\\\" and study algorithms that need only explore graphs of a given size $n$, to see \\\"how useful it is to know the size of the graph in our model\\\" [Bockenhauer2023Inports]. As in single-agent exploration, knowing the size is the classical way to let a walk end [Aleliunas1979Random]."
+    },
+    {
+      "id": "termination",
+      "name": "Termination requirement",
+      "values": [
+        {
+          "id": "return",
+          "level": 0,
+          "label": "explore, then stop at the start node",
+          "short": "return",
+          "definition": "The agent visits every node and then halts at its start node $s$ (*exploration with return*)."
+        },
+        {
+          "id": "stop",
+          "level": 1,
+          "label": "explore, then stop anywhere",
+          "short": "stop",
+          "definition": "The agent visits every node and then halts, at any node."
+        },
+        {
+          "id": "perpetual",
+          "level": 2,
+          "label": "visit every node; never required to stop",
+          "short": "perpetual",
+          "definition": "Every node is visited at least once (for the rotor-router: infinitely often); the agent never needs to halt."
+        }
+      ],
+      "origin": "The three requirements are those of single-agent exploration [Fraigniaud2005Automaton]. Recolourable exploration asks for the hardest, return: \\\"visit every vertex of the graph, return to the start vertex, and terminate\\\" [Bockenhauer2023Inports] [Takahashi2025Recolorable] [Hiraoka2026Block]. Label-guided exploration asks the agent to stop [Cohen2008Label], and the rotor-router never stops [Yanovski2003Ant]."
+    },
+    {
+      "id": "network",
+      "name": "Network",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "arbitrary connected simple graph",
+          "short": "any graph",
+          "definition": "A finite, simple, connected, undirected, anonymous graph $G = (V,E)$ with $n$ nodes."
+        },
+        {
+          "id": "cactus",
+          "level": 1,
+          "label": "cactus (every edge on at most one cycle)",
+          "short": "cactus",
+          "definition": "$G$ is a cactus: every edge lies on at most one cycle (equivalently, every block is a cycle or a single edge)."
+        },
+        {
+          "id": "tree",
+          "level": 2,
+          "label": "tree",
+          "short": "tree",
+          "definition": "$G$ is a tree (a cactus without cycles)."
+        }
+      ],
+      "origin": "Colour counts depend strongly on the class of graphs: for once-colourable nodes trees need four colours and general graphs $n$ [Bockenhauer2023Inports], and for recolourable nodes the bounds are organised by block structure, three colours for trees and cycles and four for cacti [Hiraoka2026Block]. This axis replaces the model's topology axis because it must order trees below cacti; the other classes studied (triangle-free, φ-free, graphs whose blocks are cycles, complete bipartite graphs or cliques, graphs of bounded circumference) are recorded in the notes."
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "timing",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "topology",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ports",
+    "view",
+    "memory",
+    "recolouring",
+    "colouring",
+    "knowledge",
+    "termination",
+    "network"
+  ],
+  "variants": [
+    {
+      "id": "recolourable",
+      "title": "Recolourable nodes, oblivious agent, any graph",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "unrestricted",
+        "termination": "return"
+      },
+      "summary": "An oblivious agent without port numbers explores every graph and returns with six colours; at least four are needed.",
+      "statement": "The BFUW model: no port numbers, the agent sees the colour of its node and the multiset of its neighbours' colours, recolours its node freely and names a colour to move to; the adversary chooses among neighbours of that colour. All nodes start with $c_0$. The agent must visit every node, return to $s$ and stop there, for every start and every adversary. Colours are counted including $c_0$.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "4",
+          "ref": "Hiraoka2026Block",
+          "bottleneck": "indistinguishable starts",
+          "preconditions": [
+            "no single rule with at most three colours explores every subcubic pseudotree (graphs with maximum degree three and at most one cycle; Theorem 13)",
+            "realised on a family of nine graphs with at most five nodes, among them $C_3$, $C_4$, $C_5$ and $K_{1,3}$",
+            "computer-assisted: the cases left after a hand reduction are refuted by a SAT solver with a DRAT-checked certificate",
+            "uses that two executions from different starts which reach the same configuration cannot both stop at their own start (Lemma 2)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Bojko2022Dual",
+          "bottleneck": "every node visited",
+          "preconditions": [
+            "trivial: any agent must visit all $n$ nodes (stated for trees in [Bojko2022Dual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bockenhauer2023Inports",
+          "role": "introductory",
+          "colours": "8",
+          "memory": "0",
+          "note": "Theorem 11 (stated as 7 colours: the paper does not count $c_0$). Breadth-first: a node at depth $j$ gets label $(j \\bmod 3)+1$, in green or red according to the phase, plus a colour for deleted (finished) nodes. Never recolours a node back to $c_0$. Time not analysed."
+        },
+        {
+          "ref": "Takahashi2025Recolorable",
+          "role": "best",
+          "colours": "6",
+          "memory": "0",
+          "assumes": [
+            "recolouring back to $c_0$ allowed; seven colours without it (Note 1)"
+          ],
+          "note": "Theorem 1: *semi-DFS*, a depth-first search whose return path is kept an induced path, so that the predecessor of the head is its only neighbour on the path; colours init, path, fin, head1, head2, neigh. Time not analysed."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Constant: between 4 and 6 colours (counting $c_0$); the exact value is open."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time bound is proved for any general-graph algorithm; only the trivial $\\Omega(n)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits: the agent is oblivious."
+        }
+      },
+      "open": [
+        "Is the colour complexity of recolourable exploration of arbitrary graphs 4, 5 or 6 [Takahashi2025Recolorable] [Hiraoka2026Block]?",
+        "Give a proof of the four-colour lower bound without computer assistance, or for a single graph [Hiraoka2026Block].",
+        "How many moves does a constant-colour algorithm need on general graphs? No bound is known; for graphs whose blocks are cliques or triangle-free, five colours and $O(n\\Delta)$ moves suffice [Hiraoka2026Block].",
+        "How many colours suffice if the agent has a constant number of bits, or even one bit, of memory, or may move at random [Bockenhauer2023Inports] [Takahashi2025Recolorable]?",
+        "Does forbidding recolouring back to $c_0$ change the colour complexity, or only the algorithms [Takahashi2025Recolorable]?"
+      ],
+      "notes": "Colour counts include the initial colour $c_0$, as in [Takahashi2025Recolorable] and [Hiraoka2026Block]; Böckenhauer, Frei, Unger and Wehner count without it, so their 7 is 8 here. Restricted classes: five colours suffice for triangle-free graphs (Theorem 2 of the arXiv v2 of [Takahashi2025Recolorable]) and for *φ-free* graphs, those in which, for every node $v$ of degree at least four, each component of $G - v$ contains at most two neighbours of $v$; they include all graphs of maximum degree three and all cacti (Theorem 3 of [Takahashi2025Recolorable]; the name is the paper's). Hiraoka, Imori, Takahashi and Sudo extend the five-colour algorithm to graphs whose blocks are cliques or triangle-free, with $O(n\\Delta)$ moves (Theorem 11), and show that this class is exactly where its cleanup conditions hold [Hiraoka2026Block]. All known results are for a single agent. Checked against the full texts; [Hiraoka2026Block] is a preprint and its lower bound is computer-assisted.",
+      "status": "verified"
+    },
+    {
+      "id": "recolourable-cactus",
+      "title": "Recolourable nodes on cacti",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "unrestricted",
+        "termination": "return",
+        "network": "cactus"
+      },
+      "summary": "Four colours explore every cactus in $O(n)$ moves, and four are necessary.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "4",
+          "ref": "Hiraoka2026Block",
+          "bottleneck": "indistinguishable starts",
+          "preconditions": [
+            "subcubic pseudotrees, which are cacti (Theorem 13)",
+            "computer-assisted (SAT certificate checked with DRAT)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Bojko2022Dual",
+          "bottleneck": "every node visited",
+          "preconditions": [
+            "trivial: any agent must visit all $n$ nodes (stated for trees in [Bojko2022Dual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Takahashi2025Recolorable",
+          "role": "other",
+          "colours": "5",
+          "memory": "0",
+          "note": "Theorem 3: cacti are φ-free. Uses the three colours $d_0, d_1, d_2$ to keep a directed acyclic graph that guides forward moves and backtracking. Time not analysed."
+        },
+        {
+          "ref": "Hiraoka2026Block",
+          "role": "best",
+          "colours": "4",
+          "time": "O(n)",
+          "memory": "0",
+          "assumes": [
+            "holds for every graph whose blocks are cycles or complete bipartite graphs"
+          ],
+          "note": "Theorem 6. Introductory for four colours and current best."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 4 (counting $c_0$); the lower bound is computer-assisted."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "Is four colours enough for φ-free graphs, or for graphs of maximum degree three? Both lie between 4 and 5 [Hiraoka2026Block]."
+      ],
+      "notes": "The four-colour algorithm treats each block on its own, either as a cycle or as a complete bipartite graph $K_{p,q}$, and handles child blocks recursively [Hiraoka2026Block]. Checked against the full text of the preprint.",
+      "status": "verified"
+    },
+    {
+      "id": "recolourable-trees",
+      "title": "Recolourable nodes on trees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "unrestricted",
+        "termination": "return",
+        "network": "tree"
+      },
+      "summary": "Three colours explore every tree in $O(n)$ moves; two colours cannot explore the path on three nodes.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Hiraoka2026Block",
+          "bottleneck": "indistinguishable starts",
+          "preconditions": [
+            "the path $P_3$ on three nodes, every start node (Lemma 4)",
+            "case analysis of all two-colour rules: each loops, stops early or lets two starts reach the same configuration"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Bojko2022Dual",
+          "bottleneck": "every node visited",
+          "preconditions": [
+            "trivial: any agent must visit all $n$ nodes (stated for trees in [Bojko2022Dual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Hiraoka2026Block",
+          "role": "best",
+          "colours": "3",
+          "time": "O(n)",
+          "memory": "0",
+          "assumes": [
+            "the same algorithm explores every simple cycle"
+          ],
+          "note": "Theorem 3. Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 (counting $c_0$)."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [],
+      "notes": "Without recolouring, trees need four colours (setting *Once-colourable nodes on trees*). Böckenhauer et al. remark that, with recolouring, a path explored from an end node needs only one colour besides $c_0$: colour forward, then erase on the way back [Bockenhauer2023Inports]; Lemma 4 of [Hiraoka2026Block] shows that two colours fail once the start may be the middle node. On simple cycles the same three-colour algorithm works, but no lower bound for cycles alone is stated. Checked against the full text of the preprint.",
+      "status": "verified"
+    },
+    {
+      "id": "once",
+      "title": "Once-colourable nodes, any graph",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "once",
+        "termination": "return"
+      },
+      "summary": "If a coloured node can never be recoloured, $n$ colours are necessary and sufficient.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "n",
+          "ref": "Bockenhauer2023Inports",
+          "bottleneck": "predecessor identification",
+          "preconditions": [
+            "uniform algorithm: it must explore all graphs, $n$ unknown (Theorem 4; stated as $n-1$ without $c_0$)",
+            "for every $n$ there is an $n$-node graph on which the algorithm uses $n$ colours; the proof forces the agent along a path of a larger graph that it cannot tell from the small one",
+            "also holds for bipartite graphs up to one colour: $n-1$ (as summarised in [Takahashi2025Recolorable])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bockenhauer2023Inports",
+          "role": "best",
+          "colours": "n",
+          "memory": "0",
+          "note": "Introductory and current best (Theorem 3, DepthFirstSearch): every newly visited node gets a colour larger than all its coloured neighbours, so the predecessor is always identifiable. Time not analysed."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Exactly $n$ (counting $c_0$)."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Time not studied."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "For graphs of circumference $\\mathrm{circ}(G) \\le g$, close the gap between $\\min(2g-2, n)$ and $\\min(2g, n)$ colours [Bockenhauer2023Inports]."
+      ],
+      "notes": "The driving parameter is the circumference $\\mathrm{circ}(G)$, the length of a longest cycle (their $k$): for graphs of circumference at most $g$, $\\min(2g-2, n)$ colours are necessary and $\\min(2g, n)$ suffice, counting $c_0$ (Theorems 8 and 9 of [Bockenhauer2023Inports]). A special class can be much cheaper: squares of paths need only five colours although their circumference is maximal (Theorem 10, four without $c_0$). Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "once-known-n",
+      "title": "Once-colourable nodes, $n$ known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "once",
+        "termination": "return",
+        "knowledge": "exact-n"
+      },
+      "summary": "Knowing $n$ saves one or two colours: $n-1$ suffice and $n-2$ are necessary.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "n-2",
+          "ref": "Bockenhauer2023Inports",
+          "bottleneck": "predecessor identification",
+          "preconditions": [
+            "Theorem 6 (stated as $n-3$ without $c_0$)",
+            "realised by cliques of $n-3$ nodes with two pendant leaves and a special node $s$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bockenhauer2023Inports",
+          "role": "best",
+          "colours": "n-1",
+          "memory": "0",
+          "assumes": [
+            "$n \\ge 5$"
+          ],
+          "note": "Introductory and current best (Theorem 5, DFS$_n$; stated as $n-2$ without $c_0$): the last two nodes share a colour."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "$n-2$ versus $n-1$: an additive gap of one colour."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Time not studied."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "Is the colour complexity with known $n$ equal to $n-2$ or $n-1$ [Bockenhauer2023Inports]?"
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "once-trees",
+      "title": "Once-colourable nodes on trees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "none",
+        "view": "neighbours",
+        "memory": "oblivious",
+        "colouring": "uniform",
+        "recolouring": "once",
+        "termination": "return",
+        "network": "tree"
+      },
+      "summary": "Colouring by depth modulo three explores every tree with four colours, and four are necessary.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "4",
+          "ref": "Bockenhauer2023Inports",
+          "bottleneck": "predecessor identification",
+          "preconditions": [
+            "the path on seven nodes started at an end (Theorem 2; stated as 3 without $c_0$)",
+            "an uncoloured node cannot be told from the node two steps back, and on the way back two nodes at distance two must differ"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bockenhauer2023Inports",
+          "role": "best",
+          "colours": "4",
+          "memory": "0",
+          "note": "Introductory and current best (Theorem 1, TreeExploration): a node at depth $j$ gets colour $(j \\bmod 3)+1$; the agent prefers uncoloured neighbours, otherwise returns to the parent (the unique neighbour of the previous colour), and stops at the only node of colour 1 with no neighbour of colour 3, the start. Time not analysed."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 4 (counting $c_0$)."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed in the paper."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [],
+      "notes": "The same three-by-depth idea guides label-guided exploration [Cohen2008Label] and the breadth-first algorithm with recolouring [Bockenhauer2023Inports]. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "rotor-router",
+      "title": "Rotor-router: a pointer in every node",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "ports",
+        "view": "own",
+        "memory": "oblivious",
+        "recolouring": "unrestricted",
+        "colouring": "adversarial",
+        "termination": "perpetual"
+      },
+      "summary": "A node's colour is a pointer to one of its ports; an oblivious agent that follows and advances it explores any graph in $O(mD)$ moves from arbitrary pointers, and no oblivious agent without the entry port is faster in the worst case.",
+      "statement": "Ports are numbered, the entry port is not revealed, the agent sees only its own node. The colour of $v$ is a pointer $\\pi_v \\in \\{1,\\dots,\\deg(v)\\}$, initially arbitrary. The agent leaves $v$ by port $\\pi_v$ and advances $\\pi_v$ cyclically. It must visit every node (and keeps going). So a node of degree $d$ uses $d$ colours, $\\lceil\\log_2 d\\rceil$ bits.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\deg(v)\\ \\text{at each node } v",
+          "ref": "Menc2017Rotor",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "an oblivious agent without the entry port needs $\\deg(v)$ distinct inputs at $v$ to leave by every port (Observation 1.1)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^3)",
+          "ref": "Menc2017Rotor",
+          "bottleneck": "unknown inport",
+          "preconditions": [
+            "any oblivious agent without the entry port, even with unbounded node memory (Theorem 2.3)",
+            "uniform initial node memory, so it holds a fortiori from arbitrary colours",
+            "on a path, $(n-1)^2$ moves are needed for a worst-case port numbering (Theorem 2.2), which the rotor-router attains"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Yanovski2003Ant",
+          "role": "best",
+          "time": "O(mD)",
+          "colours": "\\deg(v)",
+          "memory": "0",
+          "note": "Introductory and current best, as reported by [Menc2017Rotor]: from arbitrary pointers the walk settles into an Euler tour within $O(mD)$ moves (the abstract gives $2mD$ steps), which is $\\Theta(mD)$ in the worst case [Bampas2009LockIn]. Not checked against the full text."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "$\\deg(v)$ colours per node, the minimum."
+        },
+        "time": {
+          "status": "tight",
+          "note": "Worst case over $n$-node graphs: $O(mD) = O(n^3)$ against $\\Omega(n^3)$. For a given graph the rotor-router may be slower than a cleverer rule."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "For which graphs (other than paths) is the rotor-router exactly time-optimal among oblivious agents without the entry port [Menc2017Rotor]?"
+      ],
+      "notes": "The rotor-router (also *Propp machine*, *Edge Ant Walk*) goes back to the Eulerian walkers of Priezzhev, D. Dhar, A. Dhar and Krishnamurthy (as cited by [Takahashi2025Recolorable]) [Priezzhev1996Eulerian]; Yanovski, Wagner and Bruckstein used it for patrolling [Yanovski2003Ant]. Bampas et al. show that if the pointers may be chosen and the adversary then numbers the ports, the lock-in time drops to $O(m\\min(\\log m, D))$ (abstract) [Bampas2009LockIn]. It is a recolourable node whose palette grows with the degree: a deterministic recolouring rule fixed in advance. **Unverified:** the $O(mD)$ bound, taken from [Menc2017Rotor], the abstract of [Yanovski2003Ant] and the slides of [Bampas2009LockIn].",
+      "status": "draft"
+    },
+    {
+      "id": "label-guided",
+      "title": "Label-guided: colours fixed by a designer",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "inport",
+        "view": "own",
+        "memory": "finite",
+        "recolouring": "fixed",
+        "colouring": "designer",
+        "termination": "stop"
+      },
+      "summary": "If a designer colours the nodes with three colours, a finite automaton explores every graph and stops within $20m$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Cohen2008Label",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "with one colour the labels carry nothing, and no finite automaton explores all graphs [Fraigniaud2005Automaton] (Section 5 of [Cohen2008Label])",
+            "holds even for bounded-degree graphs"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Bojko2022Dual",
+          "bottleneck": "every node visited",
+          "preconditions": [
+            "trivial: any agent must visit all $n$ nodes (stated for trees in [Bojko2022Dual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cohen2008Label",
+          "role": "best",
+          "colours": "3",
+          "time": "O(m)",
+          "memory": "O(1)",
+          "assumes": [
+            "fewer than 25 states",
+            "labels computed in linear time: colour = depth mod 3 from a root"
+          ],
+          "note": "Introductory and current best (Theorem 2.1): at most $20m$ moves. With 1-bit (two-colour) labels, $O(\\log\\Delta)$ bits of memory and $O(\\Delta^{O(1)}m)$ moves (Theorem 3.1)."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "Constant: 2 versus 3; whether two colours suffice for arbitrary graphs is open [Cohen2008Label]."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Only the trivial $\\Omega(n)$ against $O(m)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Constant."
+        }
+      },
+      "open": [
+        "Is there a 1-bit (two-colour) labeling with which a finite automaton explores every graph [Cohen2008Label]?"
+      ],
+      "notes": "This is the setting *Node labels chosen by the designer* of single-agent exploration, seen from the colour side: the flag is planted by a designer and the agent cannot change it. The designer's colouring by depth mod 3 is the same device that Böckenhauer et al. let the agent build itself. Zhang, Zhang and Tang trade the share of black nodes in 1-bit labelings against memory [Zhang2012Ratio]. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "label-guided-oblivious",
+      "title": "Label-guided, oblivious agent",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "inport",
+        "view": "own",
+        "memory": "oblivious",
+        "recolouring": "fixed",
+        "colouring": "designer",
+        "termination": "perpetual"
+      },
+      "summary": "Fixed colours cannot replace memory cheaply: an oblivious agent needs more than $\\lfloor\\log\\Delta\\rfloor - 2$ designer colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\lfloor\\log\\Delta\\rfloor-1",
+          "ref": "Cohen2008Label",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "for every $\\Delta > 4$ and every one-state robot with at most $\\lfloor\\log\\Delta\\rfloor - 2$ colours there is a simple graph of maximum degree $\\Delta$ it does not explore (Theorem 4.5)",
+            "with self-loops allowed the bound rises to $\\Delta/2$ colours (Theorem 4.2)",
+            "star-like graphs whose central node is entered and left by ports the robot's colour functions cannot cover; applies to visiting all nodes, so to every termination requirement"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "colours": {
+          "status": "unknown",
+          "note": "No algorithm is catalogued for an oblivious agent with designer colours."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No algorithm catalogued."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "How many designer colours does an oblivious agent need to explore all graphs of maximum degree $\\Delta$ [Cohen2008Label]?"
+      ],
+      "notes": "With recolourable colours the same oblivious agent needs only a constant number of colours, even without port numbers (setting *Recolourable nodes, oblivious agent, any graph*): the power lies in writing, not in reading. Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Exploration with colourable nodes [Bockenhauer2023Inports]: an oblivious agent on a tree without port numbers sees the colour of its node and of its neighbours. On an uncoloured node it writes one more than the largest neighbouring colour (cyclically 1, 2, 3), which is its depth mod 3 plus one; it moves to an uncoloured neighbour if there is one (the adversary picks which) and otherwise to its parent, the unique neighbour of the previous colour; it stops at the start, the only node of colour 1 without a neighbour of colour 3. The coloured rings are the flags planted in the nodes; the agent itself remembers nothing.",
+    "view": [
+      90,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          16,
+          28
+        ],
+        "a": [
+          42,
+          42
+        ],
+        "b": [
+          42,
+          14
+        ],
+        "c": [
+          70,
+          50
+        ],
+        "d": [
+          70,
+          30
+        ]
+      },
+      "edges": [
+        [
+          "s",
+          "a"
+        ],
+        [
+          "s",
+          "b"
+        ],
+        [
+          "a",
+          "c"
+        ],
+        [
+          "a",
+          "d"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "s",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ],
+        "label": "Start: every node has colour 0"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "s",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ],
+        "label": "Colour the start 1 (one more than its neighbours' largest)"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "a",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "a",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "c",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "c",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ],
+        "label": "Colour each new node one more than its parent, mod 3"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "a",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ],
+        "label": "No uncoloured neighbour: go to the unique neighbour of the previous colour"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "d",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "d",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "a",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "s",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "b",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "0",
+            "c": "muted",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "b",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              14
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "at": "s",
+            "k": "agent",
+            "c": "accent",
+            "r": 1.8
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              28
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              28
+            ],
+            "r": 3.4,
+            "c": "l1",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              21.5,
+              31.5
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              42
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              45.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              14
+            ],
+            "r": 3.4,
+            "c": "l2",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              47.5,
+              17.5
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              50
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              53.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              30
+            ],
+            "r": 3.4,
+            "c": "l3",
+            "w": 1.2
+          },
+          {
+            "t": "text",
+            "p": [
+              75.5,
+              33.5
+            ],
+            "s": "3",
+            "c": "fg",
+            "size": 3
+          }
+        ],
+        "label": "Back at s: colour 1, no neighbour of colour 3, so it stops"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Bojko2022Dual",
+      "note": "Tree exploration with unknown entry port, constant agent memory and $O(\\log\\deg)$ bits per node: linear time with clean node memory or one token; quadratic time on paths with one bit at the agent and one per node if node memory is dirty (arbitrary). Abstract and introduction read."
+    },
+    {
+      "ref": "Inoue2022Oblivious",
+      "note": "With $O(\\log\\Delta)$ bits per node, an oblivious agent simulates a one-bit agent in two-edge-connected graphs with $O(n^2)$ overhead; bridges are what separates them. Abstract read."
+    },
+    {
+      "ref": "Sudo2026SelfStabilizing",
+      "note": "Self-stabilizing exploration by one agent from arbitrary agent and node memory, using whiteboards of $O(\\log)$ size; cover time $O(m)$ expected (randomized) and $O(m+nD)$ (deterministic). Not read; the arXiv versions state different memory bounds."
+    },
+    {
+      "ref": "Shimoyama2022Cactus",
+      "note": "One bit of agent memory suffices for snap-stabilizing perpetual exploration of cacti with distinguishable cycles (title and description in [Hiraoka2026Block]). Not read."
+    },
+    {
+      "ref": "Sudo2015Whiteboards",
+      "note": "Trade-offs between agent memory and whiteboard size for single-agent exploration. Not read."
+    },
+    {
+      "ref": "Bampas2009LockIn",
+      "note": "Rotor-router lock-in: $\\Theta(mD)$ when the adversary sets pointers and ports, $O(m\\min(\\log m, D))$ when pointers are chosen first. Abstract and talk slides read."
+    },
+    {
+      "ref": "Zhang2012Ratio",
+      "note": "Label-guided exploration with 1-bit labels whose black/white ratio the designer can adjust, with $O(\\rho\\log\\Delta)$ bits of memory. Abstract read."
+    }
+  ]
+}

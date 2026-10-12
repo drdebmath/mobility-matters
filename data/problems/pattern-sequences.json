@@ -1,0 +1,1159 @@
+{
+  "id": "pattern-sequences",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Pattern sequences",
+  "origin": {
+    "ref": "Das2015Sequences",
+    "year": 2010,
+    "note": "Introduced at PODC 2010."
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "generalisation of",
+    "relation": "Forming one pattern is the case $m = 1$; a sequence needs the robots to remember (or encode in the configuration) which pattern comes next."
+  },
+  "summary": "Robots must form a given sequence of patterns, one after the other, forever.",
+  "statement": "Robots must form patterns $P_1, P_2, \\dots, P_m$ in order, repeatedly, with all robots taking part in each.",
+  "primer": {
+    "intro": "Picture a marching band that must form a sequence of shapes, for instance a square, then a line, then a triangle, then the square again, over and over. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). In the basic version they are **oblivious** (no memory between cycles), agree on what clockwise means (**chirality**) but on nothing else, their moves always reach the computed destination (**rigid** moves), and the scheduler is SSYNC: in each round an adversary wakes some of the robots. Given patterns $P_1, P_2, \\dots, P_m$ ($m$ is the number of patterns), the robots must form $P_1$, then $P_2$, and so on up to $P_m$, then $P_1$ again, forever, with every robot taking part in each pattern.",
+    "ideas": [
+      {
+        "kind": "impossibility",
+        "title": "Oblivious robots cannot repeat a pattern",
+        "variant": "ssync-chirality",
+        "ref": "Das2015Sequences",
+        "idea": "Take $n = 4$ and the sequence square, line, square, kite. When the robots stand in the square they must decide where to go next: to the line (if this is the first square) or to the kite (if it is the second). But oblivious robots see only the current positions, and the two squares look exactly alike to robots that see only shapes, not sizes or directions. With the same snapshot a robot makes the same decision, so it cannot follow both continuations. A second obstacle is symmetry: robots can form a pattern only if it has at least the symmetry of the configuration they start from. In a cycle $P_1 \\to P_2 \\to \\dots \\to P_m \\to P_1$ each pattern must have at least the symmetry of the one before, and going round the cycle this forces all of them to have the same symmetry.",
+        "analysis": "Das, Flocchini, Santoro and Yamashita characterised the sequences formable by oblivious robots under these assumptions [Das2015Sequences]: as summarised in [Das2020Luminous], all patterns must have the same number of points and no pattern may appear twice, and the catalogue records that the patterns must have equal symmetricity, a multiple of the start's. With distinct identifiers, any sequence of patterns of size at most $n$ can be formed.",
+        "why_it_matters": "It isolates what memory buys: forming one pattern needs none, but following a script needs a way to know where you are in it."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Keep your place in the sequence with a coloured light",
+        "variant": "lights-async",
+        "ref": "Das2020Luminous",
+        "idea": "Give each robot a **light**: a lamp that shows one of $c$ colours, set by its robot, visible to all robots and kept between cycles.\n\n1. Use the colours shown by the robots to record which step of the sequence is being formed.\n2. Form the current pattern with a single-pattern algorithm.\n3. When the pattern is complete, the robots change their colours to record the next step, and start forming the next pattern.\n4. A repeated pattern is no longer a problem: the positions are the same, but the colours differ.",
+        "analysis": "Lights act as a small shared memory, so repetitions, and even patterns with fewer points than robots, become possible. Das, Flocchini, Prencipe and Santoro give one protocol that forms every formable sequence, in ASYNC and with non-rigid moves [Das2020Luminous]. The number of colours is bounded but not by a constant: it must grow with the number of repetitions and contractions in the sequence, by a lower bound that holds even for fully synchronous robots with rigid moves (Theorem 18 of [Das2020Luminous]). The steps above are the basic idea, not the paper's protocol, which must also cope with robots acting on outdated snapshots and with symmetric starts.",
+        "why_it_matters": "It measures, in colours, exactly how much memory a choreography needs."
+      }
+    ]
+  },
+  "history": "Forming a sequence of patterns asked how much **memory the configuration itself can hold** for oblivious robots: the answer is a symmetricity condition [Das2015Sequences]; lights remove the restriction and work asynchronously [Das2020Luminous].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "ssync-chirality",
+      "title": "Oblivious, SSYNC, chirality",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "frames": "chirality",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "A cyclic sequence of patterns is formable exactly when all patterns have the same symmetricity, a multiple of the start's.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Das2015Sequences",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best; with distinct identifiers, any sequence of patterns of size at most $n$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Form a sequence of patterns in ASYNC with oblivious robots [Das2015Sequences]."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "lights-async",
+      "title": "Luminous robots, ASYNC, non-rigid, chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With lights and common chirality, the formable pattern sequences are characterised under ASYNC and non-rigid moves; the number of colours grows with the sequence and is not known to be optimal.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\max\\{\\alpha(S)/\\min_i\\alpha(S_i),\\ \\mu(S)^{1/\\alpha(S)}\\}",
+          "ref": "Das2020Luminous",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 18",
+            "holds even in FSYNC with rigid moves"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Das2020Luminous",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 2: sequences that violate the paper's symmetry conditions"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2020Luminous",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "\\alpha(S)+\\mu(S)+O(1)",
+          "assumes": [
+            "weak chromatic multiplicity detection"
+          ],
+          "note": "Introductory and current best: a universal protocol for every formable sequence (Theorem 17). The number of colours is \"bounded but not by a constant\"."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only solvability."
+        },
+        "colours": {
+          "status": "gap",
+          "note": "$\\alpha(S)+\\mu(S)+O(1)$ against the Theorem 18 bound; closing it is called an important open question."
+        }
+      },
+      "open": [
+        "Close the gap between the colours used and the lower bound of Theorem 18 [Das2020Luminous].",
+        "Pattern sequences with lights without chirality, with faults, or self-stabilising [Das2020Luminous]."
+      ],
+      "notes": "$\\alpha(S)$ and $\\mu(S)$ are parameters of the sequence $S=\\langle S_1,\\dots\\rangle$ defined in [Das2020Luminous] (equation 1 and Theorem 18). Checked against the full text (HAL copy of the IEEE Access version).",
+      "status": "verified"
+    },
+    {
+      "id": "dancing-sequential",
+      "title": "Luminous robots, sequential scheduler (universal dancing)",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "memory": "lights",
+        "scheduler": "sequential",
+        "multiplicity": "strong",
+        "body": "point"
+      },
+      "summary": "Under a sequential scheduler, disoriented luminous robots form every sequence of patterns up to a length fixed by the number of colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\text{with } c \\text{ colours, length} \\le \\tbinom{n+c-1}{c-1}",
+          "ref": "Feletti2026Dancing",
+          "bottleneck": "memory",
+          "preconditions": [
+            "longer sequences cannot be formed with $c$ colours"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Feletti2026Dancing",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "c \\ge 4",
+          "note": "Introductory and current best: with $c \\ge 4$ colours every sequence of length up to $\\tbinom{n+c-7}{c-4}$ is formed; non-rigid moves, disoriented robots."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "near",
+          "note": "Upper and lower bounds on the sequence length differ by a shift in $n$ and $c$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Pattern sequences: robots must form the patterns $P_1, P_2, \\dots, P_m$ one after another, all robots taking part in each, and repeat the sequence forever [Das2015Sequences]. Shown in FSYNC rounds: the sequence square, line, square, kite, which oblivious robots cannot form because the two squares look alike; with lights, the colour records the step, so the second square differs from the first by its colour.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: lights show step 1 (square)",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              14,
+              44
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              30,
+              8
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              76,
+              12
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              88,
+              46
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              38,
+              16
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              16
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              40
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38,
+              40
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14,
+                44
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                30,
+                8
+              ],
+              [
+                38,
+                16
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                76,
+                12
+              ],
+              [
+                62,
+                16
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                88,
+                46
+              ],
+              [
+                62,
+                40
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "$P_1$: square formed",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              38,
+              40
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              38,
+              16
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              62,
+              16
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              62,
+              40
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                62,
+                16
+              ],
+              [
+                62,
+                40
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              38,
+              40
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "p": [
+              38,
+              16
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "2",
+            "p": [
+              62,
+              16
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "p": [
+              62,
+              40
+            ],
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                62,
+                16
+              ],
+              [
+                62,
+                40
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              17,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              61,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              83,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38,
+                40
+              ],
+              [
+                17,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                39,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                16
+              ],
+              [
+                61,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                40
+              ],
+              [
+                83,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "$P_2$: line formed",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              17,
+              28
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "p": [
+              39,
+              28
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "2",
+            "p": [
+              61,
+              28
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "p": [
+              83,
+              28
+            ],
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                17,
+                28
+              ],
+              [
+                83,
+                28
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              17,
+              28
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "1",
+            "p": [
+              39,
+              28
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "2",
+            "p": [
+              61,
+              28
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "3",
+            "p": [
+              83,
+              28
+            ],
+            "c": "l3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                17,
+                28
+              ],
+              [
+                83,
+                28
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              38,
+              16
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              16
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              40
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38,
+              40
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17,
+                28
+              ],
+              [
+                38,
+                16
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                39,
+                28
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                61,
+                28
+              ],
+              [
+                62,
+                16
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83,
+                28
+              ],
+              [
+                62,
+                40
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "$P_3$: square formed again, other colour",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              38,
+              16
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "1",
+            "p": [
+              38,
+              40
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "2",
+            "p": [
+              62,
+              16
+            ],
+            "c": "l3"
+          },
+          {
+            "id": "3",
+            "p": [
+              62,
+              40
+            ],
+            "c": "l3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                62,
+                16
+              ],
+              [
+                62,
+                40
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              38,
+              16
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "1",
+            "p": [
+              38,
+              40
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "2",
+            "p": [
+              62,
+              16
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "p": [
+              62,
+              40
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                62,
+                16
+              ],
+              [
+                62,
+                40
+              ],
+              [
+                38,
+                40
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              48
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              37,
+              32
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              8
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              63,
+              32
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38,
+                16
+              ],
+              [
+                37,
+                32
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38,
+                40
+              ],
+              [
+                50,
+                48
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                16
+              ],
+              [
+                50,
+                8
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                40
+              ],
+              [
+                63,
+                32
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "$P_4$: kite formed",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              37,
+              32
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "1",
+            "p": [
+              50,
+              48
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "2",
+            "p": [
+              50,
+              8
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "p": [
+              63,
+              32
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                50,
+                48
+              ],
+              [
+                37,
+                32
+              ],
+              [
+                50,
+                8
+              ],
+              [
+                63,
+                32
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      },
+      {
+        "label": "Lights change to step 1: the cycle repeats",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              37,
+              32
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              50,
+              48
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              50,
+              8
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              63,
+              32
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                50,
+                48
+              ],
+              [
+                37,
+                32
+              ],
+              [
+                50,
+                8
+              ],
+              [
+                63,
+                32
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      }
+    ]
+  }
+}

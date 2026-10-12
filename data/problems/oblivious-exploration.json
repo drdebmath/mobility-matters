@@ -1,0 +1,1244 @@
+{
+  "id": "oblivious-exploration",
+  "model": "mobile-agents-on-graphs",
+  "name": "Exploration by oblivious robots",
+  "origin": {
+    "ref": "Flocchini2013Ring",
+    "year": 2007,
+    "note": "Ring exploration by asynchronous oblivious robots (OPODIS 2007)."
+  },
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "variant of",
+    "relation": "The robots follow the Look–Compute–Move model of the plane, moved to graphs: they see the positions of all robots but remember nothing, so the configuration itself must encode the progress of the exploration."
+  },
+  "summary": "Oblivious Look–Compute–Move robots with vision must visit every node of a ring or grid and stop; how many robots are needed?",
+  "statement": "$k$ anonymous, oblivious robots run Look–Compute–Move cycles on an anonymous graph: they see where all robots are, compute, and move to a neighbour. They must visit every node and then stop (or, for perpetual exploration, keep visiting). The primary measure is the **number of robots**.",
+  "primer": {
+    "intro": "Imagine a few identical toy robots on a circular track of $n$ squares. They cannot talk, they have no memory at all, and they cannot tell clockwise from counterclockwise, yet together they must step on every square and then stop forever. Each robot works in cycles of **Look** (take a snapshot showing where all robots are), **Compute** (decide, from that snapshot only, whether to move and where) and **Move** (step to a neighbouring node). Robots are **oblivious**: they forget everything after each cycle. The nodes have no names, and an **adversary** (an imagined opponent) decides when each robot is activated. A robot can tell whether several robots stand on one node (such a node is called a **tower**). In the basic version $k$ robots start on distinct nodes of a ring of $n$ nodes; they must visit every node and then all stop. We count the robots needed.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Gather in a block, build a tower, send one walker",
+        "variant": "ring",
+        "ref": "Lamani2010Ring",
+        "idea": "Five robots, on a ring whose size $n$ is not a multiple of $5$ [Lamani2010Ring]. The rule a robot follows depends only on the current picture, so each stage must leave a picture that announces which stage it is.\n\n1. **Block:** while the robots are not on five consecutive nodes, robots move closer together, carefully so that no two land on the same node.\n2. **Tower:** when the five robots form one block, the middle robot steps onto a neighbour. Now there is exactly one tower, and the picture is no longer symmetric: it shows a direction.\n3. **Walk:** one robot, singled out by its position relative to the tower, walks step by step around the ring, away from the tower.\n4. When the walker reaches the other side of the group, the robots form a special pattern (a *tower-chain*); this picture means the ring has been explored, and nobody moves again.",
+        "analysis": "The condition that $n$ and $5$ share no common factor is what lets the robots break symmetry in the first stage (see the third idea for what goes wrong otherwise). Each stage costs $O(n)$ moves, so the total is $O(n)$, which is optimal, since the walker must cover the ring. For even $n$, four robots cannot explore deterministically [Lamani2010Ring], so five is optimal for those rings. The earlier algorithm of [Flocchini2013Ring] needed $17$ or more robots.",
+        "why_it_matters": "It shows the main technique of the area: memoryless robots store their progress in the shape of their own configuration."
+      },
+      {
+        "kind": "impossibility",
+        "title": "The final picture must contain a tower",
+        "variant": "grid",
+        "ref": "Devismes2012Grid",
+        "idea": "An oblivious robot decides only from the current picture. Suppose that the robots stop in a picture in which every robot is on its own node. That picture could also be a starting picture, since robots start on distinct nodes. Started from it, the robots would see a picture in which they stop, so they would stop at once, after visiting only their own $k$ nodes, fewer than the $n$ nodes of the graph. So every final picture must contain a tower.",
+        "analysis": "A single robot can never make a tower, so one robot can never explore and stop, on any graph with at least two nodes. With more care [Devismes2012Grid] show that two robots are not enough on a grid with at least three nodes, and they give an algorithm with three robots, which is optimal (four for the $2\\times2$ grid, five for the $3\\times3$ grid).",
+        "why_it_matters": "This one-line remark is the starting point of most lower bounds for oblivious robots: termination itself must be written in the configuration."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Evenly spaced robots stay evenly spaced",
+        "variant": "ring",
+        "ref": "Flocchini2013Ring",
+        "idea": "Let $k$ divide $n$, with $k < n$, for example $3$ robots on a ring of $6$ nodes, one on every second node. Every robot sees exactly the same picture, the same in both directions. The adversary activates all robots together and, whenever a robot wants to move but cannot tell its two directions apart, sends every robot clockwise. Then all robots do the same thing: either nobody moves, or everybody steps clockwise and the picture is again evenly spaced. The robots will see this same picture forever, so they either stop where they are, having visited only $k$ nodes, or never stop.",
+        "analysis": "So $k$ robots cannot explore a ring whose size is a multiple of $k$. [Flocchini2013Ring] show that exploration is impossible in general whenever $n$ and $k$ share a common factor (the full argument is longer), and solvable when they share none and $k \\ge 17$; the five-robot algorithm above later lowered the team size.",
+        "why_it_matters": "Symmetry that robots cannot break is the obstacle behind the number-theoretic conditions that appear throughout the oblivious-robot literature."
+      }
+    ]
+  },
+  "history": "Robots with no memory must encode progress in their positions, so the first question was **the minimum number of robots** [Flocchini2013Ring], answered exactly for rings [Lamani2010Ring] and grids [Devismes2012Grid].",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Robots",
+      "description": "number of robots needed"
+    },
+    {
+      "id": "time",
+      "name": "Moves",
+      "description": "total moves"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "communication",
+    "node-memory",
+    "node-ids",
+    "algorithm",
+    "initial"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "timing",
+    "topology"
+  ],
+  "variants": [
+    {
+      "id": "ring",
+      "title": "Rings, exploration with stop",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "topology": "ring"
+      },
+      "summary": "Five robots explore any ring whose size is co-prime with 5; fewer than five cannot for even $n$.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "5",
+          "ref": "Lamani2010Ring",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "even $n$, deterministic"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Flocchini2013Ring",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "for infinitely many $n$, when the algorithm must work from every configuration"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2013Ring",
+          "role": "introductory",
+          "agents": "O(\\log n)",
+          "note": "Solvable for co-prime $n$ and $k \\ge 17$; unsolvable in general if $n$ and $k$ are not co-prime."
+        },
+        {
+          "ref": "Lamani2010Ring",
+          "role": "best",
+          "agents": "5",
+          "time": "O(n)",
+          "assumes": [
+            "$\\gcd(n,5)=1$"
+          ],
+          "note": "Optimal moves; 4 robots suffice probabilistically."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Five, for $n$ co-prime with 5 and even."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$O(n)$ moves."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "grid",
+      "title": "Grids, exploration with stop",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "topology": "grid"
+      },
+      "summary": "Three robots explore any grid with at least three nodes (four for $2\\times2$, five for $3\\times3$), which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Devismes2012Grid",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "grids with at least 3 nodes, deterministic or probabilistic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Devismes2012Grid",
+          "role": "best",
+          "agents": "3",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Three."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Exploration of a ring by five oblivious robots [Lamani2010Ring] (the problem: [Flocchini2013Ring]): anonymous robots without memory, on distinct nodes of an anonymous ring with $n = 8$ nodes (co-prime with 5), run Look–Compute–Move cycles, one robot per step here. They first close the gaps into a block of five, then the middle robot forms a tower, which fixes a direction; one end robot walks away from the tower round the ring, and when it is back beside the group the pattern means that every node (shaded) has been visited, and no robot moves again. The rules are simplified from [Lamani2010Ring].",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "v0": [
+          50.0,
+          47.0
+        ],
+        "v1": [
+          64.14,
+          41.14
+        ],
+        "v2": [
+          70.0,
+          27.0
+        ],
+        "v3": [
+          64.14,
+          12.86
+        ],
+        "v4": [
+          50.0,
+          7.0
+        ],
+        "v5": [
+          35.86,
+          12.86
+        ],
+        "v6": [
+          30.0,
+          27.0
+        ],
+        "v7": [
+          35.86,
+          41.14
+        ]
+      },
+      "edges": [
+        [
+          "v0",
+          "v1"
+        ],
+        [
+          "v1",
+          "v2"
+        ],
+        [
+          "v2",
+          "v3"
+        ],
+        [
+          "v3",
+          "v4"
+        ],
+        [
+          "v4",
+          "v5"
+        ],
+        [
+          "v5",
+          "v6"
+        ],
+        [
+          "v6",
+          "v7"
+        ],
+        [
+          "v7",
+          "v0"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v4",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v6",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          }
+        ],
+        "label": "Start: 5 robots on distinct nodes, n = 8"
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v6",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          }
+        ],
+        "label": "Block: one robot at a time closes a gap"
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v5",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v4",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v4",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              71.14,
+              45.14
+            ],
+            "s": "tower",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Tower: the middle robot steps onto a neighbour"
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v5",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              71.14,
+              45.14
+            ],
+            "s": "tower",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Walk: the end robot far from the tower walks away from it"
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v6",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              71.14,
+              45.14
+            ],
+            "s": "tower",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r1",
+            "at": "v0",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r2",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r3",
+            "at": "v1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r4",
+            "at": "v3",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "r5",
+            "at": "v7",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              71.14,
+              45.14
+            ],
+            "s": "tower",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Walker reaches the group from the other side: every node visited, all stop"
+      }
+    ]
+  }
+}

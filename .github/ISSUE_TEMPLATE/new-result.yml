@@ -1,0 +1,51 @@
+name: New or improved result
+description: A paper that improves a bound, settles an open question, or belongs to a setting of the atlas.
+title: "[Result] "
+labels: ["new-result"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! Every submission is checked against the full text of the paper before it enters the atlas.
+        Contributors whose submissions are accepted are listed in the Acknowledgements (tell us below how you would like to be named).
+  - type: input
+    id: paper
+    attributes:
+      label: Paper
+      description: Title, authors and venue (or arXiv id).
+      placeholder: "Kshemkalyani, Kumar, Molla, Sharma. Optimal dispersion ... (DISC 2025)"
+    validations: {required: true}
+  - type: input
+    id: link
+    attributes:
+      label: Link to the full text
+      description: DOI, arXiv, or an author's page. An open copy helps us verify it quickly.
+    validations: {required: true}
+  - type: input
+    id: problem
+    attributes:
+      label: Problem
+      description: The atlas problem (copy the page title or URL), e.g. "Dispersion".
+    validations: {required: true}
+  - type: input
+    id: setting
+    attributes:
+      label: Setting
+      description: The setting (variant) on the problem page, or the assumptions if it is new.
+  - type: textarea
+    id: result
+    attributes:
+      label: The result
+      description: The bound or impossibility, and the theorem or section where it is stated. Include the assumptions the paper makes.
+    validations: {required: true}
+  - type: input
+    id: credit
+    attributes:
+      label: How should we acknowledge you?
+      description: Your name as you would like it to appear, or leave empty to use your GitHub handle, or write "anonymous".
+  - type: checkboxes
+    id: own
+    attributes:
+      label: Disclosure
+      options:
+        - label: I am an author of this paper.

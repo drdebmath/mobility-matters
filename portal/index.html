@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Portal</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<style>
+  .q { margin: 1rem 0; }
+  .q h3 { margin: .2rem 0 .4rem; font-size: 1.05rem; }
+  .q .ctx { color: var(--muted); font-size: .9rem; margin-bottom: .6rem; }
+  .q label.opt { display: flex; gap: .5rem; align-items: flex-start; padding: .35rem .5rem; border-radius: 8px; cursor: pointer; }
+  .q label.opt:hover { background: var(--accent-soft); }
+  .q textarea, .q input[type=text] { width: 100%; font: inherit; font-size: .9rem; padding: .4rem .5rem; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg-elev); color: var(--fg); }
+  .q .row { display: flex; gap: .6rem; align-items: center; margin-top: .6rem; flex-wrap: wrap; }
+  .q button { font: inherit; font-size: .85rem; padding: .35rem .9rem; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  .q button.ghost { background: transparent; color: var(--accent); }
+  .q .status { font-size: .8rem; color: var(--muted); }
+  .q.decided { border-left: 3px solid var(--tight); }
+  .kind { text-transform: uppercase; font-size: .7rem; letter-spacing: .06em; color: var(--muted); }
+  .tabs { display: flex; gap: .4rem; margin: .8rem 0; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: .82rem; padding: .25rem .8rem; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--fg); cursor: pointer; }
+  .tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="../index.html">Mobility Matters</a><nav><a href="../index.html">Catalogue</a></nav></header>
+<main class="container">
+  <h1>Decision portal</h1>
+  <p class="muted lead">Points where the catalogue needs your call. Choose an option (or write your own) and save: the choice is written to <code>data/decisions.json</code> in the repository. Decisions are then applied to the data and marked applied.</p>
+  <div class="tabs" id="tabs"></div>
+  <div id="list"><p class="muted">Loading… (run <code>python3 scripts/portal.py</code> and open this page from it)</p></div>
+</main>
+<script>
+(() => {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const math = s => esc(s).replace(/\$([^$]+?)\$/g, (m, x) => { try { return katex.renderToString(x.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>'), { throwOnError: false }); } catch (e) { return m; } })
+    .replace(/\[([A-Z][A-Za-z]*\d{4}[A-Za-z0-9]*)\]/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  let data = null, filter = 'open';
+  const list = document.getElementById('list'), tabs = document.getElementById('tabs');
+  function renderTabs() {
+    const n = k => data.questions.filter(k).length;
+    const T = [['open', 'Open', q => !q.decision], ['decided', 'Decided', q => q.decision], ['all', 'All', () => true]];
+    tabs.innerHTML = T.map(([id, label, f]) => `<button class="${filter === id ? 'on' : ''}" data-tab="${id}">${label} (${n(f)})</button>`).join('');
+  }
+  function card(q) {
+    const d = q.decision || {};
+    const opts = q.options.map(o => `<label class="opt"><input type="radio" name="c-${q.id}" value="${esc(o.id)}" ${d.choice === o.id ? 'checked' : ''}><span>${math(o.label)}</span></label>`).join('');
+    const other = q.allow_other ? `<label class="opt"><input type="radio" name="c-${q.id}" value="other" ${d.choice === 'other' || (!q.options.length) ? 'checked' : ''}><span>${q.options.length ? 'Other (write below)' : 'Your answer'}</span></label><input type="text" data-other placeholder="${q.options.length ? 'Your own option' : 'Write the answer here'}" value="${esc(d.other || '')}">` : '';
+    return `<section class="panel q ${q.decision ? 'decided' : ''}" data-id="${esc(q.id)}">
+      <div class="kind">${esc(q.kind)}</div><h3>${math(q.question)}</h3>
+      <div class="ctx">${math(q.context)}</div>
+      ${opts}${other}
+      <textarea data-note rows="2" placeholder="Note (optional)">${esc(d.note || '')}</textarea>
+      <div class="row"><button data-save>Save</button><button class="ghost" data-clear>Clear</button>
+      <span class="status">${q.decision ? `Saved ${esc(q.decision.at)}${q.decision.applied ? ' · applied' : ' · not yet applied'}` : 'Not decided'}</span></div>
+    </section>`;
+  }
+  function render() {
+    renderTabs();
+    const qs = data.questions.filter(q => filter === 'all' || (filter === 'open' ? !q.decision : q.decision));
+    list.innerHTML = qs.length ? qs.map(card).join('') : '<p class="muted">Nothing here.</p>';
+  }
+  async function load() {
+    const r = await fetch('../api/decisions', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    data = await r.json(); render();
+  }
+  async function post(id, body) {
+    const r = await fetch('../api/decisions/' + encodeURIComponent(id), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) { alert(j.error || 'Save failed'); return; }
+    const i = data.questions.findIndex(q => q.id === id); data.questions[i] = j.question; render();
+  }
+  tabs.addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { filter = b.dataset.tab; render(); } });
+  list.addEventListener('click', e => {
+    const sec = e.target.closest('.q'); if (!sec) return;
+    const id = sec.dataset.id;
+    if (e.target.closest('[data-save]')) {
+      const c = sec.querySelector(`input[name="c-${CSS.escape(id)}"]:checked`);
+      post(id, { choice: c ? c.value : null, other: sec.querySelector('[data-other]')?.value || '', note: sec.querySelector('[data-note]').value });
+    }
+    if (e.target.closest('[data-clear]')) post(id, { choice: null, other: '', note: '' });
+  });
+  load().catch(e => { list.innerHTML = `<div class="error">Could not load decisions: ${esc(e.message)}. Start the portal with <code>python3 scripts/portal.py</code> and open <code>http://localhost:8766/portal/</code>.</div>`; });
+})();
+</script>
+</body>
+</html>

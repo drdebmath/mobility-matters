@@ -1,0 +1,1450 @@
+{
+  "id": "shape-formation-amoebots",
+  "model": "programmable-matter",
+  "name": "Shape formation in programmable matter",
+  "origin": {
+    "ref": "Derakhshandeh2015Leader",
+    "year": 2015,
+    "note": "Introduced with leader election at DNA 21 (2015)."
+  },
+  "related": [
+    {
+      "problem": "pattern-formation",
+      "relation": "\"Shape formation is a basic distributed problem for systems of computational mobile entities. Intensively studied for systems of autonomous mobile robots, it has recently been investigated in the realm of programmable matter\" [DiLuna2020Shape]."
+    }
+  ],
+  "summary": "Particles must rearrange into a target shape (a line, a triangle, any shape built from triangles).",
+  "statement": "From a connected initial configuration of $n$ particles, the particles must reach a configuration forming a given shape (at a scale depending on $n$). **Time** is in rounds; **moves** counts expansions and contractions.",
+  "primer": {
+    "intro": "Think of a pile of clay made of tiny identical robots that should mould itself into a triangle, a hexagon or a line. There are $n$ particles on the triangular grid, forming a connected group with no holes; each has a few bits of memory and talks only to the particles it touches. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. In the standard version the particles do not agree on clockwise or on north, and an adversarial scheduler decides who acts when. They all know a small description of the target shape, and must end up forming it, scaled up so that it uses all $n$ particles. We count *rounds* (stretches of time in which every particle acts at least once) and *moves* (expansions and contractions).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Elect, straighten into a line, rebuild",
+        "variant": "deterministic",
+        "ref": "DiLuna2020Shape",
+        "idea": "The universal algorithm of [DiLuna2020Shape] has seven phases; in plain words:\\n\\n1. Erosion: corners of the shape drop out one by one (no movement) until 1, 2 or 3 touching candidate leaders remain.\\n2. Each candidate becomes the root of a tree that spans part of the shape (every particle remembers a parent).\\n3. The particles agree on what clockwise means, copying it from the candidates.\\n4. The candidates try to break ties; if they cannot, the starting shape was symmetric and several leaders carry on together.\\n5. Each leader pulls its tree into a straight line; all lines get the same length.\\n6. Walking along its line, each leader works out the scale of the target and tells every particle its future role.\\n7. Each line, guided by its leader, folds into its share of the target shape.",
+        "analysis": "A line is easy to control: a leader at one end can count along it and send instructions particle by particle. The whole process takes $O(n^2)$ rounds and $O(n^2)$ moves, and the moves are optimal by the next idea. With coin flips, chirality and one particle active at a time, shapes made of a constant number of triangles are built in $\\Theta(\\sqrt n)$ rounds from a well-prepared start [Derakhshandeh2016Universal].",
+        "why_it_matters": "Using a line as a universal halfway shape is the standard trick for shape formation, reused for tiles and modular robots too."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A compact blob must travel far to become a line",
+        "variant": "deterministic",
+        "ref": "DiLuna2020Shape",
+        "idea": "Start with the $n$ particles packed into a hexagon; it fits inside a circle of radius about $\\sqrt n$ around its centre $c$. Ask for a straight line. A line has at most $2r+1$ of its particles within distance $r$ of $c$. Take $r = n/4$: at most about $n/2$ particles of the final line are within distance $n/4$ of $c$, so at least about $n/2$ particles end farther than $n/4$ from $c$. Each of them started within about $\\sqrt n$ of $c$, so it must travel at least $n/4 - \\sqrt n$ nodes, one node per expand-and-contract.",
+        "analysis": "Adding up gives at least about $(n/2)(n/4) = n^2/8$ node steps, so $\\Omega(n^2)$ moves for any algorithm [DiLuna2020Shape]. The algorithm above uses $O(n^2)$ moves, so it is optimal in moves. The argument says nothing about rounds, because many particles can move in the same round.",
+        "why_it_matters": "The same distance-counting argument gives the quadratic lower bounds for line formation, coating and centralised transformations."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Symmetry that cannot be broken",
+        "variant": "deterministic",
+        "ref": "DiLuna2020Shape",
+        "idea": "Take three particles in a small triangle and ask them to form a straight line of three. The triangle looks the same after a turn by a third of a circle, and its centre is the middle of a triangular face, not a node. Let the scheduler always activate the three rotated copies of a particle together, and give them rotated port labels. Then they see rotated copies of the same view and make rotated copies of the same move. Because the centre is not a node, two of them never try to enter the same node, so nothing breaks the tie: the shape stays three-fold symmetric forever. A line of three is not three-fold symmetric, so it is never formed.",
+        "analysis": "In general, a start that is symmetric under a turn of a half or a third of a circle around a point that is not a node can only reach shapes with the same symmetry [DiLuna2020Shape] (Theorem 1). The paper also proves the converse for hole-free starts: every other target can be formed, so this is the only obstacle. With coin flips the obstacle disappears and any shape can be formed once $n$ is large [DiLuna2020Shape].",
+        "why_it_matters": "It shows exactly which shapes are out of reach and why, and it explains why many algorithms elect up to three leaders instead of one."
+      }
+    ]
+  },
+  "history": "The first shapes were lines, triangles and hexagons, built after electing a leader [Derakhshandeh2015Leader]; then any shape made of triangles [Derakhshandeh2016Universal]. The deterministic question, **which shapes are formable from which starts**, mirrors pattern formation for robots [DiLuna2020Shape]. Later work formed arbitrary connected shapes with a constant number of particles acting as a mobile RAM [DiLuna2020MobileRAM], reconfigured between arbitrary shapes in a linear number of rounds without a canonical intermediate shape [Kostitsyna2023Fast], and asked which shapes **silent, oblivious** particles can form, starting with the line [Navarra2023Line]. Most tasks have a natural $\\Omega(D)$ lower bound because particles and information move one node at a time; joint movements and reconfigurable circuits are extensions proposed to break it [Padalkin2025Joint].",
+  "variants": [
+    {
+      "id": "deterministic",
+      "title": "Deterministic, simply connected start, no chirality",
+      "standard": true,
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "shape": "simply-connected"
+      },
+      "summary": "Which shapes are deterministically formable from a simply connected start is characterised; $O(n^2)$ rounds and moves, and the moves are optimal.",
+      "lower_bounds": [
+        {
+          "measure": "moves",
+          "bound": "\\Omega(n^2)",
+          "ref": "DiLuna2020Shape",
+          "bottleneck": "distance",
+          "preconditions": [
+            "some initial configurations and shapes"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2020Shape",
+          "role": "best",
+          "time": "O(n^2)",
+          "moves": "O(n^2)",
+          "note": "Introductory for the deterministic, chirality-free setting and current best; \"chirality is computationally irrelevant for shape formation\"; with randomization any shape is formable for large $n$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound recorded."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "universal",
+      "title": "Universal shapes, sequential, randomized",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "sequential",
+        "orientation": "chirality",
+        "algorithm": "randomized",
+        "shape": "simply-connected"
+      },
+      "summary": "Any shape made of a constant number of triangles, from a well-initialised start, in $\\Theta(\\sqrt n)$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt n)",
+          "ref": "Derakhshandeh2016Universal",
+          "bottleneck": "distance",
+          "preconditions": [
+            "when the shape differs from the initial configuration"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Derakhshandeh2016Universal",
+          "role": "best",
+          "time": "O(\\sqrt n)",
+          "assumes": [
+            "well-initialised configuration"
+          ],
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\sqrt n)$."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "The model assumptions (chirality, sequential activation, randomization) are as described by [DiLuna2020Shape].",
+      "status": "verified"
+    },
+    {
+      "id": "silbot-chirality",
+      "title": "SILBOT, chirality",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak",
+        "orientation": "chirality"
+      },
+      "statement": "The target shape is a line.",
+      "summary": "Silent oblivious particles cannot form a line if they share only chirality.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Navarra2023Line",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "a symmetric initial configuration",
+            "a synchronous adversary",
+            "holds even with common chirality"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Unsolvable with chirality alone [Navarra2023Line]."
+        },
+        "moves": {
+          "status": "impossible",
+          "note": "—"
+        }
+      },
+      "open": [
+        "Is line formation solvable in SILBOT when particles share just one direction instead of the full orientation [Navarra2023Line]?"
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "silbot-line",
+      "title": "SILBOT, full orientation",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak",
+        "orientation": "full",
+        "connectivity": "may-disconnect"
+      },
+      "statement": "The target shape is a line.",
+      "summary": "With a common compass, silent oblivious particles form a line with $O(n^2)$ moves, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "moves",
+          "bound": "\\Omega(n^2)",
+          "ref": "Derakhshandeh2015Leader",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Lemma 7: a compact start of diameter at most $2\\sqrt n+2$ must become a line",
+            "holds for any algorithm"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Navarra2023Line",
+          "role": "best",
+          "moves": "O(n^2)",
+          "assumes": [
+            "2-hop view"
+          ],
+          "note": "Introductory and current best."
+        },
+        {
+          "ref": "Navarra2025Scattering",
+          "role": "other",
+          "moves": "\\text{finite}",
+          "note": "Journal version; adds configurations with immovable obstacles, and scattering."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No round bound recorded."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        }
+      },
+      "open": [
+        "Does 1-hop visibility suffice for line formation in SILBOT [Navarra2023Line]?",
+        "Which other shapes can SILBOT particles form [Navarra2023Line]?"
+      ],
+      "notes": "The model is SILBOT [DAngelo2020Silent]: no memory, no messages, non-atomic asynchronous actions, view of two hops. The algorithm (WRain) disconnects the system temporarily. Checked against the full text of [Navarra2023Line].",
+      "status": "verified"
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "orientation",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "figure": {
+    "caption": "Shape formation by the universal algorithm of [DiLuna2020Shape] (the problem as in [Derakhshandeh2016Universal]), here on a start with three-fold symmetry and a triangle as target. Erosion (no movement) leaves three touching candidates (green) that cannot break the symmetry, so all three lead. Each leader picks a ray (dashed; the three rays are rotations of each other) and pulls its part into a straight segment along it; then each segment folds into its third of the triangle. Every move is an expansion followed by a contraction.",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 9,
+    "origin": [
+      46,
+      24
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            8.41
+          ],
+          [
+            99.0,
+            8.41
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            16.21
+          ],
+          [
+            99.0,
+            16.21
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.0
+          ],
+          [
+            99.0,
+            24.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            31.79
+          ],
+          [
+            99.0,
+            31.79
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            39.59
+          ],
+          [
+            99.0,
+            39.59
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            47.38
+          ],
+          [
+            99.0,
+            47.38
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            39.59
+          ],
+          [
+            9.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.0
+          ],
+          [
+            18.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            8.41
+          ],
+          [
+            27.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            5.72,
+            1.0
+          ],
+          [
+            36.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            14.72,
+            1.0
+          ],
+          [
+            45.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            23.72,
+            1.0
+          ],
+          [
+            54.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            32.72,
+            1.0
+          ],
+          [
+            63.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            41.72,
+            1.0
+          ],
+          [
+            72.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            50.72,
+            1.0
+          ],
+          [
+            81.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            59.72,
+            1.0
+          ],
+          [
+            90.9,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            68.72,
+            1.0
+          ],
+          [
+            99.0,
+            53.44
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            77.72,
+            1.0
+          ],
+          [
+            99.0,
+            37.86
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            86.72,
+            1.0
+          ],
+          [
+            99.0,
+            22.27
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            95.72,
+            1.0
+          ],
+          [
+            99.0,
+            6.68
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            8.41
+          ],
+          [
+            5.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.0
+          ],
+          [
+            14.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            39.59
+          ],
+          [
+            23.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.1,
+            55.0
+          ],
+          [
+            32.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            10.1,
+            55.0
+          ],
+          [
+            41.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            19.1,
+            55.0
+          ],
+          [
+            50.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            28.1,
+            55.0
+          ],
+          [
+            59.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            37.1,
+            55.0
+          ],
+          [
+            68.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            46.1,
+            55.0
+          ],
+          [
+            77.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            55.1,
+            55.0
+          ],
+          [
+            86.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            64.1,
+            55.0
+          ],
+          [
+            95.28,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            73.1,
+            55.0
+          ],
+          [
+            99.0,
+            10.14
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            82.1,
+            55.0
+          ],
+          [
+            99.0,
+            25.73
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            91.1,
+            55.0
+          ],
+          [
+            99.0,
+            41.32
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: a connected configuration",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Erosion: corners drop out",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "label": "Three candidates remain: all three lead",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "label": "Each leader picks a ray",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                55.0,
+                24.0
+              ],
+              [
+                73.0,
+                24.0
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.5,
+                31.79
+              ],
+              [
+                41.5,
+                47.38
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                46.0,
+                24.0
+              ],
+              [
+                37.0,
+                8.41
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "label": "Straighten: pull onto the ray",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "qlat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "qlat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                55.0,
+                24.0
+              ],
+              [
+                73.0,
+                24.0
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.5,
+                31.79
+              ],
+              [
+                41.5,
+                47.38
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                46.0,
+                24.0
+              ],
+              [
+                37.0,
+                8.41
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                55.0,
+                24.0
+              ],
+              [
+                73.0,
+                24.0
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.5,
+                31.79
+              ],
+              [
+                41.5,
+                47.38
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                46.0,
+                24.0
+              ],
+              [
+                37.0,
+                8.41
+              ]
+            ],
+            "c": "tight",
+            "w": 0.7,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "label": "Fold into the triangle",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "qlat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "qlat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Final: the target triangle is formed",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "tight"
+          }
+        ]
+      }
+    ]
+  }
+}

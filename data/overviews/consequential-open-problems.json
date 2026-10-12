@@ -1,0 +1,70 @@
+{
+  "id": "consequential-open-problems",
+  "title": "The most consequential open problems",
+  "summary": "Ten open questions ranked by how far a solution would propagate through the atlas, with the chain of problems each one feeds.",
+  "problems": [
+    "collaborative-exploration",
+    "compression-amoebots",
+    "convergence",
+    "dispersion",
+    "evacuation",
+    "exploration",
+    "gathering",
+    "gathering-graphs",
+    "leader-election-amoebots",
+    "pattern-formation",
+    "rendezvous",
+    "scattering"
+  ],
+  "status": "verified",
+  "sections": [
+    {
+      "heading": "How the ranking works",
+      "body": "A solution propagates along three kinds of links: a derived problem inherits lower bounds from its parent and gives algorithms back to it; problems that use another as a first step inherit its running time; and inside one problem, an algorithm for weaker assumptions carries over to stronger settings while a lower bound carries over to weaker ones. The ranking weighs this reach with how long a question has been open and how far apart its bounds are. It is a judgement; the open questions page shows the underlying counts."
+    },
+    {
+      "heading": "1. Collective exploration of trees",
+      "body": "Is the competitive ratio of collective tree exploration $O(\\log k)$? The bounds are $\\Omega(\\log k/\\log\\log k)$ [Disser2020General] against $O(\\log^2 k)$ [Cosson2026Polylog], a preprint. In its sharpest form: can $n$ agents explore an anonymous tree of height $D$ in $O(D^2)$ rounds with local communication, and is $\\Omega(D^2)$ necessary for every $D$ [Disser2020General]?\n\n**Why it matters.** Dispersion is derived from it: with $k = n$ every dispersion algorithm explores, and dispersion's $\\Omega(D^2)$ tree bound is borrowed from it [Augustine2018Tradeoffs]. Leader election, independent and dominating sets, spanning and BFS trees by agents all start by dispersing, so their running times inherit any change. Black hole search and dynamic exploration are team exploration under faults."
+    },
+    {
+      "heading": "2. Optimal-time rendezvous of labelled agents",
+      "body": "Find an optimal-time rendezvous algorithm for two labelled agents in arbitrary graphs: the best bound is $\\tilde O(n^5\\log\\lambda)$ [TaShma2014Deterministic] against $\\Omega(n^2+\\log\\lambda)$ [Dessmark2006Deterministic], where $\\lambda$ is the smaller label; the question has been open since 2006 [Pelc2019Survey].\n\n**Why it matters.** Rendezvous is the two-agent core of gathering in graphs, and its algorithms rest on the same universal exploration sequences as treasure hunt; a tight bound would sharpen gathering, treasure hunt and leader election by agents."
+    },
+    {
+      "heading": "3. How much memory exploration needs",
+      "body": "Can an agent explore a tree and stop with asymptotically less memory than exploration with return? The bounds are $\\Omega(\\log\\log\\log n)$ [Diks2004Tree] against $O(\\log n)$ [Ambuhl2011Tree]. More broadly: what is the time of memory-optimal exploration?\n\n**Why it matters.** Memory lower bounds for agent problems, dispersion among them, come from exploration arguments; exploration is also the oldest question in the area."
+    },
+    {
+      "heading": "4. Dispersion with optimal memory and termination",
+      "body": "Can $k$ agents disperse in $O(k)$ rounds with $O(\\log k)$ bits, independent of $\\Delta$, and terminate without knowing $k$, $m$ or $\\Delta$? The best algorithm uses $O(\\log(k+\\Delta))$ bits [Kshemkalyani2025Almost]; the lower bound is $\\Omega(\\log k)$ [Augustine2018Tradeoffs].\n\n**Why it matters.** Dispersion is the first step of most agent algorithms and has the most open questions in the atlas; a $\\log\\Delta$ memory lower bound, or its removal, would settle a question shared by all of them."
+    },
+    {
+      "heading": "5. The asynchronous landscape of robots in the plane",
+      "body": "Can robots with internal lights meet in ASYNC [Flocchini2016Constant] [Masuzawa2026Disorientation]? Can oblivious robots scatter in ASYNC [Bramas2016Probabilistic]? Is point convergence with limited visibility solvable in ASYNC without measurement errors [Kirkpatrick2024Separating]?\n\n**Why it matters.** These questions decide where models separate under asynchrony (see the model grid on the plane model page); their answers carry over to every plane problem, and the first would settle five separations that rest on an unproved claim [Flocchini2023Asynchrony]."
+    },
+    {
+      "heading": "6. The time of arbitrary pattern formation",
+      "body": "Bound the number of epochs an arbitrary pattern formation algorithm needs in ASYNC; only solvability is known [Cicerone2019Asynchronous].\n\n**Why it matters.** Pattern formation has the largest family of special cases in the atlas (circle and uniform circle formation, mutual visibility, $k$-grouping, partitioning and more), and a time bound would carry over to them."
+    },
+    {
+      "heading": "7. How many faults can be tolerated",
+      "body": "\"The maximum number of faults under which a solution is still feasible, for gathering and other tasks, has yet to be established\" [Agmon2006Fault], in particular in ASYNC; and polynomial-time Byzantine gathering in graphs with $f$ Byzantine agents and teams of close to $f+1$ good agents [Bouchard2016Byzantine].\n\n**Why it matters.** Fault thresholds recur across gathering, black hole search, dispersion, evacuation and search; the arguments that bound one usually transfer."
+    },
+    {
+      "heading": "8. Leader election in programmable matter",
+      "body": "Deterministic leader election without chirality in linear time (the best is $O(L_{out}n^2)$ [Emek2019Deterministic]), and in $O(L_{out}+D)$ rounds under weaker schedulers and without disconnection [Dufoulon2021Efficient].\n\n**Why it matters.** Shape formation, coating and convex hull formation start by electing a leader, so their deterministic bounds depend on it."
+    },
+    {
+      "heading": "9. Exact constants for evacuating a disk",
+      "body": "Close the gap for two face-to-face robots: $3+\\pi/6+\\sqrt3 \\approx 5.255$ [Czyzowicz2020FaceToFace] against $\\approx 5.6234$ [Disser2019Second].\n\n**Why it matters.** The question is old and well studied; its techniques shape the whole search family, though its reach stays inside it."
+    },
+    {
+      "heading": "10. Compression and its mixing time",
+      "body": "What happens for $2.17 \\le \\lambda \\le 2+\\sqrt2$, and how fast does the chain compress [Cannon2016Compression]?\n\n**Why it matters.** Separation, alignment and bridging generalise compression, so an answer, and especially a mixing-time technique, would transfer to all three."
+    },
+    {
+      "heading": "Who works on what",
+      "body": "Counted by distinct authors of the papers the atlas cites, gathering in the plane (64 people), exploration by one agent (57) and dispersion (42) lead, followed by convergence, collaborative exploration and evacuation. The counts measure the atlas's coverage rather than the whole literature: gathering and exploration have far larger literatures than the atlas cites, and the youngest problems (flocking, alignment, subgraph counting) have a single paper each. Counts as of version 2026-10-10."
+    }
+  ]
+}

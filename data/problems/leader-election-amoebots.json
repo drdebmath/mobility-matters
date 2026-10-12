@@ -1,0 +1,2157 @@
+{
+  "id": "leader-election-amoebots",
+  "model": "programmable-matter",
+  "name": "Leader election in programmable matter",
+  "origin": {
+    "ref": "Derakhshandeh2015Leader",
+    "year": 2015,
+    "note": "Introduced with shape formation at DNA 21 (2015)."
+  },
+  "related": [
+    {
+      "problem": "leader-election-plane",
+      "relation": "Both elect a leader among anonymous entities from geometry alone; particles on the lattice can also move and talk to neighbours, robots in the plane only see [Dufoulon2021Efficient]."
+    }
+  ],
+  "summary": "Anonymous constant-memory particles must elect exactly one leader, which most shape algorithms need first.",
+  "statement": "A connected configuration of $n$ anonymous particles (initially contracted) must reach a state in which exactly one particle is the leader and all others know they are not. **Time** is in asynchronous rounds; $L_{out}$ is the length of the outer boundary and $D$ the diameter of the configuration.",
+  "primer": {
+    "intro": "Imagine a swarm of identical tiny robots, packed together on a floor tiled with triangles, that must pick one boss without any name tags. Each robot, called a *particle*, occupies one node of the triangular grid, remembers only a few bits, and can read and write the memory of the particles touching it. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. In the standard version there are $n$ particles forming one connected group, possibly with *holes* (empty regions enclosed by particles); all particles agree on what clockwise means (*chirality*), but not on a common north. An *adversary*, a scheduler that we assume chooses the worst order, decides when each particle acts; a *round* is a stretch of time in which every particle has acted at least once. The goal: exactly one particle ends in state *leader*, every other particle knows it is not, and we count the rounds this takes.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Erosion: peel the shape from the outside",
+        "variant": "silbot",
+        "ref": "DAngelo2020Silent",
+        "idea": "This works on shapes **without holes**. It is the erosion of [DiLuna2020Shape], which [DAngelo2020Silent] showed can be run even by particles with no memory and no messages. No particle changes its node (in the memoryless version, expansions serve as signals).\\n\\n1. Every particle starts as *eligible*.\\n2. An eligible particle is a *corner* if its eligible neighbours are few and sit next to each other: none, one, two that touch, or three in a row.\\n3. A corner particle drops out (becomes ineligible). Corners keep dropping out round after round, so the shape is eaten from its rim inwards, like a coastline eroded by the sea.\\n4. A few special cases stop the peeling: a lone eligible particle, two eligible particles that are each other's only eligible neighbour, or a triangle of three, become *candidates* instead of dropping out.\\n5. At the end, 1, 2 or 3 mutually touching candidates remain.",
+        "analysis": "A hole-free shape always has a corner, and removing corners never splits the eligible group or creates a hole, so erosion never gets stuck. Each removal makes the group smaller, and [DAngelo2020Silent] show the process ends in $O(n)$ rounds. It cannot always leave a single leader: three particles in a triangle look exactly alike (see the next idea). It also fails with holes: in a ring of particles around a hole, each particle has two eligible neighbours that do not touch, so nobody is a corner. The best known result elects exactly one leader, holes allowed, deterministically in $O(L_{out}+D)$ rounds, where $L_{out}$ is the length of the outer boundary and $D$ the diameter [Dufoulon2021Efficient].",
+        "why_it_matters": "Erosion is the first step of the deterministic shape-formation algorithm and is reused whenever a few candidate leaders are good enough."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Three identical particles in a triangle",
+        "variant": "stationary-chirality",
+        "ref": "Chalopin2026Stationary",
+        "idea": "Take three particles forming a small triangle, and suppose particles never move and the scheduler may let all three act at the same moment. Each particle sees the same picture: two neighbours, one to its left and one to its right (they agree on clockwise, so 'left' means the same to all). They start in the same state, so in the first step they compute the same thing and write the same thing. After that step they are again in identical states with identical views, and so on forever. Whatever a deterministic algorithm (one that flips no coins) does, either all three become leader or none does [Chalopin2026Stationary].",
+        "analysis": "The argument only uses symmetry: an algorithm cannot tell apart particles whose surroundings are rotated copies of each other. The same reasoning shows that a configuration with six-fold symmetry may end with six leaders, which is why stationary particles with chirality elect up to six leaders [Bazzi2019Stationary]. To get exactly one leader, papers add something that breaks the symmetry: coin flips [Derakhshandeh2015Leader], a scheduler that activates one particle at a time [Briones2023Asynchronous], or a common direction [Chalopin2026Stationary].",
+        "why_it_matters": "Symmetry is the basic obstacle in all of programmable matter; it explains why results say 'at most three' or 'at most six' leaders."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Coin flips along the boundaries",
+        "variant": "randomized-chirality",
+        "ref": "Derakhshandeh2015Leader",
+        "idea": "Only particles on a boundary (the outer rim, or the rim of a hole) take part. Each boundary is a closed loop, and with chirality everyone walks it in the same direction.\\n\\n1. Every boundary particle starts as a *candidate*. Between two consecutive candidates lies a *segment* of non-candidates.\\n2. Compare segments: a candidate whose segment ahead is shorter than the segment behind it gives up (particles compare lengths by passing tokens, one per particle).\\n3. If all segments are equal, every candidate flips a coin. On heads it passes its candidacy forward to the next candidate's spot; when it does and the next candidate keeps its own, two candidacies land on one spot and merge.\\n4. A candidate that is alone on its loop checks whether the loop is the outer boundary (by adding up the turns along the loop; the outer loop turns one full circle one way, a hole the other way). Alone on the outer loop: it is the leader. Alone around a hole: it gives up.",
+        "analysis": "There is always at least one candidate on the outer loop, and while there are two or more, each phase removes one with probability at least $1/4$, so the number of candidates keeps shrinking. Holes are no problem, because a hole's loop eventually loses all its candidates. The expected time is $O(L_{max})$ rounds, $L_{max}$ the longest boundary [Derakhshandeh2015Leader]; this was improved to $O(n)$ rounds with high probability [Daymude2017Improved], and later matched without coins [Dufoulon2021Efficient].",
+        "why_it_matters": "Working on boundaries instead of the whole shape is the idea behind the fast algorithms that followed."
+      }
+    ]
+  },
+  "history": "Leader election was the first task studied, because shape formation needs a leader [Derakhshandeh2015Leader]. The first question was **feasibility with constant memory**, then **rounds**: randomized algorithms came first [Derakhshandeh2015Leader] [Daymude2017Improved], then deterministic ones without chirality [Emek2019Deterministic] and in linear time [Dufoulon2021Efficient]. Later work weakened the model in three directions: **stationary** particles [Bazzi2019Stationary] [Chalopin2026Stationary], **asynchronous** adversaries [Briones2023Asynchronous], and **silent, oblivious** particles [DAngelo2020Silent]; self-stabilising election with constant memory followed [Chalopin2025SelfStab] [Chalopin2026Holes].",
+  "variants": [
+    {
+      "id": "deterministic-chirality",
+      "title": "Deterministic, with chirality",
+      "standard": true,
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "orientation": "chirality",
+        "connectivity": "may-disconnect",
+        "movement": "moving"
+      },
+      "summary": "Deterministic leader election in $O(L_{out}+D)$ rounds, as fast as the best randomized algorithm, holes allowed.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Dufoulon2021Efficient",
+          "role": "best",
+          "time": "O(L_{out}+D)",
+          "note": "Introductory for linear time and current best; $O(D_A)$, where $D_A$ is the diameter of the area enclosed by the particles (holes included), if particles know whether their boundary is the outer one. The system may temporarily disconnect."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only an informal $\\Omega(D)$ remark; no proven lower bound."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [
+        "Fast deterministic leader election under weaker (non-atomic) schedulers, and without letting the system disconnect [Dufoulon2021Efficient]."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "randomized-chirality",
+      "title": "Randomized, with chirality",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "orientation": "chirality",
+        "algorithm": "randomized",
+        "movement": "moving"
+      },
+      "summary": "Randomized leader election in a linear number of rounds with high probability.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Derakhshandeh2015Leader",
+          "role": "introductory",
+          "time": "O(L_{max})",
+          "note": "Expected rounds; $L_{max}$ is the longest boundary."
+        },
+        {
+          "ref": "Daymude2017Improved",
+          "role": "best",
+          "time": "O(n)",
+          "note": "With high probability; restated as $O(L_{out}+D)$ by [Dufoulon2021Efficient]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No proven lower bound."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "In the general amoebot model on arbitrary graphs leader election is impossible, by reduction to anonymous rings [Derakhshandeh2015Leader].",
+      "status": "verified"
+    },
+    {
+      "id": "deterministic-none",
+      "title": "Deterministic, no orientation",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "movement": "moving"
+      },
+      "summary": "Without chirality, a unique leader can still be elected deterministically, in $O(L_{out}n^2)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Emek2019Deterministic",
+          "role": "best",
+          "time": "O(L_{out}n^2)",
+          "note": "Introductory and current best; also yields agreement on chirality."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Far from the linear bound known with chirality."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [
+        "Deterministic leader election without chirality in linear time."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "silbot",
+      "title": "Silent oblivious particles (SILBOT)",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak",
+        "shape": "simply-connected",
+        "movement": "moving"
+      },
+      "summary": "Silent oblivious particles (SILBOT) elect at most three mutually adjacent leaders from hole-free configurations in $O(n)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DAngelo2020Silent",
+          "role": "best",
+          "time": "O(n)",
+          "assumes": [
+            "2-hop view",
+            "initial configuration deeply simply connected (e.g. all particles contracted, no holes)",
+            "no chirality, deterministic"
+          ],
+          "note": "Introductory and current best: Algorithm LESC (Theorem 1), which only expands particles; an emulation of the erosion of [DiLuna2020Shape] with simpler rules."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [],
+      "notes": "SILBOT [DAngelo2020Silent] removes from the amoebot model the serialised scheduler (no two neighbouring particles active together), explicit communication, atomicity of actions and randomness. Particles see up to two hops, distinguish empty nodes from contracted and expanded particles, and act asynchronously; a particle that has expanded along an edge is committed and contracts into the target node at its next activation if the node is empty. A round is the shortest period in which every particle has completed an activation. The paper argues that 1-hop visibility is not enough without communication. Holes are handled in the variant without the hole-free assumption. Checked against the full text of [DAngelo2020Silent] (IEEE Access version; preliminary version at AAMAS 2020).",
+      "status": "verified",
+      "statement": "Particle leader election (PLE): from a connected configuration of contracted particles, terminate with one, two or three mutually adjacent contracted particles that recognise themselves as LEADER, every other particle expanded (NON-LEADER), and the system connected throughout. A single leader is not required: D'Angelo et al. note that a single particle can be elected only with randomisation or a sequential scheduler, citing [Emek2019Deterministic]."
+    },
+    {
+      "id": "silbot-holes",
+      "title": "SILBOT with holes",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak",
+        "movement": "moving"
+      },
+      "summary": "With holes, SILBOT particles cannot elect up to three leaders while staying connected; if they can tell a hole from the exterior, election with compaction takes $O(n^2)$ rounds.",
+      "statement": "Particle leader election as in the hole-free SILBOT variant (one, two or three mutually adjacent leaders), from any connected configuration of contracted particles, possibly with holes, keeping the system connected.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "DAngelo2020Silent",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "a connected configuration with a hole in which groups of particles have identical 2-hop views",
+            "the adversary activates each group simultaneously, each particle twice in a row",
+            "the system must stay connected",
+            "holds even with unlimited memory and chirality"
+          ],
+          "note": "Theorem 2: every move some particle could be instructed to make disconnects the system under some schedule."
+        }
+      ],
+      "results": [
+        {
+          "ref": "DAngelo2020Silent",
+          "role": "best",
+          "time": "O(n^2)",
+          "assumes": [
+            "exterior awareness: a particle tells an empty node in a hole from an exterior empty node within its view",
+            "2-hop view"
+          ],
+          "note": "Introductory and current best: Algorithm CHLE (Theorem 3) fills the holes (compaction: the configuration becomes simply connected) while electing at most three leaders; on hole-free configurations it behaves as LESC."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Impossible in plain SILBOT; with exterior awareness $O(n^2)$ rounds and no lower bound."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [
+        "Can SILBOT particles elect leaders from configurations with holes if the system may disconnect temporarily, without exterior awareness? The impossibility of [DAngelo2020Silent] assumes that connectivity is preserved."
+      ],
+      "notes": "*Compaction* (of holes) asks to turn any connected configuration into a simply connected one. Exterior awareness is motivated by local sensing (light or pressure). Checked against the full text of [DAngelo2020Silent].",
+      "status": "verified"
+    },
+    {
+      "id": "chirality-no-holes",
+      "title": "Stationary, chirality, no holes",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "orientation": "chirality",
+        "shape": "simply-connected",
+        "movement": "stationary"
+      },
+      "summary": "On hole-free configurations with chirality, stationary constant-memory particles elect a leader deterministically in $O(n)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Gastineau2019Leader",
+          "role": "best",
+          "time": "O(n)",
+          "note": "Introductory and current best: $O(r + m_{tree})$ rounds, fewer than $2n$ (Proposition 1). Also computes k-local identifiers; works on the square, triangular and king grids."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [],
+      "notes": "$r$ and $m_{tree}$ are parameters of the configuration defined in [Gastineau2019Leader]: $r$ is the radius of the configuration with respect to its border particles (the least, over particles $u$, of the largest distance from $u$ to a border particle), and $m_{tree}$ is the largest height of an induced subgraph of the configuration that is a tree. The scheduler is strong, as listed by [Dufoulon2021Efficient]. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "stationary-chirality",
+      "title": "Stationary, chirality, weak scheduler",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "weak",
+        "orientation": "chirality",
+        "movement": "stationary"
+      },
+      "statement": "Up to six leaders may be elected.",
+      "summary": "Without moving, particles with chirality elect at most six leaders in $O(n^2)$ rounds, holes allowed.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bazzi2019Stationary",
+          "role": "best",
+          "time": "O(n^2)",
+          "note": "Introductory and current best; at most six leaders."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [
+        "Is a unique leader ever impossible for stationary particles with chirality? Dufoulon et al. say this was shown in [Bazzi2019Stationary], at least for a weak scheduler [Dufoulon2021Efficient]; the theorem was not read."
+      ],
+      "notes": "Bounds are from the table of Dufoulon, Kutten and Moses [Dufoulon2021Efficient]; the abstract of [Bazzi2019Stationary] was not read.",
+      "status": "draft"
+    },
+    {
+      "id": "stationary-direction",
+      "title": "Stationary, common direction, no chirality",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "orientation": "direction",
+        "movement": "stationary"
+      },
+      "summary": "With one common direction and no chirality, a unique leader is elected without moving, with obstacles allowed, but only with implicit termination.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{explicit termination impossible}",
+          "ref": "Chalopin2026Stationary",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 1: deterministic algorithms",
+            "connected configuration with obstacles (holes)",
+            "common direction (one axis), no chirality",
+            "holds even under a synchronous scheduler",
+            "implicit termination remains possible"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chalopin2026Stationary",
+          "role": "best",
+          "time": "O(n^3)",
+          "note": "Introductory and current best (Section 6); implicit termination, unique leader, deterministic, stationary."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No round bound recorded."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [],
+      "notes": "With chirality but no common direction, explicit termination is always possible but the number of leaders depends on the symmetry of the initial configuration [Chalopin2026Stationary]. Here \"common direction\" means agreement on one axis only. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "asynchronous",
+      "title": "Stationary, asynchronous, no orientation, no holes",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "weak",
+        "shape": "simply-connected",
+        "movement": "stationary"
+      },
+      "summary": "Stationary particles with no common orientation elect a leader in connected, contractible 2D or 3D systems under an unfair asynchronous adversary; the running time there is not analysed.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Briones2023Asynchronous",
+          "role": "best",
+          "time": "\\text{finite}",
+          "note": "Introductory and current best (Corollary 6): the sequential algorithm transformed by the concurrency control framework [Daymude2023Canonical]; the paper says its runtime \"has not yet been analyzed\"."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Runtime not analysed under the asynchronous adversary."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [
+        "Deterministic leader election in $O(L_{out}+D)$ rounds under a weaker scheduler [Dufoulon2021Efficient]."
+      ],
+      "notes": "Contractible means no holes, in 2D or in 3D (face-centred cubic lattice). Particles have \"assorted orientations\": no common direction and no chirality. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "oblivious-direction",
+      "title": "Oblivious, common compass, holes allowed",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "sequential",
+        "orientation": "full",
+        "movement": "moving"
+      },
+      "summary": "Oblivious particles that agree on all directions elect a unique leader in connected configurations with holes, self-stabilising, using movement, under an unfair sequential scheduler.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chalopin2026Holes",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "unfair sequential scheduler with atomic moves"
+          ],
+          "note": "Introductory and current best; silent self-stabilising."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "The abstract says \"common sense of direction\"; Section 2 assumes agreement on all directions. Movement together with this orientation overcomes the impossibility of constant-memory self-stabilising election in general networks [Chalopin2026Holes]. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "sequential-stationary",
+      "title": "Stationary, sequential, no orientation, no holes",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "sequential",
+        "shape": "simply-connected",
+        "movement": "stationary"
+      },
+      "summary": "Under an unfair sequential adversary, stationary particles with no common orientation elect a unique leader in $O(n)$ rounds, in 2D or 3D.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Briones2023Asynchronous",
+          "role": "best",
+          "time": "O(n)",
+          "assumes": [
+            "unfair sequential adversary"
+          ],
+          "note": "Introductory and current best (Theorem 3 and Corollary 4)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "self-stabilising",
+      "title": "Stationary, fair scheduler, no orientation, no holes",
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "shape": "simply-connected",
+        "movement": "stationary"
+      },
+      "summary": "Stationary constant-memory particles with no orientation and no chirality elect a unique leader from any initial memory: silent self-stabilising election on simply connected systems.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chalopin2025SelfStab",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "Gouda-fair scheduler",
+            "self-stabilising: any initial memory"
+          ],
+          "note": "Introductory and current best. The algorithm fails under an unfair scheduler (Section 6). Constant memory suffices although silent self-stabilising election in general networks needs $\\Omega(\\log n)$ bits, even on rings."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "moves": {
+          "status": "tight",
+          "note": "No moves."
+        }
+      },
+      "open": [],
+      "notes": "Self-stabilisation is a stronger requirement than the problem statement and has no axis here. Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "orientation",
+    "movement",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "axes": [
+    {
+      "id": "movement",
+      "name": "Movement",
+      "values": [
+        {
+          "id": "stationary",
+          "level": 0,
+          "label": "stationary: particles never move",
+          "short": "stationary",
+          "definition": "No particle ever expands or contracts; the configuration is fixed and only states change."
+        },
+        {
+          "id": "moving",
+          "level": 1,
+          "label": "particles may move",
+          "short": "may move",
+          "definition": "Particles may expand and contract during the election."
+        }
+      ],
+      "origin": "The early leader-election algorithms for amoebots only exchanged messages, and \"did not use the movement ability as an aid to the computation\" [Dufoulon2021Efficient]. Emek et al. showed that movement lets particles elect a unique leader deterministically with no assumption on chirality or holes; the main idea is \"the usage of the ability of the amoebots to move, which previous leader election algorithms have not used\" [Emek2019Deterministic]. The stationary setting stayed interesting because particles may be unable to move, \"so as to maintain a configuration or due to the presence of obstacles\" [Chalopin2026Stationary]. Bazzi and Briones studied stationary deterministic election [Bazzi2019Stationary], where symmetric configurations can force up to six leaders (as reported by [Dufoulon2021Efficient]). Chalopin, Das and Kokkou showed that one common direction suffices for a unique stationary leader [Chalopin2026Stationary]."
+    }
+  ],
+  "figure": {
+    "caption": "Leader election by erosion on a configuration without holes: no particle moves. An eligible particle (blue) whose eligible neighbours are few and consecutive (none, one, two touching, three in a row) is a corner and drops out (grey); corners drop out round after round, peeling the shape from its rim, until a single candidate remains and becomes the leader [DiLuna2020Shape] [DAngelo2020Silent]. Configurations with holes need other algorithms [Derakhshandeh2015Leader].",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 9,
+    "origin": [
+      38,
+      18
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            2.41
+          ],
+          [
+            99.0,
+            2.41
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            10.21
+          ],
+          [
+            99.0,
+            10.21
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.0
+          ],
+          [
+            99.0,
+            18.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            25.79
+          ],
+          [
+            99.0,
+            25.79
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            33.59
+          ],
+          [
+            99.0,
+            33.59
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            41.38
+          ],
+          [
+            99.0,
+            41.38
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            49.18
+          ],
+          [
+            99.0,
+            49.18
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            47.44
+          ],
+          [
+            5.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            31.86
+          ],
+          [
+            14.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            16.27
+          ],
+          [
+            23.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.19,
+            1.0
+          ],
+          [
+            32.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            10.19,
+            1.0
+          ],
+          [
+            41.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            19.19,
+            1.0
+          ],
+          [
+            50.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            28.19,
+            1.0
+          ],
+          [
+            59.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            37.19,
+            1.0
+          ],
+          [
+            68.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            46.19,
+            1.0
+          ],
+          [
+            77.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            55.19,
+            1.0
+          ],
+          [
+            86.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            64.19,
+            1.0
+          ],
+          [
+            95.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            73.19,
+            1.0
+          ],
+          [
+            99.0,
+            45.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            82.19,
+            1.0
+          ],
+          [
+            99.0,
+            30.12
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            91.19,
+            1.0
+          ],
+          [
+            99.0,
+            14.54
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            4.14
+          ],
+          [
+            2.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            19.73
+          ],
+          [
+            11.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            35.32
+          ],
+          [
+            20.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            50.91
+          ],
+          [
+            29.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            7.64,
+            55.0
+          ],
+          [
+            38.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            16.64,
+            55.0
+          ],
+          [
+            47.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            25.64,
+            55.0
+          ],
+          [
+            56.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            34.64,
+            55.0
+          ],
+          [
+            65.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            43.64,
+            55.0
+          ],
+          [
+            74.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            52.64,
+            55.0
+          ],
+          [
+            83.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            61.64,
+            55.0
+          ],
+          [
+            92.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            70.64,
+            55.0
+          ],
+          [
+            99.0,
+            5.88
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            79.64,
+            55.0
+          ],
+          [
+            99.0,
+            21.46
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            88.64,
+            55.0
+          ],
+          [
+            99.0,
+            37.05
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            97.64,
+            55.0
+          ],
+          [
+            99.0,
+            52.64
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: every particle is eligible",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Round 1: corners drop out",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "label": "Round 2: corners drop out",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "label": "Round 3: corners drop out",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "label": "Final: one candidate left, the leader",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "tight",
+            "l": "L"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "7",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "8",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "muted"
+          },
+          {
+            "id": "9",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "muted"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+name: Report an error
+description: A bound, an attribution, a definition, a citation or a statement in the atlas is wrong.
+title: "[Error] "
+labels: ["error"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The page URL (problem, setting, perspective, model) or the PDF page.
+    validations: {required: true}
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: Quote the statement, and say what it should be.
+    validations: {required: true}
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: The paper and theorem (or page) that shows the correct statement.
+    validations: {required: true}
+  - type: input
+    id: credit
+    attributes:
+      label: How should we acknowledge you?
+      description: Your name as you would like it to appear, your GitHub handle (default), or "anonymous".

@@ -1,0 +1,1283 @@
+{
+  "id": "scattering",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Scattering",
+  "origin": {
+    "ref": "Dieudonne2009Scatter",
+    "year": 2009,
+    "note": "Dieudonné and Petit showed scattering is deterministically impossible and gave a randomized solution (preprint 2007)."
+  },
+  "related": [
+    {
+      "problem": "gathering",
+      "relation": "Scattering is the opposite task: gathering creates a multiplicity point, scattering removes all of them. Pattern formation from configurations with multiplicities needs scattering first [Bramas2016Probabilistic]."
+    }
+  ],
+  "summary": "Robots that may start at shared points must move to pairwise distinct points.",
+  "statement": "$n$ robots start at points of the plane, several possibly at the same point. They must reach a configuration in which all positions are distinct, and stay there.",
+  "primer": {
+    "intro": "Picture a box of marbles that were all tipped onto the same spot of a table, and you want them to roll apart so that no two touch the same point. In the scattering problem $n$ robots start in the plane, several possibly at the same point, and must reach positions that are all distinct and then stay distinct. Robots are *oblivious* (they forget everything after each move), work in *Look-Compute-Move* cycles (look at everyone, compute a destination, move), and in each *round* an adversary (an opponent who controls everything the algorithm does not) chooses which robots act; this is the SSYNC scheduler. In the basic catalogued version robots may flip coins (*randomized*), and a robot can see how many robots share each point (*strong multiplicity detection*).",
+    "ideas": [
+      {
+        "kind": "impossibility",
+        "title": "Two robots on one spot can never be told apart",
+        "variant": "ssync-randomized",
+        "ref": "Dieudonne2009Scatter",
+        "idea": "Start with all robots on the same point, give them all the same coordinate system, and let the adversary activate all of them in every round. Each robot sees exactly the same snapshot, so a deterministic rule sends every robot to the same destination. After the move they are again all on one point, with identical snapshots, and so on forever.",
+        "analysis": "By induction, there is an execution in which the robots never separate, so no deterministic algorithm solves scattering [Dieudonne2009Scatter]. The argument does not care whether robots remember the past or can count robots at a point: the robots' memories are equal as well, so their histories never differ. Only randomness can make two co-located robots behave differently.",
+        "why_it_matters": "It is the cleanest example of why some robot problems need randomness at all, and it explains why scattering is studied only with coin flips."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Flip a coin, then move inside your own Voronoi cell",
+        "variant": "ssync-randomized",
+        "ref": "Dieudonne2009Scatter",
+        "idea": "Each time a robot is activated:\n1. Look at the occupied points and compute the *Voronoi diagram*: the cell of an occupied point is the set of places strictly closer to it than to any other occupied point.\n2. Flip a fair coin.\n3. Heads: move to some point of your own cell other than where you stand. Tails: stay.",
+        "analysis": "Robots on different points never collide again, because each moves only inside its own cell and the cells do not overlap. Two robots on the same point are separated in a round where exactly one of them moves; if both are active this happens with probability $1/2$, so with probability 1 they eventually separate [Dieudonne2009Scatter]. If all movers from a point pick the same destination, a crowd of $m$ robots is at best split in two per round, so about $\\log_2 m$ rounds are needed; robots that can count the robots on their point scatter in $O(1)$ expected rounds [Clement2010Cost], and with weaker counting $O(\\log\\log n)$ rounds, which is optimal for algorithms that use the fewest random bits [Bramas2017RandomBit].",
+        "why_it_matters": "Moving only inside your own Voronoi cell is a reusable trick for keeping already separated robots apart, and randomized scattering is used to break symmetry before running deterministic algorithms such as pattern formation."
+      }
+    ]
+  },
+  "history": "Scattering was first a **feasibility** question: it cannot be solved deterministically, so randomness is needed [Dieudonne2009Scatter]. The measures then became **expected rounds and random bits** [Clement2010Cost] [Bramas2017RandomBit], and keeping the swarm connected under limited visibility [Izumi2018Connectivity].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "ssync-randomized",
+      "title": "Randomized, SSYNC, strong multiplicity detection",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "algorithm": "randomized",
+        "multiplicity": "strong",
+        "body": "point"
+      },
+      "summary": "Deterministic scattering is impossible; with randomness and strong multiplicity detection robots scatter in $O(1)$ expected rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Dieudonne2009Scatter",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "deterministic algorithms",
+            "robots at the same point are indistinguishable"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dieudonne2009Scatter",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Randomized and self-stabilizing."
+        },
+        {
+          "ref": "Clement2010Cost",
+          "role": "best",
+          "time": "O(1)",
+          "colours": "0",
+          "note": "Expected rounds; $O(\\log n\\log\\log n)$-type bounds with weak multiplicity detection."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(1)$ expected rounds."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "weak-multiplicity",
+      "title": "Randomized, SSYNC, weak multiplicity detection",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "algorithm": "randomized",
+        "multiplicity": "weak",
+        "body": "point"
+      },
+      "summary": "Without strong multiplicity detection no algorithm scatters in $O(1)$ expected rounds; with an optimal number of random bits $O(\\log\\log n)$ rounds suffice.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{not } O(1)",
+          "ref": "Bramas2017RandomBit",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 4.1: no algorithm runs in $O(1)$ expected rounds without strong multiplicity detection"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\log\\log n)",
+          "ref": "Bramas2017RandomBit",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 4.5: only for algorithms that use the optimal number of random bits"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bramas2017RandomBit",
+          "role": "best",
+          "time": "O(\\log\\log n)",
+          "colours": "0",
+          "note": "Corollary 4.1, with an optimal number of random bits. The analysis is in FSYNC; the algorithms are valid in SSYNC. Without any multiplicity detection, algorithm $SA_\\phi$ (their $SA_f$) scatters in $O(\\phi(n))$ expected rounds for any increasing surjective function $\\phi$ (Theorem 4.2), but the robots never stop moving."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\log\\log n)$ among bit-optimal algorithms; in general only \"not $O(1)$\" is known."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "$n\\log n$ random bits are necessary in any setting [Bramas2017RandomBit]. Bramas and Tixeuil split multiplicity detection into local and global. Checked against arXiv 1309.6603 version 2, not the journal version.",
+      "status": "verified"
+    },
+    {
+      "id": "async",
+      "title": "Randomized, ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "algorithm": "randomized",
+        "body": "point"
+      },
+      "summary": "Scattering in ASYNC is open in peer-reviewed work.",
+      "lower_bounds": [],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Open."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "Open."
+        }
+      },
+      "open": [
+        "Solve scattering in ASYNC; Bramas and Tixeuil call it \"the open problem of ASYNC scattering\" [Bramas2016Probabilistic] [Bramas2017RandomBit]. A 2019 preprint by Léchine and Tixeuil (arXiv 1905.09177, not peer reviewed) solves it with vision and weak local multiplicity detection (its Theorem 4), and leaves open the plane with vision and no multiplicity detection."
+      ],
+      "notes": "",
+      "status": "draft"
+    },
+    {
+      "id": "limited",
+      "title": "Limited visibility, connectivity preserving",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "algorithm": "randomized",
+        "body": "point"
+      },
+      "summary": "Robots with limited visibility scatter without ever disconnecting their visibility graph, in $O(\\min\\{n, g^2+\\log n\\})$ expected rounds, $g$ the diameter of the initial visibility graph.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Izumi2018Connectivity",
+          "bottleneck": "distance",
+          "preconditions": [
+            "any algorithm, some configurations"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(g^2)",
+          "ref": "Izumi2018Connectivity",
+          "bottleneck": "locality",
+          "preconditions": [
+            "only for conservative algorithms"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Izumi2018Connectivity",
+          "role": "best",
+          "time": "O(\\min\\{n,g^2+\\log n\\})",
+          "colours": "0",
+          "note": "Introduced at SSS 2010."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Optimal within conservative algorithms."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "$g$ is the diameter (in hops) of the initial visibility graph.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Scattering: robots start at points of the plane, several possibly at the same point (multiplicities shown as numbers), and must reach distinct positions and stay there; deterministically this is impossible [Dieudonne2009Scatter]. The animation runs the randomized SSYNC algorithm of [Dieudonne2009Scatter]: in each round the adversary activates some robots (coin shown under their point), and a robot that gets heads moves to a point of its own Voronoi cell (thin lines), so robots on different points never meet again.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: points of multiplicity 3, 2 and 1",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6,
+            "l": "3"
+          },
+          {
+            "id": "3",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "5",
+            "p": [
+              48,
+              12
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Round 1: active robots flip coins; heads move",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6,
+            "l": "3"
+          },
+          {
+            "id": "3",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "5",
+            "p": [
+              48,
+              12
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                2,
+                2
+              ],
+              [
+                21.75,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                2,
+                48
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                21.75,
+                2.0
+              ],
+              [
+                77.18,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                77.18,
+                2.0
+              ],
+              [
+                98,
+                2
+              ],
+              [
+                98,
+                48
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                24,
+                30
+              ],
+              [
+                12.16,
+                34.31
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              24,
+              24.8
+            ],
+            "s": "H T T",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              26.8
+            ],
+            "s": "T T",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "label": "Round 2: tails everywhere, nobody moves",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.16,
+              34.31
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "5",
+            "p": [
+              48,
+              12
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                2,
+                2
+              ],
+              [
+                7.1,
+                2.0
+              ],
+              [
+                23.85,
+                48.0
+              ],
+              [
+                2,
+                48
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                7.1,
+                2.0
+              ],
+              [
+                21.75,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                23.85,
+                48.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                21.75,
+                2.0
+              ],
+              [
+                77.18,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                77.18,
+                2.0
+              ],
+              [
+                98,
+                2
+              ],
+              [
+                98,
+                48
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "text",
+            "p": [
+              24,
+              24.8
+            ],
+            "s": "T T",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              26.8
+            ],
+            "s": "T T",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "label": "Round 3: one heads separates a pair",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.16,
+              34.31
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "5",
+            "p": [
+              48,
+              12
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                2,
+                2
+              ],
+              [
+                7.1,
+                2.0
+              ],
+              [
+                23.85,
+                48.0
+              ],
+              [
+                2,
+                48
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                7.1,
+                2.0
+              ],
+              [
+                21.75,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                23.85,
+                48.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                21.75,
+                2.0
+              ],
+              [
+                77.18,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                77.18,
+                2.0
+              ],
+              [
+                98,
+                2
+              ],
+              [
+                98,
+                48
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                70,
+                32
+              ],
+              [
+                79.57,
+                40.03
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              24,
+              24.8
+            ],
+            "s": "T T",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              26.8
+            ],
+            "s": "H T",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "label": "Round 4: the last pair separates",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.16,
+              34.31
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "p": [
+              79.57,
+              40.03
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              48,
+              12
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                2,
+                2
+              ],
+              [
+                7.1,
+                2.0
+              ],
+              [
+                23.85,
+                48.0
+              ],
+              [
+                2,
+                48
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                7.1,
+                2.0
+              ],
+              [
+                21.75,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                23.85,
+                48.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                21.75,
+                2.0
+              ],
+              [
+                77.18,
+                2.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                77.18,
+                2.0
+              ],
+              [
+                98,
+                2
+              ],
+              [
+                98.0,
+                8.35
+              ],
+              [
+                64.73,
+                48.0
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                46.81,
+                35.41
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                98.0,
+                8.35
+              ],
+              [
+                98,
+                48
+              ],
+              [
+                64.73,
+                48.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                24,
+                30
+              ],
+              [
+                22.19,
+                25.03
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                48,
+                12
+              ],
+              [
+                60.3,
+                14.17
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              24,
+              24.8
+            ],
+            "s": "H T",
+            "c": "fg",
+            "size": 3
+          },
+          {
+            "t": "text",
+            "p": [
+              48,
+              6.8
+            ],
+            "s": "H",
+            "c": "fg",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "label": "Final: all positions distinct",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.16,
+              34.31
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              22.19,
+              25.03
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              79.57,
+              40.03
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              70,
+              32
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              60.3,
+              14.17
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                23.85,
+                48.0
+              ],
+              [
+                2,
+                48
+              ],
+              [
+                2.0,
+                13.27
+              ],
+              [
+                17.18,
+                29.67
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                2,
+                2
+              ],
+              [
+                36.23,
+                2.0
+              ],
+              [
+                41.58,
+                20.78
+              ],
+              [
+                17.18,
+                29.67
+              ],
+              [
+                2.0,
+                13.27
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                46.26,
+                48.0
+              ],
+              [
+                23.85,
+                48.0
+              ],
+              [
+                17.18,
+                29.67
+              ],
+              [
+                41.58,
+                20.78
+              ],
+              [
+                46.91,
+                33.01
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                36.23,
+                2.0
+              ],
+              [
+                98,
+                2
+              ],
+              [
+                98.0,
+                5.21
+              ],
+              [
+                46.91,
+                33.01
+              ],
+              [
+                41.58,
+                20.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                98.0,
+                5.21
+              ],
+              [
+                98.0,
+                8.35
+              ],
+              [
+                64.73,
+                48.0
+              ],
+              [
+                46.26,
+                48.0
+              ],
+              [
+                46.91,
+                33.01
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                98.0,
+                8.35
+              ],
+              [
+                98,
+                48
+              ],
+              [
+                64.73,
+                48.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      }
+    ]
+  }
+}

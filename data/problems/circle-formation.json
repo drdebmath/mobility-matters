@@ -1,0 +1,788 @@
+{
+  "id": "circle-formation",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Circle formation",
+  "origin": {
+    "ref": "Defago2002Circle",
+    "year": 2002,
+    "note": ""
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "special case of",
+    "relation": "A circle is a family of patterns; forming some circle is easier than forming a given pattern, and it is the precursor of uniform circle formation [Feletti2024Optimal]."
+  },
+  "summary": "Robots must reach positions on a common circle.",
+  "statement": "$n$ robots start at distinct points and must reach a configuration in which all of them lie on one circle, at distinct points, and stay there. Uniform circle formation additionally asks for a regular $n$-gon.",
+  "primer": {
+    "intro": "Think of dancers who must spread out on one common circle, each at a different spot on it, without anyone drawing the circle first. There are $n$ robots, points at distinct places in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), and each uses its own private coordinate system. A **scheduler** (an adversary) decides when they act; in the basic version it is ASYNC, so each phase may take any finite time, and moves are **non-rigid**: the adversary may stop a robot after it has travelled some minimum distance $\\delta$. The robots must reach a configuration in which all of them lie on one circle, at distinct points (not necessarily evenly spaced), and stay there.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Use the smallest enclosing circle and walk out to it",
+        "variant": "basic",
+        "ref": "Flocchini2017Uniform",
+        "idea": "1. Every robot computes the **smallest enclosing circle** (SEC) of all robots. It is unique and does not depend on anyone's coordinate system, so all robots compute the same circle.\n2. A robot already on the circle stays where it is.\n3. A robot inside the circle moves straight outwards, along the ray from the centre through itself, to the circle.\n4. A robot exactly at the centre has no ray; it first steps a little away from the centre.\n5. If several robots lie on the same ray, only the outermost one moves out; the others first step sideways onto free rays, so that no two robots ever land on the same point.",
+        "analysis": "Robots that move from inside onto the circle never change the smallest enclosing circle, so the target stays fixed while robots move at different speeds and act on old snapshots. Each robot inside needs only finitely many moves, since each move covers at least $\\delta$ or reaches the circle. This is the first phase of the uniform circle algorithm of Flocchini, Prencipe, Santoro and Viglietta, which forms even a regular $n$-gon (hence a circle) in ASYNC without chirality [Flocchini2017Uniform], the catalogue's current best. Steps 4 and 5 are simplified here; the paper handles robots at the centre and robots on a common ray as separate cases.",
+        "why_it_matters": "The smallest enclosing circle is the standard common reference for disoriented robots, reused in pattern formation, gathering and leader election."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Move only inside your own zone, then slide along the circle",
+        "variant": "ssync",
+        "ref": "Defago2008NonUniform",
+        "idea": "1. Compute the smallest enclosing circle and use its centre as the origin of polar coordinates.\n2. A robot at the centre steps off it, by less than the distance of any other robot from the centre.\n3. Otherwise, find your two neighbours in angular order around the centre and draw the rays halfway (by angle) to each of them. The region between these two rays is your **exclusive zone** for this cycle: no other robot will move into it.\n4. A robot inside the circle moves outwards within its zone towards the circle; a robot on the circle slides along it towards the angle halfway between its neighbours, without ever leaving an empty arc larger than a half circle (which would shrink the circle).",
+        "analysis": "Exclusive zones guarantee that two robots never end up at the same point. That matters: two robots on one point see the same snapshot, so a scheduler that always wakes them together, with suitable coordinate systems, can keep them together forever. Défago and Souissi show that in SSYNC the robots reach the circle and then converge towards even spacing without necessarily reaching it [Defago2008NonUniform]; reaching exactly even spacing needed later work (see uniform circle formation).",
+        "why_it_matters": "It introduced the exclusive-zone trick for avoiding inseparable robots and the \"slide towards the middle of your neighbours\" rule for even spacing."
+      }
+    ]
+  },
+  "history": "Circle formation was first proposed as a way to reach a uniform circle by oblivious robots without a common orientation [Defago2002Circle]; the first algorithms formed a circle and only converged towards uniformity [Defago2008NonUniform]. The question was **whether disoriented, oblivious robots can form a circle at all**, under which scheduler.",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "basic",
+      "title": "Circle formation",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "Robots must place themselves on a common circle, not necessarily evenly spaced; solved in ASYNC without chirality through uniform circle formation.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Flocchini2017Uniform",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory for ASYNC and current best: Theorem 6.1 forms a uniform circle, hence a circle, in ASYNC without chirality and with non-rigid moves."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "The first circle formation papers are semi-synchronous; see the SSYNC setting. Checked against the full text of [Flocchini2017Uniform].",
+      "status": "verified"
+    },
+    {
+      "id": "ssync",
+      "title": "Circle formation, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "In SSYNC the first algorithms formed a circle and then converged towards a uniform one.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Defago2002Circle",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "No chirality needed; proofs only sketched (as stated by [Defago2008NonUniform])."
+        },
+        {
+          "ref": "Defago2008NonUniform",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "chirality",
+            "a maximum step length per robot instead of adversarial non-rigid moves"
+          ],
+          "note": "Forms a circle and converges towards a uniform one without reaching it."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Défago and Souissi call their robots disoriented although they assume chirality; Flocchini et al. use disoriented to exclude chirality. Checked against the full text of [Defago2008NonUniform]; [Defago2002Circle] was not reachable.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Circle formation: robots at distinct points must place themselves at distinct points of one common circle and stay there; the spacing need not be uniform [Defago2002Circle]. Shown: the first phase of [Flocchini2017Uniform] in SSYNC rounds: every robot computes the smallest enclosing circle (dashed), which never changes; a ringed (activated) robot inside moves out along the ray from the centre, possibly stopping early; the robot at the centre first steps off it.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: the smallest enclosing circle is fixed",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              38.7,
+              32.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              61.5,
+              37.6
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              19.0
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              50,
+              28
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.7,
+              32.1
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.7,
+                32.1
+              ],
+              [
+                27.4,
+                36.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                28
+              ],
+              [
+                52.0,
+                24.5
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Inner robots move out along their rays",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              33.1,
+              34.2
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              61.5,
+              37.6
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              19.0
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              52.0,
+              24.5
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              61.5,
+              37.6
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                61.5,
+                37.6
+              ],
+              [
+                68.4,
+                43.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              19.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                19.0
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              33.1,
+              34.2
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              68.4,
+              43.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              10.0
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              52.0,
+              24.5
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.1,
+              34.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.1,
+                34.2
+              ],
+              [
+                27.4,
+                36.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              52.0,
+              24.5
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.0,
+                24.5
+              ],
+              [
+                62.0,
+                7.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              27.4,
+              36.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              68.4,
+              43.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              10.0
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              57.0,
+              15.9
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              10.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                10.0
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              27.4,
+              36.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              68.4,
+              43.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              4.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "6",
+            "p": [
+              57.0,
+              15.9
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              57.0,
+              15.9
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                57.0,
+                15.9
+              ],
+              [
+                62.0,
+                7.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: all robots on the circle",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              45.8,
+              51.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              31.6,
+              12.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.6,
+              19.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              27.4,
+              36.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              68.4,
+              43.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              4.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "6",
+            "p": [
+              62.0,
+              7.2
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          }
+        ]
+      }
+    ]
+  }
+}

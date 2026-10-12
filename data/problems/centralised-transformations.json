@@ -1,0 +1,1254 @@
+{
+  "id": "centralised-transformations",
+  "model": "programmable-matter",
+  "name": "Centralised transformations of modular robots",
+  "origin": {
+    "ref": "Michail2019Transformation",
+    "year": 2017,
+    "note": "arXiv 2017; JCSS 2019."
+  },
+  "related": [
+    {
+      "problem": "shape-formation-amoebots",
+      "relation": "A central controller plans the moves, so the question is which mechanisms are universal and how many moves they need, not how particles coordinate."
+    }
+  ],
+  "summary": "A central algorithm must transform one connected shape of $n$ modules on the square grid into another using local moves.",
+  "statement": "$n$ modules occupy cells of the square grid and form a connected shape. A centralised algorithm must transform it into a given target shape with the same number of modules, using only the allowed local moves, keeping the shape connected where required. **Moves** counts sequential moves; **time** is parallel time when several moves may happen at once.",
+  "primer": {
+    "intro": "Picture a set of square magnets on a chessboard, all touching one another, that you are allowed to rearrange only by small local moves, and ask: can one arrangement be turned into another, and how many moves does it take? Here $n$ square modules occupy cells of the square grid and form a connected shape; a central planner sees everything and decides the moves. Unlike amoebot particles, which move by expanding and contracting, a module moves by *rotation* (turning a quarter circle around a neighbouring module, ending on a diagonal cell) or by *sliding* (moving one cell along two neighbouring modules); a move is allowed only if the cells it sweeps through are empty. The goal: transform the shape into a given target shape with the same number of modules, and count *moves* (one at a time) or *parallel time* (several moves at once).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Everything turns into a line, and moves can be undone",
+        "variant": "sliding",
+        "ref": "Michail2019Transformation",
+        "idea": "With rotations and slidings both allowed:\\n\\n1. Find a module on the outside of the shape whose removal keeps the rest connected; every connected shape with at least two modules has at least two.\\n2. That module can walk around the outside of the rest, rotating at corners and sliding along straight stretches, without ever losing contact.\\n3. Walk it to the end of a horizontal line growing from the shape's lowest right-most module; repeat until all $n$ modules form the line.\\n4. To reach a target shape $B$, also plan $B \\to$ line, then play that plan backwards: every rotation and sliding can be undone by the opposite move.",
+        "analysis": "So any two connected shapes with the same number of modules can be transformed into each other without ever disconnecting [Michail2019Transformation]. Each module walks at most about the perimeter of the shape, so the plan uses $O(n^2)$ moves, and that is the best possible in the worst case (the third idea). Allowing many moves at once, the same paper reaches $O(n)$ parallel time, also best possible.",
+        "why_it_matters": "Going through a canonical shape and using reversibility is the standard way to prove that a set of moves is universal."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Rotations never change a module's chessboard colour",
+        "variant": "rotation",
+        "ref": "Michail2019Transformation",
+        "idea": "Colour the grid like a chessboard. A rotation moves a module to a diagonally neighbouring cell, which has the same colour. So with rotations alone, the number of modules on black cells never changes, and neither does the number on white cells. Example: a horizontal line of 3 modules on black, white, black cells has two on black; a shape of 3 modules with two on white cells can never be reached from it.",
+        "analysis": "Two shapes with different colour counts can never be transformed into each other by rotations [Michail2019Transformation]. Equal colour counts are not enough either: some shapes have no rotation available at all and are stuck. If disconnecting is allowed, the paper shows that deciding whether a transformation exists takes polynomial time; if connectivity must be kept, the decision is in PSPACE.",
+        "why_it_matters": "An invariant, a quantity that no move changes, is the simplest tool for proving that a transformation is impossible."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A staircase is far from a line",
+        "variant": "sliding",
+        "ref": "Michail2019Transformation",
+        "idea": "Take a *ladder*: a diagonal staircase two modules wide, climbing one row every two modules. Ask for a horizontal line. Wherever the line is placed, at least half of the ladder's modules lie on one side of it, at heights $1, 1, 2, 2, \\dots$ up to about $n/4$ from it. Each must cover at least that height, so the total distance is at least $2(1+2+\\dots+n/4)$, which is about $n^2/16$.",
+        "analysis": "One rotation or sliding moves one module by a constant distance, so it reduces this total by at most a constant. Hence $\\Omega(n^2)$ moves are needed, even if the shape may disconnect [Michail2019Transformation] (Theorem 18), and the line-based plan is optimal. The same measure, total distance under the best matching of modules to target cells, can be computed in polynomial time, so such lower bounds are easy to evaluate.",
+        "why_it_matters": "The total-distance argument gives quadratic lower bounds for every model where one entity moves one step at a time."
+      }
+    ]
+  },
+  "history": "The first question was **which mechanisms are universal** and how hard it is to decide transformability [Michail2019Transformation]; then how far stronger mechanisms reduce the number of moves [Almethen2020Pushing] [Akitaya2021Musketeers].",
+  "ignore_axes": [
+    "orientation",
+    "scheduler",
+    "memory",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "axes": [
+    {
+      "id": "mechanism",
+      "name": "Mechanism",
+      "values": [
+        {
+          "id": "rotation",
+          "level": 0,
+          "label": "rotation only",
+          "short": "rotation",
+          "definition": "A module may rotate $90°$ around an adjacent module, if the cells it sweeps are empty."
+        },
+        {
+          "id": "sliding",
+          "level": 1,
+          "label": "rotation and sliding",
+          "short": "rotation + sliding",
+          "definition": "In addition, a module may slide one cell along a line of modules."
+        }
+      ],
+      "origin": "Michail, Skretas and Spirakis chose two movements that are \"easily implementable by existing technology\": a module may *rotate* $90°$ around a neighbour, or *slide* one cell over two neighbours [Michail2019Transformation]. Rotation and sliding together had been studied before for metamorphic robotic systems [Dumitrescu2004Metamorphic] (as cited by [Michail2019Transformation]). Rotation alone is the weaker mechanism. Michail et al. showed that deciding transformability with rotations alone is in P, and in PSPACE when connectivity must be kept; adding sliding makes any two connected shapes of the same size transformable into each other with $\\Theta(n^2)$ moves [Michail2019Transformation]. Almethen, Michail and Potapov later added a line-pushing mechanism that contains both as special cases and is faster [Almethen2020Pushing]."
+    }
+  ],
+  "axis_order": [
+    "mechanism"
+  ],
+  "measures": [
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "sequential moves"
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "parallel time"
+    }
+  ],
+  "variants": [
+    {
+      "id": "rotation",
+      "title": "Rotation only",
+      "standard": true,
+      "assumptions": {
+        "mechanism": "rotation"
+      },
+      "summary": "With rotations alone, deciding whether one shape can be transformed into another is in P; with connectivity preserved it is in PSPACE.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Michail2019Transformation",
+          "role": "best",
+          "moves": "\\text{decidable in P}",
+          "note": "Introductory and current best: transformability with rotations, allowing disconnection, is decidable in polynomial time (Theorem 9); preserving connectivity it is in PSPACE (Theorem 10)."
+        }
+      ],
+      "optimality": {
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [
+        "What is the complexity of connectivity-preserving transformability with rotations alone? The paper leaves it open (Section 7) [Michail2019Transformation]."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "sliding",
+      "title": "Rotation and sliding",
+      "assumptions": {
+        "mechanism": "sliding"
+      },
+      "summary": "Rotation and sliding are universal for connected shapes: $\\Theta(n^2)$ moves sequentially and $O(n)$ parallel time, both optimal.",
+      "lower_bounds": [
+        {
+          "measure": "moves",
+          "bound": "\\Omega(n^2)",
+          "ref": "Michail2019Transformation",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Theorem 18: transforming a ladder into a line",
+            "holds even without preserving connectivity"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Michail2019Transformation",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Proposition 15 (arXiv version)",
+            "connectivity is preserved"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Michail2019Transformation",
+          "role": "best",
+          "moves": "O(n^2)",
+          "time": "O(n)",
+          "note": "Introductory and current best; connectivity preserved."
+        },
+        {
+          "ref": "Almethen2020Pushing",
+          "role": "other",
+          "moves": "O(n\\log n)",
+          "assumes": [
+            "line-pushing mechanism: one move shifts a whole line of modules",
+            "the shape may disconnect"
+          ],
+          "note": "A stronger mechanism; a suspected $\\Omega(n\\log n)$ lower bound is left open."
+        }
+      ],
+      "optimality": {
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ parallel time."
+        }
+      },
+      "open": [
+        "Prove the suspected $\\Omega(n\\log n)$ lower bound for universal transformations with line pushing [Almethen2020Pushing].",
+        "Distributed universal transformations with line pushing [Almethen2020Pushing]."
+      ],
+      "notes": "With pivoting square modules (facet-connected), universal reconfiguration between any two configurations needs only five extra helper modules and $O(n^2)$ pivot moves, worst-case optimal [Akitaya2021Musketeers]. Checked against the full texts.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Centralised transformation with rotations and slidings, the universal strategy of [Michail2019Transformation]: repeatedly pick a module on the outside whose removal keeps the rest connected and walk it around the outside, rotating at corners (a quarter turn around a neighbour, the swept cells being empty) and sliding along straight stretches (one cell along two neighbours), to the end of a line growing to the right along the bottom row (dashed); a target shape is reached by also playing its own plan to the line backwards (not shown). One frame per move; a rotation is drawn along its arc.",
+    "view": [
+      100,
+      56
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            6.0,
+            1.0
+          ],
+          [
+            6.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            14.0,
+            1.0
+          ],
+          [
+            14.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            22.0,
+            1.0
+          ],
+          [
+            22.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            30.0,
+            1.0
+          ],
+          [
+            30.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            38.0,
+            1.0
+          ],
+          [
+            38.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            46.0,
+            1.0
+          ],
+          [
+            46.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            54.0,
+            1.0
+          ],
+          [
+            54.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            62.0,
+            1.0
+          ],
+          [
+            62.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            70.0,
+            1.0
+          ],
+          [
+            70.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            78.0,
+            1.0
+          ],
+          [
+            78.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            86.0,
+            1.0
+          ],
+          [
+            86.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            94.0,
+            1.0
+          ],
+          [
+            94.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            2.0
+          ],
+          [
+            99.0,
+            2.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            10.0
+          ],
+          [
+            99.0,
+            10.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.0
+          ],
+          [
+            99.0,
+            18.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            26.0
+          ],
+          [
+            99.0,
+            26.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            34.0
+          ],
+          [
+            99.0,
+            34.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            42.0
+          ],
+          [
+            99.0,
+            42.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            50.0
+          ],
+          [
+            99.0,
+            50.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "rect",
+        "p": [
+          34.0,
+          14.0
+        ],
+        "wd": 6.6,
+        "ht": 6.6,
+        "c": "muted",
+        "dash": true
+      },
+      {
+        "t": "rect",
+        "p": [
+          42.0,
+          14.0
+        ],
+        "wd": 6.6,
+        "ht": 6.6,
+        "c": "muted",
+        "dash": true
+      },
+      {
+        "t": "rect",
+        "p": [
+          50.0,
+          14.0
+        ],
+        "wd": 6.6,
+        "ht": 6.6,
+        "c": "muted",
+        "dash": true
+      },
+      {
+        "t": "rect",
+        "p": [
+          58.0,
+          14.0
+        ],
+        "wd": 6.6,
+        "ht": 6.6,
+        "c": "muted",
+        "dash": true
+      },
+      {
+        "t": "rect",
+        "p": [
+          66.0,
+          14.0
+        ],
+        "wd": 6.6,
+        "ht": 6.6,
+        "c": "muted",
+        "dash": true
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: a connected shape of 5 modules",
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              42.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              34.0,
+              30.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Rotation: a quarter turn around a neighbour",
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              47.66,
+              19.66
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              34.0,
+              30.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              34.0,
+              30.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              39.66,
+              27.66
+            ],
+            "r": 3.3,
+            "c": "near"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              42.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          }
+        ]
+      },
+      {
+        "label": "Sliding: one cell along two neighbours",
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              55.66,
+              19.66
+            ],
+            "r": 3.3,
+            "c": "near"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              34.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              42.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              58.0,
+              22.0
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              63.66,
+              19.66
+            ],
+            "r": 3.3,
+            "c": "near"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Final: the modules form a line",
+        "ents": [
+          {
+            "id": "m0",
+            "k": "exit",
+            "p": [
+              34.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "tight"
+          },
+          {
+            "id": "m1",
+            "k": "exit",
+            "p": [
+              42.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "tight"
+          },
+          {
+            "id": "m2",
+            "k": "exit",
+            "p": [
+              66.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "tight"
+          },
+          {
+            "id": "m3",
+            "k": "exit",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "tight"
+          },
+          {
+            "id": "m4",
+            "k": "exit",
+            "p": [
+              58.0,
+              14.0
+            ],
+            "r": 3.3,
+            "c": "tight"
+          }
+        ]
+      }
+    ]
+  }
+}

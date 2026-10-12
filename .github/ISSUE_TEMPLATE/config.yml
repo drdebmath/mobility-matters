@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the atlas
+    url: https://drdebmath.github.io/mobility-matters/
+    about: Check the problem page first; every setting lists its bounds, sources and open questions.
+  - name: How to contribute
+    url: https://github.com/drdebmath/mobility-matters/blob/main/CONTRIBUTING.md
+    about: What we check, how long it takes, and how contributors are acknowledged.

@@ -1,0 +1,3116 @@
+{
+  "id": "coating-amoebots",
+  "model": "programmable-matter",
+  "name": "Coating",
+  "origin": {
+    "ref": "Derakhshandeh2017Coating",
+    "year": 2014,
+    "note": "Infinite object coating appeared as an arXiv preprint in 2014; universal coating in [Derakhshandeh2017Coating]."
+  },
+  "summary": "Particles must cover the surface of a fixed object as uniformly as possible.",
+  "statement": "A fixed object (a connected set of lattice nodes) is surrounded by particles. They must arrange themselves into layers around the object, each layer filled before the next. **Time** in rounds; **moves** is the work.",
+  "primer": {
+    "intro": "Imagine a swarm of tiny robots asked to wrap a foreign object, like ants covering a crumb, one even layer at a time. The object is a connected set of nodes of the triangular grid that particles cannot enter; $n$ particles, connected to each other and to the object, sit around it. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. They must arrange themselves into layers around the object: the first layer (the nodes touching the object) must be full before any particle sits in the second, and so on, with any extra particles in the last layer. In the standard version particles have constant memory, agree on clockwise (*chirality*), and may flip coins; we count *rounds* (stretches in which every particle acts at least once) and *work* (total moves).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Follow the leader around the object, layer by layer",
+        "variant": "universal",
+        "ref": "Derakhshandeh2017Coating",
+        "idea": "The particles move in *handovers*: an expanded particle contracts and at the same moment pulls a neighbour into the node it vacates, so the chain never breaks.\\n\\n1. Particles touching the object become *roots*; every other particle picks a neighbour closer to the object as its parent, so the swarm forms trees hanging off the object.\\n2. Roots walk clockwise around the object along the first layer; followers trail behind their parents by handovers.\\n3. A root that bumps into a particle that has already stopped stops too (it *retires*). A follower that still wants a spot sends a 'complaint' to a root with free space ahead, which then moves on and makes room.\\n4. A leader elected among the first-layer positions marks where the layer begins and ends. When the first layer is full, the next layer starts from that mark, and so on.",
+        "analysis": "In the worst case the total work is $\\Theta(n^2)$, which matches the lower bound below [Derakhshandeh2017Coating]. The running time is $O(n)$ rounds with high probability [Daymude2018Coating]; the coins are needed only for the leader election, and $O(n)$ is the best possible in the worst case. Particles with no memory and no messages can still coat a convex object with one layer, in $O(n^2)$ rounds [Navarra2023Coating].",
+        "why_it_matters": "Spanning trees plus handovers became the standard way to move a whole swarm without ever disconnecting it."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A long tail of particles",
+        "variant": "universal",
+        "ref": "Daymude2018Coating",
+        "idea": "Put all $n$ particles in one straight line that touches the object only at its first particle, and let the object's surface be longer than $n$. The particle at distance $i$ from the object must end touching it, so it must travel about $i$ nodes, which takes about $2i$ moves. The last particle is at distance $n$, and an unkind scheduler may let it act only once per round.",
+        "analysis": "The last particle needs about $n$ moves at one move per round, so every algorithm needs $\\Omega(n)$ rounds in the worst case [Daymude2018Coating]. Adding the distances, $2(1+2+\\dots+(n-1)) \\approx n^2$, so every algorithm needs $\\Omega(n^2)$ work [Derakhshandeh2017Coating]. Both bounds are matched by the algorithm above.",
+        "why_it_matters": "It is the simplest example of the distance argument that underlies most lower bounds for programmable matter."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Local particles cannot see where the gap is",
+        "variant": "universal",
+        "ref": "Daymude2018Coating",
+        "idea": "Let the object be a long straight bar. The first layer is completely full except for one empty spot exactly in the middle below the bar, and one extra particle sits in the second layer exactly in the middle above it. Someone who sees everything solves it in a constant number of rounds: everybody on the first layer shifts one step around the bar, closing the gap, and the extra particle drops in. Local particles near the two ends of the bar cannot tell, within about $n/4$ rounds, which way the shift should go: information moves at most one node per round, and the situation looks the same from both ends.",
+        "analysis": "So for about $n/4$ rounds the flows at the two ends are decided independently and by symmetry are equally likely to go either way; in the cases where they do not fit together, the layer is not yet correct. Hence any local algorithm is, on such inputs, about $n$ times slower than the best algorithm with global knowledge: a competitive ratio of $\\Omega(n)$ [Daymude2018Coating] (Theorem 1).",
+        "why_it_matters": "It shows that 'worst case over all inputs' is the right measure here, since comparing to the best possible run on each input is hopeless for local algorithms."
+      }
+    ]
+  },
+  "history": "Coating was posed as a basic task for self-organising matter with **work** (moves) as the first measure [Derakhshandeh2017Coating]; rounds followed, with matching bounds [Daymude2018Coating]. Coating was later solved by silent, oblivious particles [Navarra2023Coating] and in 3D hybrid programmable matter [Kostitsyna2024Coating3D].",
+  "variants": [
+    {
+      "id": "universal",
+      "title": "Universal coating",
+      "standard": true,
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "strong",
+        "orientation": "chirality",
+        "algorithm": "randomized"
+      },
+      "summary": "Any object admitting a uniform coating is coated with optimal work, and in $\\Theta(n)$ rounds with high probability.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Daymude2018Coating",
+          "bottleneck": "locality",
+          "preconditions": [
+            "Lemma 1: deterministic worst case",
+            "a line of $n$ particles attached to the object by one particle, the object's boundary longer than $n$"
+          ]
+        },
+        {
+          "measure": "moves",
+          "bound": "\\Omega(n^2)",
+          "ref": "Derakhshandeh2017Coating",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Lemma 15"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Derakhshandeh2017Coating",
+          "role": "introductory",
+          "moves": "O(n^2)",
+          "note": "Worst-case work-optimal: $\\Theta(n^2)$ moves (Theorem 2)."
+        },
+        {
+          "ref": "Daymude2018Coating",
+          "role": "best",
+          "time": "O(n)",
+          "note": "With high probability; randomisation enters only through the leader election."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ rounds."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        }
+      },
+      "open": [],
+      "notes": "Chirality is part of the model of both papers. In 3D hybrid programmable matter (one finite-automaton agent moving passive tiles), universal coating takes $O(n^2)$ steps, worst-case optimal against an agent with global knowledge [Kostitsyna2024Coating3D]. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "silbot",
+      "title": "SILBOT, chirality, deterministic",
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak",
+        "orientation": "chirality"
+      },
+      "summary": "Silent oblivious particles with chirality coat a convex object with one layer, deterministically, in $O(n^2)$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Navarra2023Coating",
+          "bottleneck": "oblivious silent particles",
+          "preconditions": [
+            "informal argument before Theorem 4, not a theorem"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Navarra2023Coating",
+          "role": "best",
+          "time": "O(n^2)",
+          "assumes": [
+            "2-hop view",
+            "exterior awareness: a particle can tell a hole from the outside"
+          ],
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ rounds; the lower bound is argued informally."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [
+        "Coating in SILBOT without chirality [Navarra2023Coating].",
+        "Multi-layer coating, which \"seems unfeasible\" in SILBOT [Navarra2023Coating]."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified",
+      "statement": "Single-layer coating of a **convex** object, together with compaction of holes."
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "orientation",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "figure": {
+    "caption": "Coating, following [Derakhshandeh2017Coating]: particles touching the object (black) are roots, the others follow a parent closer to the object (forming trees). Roots walk clockwise along the first layer, one expansion and one contraction per node; when an expanded particle contracts, its child expands into the node it leaves (a handover), so the trees are pulled along without breaking. With as many particles as first-layer nodes, the walk ends when every node adjacent to the object is occupied (green); further particles would start the next layer.",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 9,
+    "origin": [
+      42,
+      20
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            4.41
+          ],
+          [
+            99.0,
+            4.41
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            12.21
+          ],
+          [
+            99.0,
+            12.21
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            20.0
+          ],
+          [
+            99.0,
+            20.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            27.79
+          ],
+          [
+            99.0,
+            27.79
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            35.59
+          ],
+          [
+            99.0,
+            35.59
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            43.38
+          ],
+          [
+            99.0,
+            43.38
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            51.18
+          ],
+          [
+            99.0,
+            51.18
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            42.52
+          ],
+          [
+            8.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            26.93
+          ],
+          [
+            17.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            11.34
+          ],
+          [
+            26.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            4.03,
+            1.0
+          ],
+          [
+            35.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            13.03,
+            1.0
+          ],
+          [
+            44.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            22.03,
+            1.0
+          ],
+          [
+            53.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            31.03,
+            1.0
+          ],
+          [
+            62.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            40.03,
+            1.0
+          ],
+          [
+            71.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            49.03,
+            1.0
+          ],
+          [
+            80.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            58.03,
+            1.0
+          ],
+          [
+            89.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            67.03,
+            1.0
+          ],
+          [
+            98.21,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            76.03,
+            1.0
+          ],
+          [
+            99.0,
+            40.78
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            85.03,
+            1.0
+          ],
+          [
+            99.0,
+            25.2
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            94.03,
+            1.0
+          ],
+          [
+            99.0,
+            9.61
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            13.07
+          ],
+          [
+            7.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            28.66
+          ],
+          [
+            16.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            44.25
+          ],
+          [
+            25.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            3.79,
+            55.0
+          ],
+          [
+            34.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            12.79,
+            55.0
+          ],
+          [
+            43.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            21.79,
+            55.0
+          ],
+          [
+            52.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            30.79,
+            55.0
+          ],
+          [
+            61.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            39.79,
+            55.0
+          ],
+          [
+            70.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            48.79,
+            55.0
+          ],
+          [
+            79.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            57.79,
+            55.0
+          ],
+          [
+            88.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            66.79,
+            55.0
+          ],
+          [
+            97.97,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            75.79,
+            55.0
+          ],
+          [
+            99.0,
+            14.8
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            84.79,
+            55.0
+          ],
+          [
+            99.0,
+            30.39
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            93.79,
+            55.0
+          ],
+          [
+            99.0,
+            45.98
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            46.5,
+            22.6
+          ],
+          [
+            42.0,
+            25.2
+          ],
+          [
+            37.5,
+            22.6
+          ],
+          [
+            37.5,
+            17.4
+          ],
+          [
+            42.0,
+            14.8
+          ],
+          [
+            46.5,
+            17.4
+          ]
+        ],
+        "c": "fg",
+        "fill": "fg",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            55.5,
+            22.6
+          ],
+          [
+            51.0,
+            25.2
+          ],
+          [
+            46.5,
+            22.6
+          ],
+          [
+            46.5,
+            17.4
+          ],
+          [
+            51.0,
+            14.8
+          ],
+          [
+            55.5,
+            17.4
+          ]
+        ],
+        "c": "fg",
+        "fill": "fg",
+        "w": 0.3
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: roots touch the object; arrows point to parents",
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                35.59
+              ],
+              [
+                48.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                60.0,
+                35.59
+              ],
+              [
+                57.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Roots walk clockwise along the first layer",
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                35.59
+              ],
+              [
+                48.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Handover: the parent contracts, its child expands",
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                35.59
+              ],
+              [
+                48.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                35.59
+              ],
+              [
+                48.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                35.59
+              ],
+              [
+                48.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "qlat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                43.38
+              ],
+              [
+                53.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "qlat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "qlat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "qlat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "qlat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "qlat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "qlat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "qlat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "qlat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                42.0,
+                35.59
+              ],
+              [
+                39.52,
+                31.3
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "qlat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                43.38
+              ],
+              [
+                44.02,
+                39.1
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "qlat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                12.21
+              ],
+              [
+                50.55,
+                12.21
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "qlat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                12.21
+              ],
+              [
+                50.55,
+                12.21
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                60.0,
+                20.0
+              ],
+              [
+                57.52,
+                15.72
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "qlat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                12.21
+              ],
+              [
+                50.55,
+                12.21
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                60.0,
+                20.0
+              ],
+              [
+                57.52,
+                15.72
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              2
+            ],
+            "qlat": [
+              -1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                46.5,
+                27.79
+              ],
+              [
+                51.45,
+                27.79
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                12.21
+              ],
+              [
+                50.55,
+                12.21
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.5,
+                12.21
+              ],
+              [
+                35.02,
+                16.49
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                60.0,
+                20.0
+              ],
+              [
+                57.52,
+                15.72
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: the first layer is filled",
+        "ents": [
+          {
+            "id": "a",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "d",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "k": "particle",
+            "lat": [
+              2,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "f",
+            "k": "particle",
+            "lat": [
+              0,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "g",
+            "k": "particle",
+            "lat": [
+              -1,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "h",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "tight"
+          }
+        ]
+      }
+    ]
+  }
+}

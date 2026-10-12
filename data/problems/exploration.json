@@ -1,0 +1,2831 @@
+{
+  "id": "exploration",
+  "model": "mobile-agents-on-graphs",
+  "name": "Graph exploration by a single agent",
+  "origin": {
+    "ref": "Shannon1951Maze",
+    "year": 1951,
+    "note": "Shannon's maze-solving mouse Theseus (first prototype 1950) explored a $5\\times5$ grid with constant memory per cell [Disser2019Pebbles]; the first impossibility theorem for finite automata is Budach's [Budach1978Labyrinths]."
+  },
+  "summary": "One agent starts at a node of an unknown anonymous graph and must visit every node; how much memory does it need, which markers or knowledge make it possible, and how fast can it be?",
+  "statement": "A single deterministic agent is placed at a node $s$ of a connected graph $G$ with $n$ nodes, $m$ edges and maximum degree $\\Delta$. Nodes are anonymous and ports are locally labelled; the agent sees the degree of its node and the port by which it entered. It must **visit every node of $G$**. Three termination requirements are standard:\n\n* **perpetual exploration**: every node is eventually visited; the agent never has to stop;\n* **exploration with stop**: every node is visited and the agent then stops, anywhere;\n* **exploration with return**: every node is visited and the agent stops at $s$.\n\nReturn implies stop, and stop implies perpetual exploration. **Memory** is the number of bits of the agent's state; when the agent carries pebbles (markers it can drop and pick up) their number is reported with the memory. **Time** is the number of edge traversals (moves) until exploration is complete; for periodic exploration it is the period. Unless a variant says otherwise the agent knows nothing about $G$, not even $n$.\n\nExploration is the oldest problem of the mobile-agent literature: it started as maze search by finite automata, and the question of how little memory suffices runs from Budach's impossibility (1978) to Reingold's log-space algorithm (2005). Several agents exploring together form the sibling problem, collaborative exploration.",
+  "primer": {
+    "intro": "Picture a robot vacuum put down in a large building with no map, where every room looks the same. We model the building as a graph: rooms are **nodes** (dots) and corridors are **edges** (lines joining two dots); $n$ is the number of nodes, $m$ the number of edges, and $\\Delta$ the largest number of corridors leaving one room (the maximum **degree**). At each node the exits are numbered $0, 1, \\dots$; these numbers are called **ports**, and the numbering at one node has nothing to do with the numbering at the next. The agent sees only how many exits its current node has and the port by which it came in; nodes have no names, so it cannot tell a room it has seen before from a new one. In the basic version (**perpetual exploration**) it must eventually visit every node of every connected graph, without ever having to stop, and the question is how few bits of memory make this possible.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Leave by the next port (trees)",
+        "variant": "trees-perpetual",
+        "ref": "Diks2004Tree",
+        "idea": "This is the algorithm Choose-Next of [Diks2004Tree], for graphs without cycles (trees); here the ports of a node of degree $d$ are numbered $1, \\dots, d$.\n1. Leave the start node by port 1.\n2. When you enter a node of degree $d$ by port $i$, leave it by port $(i \\bmod d) + 1$, the next port in cyclic order (at a node of degree 1 this sends you straight back).\n3. Repeat forever.",
+        "analysis": "On a tree this is the rule \"keep your right hand on the wall\": the agent walks around the tree, and every edge is walked once in each direction before the walk repeats, so all $n$ nodes are visited within $2(n-1)$ moves. The agent only has to remember one port number, which [Diks2004Tree] count as $O(\\log\\Delta)$ bits, and they show that $\\Omega(\\log\\Delta)$ bits are needed on trees, so this is optimal. On graphs with cycles the same rule can go round a cycle forever and miss nodes; there the right amount of memory is $\\Theta(D\\log\\Delta)$ bits, with $D$ the diameter (the largest distance between two nodes) [Fraigniaud2005Automaton].",
+        "why_it_matters": "Choosing the next exit from the entry port alone is the basic move of almost every memory-efficient exploration algorithm, and the universal exploration sequences used for general graphs are a generalisation of it."
+      },
+      {
+        "kind": "impossibility",
+        "title": "No stopping on a ring without a marker",
+        "variant": "stop",
+        "ref": "Dieudonne2012Tokens",
+        "idea": "Ask for more: the agent must visit every node **and then stop**, without knowing $n$ and without being able to mark a node. Take rings (cycles) of every size, numbered so that at every node port 0 leads clockwise and port 1 counterclockwise. In such a ring every node has degree 2 and every arrival looks the same, so what the agent sees never depends on the size of the ring. A deterministic agent (one with no random choices) therefore makes the same sequence of moves in every such ring. Since it explores and stops in, say, the ring of 3 nodes, it stops after some fixed number $T$ of moves, and it does the same in the ring of $T+2$ nodes.",
+        "analysis": "In $T$ moves the agent can visit at most $T+1$ different nodes, so in the ring of $T+2$ nodes at least one node is never visited: the agent stopped too early. Extra memory does not help, because the problem is not remembering but recognising: the agent can never tell \"I am back where I started\" from \"this is a new node that looks the same\". This is why every stopping variant in the catalogue adds a marker (a pebble the agent can drop) or knowledge of a bound $N \\ge n$ [Dieudonne2012Tokens].",
+        "why_it_matters": "It shows that the hard part of exploration is often knowing when you are done, a theme that returns in dispersion, rendezvous and gathering."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Random walk",
+        "variant": "randomized",
+        "ref": "Aleliunas1979Random",
+        "idea": "Allow the agent to flip coins, and tell it a number $N \\ge n$.\n1. At each node, pick one of the exits uniformly at random and take it.\n2. Count the moves; stop after $2N^3$ moves.",
+        "analysis": "[Aleliunas1979Random] proved that a random walk visits every node of a connected graph within $2m(n-1)$ moves on average. Since $m \\le N^2/2$ and $n - 1 < N$, this average is below $N^3$; a walk that runs twice as long as its average cover time fails to cover the graph with probability at most $1/2$ (Markov's inequality), and repeating the walk lowers the failure probability further. The agent needs only a counter, $O(\\log N)$ bits. A deterministic agent with the same memory also exists, but its algorithm (Reingold's log-space construction) is much harder [Reingold2008Undirected].",
+        "why_it_matters": "The random-walk bound was the starting point for universal traversal and exploration sequences, which turn the random walk into a fixed list of port choices that works on every graph."
+      }
+    ]
+  },
+  "history": "Exploration began as **maze search by finite automata**. The first question was whether a machine with bounded memory can visit every node at all: Budach showed it cannot for mazes [Budach1978Labyrinths], Blum and Kozen showed that two pebbles or two automata are enough in mazes [Blum1978Compass], and Rollik showed that every finite team has a planar trap [Rollik1980Planar].\n\nFrom there the community turned to **how much memory** an agent needs as a function of the graph: $\\Theta(D\\log\\Delta)$ bits in general [Fraigniaud2005Automaton], $O(\\log n)$ once $n$ is known [Reingold2008Undirected], and the effect of the termination requirement on trees [Diks2004Tree] [Ambuhl2011Tree]. Markers came next: what one pebble buys [Fraigniaud2006Reduced], and the exact exchange rate between pebbles and memory [Disser2019Pebbles]. Time was a secondary measure throughout.",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "edge traversals until every node is visited (for periodic exploration: the period)"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits of agent memory; pebbles, if any, are counted separately"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "timing",
+    "initial",
+    "node-memory"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "node-ids",
+    "knowledge",
+    "algorithm",
+    "markers",
+    "advice",
+    "termination",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known about the graph",
+          "short": "nothing known",
+          "definition": "The agent knows nothing about $G$: not $n$, $m$, $\\Delta$ or $D$."
+        },
+        {
+          "id": "bound-n",
+          "level": 1,
+          "label": "an upper bound on $n$ is known",
+          "short": "knows a bound on $n$",
+          "definition": "The agent is given an integer $N\\ge n$ (an upper bound on the number of nodes) as input."
+        },
+        {
+          "id": "map",
+          "level": 2,
+          "label": "a complete map is known (for a dynamic graph: the whole schedule)",
+          "short": "knows the map",
+          "description": "The offline setting: the walk can be planned in advance.",
+          "definition": "The agent is given a graph isomorphic to $G$, with port numbers, and (where stated) its own position on it; for a dynamic graph, the whole sequence $(G_t)$."
+        }
+      ],
+      "origin": "Knowing the size of the graph is the classical way to let an exploring walk end. Aleliunas, Karp, Lipton, Lovász and Rackoff proved that a random walk on a connected graph visits every node within $2m(n-1)$ expected steps from any start (Theorem 4), so by Markov's inequality $O(mn\\log n)\\subseteq O(n^3\\log n)$ steps cover it with high probability, and a step counter and the value of $n$ give a randomized explorer that stops [Aleliunas1979Random]; Reingold's log-space universal exploration sequences do the same deterministically when $n$ is known [Reingold2008Undirected] (as summarised in [Disser2019Pebbles]). Without a bound and without a marker an agent cannot tell a cycle from a longer one, so it can explore perpetually but never stop [Fraigniaud2006Reduced]. Bender, Fernández, Ron, Sahai and Vadhan measured what the bound is worth in directed graphs: one pebble suffices when an upper bound on $n$ is known, while without it $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient, the lower bound holding even for randomized robots [Bender2002Pebble]. The top level, a full map, makes static exploration an offline planning task (a known undirected graph is explored by depth-first search in fewer than $2n$ steps); it matters for temporal graphs, where exploration with the whole schedule known in advance was introduced by Michail and Spirakis [Michail2016Temporal] (as reported by [Erlebach2021Temporal]) and studied by Erlebach, Hoffmann and Kammer [Erlebach2021Temporal]."
+    },
+    {
+      "id": "markers",
+      "name": "Markers",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no markers",
+          "short": "no markers",
+          "definition": "The agent cannot mark nodes."
+        },
+        {
+          "id": "one-pebble",
+          "level": 1,
+          "label": "one pebble (a movable marker)",
+          "short": "one pebble",
+          "definition": "The agent carries one pebble that it can drop at its current node and later pick up; it sees whether a pebble is at its node."
+        },
+        {
+          "id": "pebbles",
+          "level": 2,
+          "label": "several pebbles; their number is a resource",
+          "short": "pebbles",
+          "definition": "The agent carries $p$ pebbles (identical or distinguishable, as stated); $p$ is a resource reported with the memory."
+        }
+      ],
+      "origin": "Pebbles come from the tradition of automata in mazes. After Budach proved that no finite automaton explores every finite maze [Budach1978Labyrinths], Blum and Kozen showed that two pebbles suffice for a finite automaton in a maze, against Shah's conjecture that five were needed, and left open whether one pebble suffices [Blum1978Compass]; Hoffmann showed that it does not (as cited by [Disser2019Pebbles]). Cohen, Fraigniaud, Ilcinkas, Korman and Peleg describe this \"Rabin's pebble model\" as the ability of the robot to label nodes dynamically, at most one unit of label per pebble [Cohen2008Label]. Bender et al. carried the question to directed graphs and agents with unbounded memory, titling their paper \"The power of a pebble\": one pebble and a bound on $n$ already give polynomial-time mapping [Bender2002Pebble]. In anonymous graphs a marker is what makes stopping possible at all, and by convention a robot asked to stop is given a pebble [Fraigniaud2006Reduced]. The number of pebbles became a resource of its own when Disser, Hackfeld and Klimm showed that $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient for a constant-memory agent on undirected graphs, and that an agent with $O((\\log n)^{1-\\varepsilon})$ bits already needs $\\Omega(\\log\\log n)$ of them [Disser2019Pebbles]; this is why one pebble and several pebbles are separate levels."
+    },
+    {
+      "id": "advice",
+      "name": "Preprocessing",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "ports and nodes as given by an adversary",
+          "short": "adversarial ports",
+          "definition": "Port numbers (and any node labels) are chosen by an adversary."
+        },
+        {
+          "id": "ports",
+          "level": 1,
+          "label": "port numbers chosen by the designer",
+          "short": "designer ports",
+          "description": "The designer fixes the local port numbering of the graph before the agent starts; used for periodic exploration with tiny memory.",
+          "definition": "Before the agent starts, the designer may choose the port numbering $\\mathrm{port}_v:\\{\\text{edges at }v\\}\\to\\{1,\\dots,\\deg(v)\\}$ at every node. Ilcinkas calls a designer's port numbering a *local orientation* [Ilcinkas2008Ports]."
+        },
+        {
+          "id": "labels",
+          "level": 1,
+          "label": "short node labels chosen by the designer",
+          "short": "designer labels",
+          "definition": "Before the agent starts, the designer may write a label of $b$ bits (a constant) at every node, which the agent reads on arrival."
+        }
+      ],
+      "origin": "This axis asks what a designer who prepares the graph before the agent arrives can do for it, a question that grew out of the impossibility results of Budach and Rollik for finite automata [Budach1978Labyrinths] [Rollik1980Planar]. Cohen, Fraigniaud, Ilcinkas, Korman and Peleg let the designer write short labels on the nodes and showed that three label values let a constant-memory robot explore every graph and stop; by Rollik's result two values are the minimum one could hope for [Cohen2008Label]. They place the model next to pebbles: it \"can be considered stronger than Rabin's pebble model since labels are given in a preprocessing stage, but it can also be considered weaker since, once assigned to nodes, the labels cannot be modified\", and they cite it as part of a line of work on short information supplied in advance, including the oracle-size measure of Fraigniaud, Ilcinkas and Pelc [Cohen2008Label] [Fraigniaud2006Oracle]. Choosing the port numbers is preprocessing that writes nothing on the nodes: Ilcinkas starts from Budach's result that no finite automaton explores all graphs when an adversary sets the local orientation, and asks for the shortest exploration period when the designer sets it, improving the period $10n$ of Dobrev et al. to $4n$ [Ilcinkas2008Ports]. The two forms of preprocessing are kept on the same level because neither is known to simulate the other."
+    },
+    {
+      "id": "termination",
+      "name": "Termination requirement",
+      "values": [
+        {
+          "id": "return",
+          "level": 0,
+          "label": "explore, then stop at the start node",
+          "short": "with return",
+          "definition": "The agent visits every node and then halts at its start node $s$."
+        },
+        {
+          "id": "stop",
+          "level": 1,
+          "label": "explore, then stop anywhere",
+          "short": "with stop",
+          "definition": "The agent visits every node and then halts, at any node. Also called *terminating exploration*."
+        },
+        {
+          "id": "perpetual",
+          "level": 2,
+          "label": "visit every node; never required to stop (perpetual)",
+          "short": "perpetual",
+          "definition": "Every node is visited at least once (and, for periodic exploration, infinitely often); the agent never needs to halt."
+        }
+      ],
+      "origin": "The three termination requirements were separated in the memory-bounded exploration literature of the early 2000s. Fraigniaud, Ilcinkas, Peer, Pelc and Peleg list them explicitly, exploration with return, exploration with stop and perpetual exploration, and recall that Diks, Fraigniaud, Kranakis and Pelc showed for trees that exploration with stop needs $\\Omega(\\log\\log\\log n)$ bits of memory [Fraigniaud2005Automaton] [Diks2004Tree]; the same paper shows that exploration with return needs $\\Omega(\\log n)$ bits [Diks2004Tree] (as summarised in [Disser2019Pebbles] and [Czyzowicz2012Periodic]), while perpetual exploration of bounded-degree trees is possible with $O(1)$ bits [Fraigniaud2006Reduced]. In arbitrary anonymous graphs the requirement also decides feasibility: a robot cannot recognise that it has closed a cycle, so without a marker or a bound on $n$ it can explore perpetually but never stop [Fraigniaud2006Reduced]. The axis orders the requirements from the hardest (return) to the weakest (perpetual); periodic exploration, which asks every node to be visited infinitely often within a bounded period, is a perpetual task measured by its period [Ilcinkas2008Ports]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "perpetual",
+      "title": "Arbitrary graphs, perpetual exploration",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "termination": "perpetual"
+      },
+      "summary": "The classical memory question: how many bits must a finite-state agent have to visit every node of every graph of diameter $D$ and degree $\\Delta$?",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(D\\log\\Delta)",
+          "ref": "Fraigniaud2005Automaton",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "deterministic agent, no knowledge of the graph",
+            "degree $\\Delta \\ge 3$; the traps are planar",
+            "Theorem 4 and Corollary 5: for every $K$-state agent there is a planar trap of degree $\\Delta$ and diameter $O(\\log K/\\log\\Delta)$"
+          ],
+          "note": "Corollary 3 gives $\\lceil\\log n\\rceil$ bits directly: for every $K$-state agent there is a planar trap with at most $K+1$ nodes (Theorem 2; with loops and multiple edges, or $K+\\Delta+2$ nodes for simple graphs). Earlier: no finite automaton explores all mazes [Budach1978Labyrinths]; no finite team of automata explores all cubic planar graphs [Rollik1980Planar]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2005Automaton",
+          "role": "best",
+          "memory": "O(D\\log\\Delta)",
+          "note": "Introductory and current best (Increasing-DFS, Theorem 6 and Corollary 7): depth-first searches of depth $1, 2, 3, \\dots$; no knowledge of $D$ or $\\Delta$ is needed. The bound is the memory used until exploration is complete; by Theorem 8 any agent that explores all graphs uses unboundedly many states over time."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "The paper does not study time (\"time is not an issue in our approach\")."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(D\\log\\Delta)$ bits in the worst case over graphs of diameter $D$ and degree $\\Delta$."
+        }
+      },
+      "open": [
+        "What is the time of memory-optimal perpetual exploration, and is there a trade-off between memory and time?"
+      ],
+      "notes": "In [Fraigniaud2005Automaton] exploring means traversing every edge, not only visiting every node. The model goes back to maze search: Shannon's maze-solving mouse, Budach's theorem that no finite automaton explores all mazes [Budach1978Labyrinths], Blum and Kozen [Blum1978Compass], and Rollik's result that no finite team of automata explores all cubic planar graphs [Rollik1980Planar]. Blum and Kozen proved that a finite automaton with two pebbles, or two automata together, search every maze, and that no three finite automata together can search all finite planar cubic graphs (Theorem 6.1; also one automaton, Theorem 4.1, and two, Theorem 4.6), so mazes, which come with a compass, are strictly easier than graphs; whether any finite team suffices for planar cubic graphs was left open [Blum1978Compass]. Their automata need not halt. This confirms the account of [Fraigniaud2005Automaton]; the reading in [Cohen2008Label] that one robot with three pebbles cannot explore all graphs is not a result of [Blum1978Compass]. Fraigniaud, Ilcinkas and Pelc showed that a polynomial increase in the number of states strictly enlarges the class of explorable regular graphs (DAM 2008, not in the bibliography yet). Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "stop",
+      "title": "Exploration with stop, nothing known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "termination": "stop"
+      },
+      "summary": "Without a bound on $n$ and without a way to mark a node, an agent can never be sure it has seen everything.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Dieudonne2012Tokens",
+          "bottleneck": "no way to recognise the start",
+          "preconditions": [
+            "deterministic agent, no upper bound on $n$, no marking of nodes",
+            "unbounded memory does not help",
+            "even cycles cannot be explored with stop without a marker [Fraigniaud2006Reduced]"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\text{impossible}",
+          "ref": "Dieudonne2012Tokens",
+          "bottleneck": "no way to recognise the start",
+          "preconditions": [
+            "same conditions as for time"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Feasible with one unmovable token at the start node [Dieudonne2012Tokens]."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Impossible for any memory size."
+        }
+      },
+      "open": [],
+      "notes": "The impossibility is why every stopping variant below adds either knowledge (a bound on $n$) or a marker. Dieudonné and Pelc also study Byzantine tokens: identical unmovable tokens, some of which may be faulty; exploration is feasible in polynomial cost if a bound on the number of tokens is known and at least one is fault-free [Dieudonne2012Tokens].",
+      "status": "verified"
+    },
+    {
+      "id": "known-n",
+      "title": "Exploration with stop when $n$ is known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "knowledge": "bound-n",
+        "termination": "stop"
+      },
+      "summary": "Reingold's log-space universal exploration sequences give an $O(\\log n)$-bit agent that explores and stops in polynomial time.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\omega((\\log n)^{1-\\varepsilon})",
+          "ref": "Disser2019Pebbles",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "for every constant $\\varepsilon>0$",
+            "the agent may depend on $n$: it must explore all graphs with at most $n$ nodes",
+            "no pebbles; deterministic"
+          ],
+          "note": "Corollary 25 of [Disser2019Pebbles]: with $O((\\log n)^{1-\\varepsilon})$ bits an agent needs $\\Omega(\\log\\log n)$ pebbles."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Reingold2008Undirected",
+          "role": "best",
+          "time": "n^{O(1)}",
+          "memory": "O(\\log n)",
+          "note": "Introductory and current best. A log-space constructible universal exploration sequence [Koucky2002Backtracking] guides a walk through all nodes; the consequence for agents is stated by [Disser2019Pebbles]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial; the exponent is not tracked and no non-trivial lower bound is recorded."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log n)$ versus $\\omega((\\log n)^{1-\\varepsilon})$: a $(\\log n)^{\\varepsilon}$ factor."
+        }
+      },
+      "open": [
+        "Is $\\Omega(\\log n)$ bits necessary when $n$ is known? The trap arguments [Fraigniaud2005Automaton] are stated for agents that know nothing."
+      ],
+      "notes": "Whether the same agent can also return to $s$ (by reversing the sequence) is plausible but not checked against a source.",
+      "status": "verified"
+    },
+    {
+      "id": "randomized",
+      "title": "Randomized exploration when $n$ is known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "knowledge": "bound-n",
+        "algorithm": "randomized",
+        "termination": "stop"
+      },
+      "summary": "A random walk covers any graph in expected $2m(n-1)$ steps; with a step counter and a bound on $n$ it stops after exploring with good probability.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Aleliunas1979Random",
+          "role": "best",
+          "time": "O(mn)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "expected time",
+            "stops correctly with constant probability (Monte Carlo)"
+          ],
+          "note": "Expected cover time at most $2m(n-1)$ from any start (Theorem 4). Running the walk for a multiple of that many steps with an $O(\\log n)$-bit counter gives the Monte Carlo agent."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded for randomized agents."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No lower bound recorded for randomized agents."
+        }
+      },
+      "open": [
+        "What is the memory needed by a randomized agent that must stop correctly with high probability, as a function of $n$?"
+      ],
+      "notes": "The same paper proves by the probabilistic method that universal traversal sequences of length $O(n^3\\log n)$ exist for connected $\\Delta$-regular graphs, the constant depending on $\\Delta$ (the proof uses length $2\\Delta n(n-1)(\\Delta n+2)\\lceil\\log n\\rceil$) [Aleliunas1979Random]. For directed graphs the cover time can be exponential, while Eulerian digraphs behave like undirected graphs [Aleliunas1979Random]; Reingold later constructed universal exploration sequences in log space [Reingold2008Undirected].",
+      "status": "verified"
+    },
+    {
+      "id": "one-pebble",
+      "title": "Exploration with stop and one pebble",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "markers": "one-pebble",
+        "termination": "stop"
+      },
+      "summary": "One pebble makes stopping possible; the agent then needs $\\Omega(\\log n)$ bits.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Fraigniaud2006Reduced",
+          "bottleneck": "reduced automata",
+          "preconditions": [
+            "deterministic agent with one pebble that starts on the agent's start node",
+            "no knowledge of $n$",
+            "the traps are edge-coloured regular graphs of size $O(K^3)$ for a $K$-state agent (Theorem 5 of [Fraigniaud2006Reduced])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2005Space",
+          "role": "best",
+          "memory": "O(D\\log\\Delta)",
+          "note": "Introductory and current best (Theorem 3, DFS-with-stop): the pebble marks the start; depth-first phases of depth $1, 2, \\dots$ detect new nodes, and the agent stops after phase $D+1$. No knowledge of $D$ or $\\Delta$. Time is not analysed."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not studied."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(D\\log\\Delta)$ versus $\\Omega(\\log n)$: polynomial when $D$ is large."
+        }
+      },
+      "open": [
+        "Is $\\Omega(D\\log\\Delta)$ memory needed for exploration with stop by an agent with one pebble [Fraigniaud2005Space]?"
+      ],
+      "notes": "The same authors show that $k$ non-cooperative agents need $\\Omega(\\log(n/k))$ bits for perpetual exploration, with traps of size $O(kK)$ [Fraigniaud2006Reduced]. That chapter is inconsistent on tightness: a remark calls the $\\Omega(\\log n)$ bound tight, citing the SIROCCO paper, while its conclusion says a tight bound for terminating exploration is open. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "pebbles",
+      "title": "Exploration with return and pebbles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "markers": "pebbles"
+      },
+      "summary": "$\\Theta(\\log\\log n)$ pebbles are necessary and sufficient for a constant-memory agent, which then explores in polynomial time and returns to the start without knowing $n$.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log\\log n)\\ \\text{pebbles}",
+          "ref": "Disser2019Pebbles",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "for any agent with $O((\\log n)^{1-\\varepsilon})$ bits",
+            "holds for every termination requirement",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Disser2019Pebbles",
+          "role": "best",
+          "time": "n^{O(1)}",
+          "memory": "O(1)\\ \\text{bits},\\ O(\\log\\log n)\\ \\text{pebbles}",
+          "assumes": [
+            "distinguishable pebbles",
+            "$n$ unknown"
+          ],
+          "note": "Introductory and current best (SODA 2016 for bounded degree, JACM 2019 in general). Since $p+1$ agents can simulate one agent with $p$ pebbles, the same bounds hold for teams: $\\Theta(\\log\\log n)$ constant-memory agents."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial; the exponent is not tracked."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log\\log n)$ pebbles with $O(1)$ bits."
+        }
+      },
+      "open": [
+        "How much memory is needed to encode the agent's transition function? The naive table needs $(\\log n)^{O(1)}$ bits (Remark 1 of [Disser2019Pebbles])."
+      ],
+      "notes": "The trade-off reads: $\\Omega(\\log n)$ bits make pebbles unnecessary; $O((\\log n)^{1-\\varepsilon})$ bits force $\\Omega(\\log\\log n)$ pebbles; $\\Omega(\\log\\log n)$ pebbles make $O(1)$ bits enough. The traps of [Disser2019Pebbles] have $O(K^{2^{5k}})$ nodes for $k$ agents with $K$ states, improving Rollik's tower-type bound [Rollik1980Planar].",
+      "status": "verified"
+    },
+    {
+      "id": "memoryless-pebbles",
+      "title": "Memoryless automaton with pebbles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "markers": "pebbles",
+        "termination": "perpetual"
+      },
+      "summary": "A deterministic memoryless automaton (one state) explores every connected graph with 2 pebbles, and 2 is the minimum.",
+      "statement": "The agent is a deterministic finite automaton with a single state: its decision depends only on what it observes at the current node (entry port, degree, pebbles present), not on a state. It carries $p$ pebbles labelled $1,\\dots,p$, which it can drop and pick up. Exploration is complete when every edge has been traversed at least once.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "2\\ \\text{pebbles}",
+          "ref": "Pattanayak2024Memoryless",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "one pebble is insufficient in general, even if $n$ is known",
+            "a memoryless automaton without pebbles cannot explore all graphs"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2024Memoryless",
+          "role": "best",
+          "memory": "0\\ \\text{bits},\\ 2\\ \\text{pebbles}",
+          "assumes": [
+            "$n$ and $\\Delta$ unknown"
+          ],
+          "note": "Introductory and current best. If $n$ is known and the automaton starts at a node with a pebble, one pebble suffices."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not studied."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Two pebbles are necessary and sufficient."
+        }
+      },
+      "open": [],
+      "notes": "Results from the paper's abstract, supplied by the catalogue owner (a co-author).",
+      "status": "verified"
+    },
+    {
+      "id": "trees-perpetual",
+      "title": "Trees, perpetual exploration",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "termination": "perpetual",
+        "topology": "tree"
+      },
+      "summary": "On trees, perpetual exploration needs exactly $\\Theta(\\log\\Delta)$ bits: enough to remember a port.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\lceil\\log\\Delta\\rceil",
+          "ref": "Diks2004Tree",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "trees of maximum degree $\\Delta$",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Diks2004Tree",
+          "role": "best",
+          "memory": "O(\\log\\Delta)",
+          "note": "Introductory and current best. Equivalently, the sequence $1^n$ is a universal exploration sequence for trees [Koucky2002Backtracking]: leave by the port after the entry port."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not stated in the sources read."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log\\Delta)$ bits."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "trees-stop",
+      "title": "Trees, exploration with stop",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "termination": "stop",
+        "topology": "tree"
+      },
+      "summary": "Stopping on a tree without knowing $n$ needs more than constant memory, but how much more is open: $\\Omega(\\log\\log\\log n)$ against $O(\\log n)$.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log\\log\\log n)",
+          "ref": "Diks2004Tree",
+          "bottleneck": "deciding when to stop",
+          "preconditions": [
+            "bounded-degree trees built from paths",
+            "$n$ unknown",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Ambuhl2011Tree",
+          "role": "best",
+          "memory": "O(\\log n)",
+          "note": "Via exploration with return, which implies stop."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not studied."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(\\log n)$ versus $\\Omega(\\log\\log\\log n)$: exponentially apart."
+        }
+      },
+      "open": [
+        "Can exploration with stop on trees use asymptotically less memory than exploration with return? (Open problem of [Diks2004Tree].) Equivalently: close $\\Omega(\\log\\log\\log n)$ versus $O(\\log n)$."
+      ],
+      "notes": "If an upper bound $N$ on $n$ is known, $O(\\log N)$ bits suffice; if a bound $m$ on the number of nodes of some degree is known, $O(\\log\\Delta+\\log m)$ bits [Diks2004Tree]. \"The additional memory is essentially needed to decide when to stop.\"",
+      "status": "verified"
+    },
+    {
+      "id": "trees-return",
+      "title": "Trees, exploration with return",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "topology": "tree"
+      },
+      "summary": "Returning to the start on a tree takes $\\Theta(\\log n)$ bits.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Diks2004Tree",
+          "bottleneck": "pigeonhole on start nodes",
+          "preconditions": [
+            "every $n$-node tree",
+            "deterministic",
+            "holds even if the agent knows the tree up to its start node, so knowing $n$ does not help"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Diks2004Tree",
+          "role": "introductory",
+          "memory": "O(\\log^2 n)"
+        },
+        {
+          "ref": "Ambuhl2011Tree",
+          "role": "best",
+          "memory": "O(\\log n)",
+          "note": "Also works when ports are only circularly ordered."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not stated in the abstracts read."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$ bits."
+        }
+      },
+      "open": [],
+      "notes": "[Diks2004Tree] asked for the exact memory of exploration with return; [Ambuhl2011Tree] answered it.",
+      "status": "verified"
+    },
+    {
+      "id": "designer-labels",
+      "title": "Node labels chosen by the designer",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "advice": "labels",
+        "termination": "stop"
+      },
+      "summary": "With three-valued labels on the nodes, an agent with fewer than 25 states explores every graph and stops after at most $20m$ edge traversals.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cohen2008Label",
+          "role": "best",
+          "time": "O(m)",
+          "memory": "O(1)",
+          "assumes": [
+            "labels of 2 bits (3 values), computed in linear time"
+          ],
+          "note": "Introductory and current best (Theorem 2.1): fewer than 25 states, at most $20m$ edge traversals, stops at a node chosen by the designer. Labelling while exploring gives $O(Dm)$."
+        },
+        {
+          "ref": "Cohen2008Label",
+          "role": "other",
+          "time": "O(\\Delta^{10}m)",
+          "memory": "O(\\log\\Delta)",
+          "assumes": [
+            "labels of 1 bit"
+          ],
+          "note": "Theorem 3.1."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only the trivial $\\Omega(n)$ is known against $O(m)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Constant memory."
+        }
+      },
+      "open": [],
+      "notes": "The agent is a Mealy automaton: its output port depends on the input port. Agents with a single state cannot explore all graphs with such labels (Theorems 4.2 and 4.5 of [Cohen2008Label]). Recent work changes the model: zero-memory agents that do not see the entry port but may colour nodes (SIROCCO 2023, OPODIS 2025); these are not catalogued yet. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "designer-ports",
+      "title": "Port numbers chosen by the designer (periodic exploration)",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "advice": "ports",
+        "termination": "perpetual"
+      },
+      "summary": "If the designer may set the port numbers, a constant-memory agent visits every node periodically with period between $2n-2$ and $3.5n-2$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "2n-2",
+          "ref": "Czyzowicz2012Periodic",
+          "bottleneck": "every tree edge twice",
+          "preconditions": [
+            "any agent: on a tree every edge is traversed in both directions",
+            "realised by the star; folklore",
+            "for oblivious agents the bound is $2.8n-2$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Ilcinkas2008Ports",
+          "role": "introductory",
+          "time": "4n-2",
+          "memory": "O(1)",
+          "assumes": [
+            "three-state agent"
+          ],
+          "note": "Theorem 1; the abstract rounds the period to $4n$."
+        },
+        {
+          "ref": "Gasieniec2008Periodic",
+          "role": "other",
+          "time": "3.75n-2",
+          "memory": "O(1)",
+          "note": "The step between $4n-2$ and $3.5n-2$, as cited by [Czyzowicz2012Periodic]."
+        },
+        {
+          "ref": "Czyzowicz2012Periodic",
+          "role": "best",
+          "time": "3.5n-2",
+          "memory": "O(1)",
+          "note": "For oblivious agents the same paper gives $(4+\\tfrac13)n-4$; the best oblivious period is $4n-2$ [Kosowski2012Decomposition]."
+        },
+        {
+          "ref": "Kosowski2012Decomposition",
+          "role": "other",
+          "time": "4n-2",
+          "memory": "0",
+          "assumes": [
+            "oblivious agent (right-hand rule)"
+          ],
+          "note": "Figure as reported by [Czyzowicz2012Periodic]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$; the constant is open: $2n-2$ versus $3.5n-2$ (constant memory), $2.8n-2$ versus $4n-2$ (oblivious)."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Constant memory."
+        }
+      },
+      "open": [
+        "Close the constant gaps: $2n-2$ versus $3.5n-2$ for constant memory, $2.8n-2$ versus $4n-2$ for oblivious agents [Czyzowicz2012Periodic].",
+        "Trade-offs between period and memory: the only lower bound for agents with memory does not depend on memory."
+      ],
+      "notes": "Without the designer's help, periodic exploration by a finite automaton is impossible (Budach, as cited by [Czyzowicz2012Periodic]). The line began with Dobrev, Jansson, Sadakane and Sung (SIROCCO 2005; period $10n$, as cited by [Czyzowicz2012Periodic]). Computing the shortest witness cycle for an oblivious agent is NP-hard. The period is defined differently: Ilcinkas counts returns to a node in the same state through the same port, Czyzowicz et al. returns to a node through the same port. **Unverified:** the oblivious $4n-2$ of [Kosowski2012Decomposition], known only from [Czyzowicz2012Periodic].",
+      "status": "draft"
+    },
+    {
+      "id": "directed-pebble",
+      "title": "Directed graphs, one pebble",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "markers": "one-pebble",
+        "termination": "stop"
+      },
+      "summary": "An agent that cannot walk back along an arc needs $\\Omega(n\\log\\Delta_{out})$ bits even with a pebble; $O(n\\Delta_{out}\\log n)$ bits suffice.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(n\\log\\Delta_{out})",
+          "ref": "Fraigniaud2004Digraphs",
+          "bottleneck": "no backtracking",
+          "preconditions": [
+            "strongly connected digraphs, maximum out-degree $\\Delta_{out}$",
+            "holds even with a linear number of identical pebbles (as cited by [Disser2019Pebbles])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2004Digraphs",
+          "role": "best",
+          "memory": "O(n\\Delta_{out}\\log n)",
+          "note": "Introductory and current best. With whiteboards instead of a pebble, constant agent memory and $O(\\log\\Delta_{out})$ bits per node suffice."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not stated."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "Factor $\\Delta_{out}\\log n/\\log\\Delta_{out}$."
+        }
+      },
+      "open": [
+        "Close $\\Omega(n\\log\\Delta_{out})$ versus $O(n\\Delta_{out}\\log n)$ bits for exploring digraphs with one pebble."
+      ],
+      "notes": "Here $\\Delta_{out}$ is the maximum out-degree ($d$ in [Fraigniaud2004Digraphs]). Bender and Slonim showed that two cooperating agents learn any unlabelled digraph in expected polynomial time (FOCS 1994, not yet in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "directed-pebble-known-n",
+      "title": "Directed graphs, one pebble, bound on $n$ known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "knowledge": "bound-n",
+        "markers": "one-pebble",
+        "termination": "stop"
+      },
+      "summary": "With a bound $N \\ge n$, one pebble lets an agent map any strongly connected digraph in polynomial time.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bender2002Pebble",
+          "role": "best",
+          "time": "O(N^2 n^6 \\Delta_{out}^2)",
+          "assumes": [
+            "unbounded memory",
+            "all out-degrees padded to $\\Delta_{out}$ with self-loops; $\\Delta_{out}$ known"
+          ],
+          "note": "Introductory and current best (Theorem 3.1; $N$ is the paper's $\\hat n$, $\\Delta_{out}$ its $d$). Without a bound on $n$, for every constant $c>0$, $c\\log\\log n$ pebbles give a deterministic polynomial-time algorithm (Theorem 4.1), and $\\Omega(\\log\\log n)$ pebbles are necessary for any algorithm, even randomized, that learns every graph in expected polynomial time with probability greater than $1/2$ (Theorem 4.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound beyond the trivial $\\Omega(m)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Improve the $O(N^2 n^6 \\Delta_{out}^2)$ running time (Section 5 of [Bender2002Pebble])."
+      ],
+      "notes": "Checked against the full text of [Bender2002Pebble]. The robot must output a graph isomorphic to $G$; it sees out-ports numbered $1,\\dots,\\Delta_{out}$ but not in-degrees, and cannot retrace an arc to fetch its pebble. Bender and Slonim had shown that a constant number of pebbles does not suffice for polynomial time when no bound on $n$ is known (as cited in [Bender2002Pebble]). With labelled nodes a greedy search takes $O(nm)$ moves.",
+      "status": "verified"
+    },
+    {
+      "id": "directed-labelled",
+      "title": "Directed graphs with labelled nodes",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "node-ids": "labelled",
+        "termination": "stop"
+      },
+      "summary": "An agent that recognises nodes but cannot backtrack must traverse every arc; the cost depends on the deficiency $\\phi$ of the digraph.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\phi^2 m)",
+          "ref": "Deng1999Exploring",
+          "bottleneck": "unbalanced arcs",
+          "preconditions": [
+            "deficiency $\\phi$: the number of arcs to add to make the digraph Eulerian",
+            "deterministic strategies; the argument does not apply to randomized ones",
+            "due to Koutsoupias: Corollary 3 of [Deng1999Exploring] gives at least $\\phi^2/4$ times the number of arcs"
+          ],
+          "note": "Deng and Papadimitriou's own bound (Theorem 1) is about $\\phi^2 m/(2\\log\\phi)$; against randomized strategies they show a ratio of $\\Omega(\\phi/\\log\\phi)$ to the optimal tour (Corollary 2)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Deng1999Exploring",
+          "role": "introductory",
+          "time": "\\phi^{O(\\phi)}\\,m",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "Theorem 3: no arc is traversed more than $2^{O(\\phi\\log\\phi)}$ times, without knowing $\\phi$. Eulerian digraphs ($\\phi=0$): ratio 2 to the optimal tour, which is optimal; deficiency one: no arc traversed more than four times (Theorem 2)."
+        },
+        {
+          "ref": "Albers2000Exploring",
+          "role": "other",
+          "time": "\\phi^{O(\\log\\phi)}\\,m",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "First subexponential algorithm; the authors also show that their algorithm needs $\\phi^{\\Omega(\\log\\phi)}m$ on some graphs, and that Greedy, Depth-First and Breadth-First need $2^{\\Omega(\\phi)}m$."
+        },
+        {
+          "ref": "Fleischer2005Exploring",
+          "role": "best",
+          "time": "O(\\phi^8 m)",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "First algorithm polynomial in $\\phi$; the paper itself was not read, the bound is from the authors' abstract."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(\\phi^8m)$ versus $\\Omega(\\phi^2m)$: factor $\\phi^6$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Close $\\Omega(\\phi^2m)$ versus $O(\\phi^8m)$ for online exploration of digraphs with deficiency $\\phi$."
+      ],
+      "notes": "This is the online-algorithms tradition: nodes are recognisable and the agent builds a map; cost is compared with the optimal tour (the Chinese postman tour), and Deng and Papadimitriou note that measured in absolute terms $\\Theta(nm)$ is trivially tight. Checked against the full texts of [Deng1999Exploring] and [Albers2000Exploring]; the bound of [Fleischer2005Exploring] is still from the authors' abstract.",
+      "status": "draft"
+    },
+    {
+      "id": "dynamic-ring",
+      "title": "Dynamic rings",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "termination": "perpetual",
+        "topology": "ring"
+      },
+      "summary": "On a $T$-interval-connected ring whose edges may be missing for up to $\\delta$ steps, the worst-case exploration time is known exactly up to additive terms.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "n+\\tfrac{n}{\\max\\{1,T-1\\}}(\\delta-1)-O(\\delta)",
+          "ref": "Ilcinkas2018Ring",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "underlying graph a ring",
+            "the agent does not know the dynamics",
+            "$T$-interval connectivity; $\\delta$ = longest absence of an edge"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Ilcinkas2018Ring",
+          "role": "best",
+          "time": "n+\\tfrac{n}{\\max\\{1,T-1\\}}(\\delta-1)+O(\\delta)",
+          "note": "Introductory and current best. If the agent knows the dynamics, the worst case is $2n-T-\\Theta(1)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Matching up to $\\pm\\Theta(\\delta)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory not studied."
+        }
+      },
+      "open": [],
+      "notes": "Multi-agent exploration of dynamic rings and graphs, where the measure is how many agents are needed (Di Luna, Dobrev, Flocchini and Santoro; Gotoh, Flocchini, Masuzawa and Santoro), is not catalogued yet.",
+      "status": "verified"
+    },
+    {
+      "id": "temporal-offline",
+      "title": "Temporal graphs, schedule known",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "knowledge": "map",
+        "termination": "perpetual"
+      },
+      "summary": "If the whole schedule of an always-connected temporal graph is known, $\\Theta(n^2)$ steps are necessary and sufficient in the worst case.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Erlebach2021Temporal",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "an explicit family of always-connected temporal graphs",
+            "holds for centralised, offline exploration"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Erlebach2021Temporal",
+          "role": "best",
+          "time": "O(n^2)",
+          "note": "The $n^2$ upper bound is attributed by the authors to Michail and Spirakis. They also give $O(n^{1.5}\\mathrm{tw}^{1.5}\\log n)$ for treewidth $\\mathrm{tw}$, $O(n^{1.8}\\log n)$ for planar and $2n-2$ for cycles, and show inapproximability within $O(n^{1-\\varepsilon})$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ in the worst case."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Not a memory question."
+        }
+      },
+      "open": [
+        "Tight bounds when the underlying graph is a grid, has bounded degree or is planar [Erlebach2021Temporal]."
+      ],
+      "notes": "This is a centralised planning problem rather than a distributed one, but it gives the baseline for what any agent could do in a temporal graph.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Exploration of a tree by the rule Choose-Next of [Diks2004Tree]: the agent leaves the start node $s$ by port 1 and, entering a node of degree $d$ by port $i$, leaves by port $(i \\bmod d) + 1$. It walks around the tree, each edge once in each direction, and is back at $s$ after $2(n-1)$ moves with every node visited (perpetual exploration repeats this tour). One frame per move.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          12,
+          28
+        ],
+        "u": [
+          36,
+          42
+        ],
+        "v": [
+          36,
+          14
+        ],
+        "w": [
+          60,
+          50
+        ],
+        "x": [
+          62,
+          30
+        ],
+        "y": [
+          62,
+          8
+        ],
+        "z": [
+          88,
+          30
+        ]
+      },
+      "edges": [
+        [
+          "s",
+          "u"
+        ],
+        [
+          "s",
+          "v"
+        ],
+        [
+          "u",
+          "w"
+        ],
+        [
+          "u",
+          "x"
+        ],
+        [
+          "v",
+          "y"
+        ],
+        [
+          "x",
+          "z"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          17.9,
+          26.3
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          16.4,
+          32.3
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          31.6,
+          37.7
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          42.1,
+          40.8
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          41.2,
+          45.3
+        ],
+        "s": "3",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          42.2,
+          14.1
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          30.1,
+          15.7
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          54.8,
+          46.7
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          68.0,
+          31.5
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          55.9,
+          31.2
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          55.8,
+          7.9
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          82.0,
+          28.5
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ],
+        "label": "Start: one agent at s; ports 1..d at each node"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14.9,
+                26.3
+              ],
+              [
+                33.1,
+                15.7
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ],
+        "label": "Leave s by port 1"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "y",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                39.3,
+                13.2
+              ],
+              [
+                58.7,
+                8.8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ],
+        "label": "Entered by port i: leave by port (i mod d) + 1"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.7,
+                8.8
+              ],
+              [
+                39.3,
+                13.2
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.1,
+                15.7
+              ],
+              [
+                14.9,
+                26.3
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "u",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14.9,
+                29.7
+              ],
+              [
+                33.1,
+                40.3
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "x",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                39.1,
+                40.6
+              ],
+              [
+                58.9,
+                31.4
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "z",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.4,
+                30.0
+              ],
+              [
+                84.6,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "x",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ],
+              [
+                62,
+                30
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                84.6,
+                30.0
+              ],
+              [
+                65.4,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "u",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                36,
+                42
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.9,
+                31.4
+              ],
+              [
+                39.1,
+                40.6
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "w",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              60,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                60,
+                50
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                39.2,
+                43.1
+              ],
+              [
+                56.8,
+                48.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "u",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              60,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                60,
+                50
+              ],
+              [
+                36,
+                42
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.8,
+                48.9
+              ],
+              [
+                39.2,
+                43.1
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              42
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              60,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              8
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              88,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                62,
+                8
+              ],
+              [
+                36,
+                14
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                88,
+                30
+              ],
+              [
+                62,
+                30
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                60,
+                50
+              ],
+              [
+                36,
+                42
+              ],
+              [
+                12,
+                28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.1,
+                40.3
+              ],
+              [
+                14.9,
+                29.7
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          }
+        ],
+        "label": "Final: back at s after 2(n-1) = 12 moves; all 7 nodes visited"
+      }
+    ]
+  }
+}

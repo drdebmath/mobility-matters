@@ -1,0 +1,9 @@
+papers/
+build/
+.DS_Store
+__pycache__/
+updates/
+
+# local only (owner decisions, launchd job for this Mac)
+data/decisions.json
+scripts/launchd/

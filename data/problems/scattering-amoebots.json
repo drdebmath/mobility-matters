@@ -1,0 +1,1276 @@
+{
+  "id": "scattering-amoebots",
+  "model": "programmable-matter",
+  "name": "Scattering of particles",
+  "origin": {
+    "ref": "Navarra2025Scattering",
+    "year": 2023,
+    "note": "Scattering in SILBOT first appeared at AINA 2023 (Navarra, Prencipe, Bonini, Tracolli); that paper's DOI was not verified, so the journal version is cited."
+  },
+  "related": [
+    {
+      "problem": "scattering",
+      "relation": "Robots in the plane scatter to distinct points; particles must scatter so that no two are neighbours."
+    }
+  ],
+  "summary": "Particles must reach a configuration in which no two particles occupy neighbouring nodes.",
+  "statement": "From any initial configuration of $n$ contracted particles, the particles must reach a configuration in which no two occupy adjacent lattice nodes, and stop.",
+  "primer": {
+    "intro": "Picture people standing in a crowded square who must spread out until nobody is standing right next to anyone else. There are $n$ particles on the triangular grid, each occupying one node. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. The particles are *oblivious* (they remember nothing from one action to the next) and *silent* (they send no messages); each decides only from what it sees around it. The goal is to reach a configuration where no two particles occupy neighbouring nodes, and then stop moving. The basic question is whether this is possible at all, from every starting configuration.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Wake up only when crowded",
+        "variant": "silbot",
+        "ref": "Navarra2025Scattering",
+        "idea": "The catalogue has not read the full paper, so only its setting is described here. As reported by [Navarra2023Line], Navarra, Prencipe, Bonini and Tracolli [Navarra2025Scattering] let each particle see only its six neighbouring nodes, and use *event-driven* activation: a particle wakes up as soon as it has a neighbouring particle, and only then.\\n\\n1. A particle with no neighbour is never activated, so it stays put.\\n2. A particle with a neighbour wakes up, looks at which of its six neighbouring nodes are occupied, and decides from this picture alone whether and where to step.\\n3. When no particle has a neighbour, nobody wakes up again: the task is done and the particles have stopped.",
+        "analysis": "Event-driven activation gives stopping for free: a scattered configuration is exactly one in which nobody is ever activated again. The difficulty is choosing the local rule so that crowded particles really do spread out instead of moving back and forth forever; the paper proves that its rule always succeeds in finite time. No time bound is recorded in the catalogue.",
+        "why_it_matters": "It shows how much the choice of scheduler can replace memory: with event-driven activation, particles without memory can tell when to stop."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A crowded hexagon must spread over three times its area",
+        "variant": "silbot",
+        "idea": "This simple counting argument is ours; the catalogue records no lower bound. In the triangular grid every small triangle of three mutually neighbouring nodes can hold at most one particle of a scattered configuration. Counting triangles, a region with $N$ nodes can hold at most about $N/3$ scattered particles. Now start with the $n$ particles packed into a full hexagon of radius $r$ (it has about $3r^2 = n$ nodes). The hexagon of radius $1.5r$ around the same centre has about $6.75r^2$ nodes, so it can hold only about $2.25r^2 = 0.75n$ scattered particles.",
+        "analysis": "So about $n/4$ particles must end more than $1.5r$ from the centre, having started within $r$ of it: each travels at least $r/2$, which is about $\\sqrt n$ nodes. That is at least about $n\\sqrt n$ moves in total, and, if the scheduler lets each particle act once per round, about $\\sqrt n$ rounds. How close the known algorithm comes to these numbers is not recorded.",
+        "why_it_matters": "It shows that scattering, unlike gathering, forces the swarm to grow in area, which costs real movement."
+      }
+    ]
+  },
+  "history": "Scattering was posed for **silent, oblivious** particles, where the question is solvability without memory or messages [Navarra2025Scattering].",
+  "variants": [
+    {
+      "id": "silbot",
+      "title": "SILBOT",
+      "standard": true,
+      "assumptions": {
+        "memory": "oblivious",
+        "scheduler": "weak"
+      },
+      "summary": "Silent oblivious particles scatter from any initial configuration.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Navarra2025Scattering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "note": "Introductory journal version and current best.",
+          "assumes": [
+            "event-driven activation: a particle activates as soon as it has a neighbour",
+            "1-hop view"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Bounds not in the abstract."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "Event-driven activation is stronger than the weak scheduler of this setting, so the placement overstates the result. The assumptions are as reported by [Navarra2023Line]; the full text of [Navarra2025Scattering] was not reachable.",
+      "status": "draft"
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "orientation",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "figure": {
+    "caption": "Scattering: from a configuration of contracted particles, here a compact triangle, the particles must reach a configuration in which no two occupy adjacent nodes, and stop. Shown is an illustrative run of event-driven activation: a particle can be activated only while it has a neighbour (blue); an activated particle (outlined) steps, by an expansion and a contraction, to a free node with fewer neighbours; the exact local rule of [Navarra2025Scattering] is not reproduced here. Isolated particles (green) are never activated again.",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 7,
+    "origin": [
+      46,
+      18
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            5.88
+          ],
+          [
+            99.0,
+            5.88
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            11.94
+          ],
+          [
+            99.0,
+            11.94
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.0
+          ],
+          [
+            99.0,
+            18.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.06
+          ],
+          [
+            99.0,
+            24.06
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            30.12
+          ],
+          [
+            99.0,
+            30.12
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            36.19
+          ],
+          [
+            99.0,
+            36.19
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            42.25
+          ],
+          [
+            99.0,
+            42.25
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            48.31
+          ],
+          [
+            99.0,
+            48.31
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            54.37
+          ],
+          [
+            99.0,
+            54.37
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            49.18
+          ],
+          [
+            4.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            37.05
+          ],
+          [
+            11.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.93
+          ],
+          [
+            18.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            12.8
+          ],
+          [
+            25.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.19,
+            1.0
+          ],
+          [
+            32.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            8.19,
+            1.0
+          ],
+          [
+            39.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            15.19,
+            1.0
+          ],
+          [
+            46.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            22.19,
+            1.0
+          ],
+          [
+            53.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            29.19,
+            1.0
+          ],
+          [
+            60.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            36.19,
+            1.0
+          ],
+          [
+            67.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            43.19,
+            1.0
+          ],
+          [
+            74.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            50.19,
+            1.0
+          ],
+          [
+            81.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            57.19,
+            1.0
+          ],
+          [
+            88.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            64.19,
+            1.0
+          ],
+          [
+            95.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            71.19,
+            1.0
+          ],
+          [
+            99.0,
+            49.18
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            78.19,
+            1.0
+          ],
+          [
+            99.0,
+            37.05
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            85.19,
+            1.0
+          ],
+          [
+            99.0,
+            24.93
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            92.19,
+            1.0
+          ],
+          [
+            99.0,
+            12.8
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            11.07
+          ],
+          [
+            6.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            23.2
+          ],
+          [
+            13.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            35.32
+          ],
+          [
+            20.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            47.44
+          ],
+          [
+            27.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            3.64,
+            55.0
+          ],
+          [
+            34.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            10.64,
+            55.0
+          ],
+          [
+            41.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            17.64,
+            55.0
+          ],
+          [
+            48.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            24.64,
+            55.0
+          ],
+          [
+            55.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            31.64,
+            55.0
+          ],
+          [
+            62.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            38.64,
+            55.0
+          ],
+          [
+            69.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            45.64,
+            55.0
+          ],
+          [
+            76.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            52.64,
+            55.0
+          ],
+          [
+            83.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            59.64,
+            55.0
+          ],
+          [
+            90.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            66.64,
+            55.0
+          ],
+          [
+            97.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            73.64,
+            55.0
+          ],
+          [
+            99.0,
+            11.07
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            80.64,
+            55.0
+          ],
+          [
+            99.0,
+            23.2
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            87.64,
+            55.0
+          ],
+          [
+            99.0,
+            35.32
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            94.64,
+            55.0
+          ],
+          [
+            99.0,
+            47.44
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: crowded particles",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Activated particles expand away",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "qlat": [
+              -1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "qlat": [
+              -1,
+              3
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              53.0,
+              30.12
+            ],
+            "r": 3.6,
+            "c": "near",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              46.0,
+              18.0
+            ],
+            "r": 3.6,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "label": "… and contract",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "tight"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "qlat": [
+              1,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "qlat": [
+              3,
+              -1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              60.0,
+              18.0
+            ],
+            "r": 3.6,
+            "c": "near",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              53.0,
+              18.0
+            ],
+            "r": 3.6,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              3,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "tight"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              3,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              56.5,
+              24.06
+            ],
+            "r": 3.6,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              -1,
+              0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              3,
+              -1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              -1,
+              3
+            ],
+            "c": "tight"
+          }
+        ],
+        "label": "Final: no two particles adjacent; all stop"
+      }
+    ]
+  }
+}

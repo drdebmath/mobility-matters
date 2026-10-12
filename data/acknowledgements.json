@@ -1,0 +1,11 @@
+{
+  "intro": "The atlas is maintained by Debasish Pattanayak. It grows with help from readers: everyone whose correction, result or suggested problem is accepted through a [GitHub issue](https://github.com/drdebmath/mobility-matters/issues/new/choose) is listed here, with the issue that brought it in.",
+  "people": [],
+  "tools": [
+    {"name": "Claude (Anthropic)", "role": "AI assistance in searching the literature, reading papers, cataloguing results, drafting text and building the site and the book. Every entry marked verified was checked against the full text of the cited paper; the maintainer reviews the content."},
+    {"name": "Crossref, DataCite, arXiv and OpenAlex", "role": "bibliographic metadata and open access to papers"},
+    {"name": "KaTeX and Marked", "role": "mathematics and text rendering on the website"},
+    {"name": "LuaLaTeX and the Libertinus fonts", "role": "typesetting of the book"}
+  ],
+  "authors_note": "The atlas rests on the work of the authors of the papers it cites; the bibliography lists them all."
+}

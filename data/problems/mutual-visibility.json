@@ -1,0 +1,957 @@
+{
+  "id": "mutual-visibility",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Mutual visibility",
+  "origin": {
+    "ref": "DiLuna2017Mutual",
+    "year": 2014,
+    "note": "Introduced at CCCG 2014 for oblivious robots and at SSS 2014 for robots with lights [DiLuna2014Robots]; journal version [DiLuna2017Mutual]."
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "special case of",
+    "relation": "Mutual visibility asks for any pattern in general position, a family of patterns; it is the usual first step of pattern formation for opaque robots."
+  },
+  "summary": "Opaque robots must reach positions where no three are collinear, so that every robot sees every other.",
+  "statement": "$n$ opaque point robots (or unit discs) start at distinct points; a robot hides others behind it. They must reach a configuration in which every robot sees every other (no three collinear), without collisions.",
+  "primer": {
+    "intro": "Picture people at a party who want every pair of them to be able to see each other, but bodies block the view: you cannot see someone directly behind another person. There are $n$ robots, points at distinct places in the plane, and they are **opaque**: robot $r$ sees robot $s$ only if no third robot lies on the straight segment between them. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Each robot carries a **light** showing one of $c$ colours, which all robots can see and which persists between cycles; otherwise robots remember nothing. In the basic version the scheduler is SSYNC (in each round an adversary wakes some robots) and moves are rigid (a robot always reaches its destination). The robots must reach, without two of them ever colliding, a configuration in which no three are on a line, so all see each other, and then stop.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Shrink: only corner robots move, cutting corners of the convex hull",
+        "variant": "lights",
+        "ref": "DiLuna2017Mutual",
+        "idea": "The **convex hull** is the shape of a rubber band stretched around all robots. Lights have two colours, Off and Vertex, all starting Off.\n\n1. A robot that is not a corner of the convex hull of the robots it sees does nothing.\n2. A corner robot sets its light to Vertex, finds its two neighbours $a$ and $b$ along the hull, and moves a little into the triangle formed by itself, $a$ and $b$, cutting off its corner.\n3. The move is kept inside a smaller safe triangle, so that robots moving at the same time cannot collide, and the robot stops on the nearest line parallel to $ab$ through another robot, so that it stays a corner.\n4. A robot that sees only robots with light Vertex knows that it sees everybody, and stops.",
+        "analysis": "Each cut shrinks the hull and can turn a robot that was hidden on an edge or inside into a new corner; eventually all robots are corners of a convex polygon, and then nobody blocks anybody. Some configurations need an inside robot to move: in a centrally symmetric configuration with a robot at the centre, symmetric robots can be made to move symmetrically forever, and the central robot keeps hiding pairs; the paper handles such cases separately. Di Luna, Flocchini, Gan Chaudhuri, Poloni, Santoro and Viglietta prove that this solves the problem in rigid SSYNC with 2 colours, which is optimal, and with no lights if $n$ is known [DiLuna2017Mutual]. In ASYNC, $O(1)$ epochs are achievable with more colours [Sharma2021Constant].",
+        "why_it_matters": "It introduced the luminous-robot approach to obstructed visibility, and its output (all robots on a convex polygon) is a starting point for other tasks on opaque robots."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Without lights, a robot cannot know when to stop",
+        "variant": "lights",
+        "ref": "DiLuna2017Mutual",
+        "idea": "Suppose robots have no lights (one colour) and do not know $n$. A robot sees, say, four other robots at the corners of a square. Maybe that is everybody, and it should stop. Or maybe a fifth robot hides exactly behind one of the four, on the same line of sight, and the robots must still move. The two situations give the robot the same snapshot, and stopping cannot be undone, so whatever it decides is wrong in one of them.",
+        "analysis": "Hence at least 2 colours are needed when $n$ is unknown and robots must stop (Section 7 of [DiLuna2017Mutual]), and Shrink shows that 2 suffice in rigid SSYNC. If $n$ is known, a robot can count the robots it sees and stop when it sees $n - 1$ others, so no light is needed. The authors note that if robots only need to stand still forever, without explicitly stopping, this argument does not apply.",
+        "why_it_matters": "It shows that the cost of detecting completion, not of reaching it, is what forces memory."
+      }
+    ]
+  },
+  "history": "Mutual visibility arose from **obstructed visibility**: before opaque robots can coordinate they must see each other. The first questions were feasibility and the **number of colours** [DiLuna2017Mutual] [Sharma2015Optimal]; then **time** with $O(1)$ colours [Vaidyanathan2015Log] [Sharma2021Constant], and fat robots [Sharma2018Fat] [Bhagat2024Fat].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "lights",
+      "title": "Lights, SSYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "Opaque luminous robots reach mutual visibility in rigid SSYNC with 2 colours, which is optimal; oblivious robots suffice if $n$ is known.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Section 7: one colour does not suffice when $n$ is unknown and robots must terminate"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2017Mutual",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Introductory and current best (Theorem 1.1(b)); first announced at SSS 2014 [DiLuna2014Robots]. With $n$ known, oblivious robots (no colours) suffice."
+        },
+        {
+          "ref": "Sharma2016Complete",
+          "role": "other",
+          "time": "O(1)",
+          "colours": "12",
+          "note": "$O(1)$ rounds; as described by later papers, not read."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(1)$ rounds with 12 colours [Sharma2016Complete]."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 2 colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [DiLuna2017Mutual].",
+      "status": "verified"
+    },
+    {
+      "id": "lights-ssync-nonrigid",
+      "title": "Lights, SSYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "With non-rigid moves, 3 colours suffice in SSYNC, and 2 if $\\delta$ or $n$ is known.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Section 7: one colour does not suffice when $n$ is unknown and robots must terminate"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2017Mutual",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 1.2); 2 colours if $\\delta$ or $n$ is known."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "2 or 3 colours."
+        }
+      },
+      "open": [
+        "Does the 2-colour algorithm work in non-rigid SSYNC without knowing $\\delta$ [DiLuna2017Mutual]?"
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-async-time",
+      "title": "Lights, ASYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "In rigid ASYNC, 3 colours suffice, and $O(1)$ epochs are achievable with 47 colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Section 7: one colour does not suffice when $n$ is unknown and robots must terminate"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(1)",
+          "ref": "Sharma2021Constant",
+          "bottleneck": "trivial",
+          "preconditions": [
+            "at least one epoch"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2017Mutual",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Collision-free."
+        },
+        {
+          "ref": "Sharma2015Optimal",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Claimed optimal colours; later papers disagree on its setting, and the paper was not read."
+        },
+        {
+          "ref": "Sharma2017Logarithmic",
+          "role": "other",
+          "time": "O(\\log n)",
+          "colours": "O(1)",
+          "note": "Abstract only."
+        },
+        {
+          "ref": "Sharma2021Constant",
+          "role": "best",
+          "time": "O(1)",
+          "colours": "47",
+          "note": "Theorem 1: $O(1)$ epochs, collision-free; first appeared in 2017. Its conclusion says 60 colours."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(1)$ epochs."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$; 2 or 3 colours for finite time, 47 for $O(1)$ epochs."
+        }
+      },
+      "open": [
+        "Fewer colours with $O(1)$ epochs [Sharma2021Constant].",
+        "Time bounds with non-rigid moves."
+      ],
+      "notes": "**Unverified:** [Sharma2015Optimal] and [Sharma2017Logarithmic] were not read in full.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-async-one-axis",
+      "title": "Lights, ASYNC, non-rigid, one axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "one-axis",
+        "body": "point"
+      },
+      "summary": "With non-rigid moves, 3 colours suffice in ASYNC if robots agree on one axis; without axis agreement the problem is open.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Section 7: one colour does not suffice when $n$ is unknown and robots must terminate"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2017Mutual",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 1.2(d))."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "2 or 3 colours."
+        }
+      },
+      "open": [
+        "Mutual visibility in non-rigid ASYNC without axis agreement, ideally with 2 colours [DiLuna2017Mutual]."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-fsync-chirality",
+      "title": "Lights, FSYNC, chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "scheduler": "fsync",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "In FSYNC with chirality, complete visibility takes $O(\\log n)$ rounds with 12 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Vaidyanathan2015Log",
+          "role": "best",
+          "time": "O(\\log n)",
+          "colours": "12",
+          "note": "Introductory and current best; robot paths may cross. Abstract only."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "$O(1)$ is known in SSYNC with rigid moves [Sharma2016Complete], which needs no chirality but is not a weaker setting on every axis."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$."
+        }
+      },
+      "open": [],
+      "notes": "**Unverified:** read from the abstract only.",
+      "status": "draft"
+    },
+    {
+      "id": "fat",
+      "title": "Fat robots, ASYNC, one axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "one-axis",
+        "body": "fat"
+      },
+      "summary": "Fat robots that agree on one axis reach mutual visibility in ASYNC in $O(n)$ epochs with $O(1)$ colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bhagat2024Fat",
+          "role": "best",
+          "time": "O(n)",
+          "colours": "O(1)",
+          "note": "Introductory and current best for ASYNC. Abstract only."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$."
+        }
+      },
+      "open": [
+        "Non-rigid moves, and SSYNC and ASYNC extensions of the 2-colour FSYNC algorithm [Alsaedi2022Fat]."
+      ],
+      "notes": "**Unverified:** read from the abstract only.",
+      "status": "draft"
+    },
+    {
+      "id": "fat-fsync",
+      "title": "Fat robots, FSYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "scheduler": "fsync",
+        "movement": "rigid",
+        "body": "fat"
+      },
+      "summary": "In FSYNC, fat robots without chirality reach mutual visibility in $O(n)$ rounds with 2 colours, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Alsaedi2022Fat",
+          "bottleneck": "memory",
+          "preconditions": [
+            "inherited from point robots (a lower bound for point robots holds for fat ones)",
+            "not reproved for discs in [Alsaedi2022Fat]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Sharma2018Fat",
+          "role": "introductory",
+          "time": "O(n)",
+          "colours": "9",
+          "note": "Abstract only."
+        },
+        {
+          "ref": "Alsaedi2022Fat",
+          "role": "best",
+          "time": "O(n)",
+          "colours": "2",
+          "note": "Current best; no chirality. A preprint, not peer reviewed."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 2 colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Alsaedi2022Fat].",
+      "status": "verified"
+    },
+    {
+      "id": "crash",
+      "title": "Lights, one crash, SSYNC, rigid, compass",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "crash",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "With one crash fault, robots that share a compass reach mutual visibility in rigid SSYNC with 3 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Aljohani2018Faults",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best; one crash fault."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$."
+        }
+      },
+      "open": [
+        "Tolerating three or more crashes, and using 2 colours [Aljohani2018Faults]."
+      ],
+      "notes": "With $f$ crashes, robots that agree on one axis reach complete visibility in ASYNC in $O(n)$ epochs with 3 colours [Poudel2021FaultTolerant] (abstract only). Checked against the full text of [Aljohani2018Faults].",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine",
+      "title": "Lights, one Byzantine robot",
+      "assumptions": {
+        "visibility": "unlimited",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "With one Byzantine robot among three, mutual visibility is impossible.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Aljohani2018Faults",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$n = 3$ with one Byzantine robot"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "For $n = 3$."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "For $n = 3$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "notes": "",
+  "figure": {
+    "caption": "Mutual visibility: opaque robots at distinct points, where a robot hides those behind it, must reach a configuration with no three robots collinear, so that every robot sees every other, without collisions. Shown: the Shrink idea of [DiLuna2017Mutual] in SSYNC rounds with rigid moves: a ringed (activated) robot that is a corner of the convex hull (dashed) it sees moves a little into the triangle with its two hull neighbours, staying a corner, and sets its light to Vertex (green); hidden robots become corners in turn.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              10,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "p": [
+              50,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "p": [
+              90,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "p": [
+              50,
+              50
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "p": [
+              30,
+              29
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "p": [
+              56,
+              22
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                10,
+                8
+              ],
+              [
+                90,
+                8
+              ],
+              [
+                50,
+                50
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              10,
+              8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                10,
+                8
+              ],
+              [
+                22.4,
+                12.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              50
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                50
+              ],
+              [
+                54.0,
+                37.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ],
+        "label": "Start: hidden robots on hull edges and inside"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              22.4,
+              12.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              50,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "p": [
+              90,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "p": [
+              54.0,
+              37.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              30,
+              29
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "p": [
+              56,
+              22
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                22.4,
+                12.3
+              ],
+              [
+                50,
+                8
+              ],
+              [
+                90,
+                8
+              ],
+              [
+                54.0,
+                37.4
+              ],
+              [
+                30,
+                29
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                8
+              ],
+              [
+                55.0,
+                9.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              29
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                30,
+                29
+              ],
+              [
+                36.6,
+                25.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ],
+        "label": "Corners cut in and turn their light to Vertex"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              22.4,
+              12.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              55.0,
+              9.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              90,
+              8
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "p": [
+              54.0,
+              37.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              36.6,
+              25.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              56,
+              22
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                22.4,
+                12.3
+              ],
+              [
+                55.0,
+                9.7
+              ],
+              [
+                90,
+                8
+              ],
+              [
+                54.0,
+                37.4
+              ],
+              [
+                36.6,
+                25.7
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                90,
+                8
+              ],
+              [
+                88.0,
+                8.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              22.4,
+              12.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              55.0,
+              9.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              88.0,
+              8.9
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              54.0,
+              37.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              36.6,
+              25.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              56,
+              22
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                22.4,
+                12.3
+              ],
+              [
+                55.0,
+                9.7
+              ],
+              [
+                88.0,
+                8.9
+              ],
+              [
+                54.0,
+                37.4
+              ],
+              [
+                36.6,
+                25.7
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ],
+        "label": "Final: all see each other; the robots stop"
+      }
+    ]
+  }
+}

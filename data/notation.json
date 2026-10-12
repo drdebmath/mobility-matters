@@ -1,0 +1,570 @@
+{
+  "intro": "Each model uses the symbols of its own literature, so that a bound reads the same here as in the papers it comes from. Inside one model a symbol has exactly one meaning. The same letter may mean different things in different models (for example $n$ counts nodes on graphs and robots in the plane); essays that cross models say which model a symbol belongs to. Where a paper writes a different symbol for the same quantity, the table says so under *papers write*. Symbols that a single paper defines for its own result are defined where they are used and listed under that problem.",
+  "general": [
+    {
+      "symbol": "O, \\Omega, \\Theta, o, \\omega",
+      "meaning": "asymptotic notation, as $n$ (or the stated parameter) grows; $\\tilde O$ hides polylogarithmic factors"
+    },
+    {
+      "symbol": "\\log",
+      "meaning": "logarithm to base 2 unless stated"
+    },
+    {
+      "symbol": "\\varepsilon",
+      "meaning": "an arbitrarily small positive real (a constant unless stated)"
+    },
+    {
+      "symbol": "\\kappa",
+      "meaning": "a positive constant whose value does not matter for the statement"
+    },
+    {
+      "symbol": "t",
+      "meaning": "time: a round, or a point of time in an asynchronous execution"
+    },
+    {
+      "symbol": "\\text{round}",
+      "meaning": "in synchronous settings (FSYNC, SSYNC, synchronous agents), one step in which every activated entity performs one full cycle"
+    },
+    {
+      "symbol": "\\text{epoch}",
+      "meaning": "in asynchronous settings, an interval of time in which every entity completes at least one full cycle; it need not be the shortest such interval. The execution is divided into consecutive epochs, and a bound of $X$ epochs holds for every such division. Programmable matter calls the same notion an *asynchronous round*"
+    }
+  ],
+  "models": {
+    "mobile-agents-on-graphs": [
+      {
+        "symbol": "G=(V,E)",
+        "meaning": "the graph; for a directed graph $E$ is a set of arcs, written $G=(V,A)$ where both appear"
+      },
+      {
+        "symbol": "n",
+        "meaning": "number of nodes, $n = |V|$"
+      },
+      {
+        "symbol": "m",
+        "meaning": "number of edges (arcs)"
+      },
+      {
+        "symbol": "\\Delta",
+        "meaning": "maximum degree"
+      },
+      {
+        "symbol": "\\Delta_{out}",
+        "meaning": "maximum out-degree of a directed graph",
+        "papers_write": "$d$ in some exploration papers"
+      },
+      {
+        "symbol": "\\deg(v),\\ \\deg_{out}(v)",
+        "meaning": "degree and out-degree of node $v$",
+        "papers_write": "$\\delta(v)$, $\\delta_{out}(v)$"
+      },
+      {
+        "symbol": "D",
+        "meaning": "diameter of the graph (for a tree explored from a root: its height)"
+      },
+      {
+        "symbol": "u, v, w",
+        "meaning": "nodes (local names)"
+      },
+      {
+        "symbol": "s",
+        "meaning": "the starting node of a single agent, the root of a rooted team, or the home base of black hole search and decontamination",
+        "papers_write": "$h$ (home base), $r$ (root)"
+      },
+      {
+        "symbol": "k",
+        "meaning": "number of agents"
+      },
+      {
+        "symbol": "\\ell",
+        "meaning": "number of initially occupied nodes; $\\ell=1$ is a rooted start, $\\ell=k$ a dispersed start",
+        "where": [
+          "dispersion"
+        ]
+      },
+      {
+        "symbol": "f",
+        "meaning": "maximum number of faulty agents (crashed or Byzantine)"
+      },
+      {
+        "symbol": "N",
+        "meaning": "a known upper bound on $n$",
+        "papers_write": "$\\hat n$"
+      },
+      {
+        "symbol": "\\mathcal L",
+        "meaning": "the set of agent labels in use; $|\\mathcal L|$ distinct labels, $|\\mathcal L|=1$ anonymous, $|\\mathcal L|=k$ distinct identifiers",
+        "papers_write": "$\\ell$ (homonyms)"
+      },
+      {
+        "symbol": "L",
+        "meaning": "the largest possible label: labels are integers in $\\{1,\\dots,L\\}$",
+        "papers_write": "$\\lambda$ (largest identifier), $\\mu$ (largest label)"
+      },
+      {
+        "symbol": "\\lambda",
+        "meaning": "the smallest label among the agents (for two agents: the smaller label)",
+        "papers_write": "$l$ [Pelc2019Survey]"
+      },
+      {
+        "symbol": "\\tau",
+        "meaning": "delay between the starting times of two agents"
+      },
+      {
+        "symbol": "d",
+        "meaning": "distance from the starting node to the target (the treasure), or between the starting nodes of two agents in rendezvous",
+        "papers_write": "$D$ for the distance between starting positions [Pelc2019Survey]"
+      },
+      {
+        "symbol": "v^*",
+        "meaning": "the node of the treasure",
+        "papers_write": "$t$"
+      },
+      {
+        "symbol": "e(d)",
+        "meaning": "number of edges with an endpoint at distance less than $d$ from the start",
+        "where": [
+          "treasure-hunt"
+        ]
+      },
+      {
+        "symbol": "w(\\cdot),\\ W",
+        "meaning": "weight of the cheapest path type to the treasure (treasure hunt); $W$ its maximum over the two directions (rendezvous)",
+        "where": [
+          "treasure-hunt",
+          "rendezvous"
+        ]
+      },
+      {
+        "symbol": "h",
+        "meaning": "communication range in hops ($h$-hop communication)",
+        "papers_write": "$\\ell$ [Saxena2025Balanced]"
+      },
+      {
+        "symbol": "T",
+        "meaning": "window length in $T$-interval and $T$-path connectivity of dynamic graphs"
+      },
+      {
+        "symbol": "\\mu",
+        "meaning": "maximum number of edges missing in a round ($\\mu$-bounded 1-interval connected graphs)",
+        "papers_write": "$\\ell$-bounded [Saxena2025Balanced]"
+      },
+      {
+        "symbol": "\\eta",
+        "meaning": "number of transient edges of a temporally connected graph",
+        "where": [
+          "dynamic-exploration"
+        ]
+      },
+      {
+        "symbol": "\\delta",
+        "meaning": "longest time an edge of a dynamic ring may be absent",
+        "where": [
+          "exploration"
+        ]
+      },
+      {
+        "symbol": "p",
+        "meaning": "number of pebbles"
+      },
+      {
+        "symbol": "b",
+        "meaning": "number of bits of an agent's memory, when it is a parameter"
+      },
+      {
+        "symbol": "\\beta",
+        "meaning": "number of bits of a label written at a node in advance",
+        "where": [
+          "exploration"
+        ]
+      },
+      {
+        "symbol": "\\phi",
+        "meaning": "deficiency of a directed graph: the number of arcs whose addition makes it Eulerian",
+        "papers_write": "$d$ [Italiano2022Directed]",
+        "where": [
+          "dispersion",
+          "exploration"
+        ]
+      },
+      {
+        "symbol": "\\nu",
+        "meaning": "number of leaves of a tree",
+        "papers_write": "$\\lambda$",
+        "where": [
+          "rendezvous"
+        ]
+      },
+      {
+        "symbol": "\\mathrm{CR}(k)",
+        "meaning": "competitive ratio of a collaborative exploration algorithm with $k$ agents",
+        "where": [
+          "collaborative-exploration"
+        ]
+      },
+      {
+        "symbol": "X(n)",
+        "meaning": "time to explore any $n$-node graph",
+        "where": [
+          "dispersion"
+        ]
+      },
+      {
+        "symbol": "\\mathrm{port}_v",
+        "meaning": "port numbering at node $v$",
+        "papers_write": "$\\lambda_v$",
+        "where": [
+          "exploration"
+        ]
+      },
+      {
+        "symbol": "R",
+        "meaning": "running time, in rounds, of a message-passing algorithm simulated by agents",
+        "where": [
+          "leader-election-agents",
+          "mis-agents",
+          "mds-agents",
+          "mst-agents",
+          "bfs-agents",
+          "subgraph-counting-agents"
+        ]
+      },
+      {
+        "symbol": "K",
+        "meaning": "number of states of a finite-automaton agent",
+        "where": [
+          "exploration",
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "\\gamma",
+        "meaning": "exponent of the team size in large-team collaborative exploration, $k = Dn^{\\gamma}$",
+        "where": [
+          "collaborative-exploration"
+        ]
+      },
+      {
+        "symbol": "\\theta",
+        "meaning": "the exponent of Reingold's universal exploration sequences",
+        "where": [
+          "treasure-hunt"
+        ]
+      },
+      {
+        "symbol": "(q,\\rho)",
+        "meaning": "type of a path: its largest port $q$ and its length $\\rho$",
+        "where": [
+          "treasure-hunt"
+        ]
+      },
+      {
+        "symbol": "z",
+        "meaning": "number of nodes of non-zero capacity",
+        "where": [
+          "dispersion"
+        ]
+      },
+      {
+        "symbol": "r",
+        "meaning": "radius of a ball of the grid",
+        "where": [
+          "dispersion"
+        ]
+      },
+      {
+        "symbol": "c",
+        "meaning": "number of colours (of a robot's light, or of the colours a node can hold)",
+        "papers_write": "$\\kappa$, $\\ell$",
+        "where": [
+          "exploration-luminous",
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "\\varphi",
+        "meaning": "visibility range of a myopic robot, in hops",
+        "where": [
+          "exploration-luminous"
+        ]
+      },
+      {
+        "symbol": "a\\times b",
+        "meaning": "size of a grid or torus with $a$ rows and $b$ columns",
+        "where": [
+          "exploration-luminous"
+        ]
+      },
+      {
+        "symbol": "\\psi(v)",
+        "meaning": "current colour of node $v$",
+        "papers_write": "$c(v)$",
+        "where": [
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "c_0",
+        "meaning": "initial colour of the nodes",
+        "where": [
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "\\pi_v",
+        "meaning": "rotor pointer at node $v$: the port the next departing agent takes",
+        "where": [
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "N(v)",
+        "meaning": "the neighbours of node $v$",
+        "where": [
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "\\mathrm{circ}(G)",
+        "meaning": "circumference of $G$: the length of its longest cycle",
+        "papers_write": "$k$",
+        "where": [
+          "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "g",
+        "meaning": "a known upper bound on the circumference",
+        "where": [
+          "exploration-recolourable"
+        ]
+      }
+    ],
+    "mobile-robots-in-the-plane": [
+      {
+        "symbol": "n",
+        "meaning": "number of robots",
+        "papers_write": "$N$ in some mutual visibility papers"
+      },
+      {
+        "symbol": "f",
+        "meaning": "maximum number of faulty robots (crashed or Byzantine)"
+      },
+      {
+        "symbol": "\\ell",
+        "meaning": "number of distinct labels of homonymous robots; $\\ell=1$ anonymous, $\\ell=n$ distinct identifiers",
+        "papers_write": "$h$"
+      },
+      {
+        "symbol": "c",
+        "meaning": "number of colours of a light"
+      },
+      {
+        "symbol": "V",
+        "meaning": "visibility radius (limited visibility)"
+      },
+      {
+        "symbol": "\\delta",
+        "meaning": "minimum distance a robot travels in a non-rigid move before the adversary may stop it"
+      },
+      {
+        "symbol": "\\Delta_0",
+        "meaning": "diameter of the initial configuration",
+        "papers_write": "$D_E$"
+      },
+      {
+        "symbol": "k",
+        "meaning": "number of groups ($k$-grouping, partitioning)",
+        "where": [
+          "k-grouping",
+          "partitioning-plane",
+          "separation"
+        ]
+      },
+      {
+        "symbol": "L",
+        "meaning": "length (circumference) of the ring or circle",
+        "papers_write": "$\\ell$",
+        "where": [
+          "ring-deployment"
+        ]
+      },
+      {
+        "symbol": "d",
+        "meaning": "the target spacing $L/n$ in uniform deployment",
+        "where": [
+          "ring-deployment"
+        ]
+      },
+      {
+        "symbol": "m",
+        "meaning": "number of patterns in a sequence",
+        "where": [
+          "pattern-sequences"
+        ]
+      },
+      {
+        "symbol": "\\lambda",
+        "meaning": "contraction factor of a $\\lambda$-contracting gathering protocol",
+        "where": [
+          "gathering",
+          "near-gathering"
+        ]
+      },
+      {
+        "symbol": "r, s",
+        "meaning": "robots (local names)"
+      },
+      {
+        "symbol": "g",
+        "meaning": "hop diameter of the initial visibility graph",
+        "papers_write": "$D_G$, $D$",
+        "where": [
+          "gathering",
+          "scattering"
+        ]
+      },
+      {
+        "symbol": "\\phi",
+        "meaning": "expected running time function of scattering algorithm $SA_\\phi$",
+        "papers_write": "$f$",
+        "where": [
+          "scattering"
+        ]
+      }
+    ],
+    "search-in-geometric-domains": [
+      {
+        "symbol": "k",
+        "meaning": "number of robots",
+        "papers_write": "$n$"
+      },
+      {
+        "symbol": "f",
+        "meaning": "maximum number of faulty robots (crash or Byzantine)"
+      },
+      {
+        "symbol": "m",
+        "meaning": "number of rays sharing an endpoint"
+      },
+      {
+        "symbol": "d",
+        "meaning": "distance from the origin to the target on a line or on rays"
+      },
+      {
+        "symbol": "x",
+        "meaning": "position of the target on the line"
+      },
+      {
+        "symbol": "R",
+        "meaning": "radius of the disk (results are usually stated for $R=1$)"
+      },
+      {
+        "symbol": "v,\\ v_i",
+        "meaning": "speeds of robots (robot $i$ moves at speed at most $v_i$)",
+        "papers_write": "$s$, $s_i$"
+      },
+      {
+        "symbol": "\\alpha",
+        "meaning": "known arc distance along the boundary (between two exits, or between the treasure and the exit)",
+        "papers_write": "$d$"
+      },
+      {
+        "symbol": "r",
+        "meaning": "communication range of wireless robots"
+      },
+      {
+        "symbol": "\\ell",
+        "meaning": "length of the fence (segment or circle)",
+        "where": [
+          "patrolling"
+        ]
+      },
+      {
+        "symbol": "L",
+        "meaning": "known distance between the starting points of two robots",
+        "where": [
+          "evacuation"
+        ]
+      },
+      {
+        "symbol": "p",
+        "meaning": "index of an $\\ell_p$ norm",
+        "where": [
+          "evacuation"
+        ]
+      },
+      {
+        "symbol": "w",
+        "meaning": "weight of the second robot's arrival time in weighted group search",
+        "where": [
+          "evacuation"
+        ]
+      },
+      {
+        "symbol": "\\sigma",
+        "meaning": "number of servants in priority evacuation (the queen and $\\sigma$ servants, $k=\\sigma+1$ robots)",
+        "papers_write": "$n$",
+        "where": [
+          "evacuation"
+        ]
+      }
+    ],
+    "programmable-matter": [
+      {
+        "symbol": "n",
+        "meaning": "number of particles (modules, tiles)"
+      },
+      {
+        "symbol": "D",
+        "meaning": "diameter of the configuration (largest lattice distance between two particles)"
+      },
+      {
+        "symbol": "L_{out},\\ L_{max}",
+        "meaning": "length of the outer boundary and of the longest boundary of the configuration",
+        "where": [
+          "leader-election-amoebots"
+        ]
+      },
+      {
+        "symbol": "\\lambda",
+        "meaning": "bias towards having more neighbours (stochastic approach)"
+      },
+      {
+        "symbol": "\\gamma",
+        "meaning": "bias towards neighbours of the same colour (separation)",
+        "where": [
+          "separation-amoebots"
+        ]
+      },
+      {
+        "symbol": "\\alpha",
+        "meaning": "compression factor: perimeter at most $\\alpha$ times the minimum",
+        "where": [
+          "compression-amoebots"
+        ]
+      },
+      {
+        "symbol": "q",
+        "meaning": "number of orientations (alignment)",
+        "where": [
+          "alignment-amoebots"
+        ]
+      },
+      {
+        "symbol": "s",
+        "meaning": "number of energy sources",
+        "where": [
+          "energy-distribution-amoebots"
+        ]
+      },
+      {
+        "symbol": "k",
+        "meaning": "symmetricity of a configuration (a $k$-symmetric configuration admits up to $k$ leaders)",
+        "where": [
+          "leader-election-amoebots"
+        ]
+      }
+    ]
+  }
+}

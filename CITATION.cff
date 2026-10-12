@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this atlas, please cite it as below; for a result, cite the paper the atlas gives for it."
+title: "Mobility Matters: A Living Survey of Open Problems on Autonomous Agents, Robots and Particles"
+type: dataset
+authors:
+  - family-names: Pattanayak
+    given-names: Debasish
+version: "2026-10-12"
+date-released: "2026-10-12"
+url: "https://drdebmath.github.io/mobility-matters/"
+repository-code: "https://github.com/drdebmath/mobility-matters"
+license: CC-BY-4.0
+keywords: [mobile agents, mobile robots, programmable matter, distributed computing, open problems, survey]

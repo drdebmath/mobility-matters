@@ -1,0 +1,2594 @@
+{
+  "id": "treasure-hunt",
+  "model": "mobile-agents-on-graphs",
+  "name": "Treasure hunt",
+  "origin": {
+    "ref": "TaShma2014Deterministic",
+    "year": 2007,
+    "note": "Ta-Shma and Zwick introduced the deterministic treasure hunt problem at SODA 2007, as a variant of rendezvous in which one agent never moves."
+  },
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "subproblem of",
+    "relation": "An agent that explores the graph finds any treasure, so every exploration algorithm solves treasure hunt; the question is how much cheaper it can be when the treasure is close, measured against its distance $d$ (or a weight of the path to it) rather than the size of the graph."
+  },
+  "summary": "One agent must find a static treasure at an unknown node; the cost should depend on how far the treasure is, not on the size of the graph.",
+  "statement": "A single deterministic agent starts at a node $s$ of an unknown connected graph with port labels; a **treasure** sits at an unknown node $v^*$ at distance $d$ from $s$. The agent must reach $v^*$ (it recognises the treasure when it arrives). **Cost** is the number of edge traversals until the treasure is found, measured against $d$, against $e(d)$ (the number of edges with an endpoint at distance less than $d$ from $s$) or against a path weight defined per paper. **Help** counts any external help the agent receives: bits of advice from an oracle that knows the instance, or pebbles placed by it. Unless a variant says otherwise the agent knows nothing about the graph, $d$ or $v^*$.",
+  "primer": {
+    "intro": "A hiker is lost in a park whose paths form a graph, and a rescuer walks from the trailhead looking for her, without a map and without knowing which direction to take. The rescuer is a single agent at a node $s$ of an unknown connected graph whose edges carry port numbers (local numbers of the edges at each node); the **treasure** is at an unknown node $v^*$ at distance $d$ from $s$ (the distance is the fewest edges on a route). The agent recognises the treasure only when it stands on it. In the basic version the graph is finite, with $n$ nodes, and the agent knows nothing about it; it must reach $v^*$, and the cost is the number of edges it walks.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Universal exploration sequences of doubling size",
+        "variant": "finite",
+        "ref": "TaShma2014Deterministic",
+        "idea": "An **exploration sequence** is a list of numbers $x_1, x_2, \\dots$; following it means: at the $i$-th step, if you entered the current node (of degree $\\deg$) by port $p$, leave by port $(p + x_i) \\bmod \\deg$. A sequence is **universal for size $N$** if following it visits every node of every connected graph with at most $N$ nodes, from any start. Such sequences exist and can be computed [Reingold2008Undirected].\n1. For $N = 1, 2, 4, 8, \\dots$:\n2. follow the universal sequence for size $N$ from wherever you are;\n3. stop as soon as you stand on the treasure.",
+        "analysis": "Once $N \\ge n$, the sequence for size $N$ visits every node, including $v^*$, so the search ends during that round of the loop [TaShma2014Deterministic]. Each sequence has length polynomial in $N$, the lengths grow geometrically, and the loop never goes past $N < 2n$, so the total cost is polynomial in $n$. It ignores $d$: a treasure next door may cost as much as one far away. With node labels, a treasure at distance $d$ is found at cost $O(e(d)\\log d)$ [Bouchard2023Almost], where $e(d)$ is the number of edges with an endpoint at distance less than $d$ from $s$.",
+        "why_it_matters": "Doubling a guess you do not know (here $n$) is the standard way to remove knowledge from an algorithm; it reappears in rendezvous and gathering."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "The treasure is behind the last door",
+        "variant": "labelled",
+        "ref": "Bouchard2023Almost",
+        "idea": "Let $s$ have many neighbours, say 20, and put the treasure on one of them, so $d = 1$. The agent cannot see what is behind a port without walking through it. An adversary watches the agent and puts the treasure behind whichever of the 20 ports the agent tries last; since every node looks the same from $s$, the agent cannot avoid this.",
+        "analysis": "The agent walks out and back along at least 19 edges before it tries the last one, so it pays about twice the degree of $s$. Here $e(1)$, the number of edges with an endpoint at distance less than 1 from $s$, is exactly the degree of $s$, and the same idea applied layer by layer gives the general bound $\\Omega(e(d))$ of [Bouchard2023Almost], which holds even when nodes carry labels. Their algorithm costs $O(e(d)\\log d)$, so the gap is a factor $\\log d$. Trivially the agent also needs at least $d$ moves.",
+        "why_it_matters": "It shows that the right measure of cost is the number of edges near the start, not the distance, which is why later work states bounds in terms of $e(d)$ or path weights."
+      }
+    ]
+  },
+  "history": "Ta-Shma and Zwick introduced deterministic treasure hunt as the variant of rendezvous in which one agent never moves [TaShma2014Deterministic]. The question from the start was **cost as a function of how far the treasure is**, not of the size of the graph, which led to strongly universal exploration sequences. Later work asked how much **external help** (advice bits, pebbles) reduces the cost [Miller2015Tradeoffs] [Gorain2022Pebble], and what is possible in graphs with infinite degrees [Pattanayak2024Treasure].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Cost",
+      "description": "edge traversals until the treasure is reached"
+    },
+    {
+      "id": "memory",
+      "name": "Help",
+      "description": "bits of advice, or pebbles placed in advance by an oracle"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "timing",
+    "initial",
+    "node-memory",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "graph-size",
+    "node-ids",
+    "help",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "graph-size",
+      "name": "Graph size",
+      "values": [
+        {
+          "id": "countable",
+          "level": 0,
+          "label": "finite or countably infinite, degrees may be infinite",
+          "short": "infinite degrees allowed",
+          "definition": "$G$ is finite or countably infinite; a node may have countably infinite degree (ports $1,2,3,\\dots$)."
+        },
+        {
+          "id": "locally-finite",
+          "level": 1,
+          "label": "finite or countably infinite, every degree finite",
+          "short": "locally finite",
+          "definition": "$G$ is finite or countably infinite, and every node has finite degree."
+        },
+        {
+          "id": "finite",
+          "level": 2,
+          "label": "finite",
+          "short": "finite graph",
+          "definition": "$G$ has finitely many nodes."
+        }
+      ],
+      "origin": "Ta-Shma and Zwick posed deterministic treasure hunt in a finite connected graph, as the variant of rendezvous in which one agent never moves [TaShma2014Deterministic]; Pelc notes that rendezvous with arbitrary delay contains this case, since the adversary may wake one agent late enough [Pelc2019Survey]. Infinite graphs make sense once cost is measured locally: Bouchard, Dieudonné, Labourel and Pelc consider connected graphs, finite or countably infinite, with finite degrees, and find a treasure at distance $d$ at cost $O(e(d)\\log d)$, refuting a conjecture of Awerbuch, Betke, Rivest and Singh [Bouchard2023Almost]. Pattanayak and Pelc observed that \"all known treasure hunt and rendezvous algorithms rely on the assumption that degrees of all nodes are finite, even when the graph itself may be infinite\", removed the assumption, and noted that countable degrees are the limit: with uncountable degrees neither task can be done in finite worst-case time [Pattanayak2024Treasure]. The three levels differ in the natural cost measure: a function of $n$ in finite graphs, $e(d)$ in locally finite ones, and a weight $w(s,v^*)$ of the cheapest path type when $e(d)$ may be infinite [Pattanayak2024Treasure]."
+    },
+    {
+      "id": "help",
+      "name": "External help",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no help",
+          "short": "no help",
+          "definition": "No information beyond the agent's own observations."
+        },
+        {
+          "id": "advice",
+          "level": 1,
+          "label": "advice: bits from an oracle that knows the instance",
+          "short": "advice",
+          "definition": "An oracle that knows the whole instance gives the agent a binary string before it starts; its length (in bits) is the measure."
+        },
+        {
+          "id": "pebbles",
+          "level": 1,
+          "label": "pebbles placed by an oracle that knows the instance",
+          "short": "oracle pebbles",
+          "definition": "An oracle that knows the instance places pebbles on nodes (at most one per node) before the agent starts; their number is the measure."
+        }
+      ],
+      "origin": "External help measures how much information about the instance buys a fast treasure hunt. Miller and Pelc framed it in the paradigm of algorithms with advice: an oracle that knows the network, the start and the treasure gives the agent a binary string, and the question is the smallest advice that achieves a given cost, against cost $\\Theta(m)$ in the worst case without information [Miller2015Tradeoffs]; among the earlier advice papers they cite tree exploration with advice by Fraigniaud, Ilcinkas and Pelc [Fraigniaud2008Advice]. Their nodes carry labels that the agent reads on arrival [Miller2015Tradeoffs]. Gorain, Mondal, Nayak and Pandit replaced the string by pebbles that the oracle places on nodes of an anonymous graph, at most one per node, seen only on arrival, arguing that when many agents search independently it is cheaper to put information on the nodes once than to give advice to each agent [Gorain2022Pebble]. They show $O(d\\log\\Delta)$ pebbles give time $O(d\\log\\Delta+\\log^3\\Delta)$ and that no number of pebbles beats $\\Omega(d\\log\\Delta)$ [Gorain2022Pebble]. The two forms of help sit on the same level because neither simulates the other: advice is global and read at once, pebbles are local and read along the walk."
+    }
+  ],
+  "variants": [
+    {
+      "id": "finite",
+      "title": "Anonymous finite graphs",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite"
+      },
+      "summary": "If the treasure is present from the start, concatenating universal traversal sequences finds it in polynomial time; if it may appear later, explicit solutions need backtracking and are polynomial with a huge exponent.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "TaShma2014Deterministic",
+          "role": "introductory",
+          "time": "O(n^{2\\theta})",
+          "note": "Theorem 3.2: an infinite strongly universal exploration sequence with cover time $O(n^{2\\theta})$, $\\theta$ the exponent of Reingold's universal exploration sequences; explicit when those are.",
+          "assumes": [
+            "the treasure may appear after the agent starts",
+            "backtracking: the agent sees its entry port"
+          ]
+        },
+        {
+          "ref": "Xin2007Faster",
+          "role": "best",
+          "time": "O(n^{\\theta(1+1/a)})",
+          "note": "For any fixed integer $a \\gg 1$; with backtracking (the agent sees the entry port).",
+          "assumes": [
+            "the treasure may appear after the agent starts",
+            "backtracking: the agent sees its entry port"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound in terms of $n$ is recorded."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not studied in these papers."
+        }
+      },
+      "open": [
+        "Treasure hunt when the treasure may appear after the agent starts and the agent does **not** see its entry port: \"We do not know if an efficient solution is possible when backtracking is not allowed\" [TaShma2014Deterministic].",
+        "Do strongly universal traversal sequences exist? They exist if and only if treasure hunt has a solution independent of the start time [TaShma2014Deterministic]."
+      ],
+      "notes": "For a treasure present when the agent starts, Ta-Shma and Zwick note that following $U_1U_2U_4\\dots$, universal traversal sequences of doubling length, solves the problem in polynomial time [TaShma2014Deterministic]. The bounds above are for the harder case. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "infinite-degrees",
+      "title": "Anonymous graphs with possibly infinite degrees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected"
+      },
+      "summary": "A universal algorithm whose cost is optimal among universal algorithms, measured by a weight $w(s,v^*)$ of the cheapest path type to the treasure.",
+      "statement": "For a path with largest port $q$ and length $\\rho$, its type is $(q,\\rho)$ with value $\\rho\\,2^{\\rho}q^{\\rho}$; $w(s,v^*)$ is the value of the cheapest type of a path from $s$ to $v^*$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(w(s,v^*))",
+          "ref": "Pattanayak2024Treasure",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "among universal algorithms (no knowledge of the graph)",
+            "graphs whose nodes may have countably infinite degree"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2024Treasure",
+          "role": "best",
+          "time": "O(w(s,v^*))",
+          "note": "Introductory and current best (Theorem 2.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Optimal order of magnitude among universal algorithms."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "No help is used."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "labelled",
+      "title": "Labelled nodes, locally finite graphs",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "locally-finite",
+        "node-ids": "labelled"
+      },
+      "summary": "With node labels, a treasure at distance $d$ is found at cost $O(e(d)\\log d)$, against a lower bound of $\\Omega(e(d))$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(e(d))",
+          "ref": "Bouchard2023Almost",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$e(d)$: edges with an endpoint at distance below $d$",
+            "holds for every algorithm on some graphs"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bouchard2023Almost",
+          "role": "best",
+          "time": "O(e(d)\\log d)",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "Introductory and current best; holds also in the fuel- and rope-restricted models, and refutes a 1999 conjecture of Awerbuch, Betke, Rivest and Singh."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "A $\\log d$ factor."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "No help is used."
+        }
+      },
+      "open": [
+        "Remove the $O(\\log d)$ factor between $O(e(d)\\log d)$ and $\\Omega(e(d))$ [Bouchard2023Almost]."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "advice",
+      "title": "Treasure hunt with advice",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "help": "advice"
+      },
+      "summary": "How many bits of advice buy a given cost $C$: about $d\\log(m/C)$.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(d\\log(m/C))",
+          "ref": "Miller2015Tradeoffs",
+          "bottleneck": "information",
+          "preconditions": [
+            "to achieve cost $C$",
+            "$d$ = distance to the treasure, $m$ = number of edges"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Miller2015Tradeoffs",
+          "role": "best",
+          "time": "C",
+          "memory": "O(d\\log(d\\cdot m/C)+\\log\\log m)",
+          "note": "Introductory and current best; on trees $O(d\\log(m/C)+\\log\\log m)$, nearly tight."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Cost $C$ is the target."
+        },
+        "memory": {
+          "status": "near",
+          "note": "A $\\log d$ inside the first term on arbitrary graphs."
+        }
+      },
+      "open": [],
+      "notes": "The same paper gives the analogous trade-off for rendezvous.",
+      "status": "verified"
+    },
+    {
+      "id": "pebbles",
+      "title": "Treasure hunt guided by pebbles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "help": "pebbles"
+      },
+      "summary": "An oracle places pebbles (at most one per node); $O(d\\log\\Delta)$ pebbles let the agent reach the treasure in near-optimal time.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(d\\log\\Delta)",
+          "ref": "Gorain2022Pebble",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "any number of pebbles",
+            "$d$ = distance to the treasure"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gorain2022Pebble",
+          "role": "best",
+          "time": "O(d\\log\\Delta+\\log^3\\Delta)",
+          "memory": "O(d\\log\\Delta)\\ \\text{pebbles}",
+          "note": "Introductory and current best (SIROCCO 2021 bounds; whether the journal version improves them was not checked)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "An additive $\\log^3\\Delta$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No lower bound on the number of pebbles recorded."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Treasure hunt by exploration sequences of doubling size [TaShma2014Deterministic]: for $N = 1, 2, 4, 8, \\dots$ the agent follows the sequence for size $N$ from where it stands (entering by port $p$ with term $x$, it leaves by port $(p + x) \\bmod \\deg$; ports are numbered from 0) and stops on the treasure $v^*$. The short sequences drawn here are illustrative, not actual universal sequences, which are much longer. One frame per move.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          12,
+          28
+        ],
+        "a": [
+          32,
+          44
+        ],
+        "b": [
+          32,
+          12
+        ],
+        "c": [
+          54,
+          30
+        ],
+        "d": [
+          56,
+          50
+        ],
+        "t": [
+          78,
+          40
+        ],
+        "e": [
+          78,
+          14
+        ],
+        "f": [
+          94,
+          28
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "c"
+        ],
+        [
+          "a",
+          "d"
+        ],
+        [
+          "a",
+          "s"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "b",
+          "s"
+        ],
+        [
+          "c",
+          "e"
+        ],
+        [
+          "d",
+          "t"
+        ],
+        [
+          "e",
+          "f"
+        ],
+        [
+          "f",
+          "t"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          15.7,
+          32.9
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          17.6,
+          25.4
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          28.3,
+          39.1
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          37.9,
+          42.0
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          37.5,
+          46.9
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          26.4,
+          14.6
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          35.7,
+          17.0
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          50.3,
+          25.0
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          48.1,
+          32.0
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          59.8,
+          27.9
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          50.5,
+          47.1
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          62.1,
+          48.9
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          71.9,
+          41.1
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          83.7,
+          37.6
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          72.2,
+          16.1
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          81.5,
+          19.1
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          90.5,
+          22.9
+        ],
+        "s": "0",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          88.3,
+          30.4
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "Start: agent at s, treasure at an unknown node v*"
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14.7,
+                30.1
+              ],
+              [
+                29.3,
+                41.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "N = 1: follow the sequence (2)"
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "c",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                34.9,
+                42.2
+              ],
+              [
+                51.1,
+                31.8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "N = 2: follow the sequence (1, 2)"
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "b",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.4,
+                27.8
+              ],
+              [
+                34.6,
+                14.2
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                29.3,
+                14.1
+              ],
+              [
+                14.7,
+                25.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "N = 4: follow the sequence (1, 1, 2, 0)"
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14.7,
+                30.1
+              ],
+              [
+                29.3,
+                41.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "d",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.3,
+                44.8
+              ],
+              [
+                52.7,
+                49.2
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.7,
+                49.2
+              ],
+              [
+                35.3,
+                44.8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "s",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                29.3,
+                41.9
+              ],
+              [
+                14.7,
+                30.1
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "N = 8: follow the sequence (1, 2, 1, 1, 1, 1, 2, 2)"
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14.7,
+                30.1
+              ],
+              [
+                29.3,
+                41.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "c",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                34.9,
+                42.2
+              ],
+              [
+                51.1,
+                31.8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "e",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              78,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                78,
+                14
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.8,
+                28.1
+              ],
+              [
+                75.2,
+                15.9
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "f",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              78,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              94,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                78,
+                14
+              ],
+              [
+                94,
+                28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                80.6,
+                16.2
+              ],
+              [
+                91.4,
+                25.8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "T",
+            "at": "t",
+            "k": "target",
+            "c": "near",
+            "r": 2.4
+          },
+          {
+            "id": "a",
+            "at": "t",
+            "k": "agent",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              12,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              32,
+              12
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              54,
+              30
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              56,
+              50
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              78,
+              40
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              78,
+              14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              94,
+              28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                32,
+                12
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                56,
+                50
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                12,
+                28
+              ],
+              [
+                32,
+                44
+              ],
+              [
+                54,
+                30
+              ],
+              [
+                78,
+                14
+              ],
+              [
+                94,
+                28
+              ],
+              [
+                78,
+                40
+              ]
+            ],
+            "c": "muted",
+            "w": 0.7
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                91.3,
+                30.0
+              ],
+              [
+                80.7,
+                38.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              12,
+              21
+            ],
+            "s": "s"
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              33
+            ],
+            "s": "v*"
+          }
+        ],
+        "label": "Final: treasure found during the phase N = 8, after 13 moves"
+      }
+    ]
+  }
+}

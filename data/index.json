@@ -1,0 +1,382 @@
+{
+  "title": "Mobility Matters",
+  "tagline": "What is known, what is tight, and what is open, under which assumptions.",
+  "owner": "Debasish Pattanayak",
+  "models": [
+    "mobile-agents-on-graphs",
+    "mobile-robots-in-the-plane",
+    "search-in-geometric-domains",
+    "programmable-matter"
+  ],
+  "problems": [
+    "exploration",
+    "collaborative-exploration",
+    "dispersion",
+    "treasure-hunt",
+    "rendezvous",
+    "pattern-formation",
+    "gathering",
+    "circle-formation",
+    "uniform-circle-formation",
+    "convergence",
+    "linear-search",
+    "evacuation",
+    "black-hole-search",
+    "gathering-graphs",
+    "map-construction",
+    "dynamic-exploration",
+    "leader-election-agents",
+    "mis-agents",
+    "mds-agents",
+    "scattering",
+    "leader-election-plane",
+    "universal-pattern-formation",
+    "pattern-sequences",
+    "near-gathering",
+    "mutual-visibility",
+    "k-grouping",
+    "separation",
+    "subgraph-counting-agents",
+    "mst-agents",
+    "bfs-agents",
+    "leader-election-amoebots",
+    "shape-formation-amoebots",
+    "coating-amoebots",
+    "compression-amoebots",
+    "convex-hull-amoebots",
+    "patrolling",
+    "decontamination",
+    "oblivious-exploration",
+    "exploration-luminous",
+    "exploration-recolourable",
+    "flocking",
+    "ring-deployment",
+    "chauffeuring",
+    "partitioning-plane",
+    "scattering-amoebots",
+    "separation-amoebots",
+    "alignment-amoebots",
+    "bridging-amoebots",
+    "energy-distribution-amoebots",
+    "hybrid-shape-formation",
+    "centralised-transformations"
+  ],
+  "families": [
+    {
+      "id": "exploration",
+      "name": "Exploration",
+      "summary": "Visit every node of an unknown graph: one agent with as little memory or as few markers as possible, or a team as fast as possible. Treasure hunt and rendezvous are subproblems of exploration; dispersion is derived from collaborative exploration.",
+      "problems": [
+        "exploration",
+        "collaborative-exploration",
+        "dispersion",
+        "treasure-hunt",
+        "rendezvous",
+        "black-hole-search",
+        "gathering-graphs",
+        "map-construction",
+        "dynamic-exploration",
+        "oblivious-exploration",
+        "exploration-luminous",
+        "exploration-recolourable",
+        "decontamination"
+      ]
+    },
+    {
+      "id": "agent-computing",
+      "name": "Computing with agents",
+      "summary": "Agents solve graph problems on the anonymous graph they move in: leader election, independent sets, dominating sets, spanning trees, subgraph counts. Most algorithms first disperse the agents, so that every node has an agent to compute for it.",
+      "problems": [
+        "leader-election-agents",
+        "mis-agents",
+        "mds-agents",
+        "subgraph-counting-agents",
+        "mst-agents",
+        "bfs-agents"
+      ],
+      "related": [
+        {
+          "problem": "dispersion",
+          "relation": "Most algorithms first bring the $n$ agents into a dispersed configuration, one agent per node, so that every node has an agent to compute for it [Kshemkalyani2026Leader] [Chand2026MDS]."
+        }
+      ]
+    },
+    {
+      "id": "pattern-formation",
+      "name": "Formation problems",
+      "summary": "Form a geometric pattern from a starting configuration. Gathering (one point, through k-grouping), circle formation and uniform circle formation are special cases; convergence is gathering's relaxation.",
+      "problems": [
+        "pattern-formation",
+        "gathering",
+        "circle-formation",
+        "uniform-circle-formation",
+        "universal-pattern-formation",
+        "pattern-sequences",
+        "mutual-visibility",
+        "k-grouping",
+        "near-gathering",
+        "convergence",
+        "partitioning-plane"
+      ]
+    },
+    {
+      "id": "symmetry-breaking",
+      "name": "Symmetry breaking and spreading",
+      "summary": "Tasks whose difficulty is breaking the symmetry of anonymous robots: electing a leader, scattering from shared points, and separating by colour.",
+      "problems": [
+        "leader-election-plane",
+        "scattering",
+        "separation",
+        "ring-deployment",
+        "flocking"
+      ]
+    },
+    {
+      "id": "search-evacuation",
+      "name": "Search, evacuation and patrolling",
+      "summary": "Find a target, or get every robot out through an exit, at an unknown point of a known continuous domain. Evacuation builds on linear search (the cow-path problem).",
+      "problems": [
+        "linear-search",
+        "evacuation",
+        "chauffeuring",
+        "patrolling"
+      ]
+    },
+    {
+      "id": "programmable-matter",
+      "name": "Self-organising particle systems",
+      "summary": "Leader election, shape formation, coating, scattering, stochastic tasks (compression, separation, alignment, bridging), energy distribution, hybrid and centralised reconfiguration.",
+      "problems": [
+        "leader-election-amoebots",
+        "shape-formation-amoebots",
+        "coating-amoebots",
+        "compression-amoebots",
+        "convex-hull-amoebots",
+        "scattering-amoebots",
+        "separation-amoebots",
+        "alignment-amoebots",
+        "bridging-amoebots",
+        "energy-distribution-amoebots",
+        "hybrid-shape-formation",
+        "centralised-transformations"
+      ]
+    }
+  ],
+  "overviews": [
+    "why-move-to-compute",
+    "symmetry-breaking",
+    "finding-your-way",
+    "exploration-to-dispersion",
+    "gathering-across-models",
+    "weak-robots",
+    "robots-to-particles",
+    "search-to-evacuation",
+    "faults-across-models",
+    "what-forces-the-bounds",
+    "consequential-open-problems"
+  ],
+  "citation": {
+    "authors": [
+      "Debasish Pattanayak"
+    ],
+    "title": "Mobility Matters: A Living Survey of Open Problems on Autonomous Agents, Robots and Particles",
+    "year": 2026,
+    "version": "2026-10-12",
+    "url": "https://drdebmath.github.io/mobility-matters/",
+    "pdf": "mobility-matters.pdf"
+  },
+  "owner_url": "https://drdebmath.github.io/",
+  "repo": "https://github.com/drdebmath/mobility-matters",
+  "ai_disclaimer": "Claude (Anthropic) was used in cataloguing the problems.",
+  "intro": "The problem space is a **directed acyclic graph**. Independent assumptions, one per axis (the graph or domain, the scheduler, what the entities see, remember and share, the faults), come together to define a problem, and each particular setting appears as a leaf of the graph: a problem solved under one set of assumptions. Results move along the edges: an algorithm for weaker assumptions works under stronger ones, and a lower bound for stronger assumptions holds under weaker ones. Assumption sets also change over time: later work minimises the set a result needs, a stronger assumption subsumes weaker ones, and some assumptions become irrelevant in the presence of better ones. Every setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.",
+  "subtitle": "A Living Survey of Open Problems on Autonomous Agents, Robots and Particles",
+  "priorities": {
+    "intro": "A ranking by downstream impact: how many problems and settings a solution would feed, through derived problems, related problems and the carry-over of algorithms and lower bounds; weighed with how long a question has been open and how far apart its bounds are. The ranking is the maintainer's judgement; the counts in the table below are computed from the catalogue.",
+    "items": [
+      {
+        "title": "Collective exploration of trees",
+        "problems": [
+          "collaborative-exploration",
+          "dispersion"
+        ],
+        "settings": [
+          [
+            "collaborative-exploration",
+            "tree-global"
+          ],
+          [
+            "collaborative-exploration",
+            "anonymous-n-agents"
+          ],
+          [
+            "collaborative-exploration",
+            "tree-n-agents"
+          ],
+          [
+            "dispersion",
+            "tree-rooted"
+          ]
+        ],
+        "question": "Is the competitive ratio of collective tree exploration $O(\\log k)$? The bounds are $\\Omega(\\log k/\\log\\log k)$ [Disser2020General] against $O(\\log^2 k)$ [Cosson2026Polylog], a preprint. In its sharpest form: can $n$ agents explore an anonymous tree of height $D$ in $O(D^2)$ rounds with local communication, and is $\\Omega(D^2)$ necessary for every $D$ [Disser2020General]?",
+        "why": "Dispersion is derived from it: with $k = n$ every dispersion algorithm explores, and dispersion's $\\Omega(D^2)$ tree bound is borrowed from it [Augustine2018Tradeoffs]. Leader election, independent and dominating sets, spanning and BFS trees by agents all start by dispersing, so their running times inherit any change. Black hole search and dynamic exploration are team exploration under faults."
+      },
+      {
+        "title": "Optimal-time rendezvous of labelled agents",
+        "problems": [
+          "rendezvous"
+        ],
+        "settings": [
+          [
+            "rendezvous",
+            "labelled"
+          ]
+        ],
+        "question": "Find an optimal-time rendezvous algorithm for two labelled agents in arbitrary graphs: the best bound is $\\tilde O(n^5\\log\\lambda)$ [TaShma2014Deterministic] against $\\Omega(n^2+\\log\\lambda)$ [Dessmark2006Deterministic], where $\\lambda$ is the smaller label; the question has been open since 2006 [Pelc2019Survey].",
+        "why": "Rendezvous is the two-agent core of gathering in graphs, and its algorithms rest on the same universal exploration sequences as treasure hunt; a tight bound would sharpen gathering, treasure hunt and leader election by agents."
+      },
+      {
+        "title": "How much memory exploration needs",
+        "problems": [
+          "exploration"
+        ],
+        "settings": [
+          [
+            "exploration",
+            "trees-stop"
+          ],
+          [
+            "exploration",
+            "perpetual"
+          ]
+        ],
+        "question": "Can an agent explore a tree and stop with asymptotically less memory than exploration with return? The bounds are $\\Omega(\\log\\log\\log n)$ [Diks2004Tree] against $O(\\log n)$ [Ambuhl2011Tree]. More broadly: what is the time of memory-optimal exploration?",
+        "why": "Memory lower bounds for agent problems, dispersion among them, come from exploration arguments; exploration is also the oldest question in the area."
+      },
+      {
+        "title": "Dispersion with optimal memory and termination",
+        "problems": [
+          "dispersion"
+        ],
+        "settings": [
+          [
+            "dispersion",
+            "base"
+          ],
+          [
+            "dispersion",
+            "rooted"
+          ]
+        ],
+        "question": "Can $k$ agents disperse in $O(k)$ rounds with $O(\\log k)$ bits, independent of $\\Delta$, and terminate without knowing $k$, $m$ or $\\Delta$? The best algorithm uses $O(\\log(k+\\Delta))$ bits [Kshemkalyani2025Almost]; the lower bound is $\\Omega(\\log k)$ [Augustine2018Tradeoffs].",
+        "why": "Dispersion is the first step of most agent algorithms and has the most open questions in the atlas; a $\\log\\Delta$ memory lower bound, or its removal, would settle a question shared by all of them."
+      },
+      {
+        "title": "The asynchronous landscape of robots in the plane",
+        "problems": [
+          "gathering",
+          "scattering",
+          "convergence"
+        ],
+        "settings": [
+          [
+            "gathering",
+            "two-fsta-async"
+          ],
+          [
+            "scattering",
+            "async"
+          ],
+          [
+            "convergence",
+            "limited-async"
+          ]
+        ],
+        "question": "Can robots with internal lights meet in ASYNC [Flocchini2016Constant] [Masuzawa2026Disorientation]? Can oblivious robots scatter in ASYNC [Bramas2016Probabilistic]? Is point convergence with limited visibility solvable in ASYNC without measurement errors [Kirkpatrick2024Separating]?",
+        "why": "These questions decide where models separate under asynchrony (see the model grid on the plane model page); their answers carry over to every plane problem, and the first would settle five separations that rest on an unproved claim [Flocchini2023Asynchrony]."
+      },
+      {
+        "title": "The time of arbitrary pattern formation",
+        "problems": [
+          "pattern-formation"
+        ],
+        "settings": [
+          [
+            "pattern-formation",
+            "async-disoriented"
+          ]
+        ],
+        "question": "Bound the number of epochs an arbitrary pattern formation algorithm needs in ASYNC; only solvability is known [Cicerone2019Asynchronous].",
+        "why": "Pattern formation has the largest family of special cases in the atlas (circle and uniform circle formation, mutual visibility, $k$-grouping, partitioning and more), and a time bound would carry over to them."
+      },
+      {
+        "title": "How many faults can be tolerated",
+        "problems": [
+          "gathering",
+          "gathering-graphs"
+        ],
+        "settings": [
+          [
+            "gathering",
+            "crash"
+          ],
+          [
+            "gathering-graphs",
+            "byzantine"
+          ]
+        ],
+        "question": "\"The maximum number of faults under which a solution is still feasible, for gathering and other tasks, has yet to be established\" [Agmon2006Fault], in particular in ASYNC; and polynomial-time Byzantine gathering in graphs with $f$ Byzantine agents and teams of close to $f+1$ good agents [Bouchard2016Byzantine].",
+        "why": "Fault thresholds recur across gathering, black hole search, dispersion, evacuation and search; the arguments that bound one usually transfer."
+      },
+      {
+        "title": "Leader election in programmable matter",
+        "problems": [
+          "leader-election-amoebots"
+        ],
+        "settings": [
+          [
+            "leader-election-amoebots",
+            "deterministic-none"
+          ],
+          [
+            "leader-election-amoebots",
+            "deterministic-chirality"
+          ]
+        ],
+        "question": "Deterministic leader election without chirality in linear time (the best is $O(L_{out}n^2)$ [Emek2019Deterministic]), and in $O(L_{out}+D)$ rounds under weaker schedulers and without disconnection [Dufoulon2021Efficient].",
+        "why": "Shape formation, coating and convex hull formation start by electing a leader, so their deterministic bounds depend on it."
+      },
+      {
+        "title": "Exact constants for evacuating a disk",
+        "problems": [
+          "evacuation"
+        ],
+        "settings": [
+          [
+            "evacuation",
+            "disk-two-f2f"
+          ]
+        ],
+        "question": "Close the gap for two face-to-face robots: $3+\\pi/6+\\sqrt3 \\approx 5.255$ [Czyzowicz2020FaceToFace] against $\\approx 5.6234$ [Disser2019Second].",
+        "why": "The question is old and well studied; its techniques shape the whole search family, though its reach stays inside it."
+      },
+      {
+        "title": "Compression and its mixing time",
+        "problems": [
+          "compression-amoebots"
+        ],
+        "settings": [
+          [
+            "compression-amoebots",
+            "stochastic"
+          ]
+        ],
+        "question": "What happens for $2.17 \\le \\lambda \\le 2+\\sqrt2$, and how fast does the chain compress [Cannon2016Compression]?",
+        "why": "Separation, alignment and bridging generalise compression, so an answer, and especially a mixing-time technique, would transfer to all three."
+      }
+    ]
+  },
+  "license": "Text and data: CC BY 4.0 · code: MIT",
+  "license_url": "https://github.com/drdebmath/mobility-matters/blob/main/LICENSE-CONTENT.md",
+  "changelog_url": "https://github.com/drdebmath/mobility-matters/blob/main/CHANGELOG.md",
+  "abstract": "Mobility Matters is a living survey of open problems in distributed computing by mobile entities: agents moving on graphs, robots in the plane, robots searching geometric domains, and programmable matter. Each problem is organised as a tree of settings: its root assumes nothing, and each edge adds one assumption (timing, faults, communication, symmetry breaking, knowledge, and so on), so that algorithms carry over to stronger assumptions and lower bounds to weaker ones. For every setting the survey records the proven lower bounds and what forces them, the paper that introduced the setting, the current best result, the gap between them, and the open questions, each checked against the cited papers. Every assumption comes with its origin and formal definition, every problem with a plain-language first look, and essays connect the problems across models. The survey is maintained as a website and regenerated as a book from the same data."
+}

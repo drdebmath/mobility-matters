@@ -1,0 +1,2627 @@
+{
+  "id": "black-hole-search",
+  "model": "mobile-agents-on-graphs",
+  "name": "Black hole search",
+  "origin": {
+    "ref": "Dobrev2007Ring",
+    "year": 2001,
+    "note": "Dobrev, Flocchini, Prencipe and Santoro introduced black hole search in rings (DISC 2001) and in arbitrary networks (PODC 2002) [Dobrev2006Searching]."
+  },
+  "derived_from": {
+    "problem": "collaborative-exploration",
+    "kind": "variant of",
+    "relation": "Locating the black hole means exploring every other node safely, so black hole search is exploration of a dangerous graph by a team, where agents can be lost."
+  },
+  "summary": "A black hole destroys every agent that enters it, without trace; a team must locate it, losing as few agents as possible.",
+  "statement": "A connected graph contains one **black hole**: a node that destroys any agent arriving there, leaving no trace. All other nodes are safe. Agents start at a safe node (the home base) and must determine the location of the black hole; at least one agent must survive and know it. The primary measure is the **team size** (number of agents needed); the secondary measure is the **cost** (total moves) or, for synchronous agents, the time. Some papers also start the agents **scattered**, at distinct safe nodes; those results are recorded in the notes, because every catalogued variant starts at a home base.",
+  "primer": {
+    "intro": "Imagine a computer network in which one machine has been taken over: every software robot that arrives there is deleted without a trace, and nobody outside can tell. Find that machine by sending robots, while losing as few of them as possible. In the basic version the network is a graph (dots joined by lines) with $n$ nodes; it contains exactly one **black hole**, a node that destroys every agent that enters it. A team of identical agents starts at a safe node $s$, the *home base*; they have no map, but they know $n$. At each node the lines leaving it are numbered $1, 2, \\dots$ (these numbers are called **ports**), each node has a **whiteboard** (a small memory on which agents can read and write notes), and the agents are **asynchronous**: every move takes a finite but unpredictable time, chosen by an *adversary* (an imagined opponent who picks the worst timing). The task: at least one agent must survive and know exactly which node is the black hole. We count the agents needed and the total number of moves.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Cautious walk and halving the unexplored ring",
+        "variant": "async-ring",
+        "ref": "Dobrev2007Ring",
+        "idea": "Two agents start together at $s$ on a ring of $n$ nodes; they know $n$.\n\n1. **Cautious walk** (used for every step into the unknown): an agent that crosses a line nobody has crossed before first writes *\\\"I am trying this line\\\"* on the whiteboard where it starts. If it arrives safely, it immediately goes back and changes the note to *\\\"this line is safe\\\"*, and only then continues. Nobody else ever enters a line marked *\\\"trying\\\"*.\n2. The unexplored nodes form one stretch of the ring. Cut it into two halves of almost equal length; one agent explores the left half, the other the right half, both by cautious walk.\n3. The black hole lies in at most one half, so one agent finishes its half. It walks through the explored part to the last safe line of the other agent.\n4. What is still unexplored is again one stretch, at most about half as long. The finishing agent cuts it in two again, writes the new plan on the whiteboard there for its partner (in case the partner is only slow and comes back), and takes the half on the far side, away from the line its partner is trying.\n5. When only one unexplored node remains, that node is the black hole.",
+        "analysis": "Under cautious walk an agent that does not come back has died on the very first node beyond its last safe line, so the black hole, if it has killed the partner, lies in the near half; the finishing agent always takes the far half and never enters a line marked *\\\"trying\\\"*, so exactly one agent dies and the other survives. Each round at least halves the unexplored stretch, so there are about $\\log n$ rounds, and each round costs $O(n)$ moves (walking around the explored part and exploring), giving $O(n\\log n)$ moves. [Dobrev2007Ring] show the exact cost $2n\\log n + O(n)$, and they prove that any algorithm, with any number of agents, needs at least $(n-1)\\log(n-1) + O(n)$ moves, so this simple plan is optimal up to a factor of two.",
+        "why_it_matters": "Cautious walk is the basic safety tool of almost every later black hole search algorithm, in rings and in arbitrary graphs."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Every unexplored port may lead to the black hole",
+        "variant": "async-whiteboards",
+        "ref": "Dobrev2006Searching",
+        "idea": "Without a map, the agents do not know where a port leads. The adversary may therefore decide, as the algorithm runs, that the **first** port tried out of a node is the one that leads to the black hole. Take a graph in which the black hole is a neighbour of many nodes, for example the black hole $0$ joined to every other node, with the home base at node $1$. The first agent leaving node $1$ through a new port is sent into the black hole. Some other agent must then reach node $2$; the first agent that leaves node $2$ through a new port is again sent into the black hole, and so on, node after node. Each such node costs one agent, and the search is not finished while two or more nodes are still unexplored, because a node that nobody has returned from may be the black hole or may simply be slow to reach.",
+        "analysis": "In this example the algorithm loses an agent at almost every node adjacent to the black hole, and the black hole can have up to $\\Delta$ neighbours, where $\\Delta$ is the largest number of lines at any node (the *maximum degree*). With a cleverer graph (a ring of nodes all joined to a central black hole, which the adversary later replaces by a graph of maximum degree $\\Delta$ that looks the same to the agents) [Dobrev2006Searching] prove that $\\Delta + 1$ agents are needed; the full proof is longer. The same paper gives an algorithm with exactly $\\Delta + 1$ agents and $O(n^2)$ moves, and shows that $\\Omega(n^2)$ moves are necessary for a team of this size, so both bounds are tight.",
+        "why_it_matters": "It shows that what limits a team without a map is the number of ports that can lead to the black hole, which is why a map or a sense of direction lowers the team to two agents."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Without knowing $n$, slow and dead look the same",
+        "variant": "async-whiteboards",
+        "ref": "Dobrev2006Searching",
+        "idea": "Because moves take unpredictable time, an agent that has not come back may be dead or just slow. Suppose the agents do not know $n$. Take a graph $G$ with the black hole at node $v$, and a second graph $G'$ in which $v$ is replaced by two nodes $v_1$ and $v_2$ joined to each other, sharing the lines that went to $v$. In $G'$ the adversary makes every line into $v_1$ or $v_2$ extremely slow. Up to the moment the algorithm stops, the agents see exactly the same things in $G$ and in $G'$, so they stop in $G'$ too, with both $v_1$ and $v_2$ unexplored: they cannot know which one is the black hole.",
+        "analysis": "The same reasoning shows that the agents can never stop while two nodes are unexplored, and that the problem is unsolvable when the graph has a node (other than $s$) whose removal disconnects it: if that node is the black hole, everything behind it stays unexplored [Dobrev2006Searching]. This is why the basic version assumes that $n$ is known and that the graph stays connected after removing any one node (it is *2-connected*).",
+        "why_it_matters": "The indistinguishability of slow and dead agents is the reason asynchronous black hole search needs knowledge of $n$, and it reappears in every asynchronous lower bound for the problem."
+      }
+    ]
+  },
+  "history": "From the start the objective was the **minimum number of agents** that guarantees success, since every agent that enters the black hole is lost; the number of moves came second [Dobrev2006Searching]. Later work replaced whiteboards by tokens [Dobrev2013Tokens] [Flocchini2012PingPong] [Balamohan2016Tokens], turned to synchronous agents where time can be optimised [Czyzowicz2006Complexity] [Klasing2007Hardness], to dynamic graphs [DiLuna2025DynamicBHS], and to Byzantine companions [DiLuna2025Byzantine].",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Agents",
+      "description": "number of agents needed (team size)"
+    },
+    {
+      "id": "time",
+      "name": "Cost",
+      "description": "total moves (asynchronous) or rounds (synchronous)"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "faults",
+    "timing",
+    "knowledge",
+    "marking",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the graph",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of the topology ($n$ is known)",
+          "short": "topology unknown",
+          "definition": "Agents know $n$ but not the topology of $G$."
+        },
+        {
+          "id": "sod",
+          "level": 1,
+          "label": "sense of direction",
+          "short": "sense of direction",
+          "definition": "Agents have a consistent sense of direction: a globally consistent labelling of edges from which they can tell whether two walks lead to the same node."
+        },
+        {
+          "id": "map",
+          "level": 2,
+          "label": "a map of the graph",
+          "short": "map",
+          "definition": "Agents have a map of $G$ and know their starting position on it."
+        }
+      ],
+      "origin": "Dobrev, Flocchini, Prencipe and Santoro organised black hole search in arbitrary networks around the agents' a priori knowledge: with topological ignorance, $\\Delta+1$ agents are necessary and sufficient and the cost is $\\Theta(n^2)$; with sense of direction two agents suffice, still at cost $\\Theta(n^2)$; with complete topological knowledge two agents suffice at cost $\\Theta(n\\log n)$ [Dobrev2006Searching]. Knowing $n$ is the floor of the axis, because they prove that asynchronous black hole search is unsolvable when $n$ is unknown [Dobrev2006Searching]. Sense of direction is the notion of Flocchini, Mans and Santoro: a globally consistent labelling of the ports from which one can decide, from the label sequences alone, whether two walks from a node end at the same node [Flocchini1998Direction] (as defined in [Dobrev2006Searching]); Dobrev et al. trace its effect on exploration back to Blum and Kozen's study of the power of a compass [Blum1978Compass]. The three levels thus separate team size (from $\\Delta+1$ down to $2$) and, independently, cost (from $n^2$ down to $n\\log n$)."
+    },
+    {
+      "id": "marking",
+      "name": "Marking nodes",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no marking",
+          "short": "no marking",
+          "definition": "Agents cannot leave information at nodes."
+        },
+        {
+          "id": "tokens",
+          "level": 1,
+          "label": "tokens (pebbles) that agents carry and drop",
+          "short": "tokens",
+          "definition": "Agents carry tokens (pebbles) they can place at nodes or on ports; tokens are identical and carry no other information."
+        },
+        {
+          "id": "whiteboards",
+          "level": 2,
+          "label": "whiteboards at the nodes",
+          "short": "whiteboards",
+          "definition": "Every node has a whiteboard that agents read and write under mutual exclusion."
+        }
+      ],
+      "origin": "The first black hole search papers gave the agents a whiteboard at every node [Dobrev2007Ring] [Dobrev2006Searching]. Flocchini, Ilcinkas and Santoro observe that whiteboards let a protocol assume FIFO links and break symmetry, whereas \"the theoretical quest, on the contrary, has been for the weakest interaction mechanism allowing the problem to be solved\"; that weaker mechanism is identical tokens, taken from the early work on exploring safe graphs [Flocchini2012PingPong]. Dobrev, Flocchini, Královič and Santoro showed that $\\Delta+1$ agents, each with a token that may be placed on a node or a port, locate the black hole without a map at polynomial cost [Dobrev2013Tokens] (as summarised in [Flocchini2012PingPong]); with a map, Flocchini, Ilcinkas and Santoro gave the first proof that one pebble per agent, on nodes only, matches the whiteboard bounds of two agents and $\\Theta(n\\log n)$ moves, even on non-FIFO links [Flocchini2012PingPong]. Without a map the equivalence fails for a constant number of tokens: Balamohan, Dobrev, Flocchini and Santoro show that $\\Delta+2$ agents with three tokens are necessary and sufficient, one agent more than with whiteboards [Balamohan2016Tokens]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "async-whiteboards",
+      "title": "Asynchronous agents with whiteboards",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "faults": "none"
+      },
+      "summary": "Without a map, $\\Delta+1$ asynchronous agents are necessary and sufficient, and they need $\\Theta(n^2)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Delta+1",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "generic algorithms without topological knowledge",
+            "even if $\\Delta$ and $n$ are known"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "size-optimal generic solutions"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "if $n$ is unknown, or the graph is not 2-connected"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "\\Delta+1",
+          "time": "O(n^2)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Delta+1$."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        }
+      },
+      "open": [],
+      "notes": "The anonymous ring was treated first [Dobrev2007Ring]; see the variant for rings.",
+      "status": "verified"
+    },
+    {
+      "id": "async-ring",
+      "title": "Asynchronous agents with whiteboards in a ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "faults": "none",
+        "topology": "ring"
+      },
+      "summary": "In an anonymous ring of known size, two co-located asynchronous agents are necessary and sufficient, at optimal cost $\\Theta(n\\log n)$.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "at least one agent enters the black hole"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n\\log n)",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "Theorem 1: $(n-1)\\log(n-1)+O(n)$ moves, whatever the number of agents",
+            "an adversarial scheduler delays links",
+            "holds also for dispersed agents in oriented rings (Theorem 8)"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "if $n$ is unknown: no deterministic protocol always terminates correctly"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2007Ring",
+          "role": "best",
+          "agents": "2",
+          "time": "2n\\log n+O(n)",
+          "assumes": [
+            "co-located agents",
+            "$n$ known",
+            "$O(\\log n)$-bit whiteboards"
+          ],
+          "note": "Introductory and current best (Algorithm DIVIDE, Theorems 2 and 3), size-optimal and cost-optimal within a factor of two; works in unoriented rings, since co-located agents agree on a direction through the whiteboard."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n\\log n)$ moves; the constants differ by a factor of two."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dobrev2007Ring]. Agents are anonymous and asynchronous, and the problem is solved when at least one agent survives and all survivors know the location of the black hole. In ideal time (every move one time unit) $2n-4$ units are necessary whatever the number of agents (Theorem 4) and $n-1$ co-located agents achieve it (Theorems 5 and 6); $n^{1/q}+1$ agents need $2(q+1)n-q-o(n)$ time for $1\\le q\\le\\log n$ (Theorem 7). With **dispersed** agents the cost is $\\Omega(n\\log n)$, or $\\Omega(n\\log(n-k))$ when the number $k$ of agents is known (Theorems 8 and 9); in an oriented ring two dispersed agents are necessary and sufficient at cost $O(n\\log n)$ (Theorem 10), and in an unoriented ring three are necessary and sufficient at the same cost (Theorem 13).",
+      "status": "verified"
+    },
+    {
+      "id": "async-sod",
+      "title": "Whiteboards and sense of direction",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "knowledge": "sod",
+        "faults": "none"
+      },
+      "summary": "With sense of direction two agents suffice, still with $\\Theta(n^2)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "2",
+          "time": "O(n^2)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "async-map",
+      "title": "Whiteboards and a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "knowledge": "map",
+        "faults": "none"
+      },
+      "summary": "With a map, two agents locate the black hole in $\\Theta(n\\log n)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "2",
+          "time": "\\Theta(n\\log n)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n\\log n)$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tokens-map",
+      "title": "Tokens and a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "tokens",
+        "knowledge": "map",
+        "faults": "none"
+      },
+      "summary": "Whiteboards can be replaced by one pebble per agent: two agents, $\\Theta(n\\log n)$ moves, even on non-FIFO links.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2012PingPong",
+          "role": "best",
+          "agents": "2",
+          "time": "\\Theta(n\\log n)",
+          "assumes": [
+            "one identical pebble per agent"
+          ],
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "Same as with whiteboards."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tokens",
+      "title": "Tokens, no map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "tokens",
+        "faults": "none"
+      },
+      "summary": "With a constant number of tokens and no map, $\\Delta+2$ agents and 3 tokens are necessary and sufficient.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Delta+2",
+          "ref": "Balamohan2016Tokens",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "$O(1)$ tokens",
+            "$\\Delta+1$ agents are not enough; 2 tokens never suffice"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2/\\Delta)",
+          "ref": "Balamohan2016Tokens",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "teams of $(2-\\varepsilon)\\Delta$ agents"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2013Tokens",
+          "role": "introductory",
+          "agents": "\\Delta+1",
+          "assumes": [
+            "enhanced tokens"
+          ],
+          "note": "First token-based exploration of an unknown dangerous graph; polynomial cost."
+        },
+        {
+          "ref": "Balamohan2016Tokens",
+          "role": "best",
+          "agents": "\\Delta+2",
+          "time": "O(mn)",
+          "assumes": [
+            "3 tokens; the number of agents is known (5 tokens otherwise)"
+          ]
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Delta+2$ with $O(1)$ tokens."
+        },
+        "time": {
+          "status": "gap",
+          "note": "$O(mn)$ versus $\\Omega(n^2/\\Delta)$; move-optimal in sparse graphs."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "sync-map",
+      "title": "Synchronous agents with a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "knowledge": "map",
+        "faults": "none"
+      },
+      "summary": "With synchrony, two agents and a map, the question becomes the fastest exploration schedule, which is NP-hard to find.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{NP-hard}",
+          "ref": "Klasing2007Hardness",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "computing an optimal schedule for two agents",
+            "no $389/388$-approximation unless P = NP (APX-hard)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2006Complexity",
+          "role": "introductory",
+          "agents": "2",
+          "time": "9.3\\text{-approx.}"
+        },
+        {
+          "ref": "Klasing2007Hardness",
+          "role": "best",
+          "agents": "2",
+          "time": "3\\tfrac{3}{8}\\text{-approx.}"
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "gap",
+          "note": "Approximation ratio $3\\frac38$ versus inapproximability $389/388$."
+        }
+      },
+      "open": [],
+      "notes": "On trees the problem has a $5/3$-approximation (CPC 2007, not yet in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-ring",
+      "title": "Dynamic rings",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "faults": "none",
+        "timing": "sync",
+        "marking": "tokens",
+        "topology": "ring"
+      },
+      "summary": "In a 1-interval-connected ring three agents are necessary and sufficient; with pebbles they need $\\Theta(n^{1.5})$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "DiLuna2025DynamicBHS",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "fewer agents fail even when co-located with whiteboards and identifiers",
+            "$n$ must be known"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^{1.5})",
+          "ref": "DiLuna2025DynamicBHS",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "co-located agents, whiteboards"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2025DynamicBHS",
+          "role": "best",
+          "agents": "3",
+          "time": "O(n^{1.5})",
+          "assumes": [
+            "co-located start, pebbles"
+          ],
+          "note": "Introductory and current best; with face-to-face communication or vision $\\Theta(n^2)$."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Three."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^{1.5})$."
+        }
+      },
+      "open": [],
+      "notes": "The ring is oriented and each agent carries one pebble; $n$ must be known [DiLuna2025DynamicBHS]. With **scattered** agents (distinct arbitrary starting nodes) the cost rises to $\\Theta(n^2)$ with pebbles, and with only face-to-face communication or vision scattered agents cannot solve the problem [DiLuna2025DynamicBHS]. For arbitrary dynamic graphs in which at most one edge is missing per round, six co-located agents with $O(\\log n)$-bit whiteboards suffice in $O(m^2)$ rounds, while $2\\deg(v_{BH})$ agents from an arbitrary configuration cannot [Kaur2026Dynamic]; $\\deg(v_{BH})$ is the degree of the black hole.",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine",
+      "title": "Byzantine companions, with a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "knowledge": "map",
+        "faults": "weak-byzantine"
+      },
+      "summary": "If up to $f$ agents are Byzantine (they collude with the black hole and survive it), $2f+2$ agents suffice with a map.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DiLuna2025Byzantine",
+          "role": "best",
+          "agents": "2f+2",
+          "time": "O(n+f)",
+          "note": "Introductory and current best; also with face-to-face communication. The agent counts are asymptotically optimal."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "near",
+          "note": "Asymptotically optimal."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound recorded."
+        }
+      },
+      "open": [],
+      "notes": "The Byzantine agents are weakly Byzantine: they cannot forge identities (confirmed by the catalogue owner, a co-author).",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-whiteboards",
+      "title": "Byzantine companions, whiteboards, no map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "marking": "whiteboards",
+        "faults": "weak-byzantine"
+      },
+      "summary": "Without a map but with whiteboards, $(f+1)(\\Delta+1)$ agents locate the black hole in $O(m+f)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DiLuna2025Byzantine",
+          "role": "best",
+          "agents": "(f+1)(\\Delta+1)",
+          "time": "O(m+f)",
+          "note": "With face-to-face communication instead: $(f+1)(\\Delta+1)+3f+1$ agents, $O(mn+f)$ rounds."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "near",
+          "note": "Asymptotically optimal."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound recorded."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Black hole search on a ring by two agents with cautious walk [Dobrev2007Ring] (the problem: [Dobrev2006Searching]). Agents A and B start at the safe home base $s$ of a ring of six nodes; one node (black) destroys every agent that enters it. Each explores half of the unexplored nodes: before crossing a new edge it marks it *trying* on the whiteboard (dashed), and after arriving it returns to mark it *safe* (green) before going on. A dies on its second new edge; B finishes its half, walks back through the explored part and finds the edge still marked *trying*: the one unexplored node beyond it is the black hole. One agent survives and knows it.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "v0": [
+          31.0,
+          26.0
+        ],
+        "v1": [
+          40.5,
+          42.45
+        ],
+        "v2": [
+          59.5,
+          42.45
+        ],
+        "v3": [
+          69.0,
+          26.0
+        ],
+        "v4": [
+          59.5,
+          9.55
+        ],
+        "v5": [
+          40.5,
+          9.55
+        ]
+      },
+      "edges": [
+        [
+          "v0",
+          "v1"
+        ],
+        [
+          "v1",
+          "v2"
+        ],
+        [
+          "v2",
+          "v3"
+        ],
+        [
+          "v3",
+          "v4"
+        ],
+        [
+          "v4",
+          "v5"
+        ],
+        [
+          "v5",
+          "v0"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Start: agents A, B at s; ring of 6"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "Cautious walk: mark the edge trying, cross, return, mark it safe"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "A enters the black hole and is destroyed; B goes on"
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "B has explored its half; it walks to A's last safe edge"
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              42.45
+            ],
+            "r": 3.6,
+            "c": "gap",
+            "w": 0.8
+          }
+        ],
+        "label": "B reads 'trying' on edge v1-v2: the black hole is v2"
+      }
+    ]
+  }
+}

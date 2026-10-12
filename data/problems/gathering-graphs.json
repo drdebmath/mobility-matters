@@ -1,0 +1,2003 @@
+{
+  "id": "gathering-graphs",
+  "model": "mobile-agents-on-graphs",
+  "name": "Gathering in graphs",
+  "origin": {
+    "ref": "Dieudonne2014Mischief",
+    "year": 2012,
+    "note": "Gathering many agents in arbitrary graphs grew out of two-agent rendezvous; the Byzantine version was posed at SODA 2012."
+  },
+  "derived_from": {
+    "problem": "rendezvous",
+    "kind": "generalisation of",
+    "relation": "Rendezvous is gathering of two agents; with more agents the questions become which teams can gather, and how many faulty agents a team tolerates."
+  },
+  "summary": "Several agents must all meet at one node of an unknown graph, possibly despite faulty agents.",
+  "statement": "$k \\ge 2$ agents start at different nodes of an unknown connected graph and must all be at the same node at the same time, and (with detection) know it. **Time** is in rounds; **team** is the number of good agents needed when some agents are Byzantine.",
+  "primer": {
+    "intro": "A group of hikers scattered over a trail network wants to get together at one spot, with no phones and no map. We have $k \\ge 2$ agents at different nodes of an unknown connected graph (dots joined by lines, with port numbers on the edges); time passes in synchronous **rounds**, and in each round an agent stays or walks along one edge. All agents must be at the same node at the same time and, in the version **with detection**, know that everyone has arrived. In the basic version the agents are **anonymous** (identical: same algorithm, no labels), there are no faults, and $n$ denotes the number of nodes; the question is which starting configurations can be gathered, and how fast.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Meet in pairs, then follow the largest label",
+        "variant": "labelled",
+        "idea": "A standard approach for agents with distinct labels that can read each other's label when they are at the same node. It uses any rendezvous algorithm for two labelled agents that works whatever the delay between their starts, such as the one of [Dessmark2006Deterministic].\n1. Every agent starts as the **leader** of a group containing only itself, and runs the rendezvous algorithm with its own label.\n2. When groups meet at a node, everyone there adopts the largest label present; the agent with that label remains a leader and continues its own rendezvous algorithm as if nothing had happened.\n3. Every other agent stops being a leader and from now on simply follows its leader's moves.",
+        "analysis": "A leader's walk is exactly what it would do alone, so any two leaders are guaranteed to meet by the rendezvous algorithm, and at each such meeting one of them stops being a leader. The agent with the largest label is never absorbed, and every other leader meets its group at the latest when it meets that agent, so eventually all $k$ agents move as one group. The time is at most $k-1$ rendezvous times. This gives gathering but not detection: knowing that nobody is missing needs extra knowledge, for example of $n$; with more than $n/2$ agents and $n$ known, [Molla2023Fast] gather with detection in $O(n^3)$ rounds.",
+        "why_it_matters": "Reducing gathering to repeated rendezvous with merging is the simplest way to see why distinct labels make gathering solvable."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Symmetric configurations of identical agents",
+        "variant": "anonymous",
+        "ref": "Dieudonne2016Anonymous",
+        "idea": "Take a ring of 6 nodes, with port 0 leading clockwise and port 1 counterclockwise at every node, and put three identical agents on every second node. Starting together, each agent sees exactly what the others see, so in every round all three make the same choice. Turning the ring by two nodes maps the configuration to itself before the round and after it.",
+        "analysis": "So the agents always stay on three different nodes, two edges apart, and never gather, whatever the algorithm. For identical agents the question is therefore which configurations can be gathered at all; [Dieudonne2016Anonymous] characterise them and gather every such configuration in time polynomial in $n$, but detecting that gathering is complete needs an upper bound on $n$.",
+        "why_it_matters": "It shows that for identical agents the right question is which starting configurations are solvable, not only how fast."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Byzantine agents can impersonate the whole team",
+        "variant": "byzantine",
+        "ref": "Dieudonne2014Mischief",
+        "idea": "Some agents may be **Byzantine**: faulty agents that move arbitrarily and, in the strong version, may lie about their labels. Take $f = 2$ good agents, labelled 0 and 1, and 2 Byzantine ones, on a ring of 4 nodes $v_0, v_1, v_2, v_3$ with port 0 leading clockwise everywhere. **Run 1:** good agents 0 and 1 on $v_0, v_1$; the two Byzantine agents on $v_2, v_3$ claim labels 0 and 1 and follow the algorithm honestly. The picture is symmetric, so when the good agents gather at some node $v_i$ and stop, the fakes stop at the opposite node $v_{i+2}$. **Run 2:** the same, except good agent 0 and its fake swap starting places.",
+        "analysis": "Every agent sees in run 2 exactly what it saw in run 1, so everyone does the same thing; at the end good agent 1 stands with fake 0 on one node and good agent 0 stands with fake 1 on the opposite node, and both groups stop. The good agents are not gathered, so with $f$ strongly Byzantine agents, $f$ good agents cannot gather, even if $n$ is known [Dieudonne2014Mischief] (their Theorem 4.7, for every $f$, on a ring of $2f$ nodes). With $f+1$ good agents ($n$ known) or $f+2$ ($n$ unknown) gathering becomes possible [Bouchard2016Byzantine].",
+        "why_it_matters": "This \"two indistinguishable runs\" argument is the standard way to prove that faulty agents make a task impossible, and it shows how many good agents a fault-tolerant algorithm must assume."
+      }
+    ]
+  },
+  "history": "Gathering of many agents in graphs was studied as the natural extension of rendezvous [Pelc2019Survey]: first **which configurations can gather** at all [Dieudonne2016Anonymous], then **how many faulty agents** a team can tolerate [Dieudonne2014Mischief] [Bouchard2016Byzantine], and only then time [Bouchard2022Polynomial] [Molla2023Fast].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds until all agents meet"
+    },
+    {
+      "id": "team",
+      "name": "Team",
+      "description": "good agents needed when $f$ agents are Byzantine"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "faults",
+    "ids",
+    "timing",
+    "topology"
+  ],
+  "variants": [
+    {
+      "id": "anonymous",
+      "title": "Anonymous agents",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "faults": "none"
+      },
+      "summary": "Which configurations of identical agents can gather is characterised; detecting that gathering is complete needs a bound on $n$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Dieudonne2016Anonymous",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "gathering with detection by a universal algorithm when no bound on $n$ is known"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dieudonne2016Anonymous",
+          "role": "best",
+          "time": "\\text{poly}(n)",
+          "assumes": [
+            "an upper bound on $n$ (for detection)"
+          ],
+          "note": "Introductory and current best; without a bound, gathering without detection in time polynomial in the actual size."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial; exponent not tracked."
+        },
+        "team": {
+          "status": "unknown",
+          "note": "Not a team-size question here."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "labelled",
+      "title": "Labelled agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "ids": "unique",
+        "faults": "none"
+      },
+      "summary": "Labelled agents gather even without talking; with many agents gathering with detection takes $O(n^3)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bouchard2023Chatter",
+          "role": "other",
+          "time": "\\text{finite}",
+          "note": "Gathering with no communication at all."
+        },
+        {
+          "ref": "Molla2023Fast",
+          "role": "best",
+          "time": "O(n^3)",
+          "assumes": [
+            "more than $n/2$ agents",
+            "$n$ known"
+          ],
+          "note": "Gathering with detection."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        },
+        "team": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [
+        "Gathering without communication when no bound on $n$ is known."
+      ],
+      "notes": "Two-agent gathering is rendezvous. For Look–Compute–Move robots on rings see [Klasing2008Ring].",
+      "status": "verified"
+    },
+    {
+      "id": "homonymous",
+      "title": "Homonymous agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "ids": "homonymous",
+        "faults": "none"
+      },
+      "summary": "When agents may share labels, the teams that can always gather are fully characterised, and gather in time polynomial in $n$ and $\\log\\lambda$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Devismes2026Homonymous",
+          "role": "best",
+          "time": "\\text{poly}(n,\\log\\lambda)",
+          "assumes": [
+            "$O(\\log\\log\\log L)$ bits of common knowledge"
+          ],
+          "note": "Introductory and current best; $\\lambda$ is the smallest label, $L$ the largest."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "team": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "weak-byzantine",
+      "title": "Weakly Byzantine agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "ids": "unique",
+        "faults": "weak-byzantine"
+      },
+      "summary": "With $f$ weakly Byzantine agents, one good agent suffices when $n$ is known and $f+2$ are necessary and sufficient when it is not.",
+      "lower_bounds": [
+        {
+          "measure": "team",
+          "bound": "f+2",
+          "ref": "Dieudonne2014Mischief",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$n$ unknown",
+            "Theorem 3.11: $f+1$ good agents cannot gather deterministically with termination in some networks"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dieudonne2014Mischief",
+          "role": "best",
+          "team": "f+2",
+          "time": "\\text{poly}(n,\\log L)",
+          "assumes": [
+            "$f$ known to all agents"
+          ],
+          "note": "Introductory and current best (Theorem 3.10, unknown $n$); time polynomial in $n$ and in the length of the largest label of a good agent. With known $n$, any number of good agents gather within $4n^4\\cdot P(n,\\log L)$ rounds (Theorem 3.6; $P$ is the polynomial time bound of the rendezvous algorithm of Ta-Shma and Zwick [TaShma2014Deterministic])."
+        }
+      ],
+      "optimality": {
+        "team": {
+          "status": "tight",
+          "note": "$f+2$ for unknown $n$; $1$ for known $n$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound on time beyond fault-free gathering is recorded."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dieudonne2014Mischief]. Dieudonné, Pelc and Peleg note that $f+2$ is a new threshold for tolerating $f$ Byzantine entities, next to $f+1$ for communication through a cut and $2f+1$ processors for consensus in a complete network.",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine",
+      "title": "Byzantine agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "ids": "unique",
+        "faults": "strong-byzantine"
+      },
+      "summary": "With $f$ strongly Byzantine agents, $f+1$ good agents (known $n$) or $f+2$ (unknown $n$) are necessary and sufficient.",
+      "lower_bounds": [
+        {
+          "measure": "team",
+          "bound": "f+1",
+          "ref": "Dieudonne2014Mischief",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "Theorem 4.7: $f$ good agents cannot gather deterministically against $f$ strongly Byzantine agents",
+            "holds even in a ring of known size"
+          ]
+        },
+        {
+          "measure": "team",
+          "bound": "f+2",
+          "ref": "Dieudonne2014Mischief",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$n$ unknown",
+            "inherited from weakly Byzantine agents (Theorem 3.11)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dieudonne2014Mischief",
+          "role": "introductory",
+          "team": "2f+1",
+          "note": "Introductory (Theorems 4.5 and 4.6): $2f+1$ good agents with known $n$, $4f+2$ with unknown $n$; deterministic but exponential time. For known $n$ and constant $f$ a randomized algorithm gathers $2f+1$ good agents in polynomial time with probability at least $1-1/n$ (Theorem 4.4).",
+          "assumes": [
+            "$f$ known to all agents"
+          ]
+        },
+        {
+          "ref": "Bouchard2016Byzantine",
+          "role": "best",
+          "team": "f+1",
+          "note": "$f+2$ when $n$ is unknown; time exponential."
+        },
+        {
+          "ref": "Bouchard2022Polynomial",
+          "role": "other",
+          "time": "\\text{poly}(n,\\log\\lambda)",
+          "assumes": [
+            "good agents at least quadratic in $f$",
+            "$O(\\log\\log\\log n)$ bits of global knowledge"
+          ],
+          "note": "First polynomial-time Byzantine gathering. $\\lambda$ is the smallest label of a good agent (the paper's $|l_{min}|$ is $\\log\\lambda$ here)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial only for large teams."
+        },
+        "team": {
+          "status": "tight",
+          "note": "$f+1$ / $f+2$."
+        }
+      },
+      "open": [
+        "Polynomial-time Byzantine gathering with teams of size close to $f+1$."
+      ],
+      "notes": "Checked against the full text of [Dieudonne2014Mischief] for its bounds; the agents cannot mark nodes, agents at the same node exchange all information, the adversary may wake agents at different times, and good agents must gather and terminate simultaneously. The paper's results for known $n$ also hold with a known polynomial upper bound on $n$.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Gathering of labelled agents by merging rendezvous [Dessmark2006Deterministic]: each leader runs the explore-or-wait rendezvous of a tree with its own label (after one tour to learn $n$, one block of $2(n-1)$ rounds per bit of its doubled label followed by $01$: explore on 1, wait at home on 0); when groups meet, the largest label stays leader and the others follow it. Colours show the leader each agent follows; one frame per round. Gathering is reached, but without detection.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "c": [
+          44,
+          26
+        ],
+        "u": [
+          30,
+          6
+        ],
+        "w": [
+          16,
+          36
+        ],
+        "x": [
+          68,
+          34
+        ],
+        "y": [
+          90,
+          46
+        ]
+      },
+      "edges": [
+        [
+          "c",
+          "u"
+        ],
+        [
+          "c",
+          "w"
+        ],
+        [
+          "c",
+          "x"
+        ],
+        [
+          "x",
+          "y"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          37.8,
+          26.6
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          41.8,
+          20.2
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          49.2,
+          29.3
+        ],
+        "s": "3",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          32.2,
+          11.8
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          72.5,
+          38.2
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          62.8,
+          30.7
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          85.5,
+          41.8
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          22.2,
+          35.4
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          82,
+          18
+        ],
+        "s": "4: 11 00 00 01",
+        "size": 2.8,
+        "c": "accent"
+      },
+      {
+        "t": "text",
+        "p": [
+          82,
+          13
+        ],
+        "s": "3: 11 11 01",
+        "size": 2.8,
+        "c": "disputed"
+      },
+      {
+        "t": "text",
+        "p": [
+          82,
+          8
+        ],
+        "s": "2: 11 00 01",
+        "size": 2.8,
+        "c": "near"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "w",
+            "k": "agent",
+            "l": "2",
+            "c": "near"
+          },
+          {
+            "id": "3",
+            "at": "y",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [],
+        "label": "Start: agents 2, 3, 4 at distinct nodes of a tree"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "near"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "y",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "near",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 0: every leader explores (learns n; block = 8 rounds)"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "u",
+            "k": "agent",
+            "l": "2",
+            "c": "near"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "near",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "w",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Leaders 2 and 4 meet: 2 now follows 4"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "w",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "w",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "u",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "u",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "u",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "y",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "y",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "y",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 1: leader 3 explores, leader 4 explores"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "w",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "w",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "w",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "u",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "u",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "u",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "y",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "y",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "y",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 2: leader 3 explores, leader 4 explores"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.8,
+                44.3
+              ],
+              [
+                71.2,
+                35.7
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "w",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64.6,
+                32.9
+              ],
+              [
+                47.4,
+                27.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "w",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "w",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                40.6,
+                27.2
+              ],
+              [
+                19.4,
+                34.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "u",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                19.4,
+                34.8
+              ],
+              [
+                40.6,
+                27.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "u",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "u",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.9,
+                23.1
+              ],
+              [
+                32.1,
+                8.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32.1,
+                8.9
+              ],
+              [
+                41.9,
+                23.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "y",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                71.2,
+                35.7
+              ],
+              [
+                86.8,
+                44.3
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                47.4,
+                27.1
+              ],
+              [
+                64.6,
+                32.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "at": "x",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "x",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "x",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          }
+        ],
+        "marks": [],
+        "label": "Final: leader 3 walks onto the waiting group of 4 (round 25)"
+      }
+    ]
+  }
+}

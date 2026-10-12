@@ -1,0 +1,7252 @@
+{
+  "id": "evacuation",
+  "model": "search-in-geometric-domains",
+  "name": "Evacuation",
+  "origin": {
+    "ref": "Czyzowicz2014Evacuating",
+    "year": 2014,
+    "note": "Czyzowicz et al. posed evacuation of $k$ robots from a disk through an unknown exit on its boundary at DISC 2014."
+  },
+  "derived_from": {
+    "problem": "linear-search",
+    "kind": "generalisation of",
+    "relation": "Evacuation is a form of search with an extra requirement: \"optimality in evacuation is measured by the time it takes for the last robot to reach the exit, whereas in traditional search, optimality is measured by the time it takes the first robot to reach the exit\" [Czyzowicz2017Faulty]. The introductory paper notes its similarity with the cow-path problem, and that evacuating uniform agents on a line \"is as hard as the cow-path problem\" [Czyzowicz2014Evacuating]."
+  },
+  "summary": "Robots start at the centre of a disk (or a polygon) and must all leave through an exit at an unknown point of the boundary, as fast as possible.",
+  "statement": "$k$ unit-speed robots start together at the centre of a unit disk (or the centroid of a unit equilateral triangle or square). An exit lies at an unknown point of the boundary; a robot recognises it only on reaching it. **Time** is the worst case, over exit positions, of the time until the last robot reaches the exit (in priority evacuation: until the queen does).",
+  "primer": {
+    "intro": "Two people are in a dark round room of radius 1 and know there is one door somewhere on the wall, but not where; they can talk by walkie-talkie. In evacuation, $k$ robots of speed 1 start at the centre of a unit disk, one exit lies at an unknown point of the boundary circle, and a robot recognises the exit only when it stands on it. The goal is to minimise, in the worst case over exit positions, the time until the **last** robot reaches the exit. In the basic version there are two robots with *wireless* communication: a robot that finds the exit tells the other instantly, wherever it is.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Go to the wall together, then split",
+        "variant": "disk-two-wireless",
+        "ref": "Czyzowicz2014Evacuating",
+        "idea": "1. Both robots walk together from the centre to the same point $A$ of the wall (time 1).\n2. One walks clockwise along the wall, the other counter-clockwise, at full speed.\n3. The robot that finds the exit radios the other.\n4. The other walks straight across the disk (along a chord) to the exit.",
+        "analysis": "If the exit is found after each robot has walked an arc of length $x$ (so $x \\le \\pi$), the robots are $2x$ apart along the circle, and the chord between them has length $2\\sin x$. The total time is $1 + x + 2\\sin x$. Its derivative $1 + 2\\cos x$ is zero at $x = 2\\pi/3$, so the worst case is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.826$ [Czyzowicz2014Evacuating]. This is exactly optimal (next idea).",
+        "why_it_matters": "Searching the boundary in opposite directions and cutting across on a chord is the template for almost every later disk evacuation algorithm."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Two unexplored points far apart",
+        "variant": "disk-two-wireless",
+        "ref": "Czyzowicz2014Evacuating",
+        "idea": "Look at time $1 + 2\\pi/3$. Each robot needed time 1 just to reach the wall, so together they have walked at most $4\\pi/3$ of the boundary, and at least $2\\pi/3$ of the circle (minus a tiny $\\varepsilon$) is unexplored. [Czyzowicz2014Evacuating] show that then there are two unexplored points at arc distance about $2\\pi/3$, so the chord between them has length $\\sqrt3$. The adversary waits until some robot first reaches one of these two points and places the exit at the other one.",
+        "analysis": "That robot is then at least $\\sqrt3$ away from the exit and must still get there, and this happens no earlier than time $1 + 2\\pi/3$. So every algorithm needs at least $1 + 2\\pi/3 + \\sqrt3$ in the worst case, which matches the algorithm above [Czyzowicz2014Evacuating].",
+        "why_it_matters": "Counting how much of the boundary can be explored by a given time, then hiding the exit at the far end of an unexplored chord, is the basic lower-bound tool for evacuation."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Without radios: chase your partner",
+        "variant": "disk-two-f2f",
+        "ref": "Czyzowicz2014Evacuating",
+        "idea": "If robots exchange information only when they meet (*face-to-face*):\n1. Go to the wall together and split in opposite directions, as before.\n2. The robot that finds the exit cannot call; it walks along a chord to the point where its partner will be, meets it,\n3. and both walk back along a chord to the exit.",
+        "analysis": "The finder must cover the distance to the partner and back, so the cost is larger: about $5.74$ for this simple version [Czyzowicz2014Evacuating]. Cleverer paths that leave the wall and come back improved it to about $5.6234$ [Disser2019Second], while the best lower bound is $3 + \\pi/6 + \\sqrt3 \\approx 5.255$ [Czyzowicz2020FaceToFace]. This gap has been open since 2019.",
+        "why_it_matters": "It shows how much communication is worth, and it is one of the simplest-to-state geometric questions still open in the area."
+      }
+    ]
+  },
+  "history": "Evacuation was introduced to capture the tension between **spreading the robots** to find the exit fast and **keeping them close** so that the others can reach it quickly [Czyzowicz2014Evacuating]. The first results already separated wireless from face-to-face communication. The community then tightened the two-robot face-to-face constants [Czyzowicz2020FaceToFace] [Brandt2017Collaboration] [Disser2019Second] and added faults [Czyzowicz2017Faulty], priority (one robot must leave) [Czyzowicz2018Priority], asymmetric communication [Georgiou2022Asymmetric], other domains [Chuangpishit2020Triangles] and several exits [Pattanayak2018TwoExits]. Beyond disks, triangles and squares, the question was asked on the line and on rays [Chrobak2015GroupSearch] [Brandt2020Rays], in regular polygons with priority [Georgiou2025Polygons], on known trees as a planning problem that is NP-hard to solve exactly [Devillez2021Tree], and in the plane for an unknown shoreline [Acharjee2019Shoreline] or an unknown convex region to escape [Wei2016Competitive].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Evacuation time",
+      "description": "worst-case time until the last robot (or the queen) reaches the exit; unit disk, unit speed"
+    }
+  ],
+  "axes": [
+    {
+      "id": "domain",
+      "name": "Domain",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "unspecified bounded domain",
+          "short": "any domain",
+          "definition": "A bounded convex domain, robots start at an interior point."
+        },
+        {
+          "id": "disk",
+          "level": 1,
+          "label": "unit disk, start at the centre",
+          "short": "disk",
+          "definition": "The unit disk; robots start at its centre; the exit is a point of the boundary circle."
+        },
+        {
+          "id": "triangle",
+          "level": 1,
+          "label": "unit equilateral triangle, start at the centroid",
+          "short": "triangle",
+          "definition": "The equilateral triangle of unit side; robots start at its centroid; the exit is a point of the boundary."
+        },
+        {
+          "id": "square",
+          "level": 1,
+          "label": "unit square, start at the centroid",
+          "short": "square",
+          "definition": "The unit square; robots start at its centroid; the exit is a point of the boundary."
+        },
+        {
+          "id": "line",
+          "level": 1,
+          "label": "the infinite line",
+          "short": "line",
+          "definition": "The robots start at the origin of the real line; the exit is at an unknown point at distance at least $1$; the measure is the competitive ratio, the evacuation time divided by that distance."
+        },
+        {
+          "id": "rays",
+          "level": 1,
+          "label": "$m$ rays from a junction (a star)",
+          "short": "rays",
+          "definition": "$m \\ge 2$ half-lines share an endpoint, the junction; the exit lies on one ray at distance at least $1$ from the start; the measure is the competitive ratio."
+        }
+      ],
+      "origin": "Czyzowicz et al. posed evacuation in the unit disk with the exit on its boundary [Czyzowicz2014Evacuating], which remains the standard domain. Evacuation on the line had been raised just before by Chrobak et al., who showed that evacuating several uniform agents is as hard as the cow-path problem (as reported by [Czyzowicz2014Evacuating]) [Chrobak2015GroupSearch]. Polygons followed: equilateral triangles and squares, first with wireless robots [Czyzowicz2015Wireless] and then face-to-face [Chuangpishit2020Triangles]. Brandt et al. studied $m$ concurrent rays, citing Hammar et al. that \"a problem with paradigmatic status in this framework is searching on m concurrent rays\" [Brandt2020Rays]. Evacuation from a general convex region appears in a separate line of online-strategy papers [Xu2013Groups] [Wei2014Convex]."
+    },
+    {
+      "id": "robots",
+      "name": "Number of robots",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number $k$ of robots",
+          "short": "any $k$",
+          "definition": "$k\\ge1$ robots."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two robots",
+          "short": "two robots",
+          "definition": "Two robots."
+        },
+        {
+          "id": "three",
+          "level": 1,
+          "label": "three robots",
+          "short": "three robots",
+          "definition": "Three robots."
+        }
+      ],
+      "origin": "Czyzowicz et al. studied the exact optimal evacuation time for $k = 2$ and $k = 3$ robots in the disk, and the asymptotic behaviour as $k$ grows: $3 + 2\\pi/k$ face-to-face and $3 + \\pi/k$ wireless, up to lower-order terms [Czyzowicz2014Evacuating]. Most later disk papers fix $k = 2$, and even there the face-to-face case is not closed after several improvements [Czyzowicz2020FaceToFace] [Brandt2017Collaboration] [Disser2019Second]. Specific small team sizes also appear in priority evacuation with one or two servants [Czyzowicz2018GodSaveQueen] and with polygons, where triangles and squares were solved for $k = 2, 3, 4$ [Chuangpishit2020Triangles]."
+    },
+    {
+      "id": "goal",
+      "name": "Goal",
+      "values": [
+        {
+          "id": "all",
+          "level": 0,
+          "label": "every robot must reach the exit",
+          "short": "all robots",
+          "definition": "The task ends when the last robot reaches the exit."
+        },
+        {
+          "id": "queen",
+          "level": 1,
+          "label": "priority: only the queen must reach the exit",
+          "short": "priority (queen)",
+          "definition": "One designated robot (the queen) must reach the exit; the others (servants) only help; the task ends when the queen exits."
+        },
+        {
+          "id": "fetch",
+          "level": 1,
+          "label": "search-and-fetch: a treasure must be brought to the exit",
+          "short": "search-and-fetch",
+          "definition": "A treasure lies at an unknown point of the boundary, and the exit at a known arc distance $\\alpha$ from it; the task ends when some robot has carried the treasure to the exit."
+        }
+      ],
+      "origin": "Search ends at the first arrival and evacuation at the last [Czyzowicz2014Evacuating]. Czyzowicz et al. introduced *priority evacuation*, in which only a distinguished robot, the queen, must reach the exit while servants help. They motivate it by a robot that alone \"has the capability to address an urgent need at the target, for example, performing an emergency procedure, or closing a breach in the perimeter\" [Czyzowicz2018Priority]. Georgiou, Karakostas and Kranakis introduced *search-and-fetch* (treasure evacuation), where a robot must carry a treasure to the exit. It is motivated by search-and-rescue, where drones must \"locate a victim (the treasure) and bring her to safety (the exit)\" [Georgiou2019SearchFetch]. They note that \"this is the first time an explicit ordering on the tasks to be performed is imposed on two moving robots\" [Georgiou2019SearchFetch]."
+    },
+    {
+      "id": "exits",
+      "name": "Exits",
+      "values": [
+        {
+          "id": "one",
+          "level": 0,
+          "label": "one exit",
+          "short": "one exit",
+          "definition": "One exit, at an unknown point of the boundary."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two exits at unknown positions",
+          "short": "two exits",
+          "definition": "Two exits at unknown points of the boundary; the task ends when every robot has reached one of them."
+        }
+      ],
+      "origin": "Evacuation was posed with a single unknown exit [Czyzowicz2014Evacuating]. Czyzowicz et al. considered two robots on a circle with $k$ exits whose distribution is known, where the robots do not know their own position [Czyzowicz2016MultipleExits]. Pattanayak, Ramesh, Mandal and Schmid studied two robots starting at the centre of the disk with two exits at unknown points whose arc distance $\\alpha$ is known. They worked in both communication models and introduced labelled exits [Pattanayak2018TwoExits]. More exits help the robots, but only if the algorithm can use what it knows about the exits' relative position."
+    }
+  ],
+  "axis_order": [
+    "domain",
+    "robots",
+    "goal",
+    "exits",
+    "communication",
+    "faults",
+    "speeds",
+    "algorithm"
+  ],
+  "variants": [
+    {
+      "id": "disk-two-wireless",
+      "title": "Two wireless robots, disk",
+      "standard": true,
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "two",
+        "communication": "wireless"
+      },
+      "summary": "Two wireless robots evacuate the unit disk in exactly $1+2\\pi/3+\\sqrt3 \\approx 4.826$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2\\pi/3+\\sqrt{3}",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "deterministic",
+            "start at the centre"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "best",
+          "time": "1+2\\pi/3+\\sqrt{3}",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\approx 4.826$, exact."
+        }
+      },
+      "open": [],
+      "notes": "With one robot that has crashed and must be carried out, see Chauffeuring. In the unit disk of an $\\ell_p$ norm, two wireless robots evacuate optimally for every $p \\ge 1$, in time $5$ for $p = 1$ and $p = \\infty$ and about $4.7544$ at best [Georgiou2023Lp]. If every robot must visit every one of $k$ treasures, $k = 1$ is this problem [Kaminski2026Circles], a preprint.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-two-f2f",
+      "title": "Two face-to-face robots, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "two"
+      },
+      "summary": "Face-to-face, two robots need between $\\approx 5.255$ and $\\approx 5.6234$; the gap has been open since 2019.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3+\\pi/6+\\sqrt{3}",
+          "ref": "Czyzowicz2020FaceToFace",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "face-to-face",
+            "improves $3+\\pi/4+\\sqrt2$ of [Czyzowicz2014Evacuating]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "introductory",
+          "time": "\\approx 5.74"
+        },
+        {
+          "ref": "Czyzowicz2020FaceToFace",
+          "role": "other",
+          "time": "\\approx 5.628"
+        },
+        {
+          "ref": "Brandt2017Collaboration",
+          "role": "other",
+          "time": "\\approx 5.625",
+          "note": "Forced meetings exchange no useful information; simpler algorithm."
+        },
+        {
+          "ref": "Disser2019Second",
+          "role": "best",
+          "time": "\\approx 5.6234",
+          "note": "A second detour through the interior."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$\\approx 5.6234$ versus $\\approx 5.255$: a constant gap of about 0.37."
+        }
+      },
+      "open": [
+        "Close the gap between $3+\\pi/6+\\sqrt3 \\approx 5.255$ and $5.6234$ for two face-to-face robots."
+      ],
+      "notes": "The \"second cut\" of [Disser2019Second] is a second detour through the interior: an upper-bound technique. Measured in the average case over the exit position, the trade-off between average and worst-case time is mapped, and $1+\\pi$ is conjectured to be the optimal average for any number of robots [Chuangpishit2019Average].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-three-wireless",
+      "title": "Three wireless robots, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "three",
+        "communication": "wireless"
+      },
+      "summary": "Three wireless robots: between $\\approx 4.159$ and $4.22$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 4.159",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "three robots, wireless"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "best",
+          "time": "< 4.22",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "A small constant gap."
+        }
+      },
+      "open": [
+        "Find the optimal evacuation time for three wireless robots."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "disk-three-f2f",
+      "title": "Three face-to-face robots, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "three"
+      },
+      "summary": "Three face-to-face robots: between $\\approx 4.519$ and $3+2\\pi/3 \\approx 5.09$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 4.519",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "three robots, face-to-face"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "best",
+          "time": "3+2\\pi/3",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "disk-many-wireless",
+      "title": "Many wireless robots, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "communication": "wireless"
+      },
+      "summary": "With $k$ wireless robots the time approaches $3+\\pi/k$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3+\\pi/k",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "$k$ robots, wireless"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "best",
+          "time": "3+\\pi/k+O(k^{-4/3})",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "Matching up to $O(k^{-4/3})$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "disk-many-f2f",
+      "title": "Many face-to-face robots, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk"
+      },
+      "summary": "With $k$ face-to-face robots the time is $3+2\\pi/k$ up to $O(k^{-2})$; the separation from wireless is a factor 2 in the second term.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3+2\\pi/k-O(k^{-2})",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "$k$ robots, face-to-face"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2014Evacuating",
+          "role": "best",
+          "time": "3+2\\pi/k",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "Matching up to $O(k^{-2})$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "disk-three-crash",
+      "title": "Three wireless robots, one crash fault",
+      "assumptions": {
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "three",
+        "communication": "wireless",
+        "faults": "crash"
+      },
+      "summary": "If one of three wireless robots may crash, evacuation takes between $\\approx 5.082$ and $\\approx 6.309$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 5.082",
+          "ref": "Czyzowicz2017Faulty",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "three robots, at most one crash"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Faulty",
+          "role": "best",
+          "time": "\\approx 6.309",
+          "note": "Introductory and current best; time until the last non-faulty robot exits."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [
+        "Tight bounds for disk evacuation with one crash-faulty robot among three."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "disk-three-byzantine",
+      "title": "Three wireless robots, one Byzantine",
+      "assumptions": {
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "three",
+        "communication": "wireless"
+      },
+      "summary": "With one Byzantine robot among three: between $\\approx 5.948$ and $\\approx 6.921$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 5.948",
+          "ref": "Czyzowicz2017Faulty",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "three robots, at most one Byzantine"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Faulty",
+          "role": "best",
+          "time": "\\approx 6.921",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "Byzantine evacuation with $k$ robots and $f$ faults is studied by [Leonardos2023Symmetric] and [Behrouz2025Byzantine]; those papers were not read.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-priority",
+      "title": "Priority evacuation (queen and servants), disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "communication": "wireless",
+        "goal": "queen"
+      },
+      "summary": "Only the queen must leave; $\\sigma$ servants (the paper writes $n$; $k = \\sigma+1$ robots) help her find the exit.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\tfrac{2}{\\sigma}\\arccos\\left(-\\tfrac{2}{\\sigma}\\right)+\\sqrt{1-\\tfrac{4}{\\sigma^2}}",
+          "ref": "Czyzowicz2018Priority",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "$\\sigma \\ge 4$ servants, wireless",
+            "all robots start at the centre of a unit disk"
+          ],
+          "note": "Theorem 5 of [Czyzowicz2018Priority]; it exceeds $2+\\pi/\\sigma+2/\\sigma^2$, the leading terms of its expansion in $1/\\sigma$, which is the form stated in the abstract (e.g. $2.913$ against $2.910$ for $\\sigma = 4$). The naive bound is $2+\\pi/(\\sigma+1)$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2018Priority",
+          "role": "best",
+          "time": "2+4(\\sqrt2-1)\\pi/\\sigma",
+          "assumes": [
+            "$\\sigma \\ge 4$ servants"
+          ],
+          "note": "Introductory and current best (Theorem 1). The exact times of the algorithm are computed numerically, e.g. $3.113$ for $\\sigma = 4$ against the closed-form upper bound $3.301$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "For large $\\sigma$ the gap between the closed-form bounds is about $(4\\sqrt2-5)\\pi/\\sigma \\approx 0.657\\pi/\\sigma$ [Czyzowicz2018Priority]."
+        }
+      },
+      "open": [
+        "Close the gap for priority evacuation; for one servant the bounds differ by about 0.25 (a 2024 preprint, not yet in the bibliography)."
+      ],
+      "notes": "For a queen and three servants the bounds are about $3.374$ and $3.202$ [Czyzowicz2018GodSaveQueen]. The authors conjecture their algorithm for $\\sigma \\ge 4$ servants is optimal [Czyzowicz2018Priority]. The lower bound was checked against the full text (arXiv version) of [Czyzowicz2018Priority]: Section 4 proves the exact expression and the abstract states its asymptotic form $2+\\pi/\\sigma+2/\\sigma^2$, so the two agree.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-two-sr",
+      "title": "Two robots with asymmetric communication, disk",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "two",
+        "communication": "sr"
+      },
+      "summary": "When one robot can only send and the other only receive, evacuation lies strictly between the wireless and face-to-face optima; $\\pi+2$ suffices.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "> 1+2\\pi/3+\\sqrt3",
+          "ref": "Georgiou2022Asymmetric",
+          "bottleneck": "one-way communication",
+          "preconditions": [
+            "strictly above the wireless optimum; no explicit value"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2022Asymmetric",
+          "role": "best",
+          "time": "\\pi+2",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No explicit lower bound."
+        }
+      },
+      "open": [
+        "Give an explicit lower bound above $\\approx 4.826$ for sender/receiver evacuation."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-two-f2f",
+      "title": "Two face-to-face robots, equilateral triangle",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "triangle",
+        "robots": "two"
+      },
+      "summary": "From the centroid of a unit equilateral triangle: between $1+2/\\sqrt3$ and $2.3367$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2/\\sqrt3",
+          "ref": "Chuangpishit2020Triangles",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "two robots, face-to-face, start at the centroid"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chuangpishit2020Triangles",
+          "role": "best",
+          "time": "2.3367",
+          "note": "For $k$ robots: $\\sqrt3+3/k$ against $\\sqrt3$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "Wireless evacuation of triangles and squares was introduced at ADHOC-NOW 2015 (not yet in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "square-two-f2f",
+      "title": "Two face-to-face robots, square",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "square",
+        "robots": "two"
+      },
+      "summary": "From the centroid of a unit square: between $3.118$ and $3.4645$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3.118",
+          "ref": "Chuangpishit2020Triangles",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "two robots, face-to-face"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chuangpishit2020Triangles",
+          "role": "best",
+          "time": "3.4645"
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "The lower bound is $1+3\\sqrt2/2 \\approx 3.121$ in Theorem 4.1 (the abstract states 3.118). Three and four robots evacuate in about $3.178$ and $2.664$ [Chuangpishit2020Triangles].",
+      "status": "verified"
+    },
+    {
+      "id": "two-exits-f2f",
+      "title": "Two robots, two exits, face-to-face",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "two",
+        "exits": "two"
+      },
+      "summary": "With two exits at unknown positions and communication only on meeting, the optimal evacuation time is $(1+\\pi/2)R \\approx 2.57R$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\pi/2",
+          "ref": "Pattanayak2018TwoExits",
+          "bottleneck": "unknown exits",
+          "preconditions": [
+            "two robots start at the centre",
+            "radius $R=1$; oblivious robots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2018TwoExits",
+          "role": "best",
+          "time": "1+\\pi/2",
+          "note": "Introductory and current best; optimal."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Optimal: $(1+\\pi/2)R$."
+        }
+      },
+      "open": [],
+      "notes": "Bounds from the full version, supplied by the catalogue owner (a co-author); the robots are oblivious.",
+      "status": "verified"
+    },
+    {
+      "id": "two-exits-wireless",
+      "title": "Two robots, two exits, wireless",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "disk",
+        "robots": "two",
+        "exits": "two",
+        "communication": "wireless"
+      },
+      "summary": "With two exits and wireless communication, evacuation takes between $2R$ and $(1+\\pi/3)R \\approx 2.047R$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "2",
+          "ref": "Pattanayak2018TwoExits",
+          "bottleneck": "unknown exits",
+          "preconditions": [
+            "two robots start at the centre",
+            "radius $R=1$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2018TwoExits",
+          "role": "best",
+          "time": "1+\\pi/3",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$(1+\\pi/3)R$ versus $2R$: a constant gap."
+        }
+      },
+      "open": [
+        "Close the gap between $2R$ and $(1+\\pi/3)R$ for two wireless robots and two exits [Pattanayak2018TwoExits]."
+      ],
+      "notes": "Bounds supplied by the catalogue owner (a co-author). When robots move only along a circle and the exits' arrangement is known, two robots starting at known distance $L$ evacuate optimally in $3/4+L/2$ (one exit, circle of unit length) [Czyzowicz2016MultipleExits].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-two-speeds",
+      "title": "Disk, two wireless robots of different speeds",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "two",
+        "communication": "wireless"
+      },
+      "summary": "With speeds $1$ and $v \\ge 1$, two wireless robots evacuate optimally for $v \\ge 2.75$; for smaller $v$ the bounds are within a factor $1.22$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{matching for } v \\ge 2.75",
+          "ref": "Lamprou2020Fast",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "speeds $1$ and $v \\ge 1$, both known",
+            "Section 5"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Lamprou2020Fast",
+          "role": "best",
+          "time": "\\tfrac{1+2\\arccos(-2/v)}{v}+\\sqrt{1-4/v^2}",
+          "note": "Introductory and current best: optimal (Half-Chord) for $v \\ge 2.75$; for $1 \\le v < 2.75$ the best of three algorithms, within a factor $1.22$ of the lower bound."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Tight for $v \\ge 2.75$; a constant factor below it."
+        }
+      },
+      "open": [
+        "Optimal evacuation for $1 < v < 2.75$, for more than two robots, and face-to-face [Lamprou2020Fast]."
+      ],
+      "notes": "Checked against the full text (arXiv version).",
+      "status": "verified"
+    },
+    {
+      "id": "disk-priority-one",
+      "title": "Disk, priority evacuation, queen and one servant",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "two",
+        "communication": "wireless",
+        "goal": "queen"
+      },
+      "summary": "A queen and one servant evacuate the queen in about $4.819$, strictly faster than evacuating both; the lower bound is about $4.568$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 4.56798",
+          "ref": "Georgiou2025WeightedDisk",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 1",
+            "a linear-programming relaxation over polygon instances"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2018GodSaveQueen",
+          "role": "introductory",
+          "time": "\\approx 4.81854",
+          "note": "Theorem 8; also the first lower bound, about $4.3896$ (Theorem 17)."
+        },
+        {
+          "ref": "Georgiou2025WeightedDisk",
+          "role": "best",
+          "time": "\\approx 4.81854",
+          "note": "Same algorithm, with the improved lower bound."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "About $4.819$ against $4.568$."
+        }
+      },
+      "open": [
+        "Close the gap between $4.568$ and $4.819$ [Georgiou2025WeightedDisk]."
+      ],
+      "notes": "Weighted group search, where the two robots' arrival times are weighted $1$ and $w$, is solved within a gap in the same paper [Georgiou2025WeightedDisk]. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-priority-two",
+      "title": "Disk, priority evacuation, queen and two servants",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "three",
+        "communication": "wireless",
+        "goal": "queen"
+      },
+      "summary": "A queen and two servants evacuate the queen in about $3.833$ against a lower bound of about $3.631$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 3.6307",
+          "ref": "Czyzowicz2018GodSaveQueen",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 19"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2018GodSaveQueen",
+          "role": "best",
+          "time": "\\approx 3.8327",
+          "note": "Introductory and current best (Theorem 10)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "fetch-two-wireless",
+      "title": "Disk, search-and-fetch, two wireless robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "two",
+        "communication": "wireless",
+        "goal": "fetch"
+      },
+      "summary": "Two wireless robots find a treasure on the boundary and bring it to an exit at known arc distance $\\alpha$ in $1+\\pi-\\alpha+4\\sin(\\alpha/2)$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Georgiou2019SearchFetch",
+          "role": "best",
+          "time": "1+\\pi-\\alpha+4\\sin(\\alpha/2)",
+          "note": "Introductory and current best (Theorem 2.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is given."
+        }
+      },
+      "open": [
+        "Lower bounds that separate wireless from face-to-face search-and-fetch [Georgiou2019SearchFetch]."
+      ],
+      "notes": "With one robot, the treasure-evacuation version is solved optimally when only a lower bound on the treasure–exit distance is known [Georgiou2021Treasure] (abstract only). Checked against the full text of [Georgiou2019SearchFetch].",
+      "status": "verified"
+    },
+    {
+      "id": "fetch-two-f2f",
+      "title": "Disk, search-and-fetch, two face-to-face robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "two",
+        "goal": "fetch"
+      },
+      "summary": "Face-to-face, two robots fetch the treasure in $1+\\pi-\\alpha/2+3\\sin(\\alpha/2)$, against $1+\\pi/3+4\\sin(\\alpha/2)$ for $\\alpha \\le 2\\pi/3$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\pi/3+4\\sin(\\alpha/2)",
+          "ref": "Georgiou2019SearchFetch",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 4.1",
+            "$\\alpha \\le 2\\pi/3$; $1+\\pi/3+2\\sin\\alpha+2\\sin(\\alpha/2)$ for larger $\\alpha$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2019SearchFetch",
+          "role": "best",
+          "time": "1+\\pi-\\alpha/2+3\\sin(\\alpha/2)",
+          "note": "Introductory and current best (Theorem 3.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "line-f2f",
+      "title": "Line, any number of face-to-face robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "speeds": "equal"
+      },
+      "summary": "On the line, face-to-face robots evacuate with competitive ratio exactly 9: extra robots do not help.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "9",
+          "ref": "Bampas2019Speeds",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "any number of robots of maximum speed at most 1",
+            "full proof of $9d-o(d)$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chrobak2015GroupSearch",
+          "role": "best",
+          "time": "9",
+          "note": "Introductory and current best: the robots move together and run the doubling strategy; as described by later papers."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 9."
+        }
+      },
+      "open": [],
+      "notes": "For two face-to-face robots the energy of group search can be traded against time; with maximum speed $v$ and time at most $9d/v$ the energy is about $8.42588\\,v^2 d$ (the paper writes $b$ for $v$; Theorem 16) [Czyzowicz2019Energy]. Checked against the full text of [Bampas2019Speeds]; [Chrobak2015GroupSearch] was not read.",
+      "status": "verified"
+    },
+    {
+      "id": "line-wireless",
+      "title": "Line, any number of wireless robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "With wireless communication, two or more robots evacuate the line with competitive ratio exactly 3.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Chrobak2015GroupSearch",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "as cited by [Czyzowicz2021GroupEvacuation]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chrobak2015GroupSearch",
+          "role": "best",
+          "time": "3",
+          "note": "Introductory and current best: two robots search in opposite directions and call the others; as cited by [Czyzowicz2021GroupEvacuation]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 3."
+        }
+      },
+      "open": [],
+      "notes": "**Unverified:** [Chrobak2015GroupSearch] was not read; the bounds are as cited by later papers.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-speeds-f2f",
+      "title": "Line, two face-to-face robots of different speeds",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two"
+      },
+      "summary": "With speeds $1$ and $v \\le 1$, two face-to-face robots evacuate the line optimally: ratio $(1+3v)/(1-v)$ for $v \\le 1/3$ and $9v$ above.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{matching}",
+          "ref": "Bampas2019Speeds",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 3.11"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bampas2019Speeds",
+          "role": "best",
+          "time": "\\tfrac{1+3v}{1-v}\\ (v \\le \\tfrac13),\\ 9v\\ (v \\ge \\tfrac13)",
+          "note": "Introductory and current best (Theorem 3.11); both robots must reach the exit."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $v$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "line-two-speeds-wireless",
+      "title": "Line, two wireless robots of different speeds",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "communication": "wireless"
+      },
+      "summary": "With speeds $1$ and $v \\le 1$, two wireless robots evacuate the line optimally, with a ratio that changes form at $v = \\sqrt{17}-4$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{matching}",
+          "ref": "Bampas2019Speeds",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 4.8"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bampas2019Speeds",
+          "role": "best",
+          "time": "\\tfrac{1+3v}{1-v}\\ (v \\le \\sqrt{17}-4),\\ \\tfrac{2+v+\\sqrt{v^2+8v}}{2}\\ \\text{above}",
+          "note": "Introductory and current best (Theorem 4.8)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $v$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "line-sr",
+      "title": "Line, a sender and a receiver",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "sr"
+      },
+      "summary": "A robot that can only send and one that can only receive wirelessly evacuate the line with ratio exactly $3+2\\sqrt2$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3+2\\sqrt2",
+          "ref": "Czyzowicz2021GroupEvacuation",
+          "bottleneck": "one-way communication",
+          "preconditions": [
+            "Theorem 10"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2021GroupEvacuation",
+          "role": "best",
+          "time": "3+2\\sqrt2",
+          "note": "Introductory and current best (Theorem 1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $3+2\\sqrt2$."
+        }
+      },
+      "open": [
+        "Close the gaps for one sender and many receivers ($2+\\sqrt5$ against $5$) and for many senders and one receiver ($3$ against about $5.681$) [Czyzowicz2021GroupEvacuation]."
+      ],
+      "notes": "If an extra vehicle (a bike) can carry a robot faster, sender/receiver evacuation on the line has piecewise bounds in the bike's speed [Jawhar2025Asymmetric]. Checked against the full text of [Czyzowicz2021GroupEvacuation].",
+      "status": "verified"
+    },
+    {
+      "id": "line-crash",
+      "title": "Line, $2f+1$ wireless robots, $f$ crash faults",
+      "assumptions": {
+        "domain": "line",
+        "speeds": "equal",
+        "communication": "wireless",
+        "faults": "crash"
+      },
+      "statement": "$k = 2f+1$ robots, of which up to $f$ may fail to report the exit; every non-faulty robot must reach it.",
+      "summary": "With a near majority of faulty robots, evacuation on the line takes ratio about $7.437$ for $(k,f) = (3,1)$, tending to $4+2\\sqrt2$; the lower bounds come from search.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 5.233",
+          "ref": "Kupavskii2018Lower",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "$(k,f) = (3,1)$",
+            "inherited from search with crash faults"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2021NearMajority",
+          "role": "best",
+          "time": "\\approx 7.437",
+          "note": "Introductory and current best for $(3,1)$; $7.254$ for $(5,2)$ and $(7,3)$, $7.147$ for $(9,4)$, tending to $4+2\\sqrt2$ (Theorems 2.2, 3.1, 3.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap against the search lower bounds."
+        }
+      },
+      "open": [
+        "Tight bounds for evacuation with $k = 2f+1$ crash or Byzantine robots [Czyzowicz2021NearMajority]."
+      ],
+      "notes": "When every attempt to turn fails with known probability $\\beta < 1/2$ (the paper's $p$), two wireless robots achieve ratio $3+4\\sqrt{\\beta(1-\\beta)}+\\varepsilon$ [Georgiou2024Disoriented]. Checked against the full text of [Czyzowicz2021NearMajority].",
+      "status": "verified"
+    },
+    {
+      "id": "rays-junction",
+      "title": "$m$ rays, $k = m$ wireless robots at the junction",
+      "assumptions": {
+        "faults": "none",
+        "domain": "rays",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "With one wireless robot per ray, starting at the junction, the competitive ratio is exactly 3.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Brandt2020Rays",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Observation 2",
+            "every $2 \\le k \\le m$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Brandt2020Rays",
+          "role": "best",
+          "time": "3",
+          "note": "Introductory and current best (Observation 1): each robot explores its own ray."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 3."
+        }
+      },
+      "open": [
+        "Starting off the junction with $k = m$: close $2+\\sqrt{7/3} \\approx 3.528$ against $4$ [Brandt2020Rays].",
+        "Fewer robots than rays ($1 < k < m$): the bounds $3+2\\lfloor (m-1)/k\\rfloor$ and $1+2\\tfrac{m-1}{k}(1+\\tfrac{k}{m-1})^{1+(m-1)/k}$ differ [Brandt2020Rays]."
+      ],
+      "notes": "Checked against the full text (conference version).",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-two-wireless",
+      "title": "Triangle, two wireless robots starting on the boundary",
+      "assumptions": {
+        "faults": "none",
+        "domain": "triangle",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "Two wireless robots starting on the boundary of a non-obtuse triangle evacuate in half the perimeter if they may choose their start, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "(a+b+c)/2",
+          "ref": "Georgiou2026Triangle",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 1",
+            "non-obtuse triangle with sides $a \\ge b \\ge c$",
+            "the algorithm chooses the starting edge and point"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "introductory",
+          "time": "3/2+y",
+          "note": "Equilateral unit triangle, start on the boundary at distance $y$ from a side's midpoint; tight; as cited by later papers."
+        },
+        {
+          "ref": "Georgiou2026Triangle",
+          "role": "best",
+          "time": "(a+b+c)/2",
+          "note": "Non-obtuse triangles (Theorem 1); separate tight or near-tight bounds when the adversary chooses the edge or the point."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "When the algorithm chooses the start."
+        }
+      },
+      "open": [
+        "Face-to-face evacuation of general triangles, and wireless evacuation of obtuse triangles [Georgiou2026Triangle]."
+      ],
+      "notes": "With many wireless robots an equilateral triangle is evacuated in $1+\\sqrt3/3$, optimal with 6 robots [Czyzowicz2015Wireless]; with communication range $r$, $6+2\\lceil 1/r-1\\rceil$ robots achieve it [Bagheri2019Triangles]. Checked against the full texts of [Georgiou2026Triangle] and [Bagheri2019Triangles].",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-many-f2f",
+      "title": "Triangle, any number of face-to-face robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "triangle",
+        "speeds": "equal"
+      },
+      "summary": "$k$ face-to-face robots at the centroid of an equilateral unit triangle evacuate in at most $\\sqrt3+3/k$, against $\\sqrt3$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\sqrt3",
+          "ref": "Chuangpishit2020Triangles",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 3.1",
+            "every $k$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chuangpishit2020Triangles",
+          "role": "best",
+          "time": "\\sqrt3+3/k",
+          "note": "Introductory and current best (Observation 3.2); for $k = 3, 4, 5, 6$ about $2.089$, $1.982$, $1.876$, $1.826$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "The gap $3/k$ vanishes as $k$ grows."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "further": [
+    {
+      "ref": "Czyzowicz2019GroupSearch",
+      "note": "Survey chapter on group search and evacuation. Not read."
+    },
+    {
+      "ref": "Kranakis2024Survey",
+      "note": "Survey of how knowledge affects the competitive ratio of linear search, including evacuation. Not read."
+    },
+    {
+      "ref": "Georgiou2023OptimalCircle",
+      "note": "Circle search with crash and Byzantine robots. Not read."
+    },
+    {
+      "ref": "Georgiou2023WeightedLine",
+      "note": "Weighted group search on the line, with consequences for priority evacuation. Not read."
+    },
+    {
+      "ref": "Czyzowicz2021TimeEnergy",
+      "note": "Time–energy trade-offs for evacuating two wireless robots from the line."
+    },
+    {
+      "ref": "Jawhar2021Bike",
+      "note": "Introduces bike-assisted evacuation on the line. Abstract only."
+    },
+    {
+      "ref": "Pattanayak2020Collaborative",
+      "note": "One-page summary of collaborative disk evacuation (two exits, chauffeuring). Abstract only."
+    },
+    {
+      "ref": "Chuangpishit2020MultiObjective",
+      "note": "Average versus worst case for two face-to-face robots in the disk; probably the journal version of [Chuangpishit2019Average]. Not read."
+    },
+    {
+      "ref": "Liu2022Square",
+      "note": "Evacuating crashed robots from a square. Abstract only."
+    },
+    {
+      "ref": "Fekete2010Rectilinear",
+      "note": "Evacuating rectilinear polygons; background from before the disk line of work."
+    },
+    {
+      "ref": "Borowiecki2025Discrete",
+      "note": "Discrete evacuation of many agents through known exits of a graph, limited by congestion: a different sense of evacuation. Not read."
+    },
+    {
+      "ref": "Czyzowicz2019Plane",
+      "note": "Group search of the plane with crash and Byzantine robots. Abstract only."
+    },
+    {
+      "ref": "Dobrev2020Shoreline",
+      "note": "Lower bounds for searching an unknown line in the plane. Not read."
+    },
+    {
+      "ref": "Xu2013Groups",
+      "note": "Groups escaping an unknown convex region of the plane; the group lower bound 3 is cited by [Wei2016Competitive]."
+    },
+    {
+      "ref": "Wei2014Convex",
+      "note": "Online strategies for escaping a convex region. Not read."
+    },
+    {
+      "ref": "Li2017Convex",
+      "note": "Online strategies for escaping a convex region. Not read."
+    },
+    {
+      "ref": "Liu2015Groups",
+      "note": "Groups escaping a convex region. Not read."
+    },
+    {
+      "ref": "Jiang2015Groups",
+      "note": "Groups escaping a convex region. Title only."
+    },
+    {
+      "ref": "Wei2016Affected",
+      "note": "Escaping an unknown affected area. Not read."
+    },
+    {
+      "ref": "Conley2025Inspection",
+      "note": "Related task: several agents inspect the boundary of a disk."
+    },
+    {
+      "ref": "Georgiou2026Fermat",
+      "note": "Related task: optimal average-case disk inspection."
+    },
+    {
+      "ref": "Coleman2023Delivery",
+      "note": "Related task: two robots deliver a target to safety. Not read."
+    },
+    {
+      "ref": "Georgiou2025Spirals",
+      "note": "Plane search with agents of several speeds; a preprint, not read."
+    },
+    {
+      "ref": "Coleman2026Plane",
+      "note": "Search and rescue in the plane; a preprint, not read."
+    }
+  ],
+  "figure": {
+    "caption": "Evacuation from a disk: two robots start at the centre of a unit disk and must both reach an exit at an unknown point of the boundary. The animation runs the wireless algorithm of [Czyzowicz2014Evacuating] at unit speed: both walk to the wall together, then search it in opposite directions; the one that finds the exit radios the other, which walks straight across the disk along the chord. With the exit placed at arc distance $2\\pi/3$ (the worst case) the time is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.83$.",
+    "view": [
+      100,
+      54
+    ],
+    "static": [
+      {
+        "t": "circle",
+        "p": [
+          50,
+          27
+        ],
+        "r": 23,
+        "c": "fg",
+        "w": 0.8
+      },
+      {
+        "t": "text",
+        "p": [
+          52.5,
+          29.5
+        ],
+        "s": "O"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              48.6,
+              27.0
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              51.4,
+              27.0
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [],
+        "label": "Start: both robots at the centre O"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              48.6,
+              21.25
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              51.4,
+              21.25
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                21.25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              48.6,
+              15.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              51.4,
+              15.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                15.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              48.6,
+              9.75
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              51.4,
+              9.75
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                9.75
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              48.6,
+              4.0
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              51.4,
+              4.0
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          }
+        ],
+        "label": "Time 1: at the wall together; they split"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              55.69,
+              4.72
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              44.31,
+              4.72
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.44,
+                4.04
+              ],
+              [
+                52.87,
+                4.18
+              ],
+              [
+                54.29,
+                4.4
+              ],
+              [
+                55.69,
+                4.72
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.56,
+                4.04
+              ],
+              [
+                47.13,
+                4.18
+              ],
+              [
+                45.71,
+                4.4
+              ],
+              [
+                44.31,
+                4.72
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              61.03,
+              6.82
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              38.97,
+              6.82
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.28,
+                4.04
+              ],
+              [
+                52.55,
+                4.14
+              ],
+              [
+                53.82,
+                4.32
+              ],
+              [
+                55.07,
+                4.57
+              ],
+              [
+                56.31,
+                4.88
+              ],
+              [
+                57.53,
+                5.27
+              ],
+              [
+                58.72,
+                5.72
+              ],
+              [
+                59.89,
+                6.23
+              ],
+              [
+                61.03,
+                6.82
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.72,
+                4.04
+              ],
+              [
+                47.45,
+                4.14
+              ],
+              [
+                46.18,
+                4.32
+              ],
+              [
+                44.93,
+                4.57
+              ],
+              [
+                43.69,
+                4.88
+              ],
+              [
+                42.47,
+                5.27
+              ],
+              [
+                41.28,
+                5.72
+              ],
+              [
+                40.11,
+                6.23
+              ],
+              [
+                38.97,
+                6.82
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              65.68,
+              10.17
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              34.32,
+              10.17
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.23,
+                4.03
+              ],
+              [
+                52.46,
+                4.13
+              ],
+              [
+                53.68,
+                4.3
+              ],
+              [
+                54.89,
+                4.53
+              ],
+              [
+                56.09,
+                4.82
+              ],
+              [
+                57.27,
+                5.18
+              ],
+              [
+                58.42,
+                5.6
+              ],
+              [
+                59.56,
+                6.08
+              ],
+              [
+                60.66,
+                6.62
+              ],
+              [
+                61.74,
+                7.22
+              ],
+              [
+                62.78,
+                7.88
+              ],
+              [
+                63.79,
+                8.59
+              ],
+              [
+                64.75,
+                9.36
+              ],
+              [
+                65.68,
+                10.17
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.77,
+                4.03
+              ],
+              [
+                47.54,
+                4.13
+              ],
+              [
+                46.32,
+                4.3
+              ],
+              [
+                45.11,
+                4.53
+              ],
+              [
+                43.91,
+                4.82
+              ],
+              [
+                42.73,
+                5.18
+              ],
+              [
+                41.58,
+                5.6
+              ],
+              [
+                40.44,
+                6.08
+              ],
+              [
+                39.34,
+                6.62
+              ],
+              [
+                38.26,
+                7.22
+              ],
+              [
+                37.22,
+                7.88
+              ],
+              [
+                36.21,
+                8.59
+              ],
+              [
+                35.25,
+                9.36
+              ],
+              [
+                34.32,
+                10.17
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.35,
+              14.57
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              30.65,
+              14.57
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.21,
+                4.03
+              ],
+              [
+                52.42,
+                4.13
+              ],
+              [
+                53.62,
+                4.29
+              ],
+              [
+                54.81,
+                4.51
+              ],
+              [
+                55.98,
+                4.79
+              ],
+              [
+                57.14,
+                5.14
+              ],
+              [
+                58.28,
+                5.54
+              ],
+              [
+                59.4,
+                6.01
+              ],
+              [
+                60.49,
+                6.53
+              ],
+              [
+                61.55,
+                7.11
+              ],
+              [
+                62.58,
+                7.75
+              ],
+              [
+                63.58,
+                8.44
+              ],
+              [
+                64.54,
+                9.18
+              ],
+              [
+                65.45,
+                9.97
+              ],
+              [
+                66.33,
+                10.8
+              ],
+              [
+                67.16,
+                11.68
+              ],
+              [
+                67.94,
+                12.61
+              ],
+              [
+                68.67,
+                13.57
+              ],
+              [
+                69.35,
+                14.57
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.79,
+                4.03
+              ],
+              [
+                47.58,
+                4.13
+              ],
+              [
+                46.38,
+                4.29
+              ],
+              [
+                45.19,
+                4.51
+              ],
+              [
+                44.02,
+                4.79
+              ],
+              [
+                42.86,
+                5.14
+              ],
+              [
+                41.72,
+                5.54
+              ],
+              [
+                40.6,
+                6.01
+              ],
+              [
+                39.51,
+                6.53
+              ],
+              [
+                38.45,
+                7.11
+              ],
+              [
+                37.42,
+                7.75
+              ],
+              [
+                36.42,
+                8.44
+              ],
+              [
+                35.46,
+                9.18
+              ],
+              [
+                34.55,
+                9.97
+              ],
+              [
+                33.67,
+                10.8
+              ],
+              [
+                32.84,
+                11.68
+              ],
+              [
+                32.06,
+                12.61
+              ],
+              [
+                31.33,
+                13.57
+              ],
+              [
+                30.65,
+                14.57
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              71.83,
+              19.75
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              28.17,
+              19.75
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.25,
+                4.03
+              ],
+              [
+                52.5,
+                4.14
+              ],
+              [
+                53.73,
+                4.31
+              ],
+              [
+                54.96,
+                4.54
+              ],
+              [
+                56.17,
+                4.84
+              ],
+              [
+                57.37,
+                5.21
+              ],
+              [
+                58.54,
+                5.64
+              ],
+              [
+                59.69,
+                6.14
+              ],
+              [
+                60.81,
+                6.7
+              ],
+              [
+                61.89,
+                7.31
+              ],
+              [
+                62.95,
+                7.99
+              ],
+              [
+                63.96,
+                8.72
+              ],
+              [
+                64.93,
+                9.51
+              ],
+              [
+                65.86,
+                10.34
+              ],
+              [
+                66.74,
+                11.23
+              ],
+              [
+                67.57,
+                12.16
+              ],
+              [
+                68.35,
+                13.14
+              ],
+              [
+                69.08,
+                14.16
+              ],
+              [
+                69.75,
+                15.21
+              ],
+              [
+                70.36,
+                16.3
+              ],
+              [
+                70.91,
+                17.42
+              ],
+              [
+                71.4,
+                18.57
+              ],
+              [
+                71.83,
+                19.75
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.75,
+                4.03
+              ],
+              [
+                47.5,
+                4.14
+              ],
+              [
+                46.27,
+                4.31
+              ],
+              [
+                45.04,
+                4.54
+              ],
+              [
+                43.83,
+                4.84
+              ],
+              [
+                42.63,
+                5.21
+              ],
+              [
+                41.46,
+                5.64
+              ],
+              [
+                40.31,
+                6.14
+              ],
+              [
+                39.19,
+                6.7
+              ],
+              [
+                38.11,
+                7.31
+              ],
+              [
+                37.05,
+                7.99
+              ],
+              [
+                36.04,
+                8.72
+              ],
+              [
+                35.07,
+                9.51
+              ],
+              [
+                34.14,
+                10.34
+              ],
+              [
+                33.26,
+                11.23
+              ],
+              [
+                32.43,
+                12.16
+              ],
+              [
+                31.65,
+                13.14
+              ],
+              [
+                30.92,
+                14.16
+              ],
+              [
+                30.25,
+                15.21
+              ],
+              [
+                29.64,
+                16.3
+              ],
+              [
+                29.09,
+                17.42
+              ],
+              [
+                28.6,
+                18.57
+              ],
+              [
+                28.17,
+                19.75
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              72.94,
+              25.37
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              27.06,
+              25.37
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.23,
+                4.03
+              ],
+              [
+                52.46,
+                4.13
+              ],
+              [
+                53.68,
+                4.3
+              ],
+              [
+                54.89,
+                4.53
+              ],
+              [
+                56.09,
+                4.82
+              ],
+              [
+                57.27,
+                5.18
+              ],
+              [
+                58.42,
+                5.6
+              ],
+              [
+                59.56,
+                6.08
+              ],
+              [
+                60.66,
+                6.62
+              ],
+              [
+                61.74,
+                7.22
+              ],
+              [
+                62.78,
+                7.88
+              ],
+              [
+                63.79,
+                8.59
+              ],
+              [
+                64.75,
+                9.36
+              ],
+              [
+                65.68,
+                10.17
+              ],
+              [
+                66.56,
+                11.03
+              ],
+              [
+                67.39,
+                11.94
+              ],
+              [
+                68.17,
+                12.9
+              ],
+              [
+                68.9,
+                13.89
+              ],
+              [
+                69.57,
+                14.92
+              ],
+              [
+                70.19,
+                15.99
+              ],
+              [
+                70.75,
+                17.08
+              ],
+              [
+                71.25,
+                18.21
+              ],
+              [
+                71.69,
+                19.36
+              ],
+              [
+                72.07,
+                20.53
+              ],
+              [
+                72.39,
+                21.72
+              ],
+              [
+                72.64,
+                22.93
+              ],
+              [
+                72.82,
+                24.15
+              ],
+              [
+                72.94,
+                25.37
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.77,
+                4.03
+              ],
+              [
+                47.54,
+                4.13
+              ],
+              [
+                46.32,
+                4.3
+              ],
+              [
+                45.11,
+                4.53
+              ],
+              [
+                43.91,
+                4.82
+              ],
+              [
+                42.73,
+                5.18
+              ],
+              [
+                41.58,
+                5.6
+              ],
+              [
+                40.44,
+                6.08
+              ],
+              [
+                39.34,
+                6.62
+              ],
+              [
+                38.26,
+                7.22
+              ],
+              [
+                37.22,
+                7.88
+              ],
+              [
+                36.21,
+                8.59
+              ],
+              [
+                35.25,
+                9.36
+              ],
+              [
+                34.32,
+                10.17
+              ],
+              [
+                33.44,
+                11.03
+              ],
+              [
+                32.61,
+                11.94
+              ],
+              [
+                31.83,
+                12.9
+              ],
+              [
+                31.1,
+                13.89
+              ],
+              [
+                30.43,
+                14.92
+              ],
+              [
+                29.81,
+                15.99
+              ],
+              [
+                29.25,
+                17.08
+              ],
+              [
+                28.75,
+                18.21
+              ],
+              [
+                28.31,
+                19.36
+              ],
+              [
+                27.93,
+                20.53
+              ],
+              [
+                27.61,
+                21.72
+              ],
+              [
+                27.36,
+                22.93
+              ],
+              [
+                27.18,
+                24.15
+              ],
+              [
+                27.06,
+                25.37
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              72.63,
+              31.1
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              27.37,
+              31.1
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.22,
+                4.03
+              ],
+              [
+                52.43,
+                4.13
+              ],
+              [
+                53.64,
+                4.29
+              ],
+              [
+                54.84,
+                4.52
+              ],
+              [
+                56.03,
+                4.8
+              ],
+              [
+                57.2,
+                5.15
+              ],
+              [
+                58.34,
+                5.57
+              ],
+              [
+                59.47,
+                6.04
+              ],
+              [
+                60.57,
+                6.57
+              ],
+              [
+                61.63,
+                7.16
+              ],
+              [
+                62.67,
+                7.8
+              ],
+              [
+                63.67,
+                8.5
+              ],
+              [
+                64.63,
+                9.25
+              ],
+              [
+                65.55,
+                10.05
+              ],
+              [
+                66.43,
+                10.9
+              ],
+              [
+                67.26,
+                11.79
+              ],
+              [
+                68.04,
+                12.73
+              ],
+              [
+                68.77,
+                13.71
+              ],
+              [
+                69.45,
+                14.72
+              ],
+              [
+                70.07,
+                15.77
+              ],
+              [
+                70.64,
+                16.85
+              ],
+              [
+                71.15,
+                17.96
+              ],
+              [
+                71.6,
+                19.09
+              ],
+              [
+                71.99,
+                20.25
+              ],
+              [
+                72.31,
+                21.42
+              ],
+              [
+                72.58,
+                22.61
+              ],
+              [
+                72.78,
+                23.81
+              ],
+              [
+                72.92,
+                25.03
+              ],
+              [
+                72.99,
+                26.24
+              ],
+              [
+                73.0,
+                27.46
+              ],
+              [
+                72.94,
+                28.68
+              ],
+              [
+                72.82,
+                29.89
+              ],
+              [
+                72.63,
+                31.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.78,
+                4.03
+              ],
+              [
+                47.57,
+                4.13
+              ],
+              [
+                46.36,
+                4.29
+              ],
+              [
+                45.16,
+                4.52
+              ],
+              [
+                43.97,
+                4.8
+              ],
+              [
+                42.8,
+                5.15
+              ],
+              [
+                41.66,
+                5.57
+              ],
+              [
+                40.53,
+                6.04
+              ],
+              [
+                39.43,
+                6.57
+              ],
+              [
+                38.37,
+                7.16
+              ],
+              [
+                37.33,
+                7.8
+              ],
+              [
+                36.33,
+                8.5
+              ],
+              [
+                35.37,
+                9.25
+              ],
+              [
+                34.45,
+                10.05
+              ],
+              [
+                33.57,
+                10.9
+              ],
+              [
+                32.74,
+                11.79
+              ],
+              [
+                31.96,
+                12.73
+              ],
+              [
+                31.23,
+                13.71
+              ],
+              [
+                30.55,
+                14.72
+              ],
+              [
+                29.93,
+                15.77
+              ],
+              [
+                29.36,
+                16.85
+              ],
+              [
+                28.85,
+                17.96
+              ],
+              [
+                28.4,
+                19.09
+              ],
+              [
+                28.01,
+                20.25
+              ],
+              [
+                27.69,
+                21.42
+              ],
+              [
+                27.42,
+                22.61
+              ],
+              [
+                27.22,
+                23.81
+              ],
+              [
+                27.08,
+                25.03
+              ],
+              [
+                27.01,
+                26.24
+              ],
+              [
+                27.0,
+                27.46
+              ],
+              [
+                27.06,
+                28.68
+              ],
+              [
+                27.18,
+                29.89
+              ],
+              [
+                27.37,
+                31.1
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              70.91,
+              36.57
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              29.09,
+              36.57
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.21,
+                4.03
+              ],
+              [
+                52.42,
+                4.13
+              ],
+              [
+                53.62,
+                4.29
+              ],
+              [
+                54.81,
+                4.51
+              ],
+              [
+                55.98,
+                4.79
+              ],
+              [
+                57.14,
+                5.14
+              ],
+              [
+                58.28,
+                5.54
+              ],
+              [
+                59.4,
+                6.01
+              ],
+              [
+                60.49,
+                6.53
+              ],
+              [
+                61.55,
+                7.11
+              ],
+              [
+                62.58,
+                7.75
+              ],
+              [
+                63.58,
+                8.44
+              ],
+              [
+                64.54,
+                9.18
+              ],
+              [
+                65.45,
+                9.97
+              ],
+              [
+                66.33,
+                10.8
+              ],
+              [
+                67.16,
+                11.68
+              ],
+              [
+                67.94,
+                12.61
+              ],
+              [
+                68.67,
+                13.57
+              ],
+              [
+                69.35,
+                14.57
+              ],
+              [
+                69.98,
+                15.61
+              ],
+              [
+                70.55,
+                16.68
+              ],
+              [
+                71.07,
+                17.77
+              ],
+              [
+                71.52,
+                18.89
+              ],
+              [
+                71.92,
+                20.04
+              ],
+              [
+                72.26,
+                21.2
+              ],
+              [
+                72.53,
+                22.38
+              ],
+              [
+                72.74,
+                23.57
+              ],
+              [
+                72.89,
+                24.77
+              ],
+              [
+                72.98,
+                25.98
+              ],
+              [
+                73.0,
+                27.19
+              ],
+              [
+                72.96,
+                28.4
+              ],
+              [
+                72.85,
+                29.6
+              ],
+              [
+                72.68,
+                30.8
+              ],
+              [
+                72.45,
+                31.99
+              ],
+              [
+                72.16,
+                33.16
+              ],
+              [
+                71.8,
+                34.32
+              ],
+              [
+                71.39,
+                35.46
+              ],
+              [
+                70.91,
+                36.57
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.79,
+                4.03
+              ],
+              [
+                47.58,
+                4.13
+              ],
+              [
+                46.38,
+                4.29
+              ],
+              [
+                45.19,
+                4.51
+              ],
+              [
+                44.02,
+                4.79
+              ],
+              [
+                42.86,
+                5.14
+              ],
+              [
+                41.72,
+                5.54
+              ],
+              [
+                40.6,
+                6.01
+              ],
+              [
+                39.51,
+                6.53
+              ],
+              [
+                38.45,
+                7.11
+              ],
+              [
+                37.42,
+                7.75
+              ],
+              [
+                36.42,
+                8.44
+              ],
+              [
+                35.46,
+                9.18
+              ],
+              [
+                34.55,
+                9.97
+              ],
+              [
+                33.67,
+                10.8
+              ],
+              [
+                32.84,
+                11.68
+              ],
+              [
+                32.06,
+                12.61
+              ],
+              [
+                31.33,
+                13.57
+              ],
+              [
+                30.65,
+                14.57
+              ],
+              [
+                30.02,
+                15.61
+              ],
+              [
+                29.45,
+                16.68
+              ],
+              [
+                28.93,
+                17.77
+              ],
+              [
+                28.48,
+                18.89
+              ],
+              [
+                28.08,
+                20.04
+              ],
+              [
+                27.74,
+                21.2
+              ],
+              [
+                27.47,
+                22.38
+              ],
+              [
+                27.26,
+                23.57
+              ],
+              [
+                27.11,
+                24.77
+              ],
+              [
+                27.02,
+                25.98
+              ],
+              [
+                27.0,
+                27.19
+              ],
+              [
+                27.04,
+                28.4
+              ],
+              [
+                27.15,
+                29.6
+              ],
+              [
+                27.32,
+                30.8
+              ],
+              [
+                27.55,
+                31.99
+              ],
+              [
+                27.84,
+                33.16
+              ],
+              [
+                28.2,
+                34.32
+              ],
+              [
+                28.61,
+                35.46
+              ],
+              [
+                29.09,
+                36.57
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              30.08,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.23,
+                4.03
+              ],
+              [
+                52.47,
+                4.13
+              ],
+              [
+                53.69,
+                4.3
+              ],
+              [
+                54.9,
+                4.53
+              ],
+              [
+                56.1,
+                4.82
+              ],
+              [
+                57.28,
+                5.18
+              ],
+              [
+                58.44,
+                5.61
+              ],
+              [
+                59.58,
+                6.09
+              ],
+              [
+                60.69,
+                6.63
+              ],
+              [
+                61.77,
+                7.24
+              ],
+              [
+                62.81,
+                7.9
+              ],
+              [
+                63.82,
+                8.61
+              ],
+              [
+                64.78,
+                9.38
+              ],
+              [
+                65.71,
+                10.2
+              ],
+              [
+                66.59,
+                11.07
+              ],
+              [
+                67.42,
+                11.98
+              ],
+              [
+                68.2,
+                12.94
+              ],
+              [
+                68.93,
+                13.93
+              ],
+              [
+                69.6,
+                14.97
+              ],
+              [
+                70.22,
+                16.04
+              ],
+              [
+                70.78,
+                17.14
+              ],
+              [
+                71.28,
+                18.27
+              ],
+              [
+                71.72,
+                19.42
+              ],
+              [
+                72.09,
+                20.6
+              ],
+              [
+                72.4,
+                21.8
+              ],
+              [
+                72.65,
+                23.01
+              ],
+              [
+                72.83,
+                24.23
+              ],
+              [
+                72.95,
+                25.46
+              ],
+              [
+                73.0,
+                26.69
+              ],
+              [
+                72.98,
+                27.93
+              ],
+              [
+                72.9,
+                29.16
+              ],
+              [
+                72.75,
+                30.38
+              ],
+              [
+                72.54,
+                31.6
+              ],
+              [
+                72.26,
+                32.8
+              ],
+              [
+                71.91,
+                33.99
+              ],
+              [
+                71.51,
+                35.16
+              ],
+              [
+                71.04,
+                36.3
+              ],
+              [
+                70.51,
+                37.41
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.77,
+                4.03
+              ],
+              [
+                47.53,
+                4.13
+              ],
+              [
+                46.31,
+                4.3
+              ],
+              [
+                45.1,
+                4.53
+              ],
+              [
+                43.9,
+                4.82
+              ],
+              [
+                42.72,
+                5.18
+              ],
+              [
+                41.56,
+                5.61
+              ],
+              [
+                40.42,
+                6.09
+              ],
+              [
+                39.31,
+                6.63
+              ],
+              [
+                38.23,
+                7.24
+              ],
+              [
+                37.19,
+                7.9
+              ],
+              [
+                36.18,
+                8.61
+              ],
+              [
+                35.22,
+                9.38
+              ],
+              [
+                34.29,
+                10.2
+              ],
+              [
+                33.41,
+                11.07
+              ],
+              [
+                32.58,
+                11.98
+              ],
+              [
+                31.8,
+                12.94
+              ],
+              [
+                31.07,
+                13.93
+              ],
+              [
+                30.4,
+                14.97
+              ],
+              [
+                29.78,
+                16.04
+              ],
+              [
+                29.22,
+                17.14
+              ],
+              [
+                28.72,
+                18.27
+              ],
+              [
+                28.28,
+                19.42
+              ],
+              [
+                27.91,
+                20.6
+              ],
+              [
+                27.6,
+                21.8
+              ],
+              [
+                27.35,
+                23.01
+              ],
+              [
+                27.17,
+                24.23
+              ],
+              [
+                27.05,
+                25.46
+              ],
+              [
+                27.0,
+                26.69
+              ],
+              [
+                27.02,
+                27.93
+              ],
+              [
+                27.1,
+                29.16
+              ],
+              [
+                27.25,
+                30.38
+              ],
+              [
+                27.46,
+                31.6
+              ],
+              [
+                27.74,
+                32.8
+              ],
+              [
+                28.09,
+                33.99
+              ],
+              [
+                28.49,
+                35.16
+              ],
+              [
+                28.96,
+                36.3
+              ],
+              [
+                29.49,
+                37.41
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "w": 0.5
+          }
+        ],
+        "label": "Robot 1 finds the exit, radios robot 2"
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              33.66,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                33.66,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              39.41,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                39.41,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              45.16,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                45.16,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              50.91,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                50.91,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              56.66,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                56.66,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              62.41,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                62.41,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "near"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              68.16,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                68.16,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "x",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "k": "exit",
+            "c": "tight"
+          },
+          {
+            "id": "r1",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "1"
+          },
+          {
+            "id": "r2",
+            "p": [
+              69.92,
+              38.5
+            ],
+            "l": "2",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                27
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                51.2,
+                4.03
+              ],
+              [
+                52.4,
+                4.13
+              ],
+              [
+                53.6,
+                4.28
+              ],
+              [
+                54.78,
+                4.5
+              ],
+              [
+                55.95,
+                4.78
+              ],
+              [
+                57.11,
+                5.13
+              ],
+              [
+                58.24,
+                5.53
+              ],
+              [
+                59.35,
+                5.99
+              ],
+              [
+                60.44,
+                6.51
+              ],
+              [
+                61.5,
+                7.08
+              ],
+              [
+                62.53,
+                7.71
+              ],
+              [
+                63.52,
+                8.39
+              ],
+              [
+                64.47,
+                9.13
+              ],
+              [
+                65.39,
+                9.91
+              ],
+              [
+                66.26,
+                10.74
+              ],
+              [
+                67.09,
+                11.61
+              ],
+              [
+                67.87,
+                12.53
+              ],
+              [
+                68.61,
+                13.48
+              ],
+              [
+                69.29,
+                14.47
+              ],
+              [
+                69.92,
+                15.5
+              ],
+              [
+                70.49,
+                16.56
+              ],
+              [
+                71.01,
+                17.65
+              ],
+              [
+                71.47,
+                18.76
+              ],
+              [
+                71.87,
+                19.89
+              ],
+              [
+                72.22,
+                21.05
+              ],
+              [
+                72.5,
+                22.22
+              ],
+              [
+                72.72,
+                23.4
+              ],
+              [
+                72.87,
+                24.6
+              ],
+              [
+                72.97,
+                25.8
+              ],
+              [
+                73.0,
+                27.0
+              ],
+              [
+                72.97,
+                28.2
+              ],
+              [
+                72.87,
+                29.4
+              ],
+              [
+                72.72,
+                30.6
+              ],
+              [
+                72.5,
+                31.78
+              ],
+              [
+                72.22,
+                32.95
+              ],
+              [
+                71.87,
+                34.11
+              ],
+              [
+                71.47,
+                35.24
+              ],
+              [
+                71.01,
+                36.35
+              ],
+              [
+                70.49,
+                37.44
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                4.0
+              ],
+              [
+                48.8,
+                4.03
+              ],
+              [
+                47.6,
+                4.13
+              ],
+              [
+                46.4,
+                4.28
+              ],
+              [
+                45.22,
+                4.5
+              ],
+              [
+                44.05,
+                4.78
+              ],
+              [
+                42.89,
+                5.13
+              ],
+              [
+                41.76,
+                5.53
+              ],
+              [
+                40.65,
+                5.99
+              ],
+              [
+                39.56,
+                6.51
+              ],
+              [
+                38.5,
+                7.08
+              ],
+              [
+                37.47,
+                7.71
+              ],
+              [
+                36.48,
+                8.39
+              ],
+              [
+                35.53,
+                9.13
+              ],
+              [
+                34.61,
+                9.91
+              ],
+              [
+                33.74,
+                10.74
+              ],
+              [
+                32.91,
+                11.61
+              ],
+              [
+                32.13,
+                12.53
+              ],
+              [
+                31.39,
+                13.48
+              ],
+              [
+                30.71,
+                14.47
+              ],
+              [
+                30.08,
+                15.5
+              ],
+              [
+                29.51,
+                16.56
+              ],
+              [
+                28.99,
+                17.65
+              ],
+              [
+                28.53,
+                18.76
+              ],
+              [
+                28.13,
+                19.89
+              ],
+              [
+                27.78,
+                21.05
+              ],
+              [
+                27.5,
+                22.22
+              ],
+              [
+                27.28,
+                23.4
+              ],
+              [
+                27.13,
+                24.6
+              ],
+              [
+                27.03,
+                25.8
+              ],
+              [
+                27.0,
+                27.0
+              ],
+              [
+                27.03,
+                28.2
+              ],
+              [
+                27.13,
+                29.4
+              ],
+              [
+                27.28,
+                30.6
+              ],
+              [
+                27.5,
+                31.78
+              ],
+              [
+                27.78,
+                32.95
+              ],
+              [
+                28.13,
+                34.11
+              ],
+              [
+                28.53,
+                35.24
+              ],
+              [
+                28.99,
+                36.35
+              ],
+              [
+                29.51,
+                37.44
+              ],
+              [
+                30.08,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.08,
+                38.5
+              ],
+              [
+                69.92,
+                38.5
+              ]
+            ],
+            "c": "l2",
+            "w": 0.9
+          }
+        ],
+        "label": "Final: robot 2 arrives by the chord at 1 + 2π/3 + √3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+name: Suggest a problem
+description: A problem on mobile agents, robots or particles that the atlas does not cover yet.
+title: "[Problem] "
+labels: ["new-problem"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Problem
+    validations: {required: true}
+  - type: textarea
+    id: statement
+    attributes:
+      label: Statement
+      description: What is given, what must be achieved, and what is measured.
+    validations: {required: true}
+  - type: textarea
+    id: papers
+    attributes:
+      label: Key papers
+      description: The paper that posed it, and the best known results, with links.
+    validations: {required: true}
+  - type: input
+    id: credit
+    attributes:
+      label: How should we acknowledge you?
+      description: Your name, your GitHub handle (default), or "anonymous".

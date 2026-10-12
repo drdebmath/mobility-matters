@@ -1,0 +1,2021 @@
+{
+  "id": "gathering",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Gathering",
+  "origin": {
+    "ref": "Suzuki1999Formation",
+    "year": 1999,
+    "note": "Suzuki and Yamashita gave an algorithm \"moving the robots to a single point in finite steps\" and showed that two oblivious robots cannot meet in SSYNC."
+  },
+  "axes": [
+    {
+      "id": "team",
+      "name": "Number of robots",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any $n$",
+          "short": "any $n$",
+          "definition": "Any number $n\\ge 2$ of robots."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "$n = 2$ (rendezvous)",
+          "short": "$n = 2$",
+          "definition": "Exactly two robots (rendezvous)."
+        },
+        {
+          "id": "three-plus",
+          "level": 1,
+          "label": "$n \\ge 3$",
+          "short": "$n \\ge 3$",
+          "definition": "$n\\ge 3$ robots."
+        }
+      ],
+      "origin": "Suzuki and Yamashita [Suzuki1999Formation] showed that two oblivious robots cannot gather deterministically in SSYNC, although the task is trivial in FSYNC; rendezvous thus became the first separator between the two schedulers [Flocchini2023Asynchrony] [Heriban2018Optimally]. For $n \\ge 3$ robots the situation differs: with multiplicity detection, oblivious disoriented robots gather from any configuration even in ASYNC [Cieliebak2012Gathering], because a multiplicity point, once formed, can be kept unique and serve as the target [Bandettini2011Survey]. As Flocchini, Santoro, Viglietta and Yamashita put it, \"Rendezvous is very different from the Gathering problem of having $k \\geqslant 3$ robots meet\" [Flocchini2016Constant] (their $k$ is $n$ here). Two robots cannot create such an asymmetry, so the two-robot case became the test bed for each new capability: unreliable compasses [Izumi2012TwoRobots], persistent memory [Suzuki1999Formation], lights [Viglietta2013Rendezvous] [Heriban2018Optimally] [Okumura2023External], and finite-state or finite-communication robots [Flocchini2016Constant]. The catalogue therefore splits gathering by team size: any $n \\ge 2$, exactly two (rendezvous), and $n \\ge 3$."
+    }
+  ],
+  "derived_from": {
+    "problem": "k-grouping",
+    "kind": "special case of",
+    "relation": "Gathering is $k$-grouping with $k = 1$, a single group of all $n$ robots, that is, point formation: the pattern consisting of one point of multiplicity $n$ [Flocchini2017Uniform] [Flocchini2026Universal]. General pattern formation algorithms usually exclude it, because multiplicity points need detection [Bramas2016Probabilistic]."
+  },
+  "summary": "Robots must meet at a single point that is not fixed in advance, and stay there.",
+  "statement": "$n$ robots start at distinct points and must all reach the same point in finite time and remain there. For $n = 2$ the problem is called rendezvous. **Time** is counted in rounds or epochs; **colours** count light colours.",
+  "primer": {
+    "intro": "Imagine robots scattered over a field that must all meet at one spot, although nobody has said where. There are $n$ robots, points in the plane at distinct places. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (they remember nothing from one cycle to the next), and each uses its own private coordinate system, so they share no sense of direction. An adversary, the **scheduler**, decides when robots act: in SSYNC time runs in rounds and in each round it wakes some of the robots; in ASYNC every phase may take any finite time. The robots must all reach the same point in finite time and stay there (for $n = 2$ this is called rendezvous). In the standard version $n \\ge 3$, the scheduler is ASYNC, and robots have **weak multiplicity detection**: they can tell whether a point holds one robot or several, but not how many.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Create one crowded point, then everyone walks to it",
+        "variant": "async-weak",
+        "ref": "Cieliebak2012Gathering",
+        "idea": "1. If exactly one point holds several robots (a **multiplicity point**), walk straight to it.\n2. Otherwise, look at the shape of the configuration and choose a point that every robot identifies in the same way despite their different coordinates (for example the centre of a symmetric configuration), and move so that exactly one multiplicity point appears.\n3. From then on every robot follows rule 1, along paths that never create a second crowded point.",
+        "analysis": "A multiplicity point is a landmark that no private coordinate system can hide: it looks special to every robot. Step 2 is the hard part, because the robots share no orientation and the scheduler may stop a robot partway; Cieliebak, Flocchini, Prencipe and Santoro solve it with a case analysis of configuration types and gather $n \\ge 3$ robots in ASYNC from every start [Cieliebak2012Gathering], the catalogue's introductory and current best result for this setting. Time is not analysed. The outline above is the idea of the approach and was not checked against the paper's full text.",
+        "why_it_matters": "It shows how a tiny sensing ability, telling one robot from several, makes an unsolvable problem solvable."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Two oblivious robots cannot meet in SSYNC",
+        "variant": "two-ssync",
+        "ref": "Suzuki1999Formation",
+        "idea": "Take two robots, $A$ and $B$, and look at the round in which they would finally meet.\n\n(a) If both moved in that round, the scheduler could have woken only one: it lands where the other was heading, not where the other is, so they miss.\n\n(b) If only $A$ moved and landed on $B$, the scheduler could have woken both; unless $B$'s rule tells it to stay put, $B$ moves away and they miss again.\n\nSo meeting needs a situation in which, when both are awake, one robot jumps onto the other while the other stays. (c) But the robots are identical and share no orientation, so the adversary can give them coordinate systems in which each sees the other at the same spot, say one unit to its east. Identical robots with identical snapshots make the same choice: both stay or both move. The lopsided situation never occurs, and they never meet.",
+        "analysis": "Suzuki and Yamashita proved this as Theorem 3.1 of [Suzuki1999Formation], even for robots with common handedness whose moves always reach their destination, so it also holds without these advantages. Natural rules fail in instructive ways: \\\"move to the midpoint\\\" brings the robots closer forever, but the scheduler wakes one robot at a time so they never coincide; \\\"move to the other robot\\\" makes them swap places forever when both are awake. Extra power fixes this: with lights that both robots see, two colours suffice even in ASYNC [Heriban2018Optimally].",
+        "why_it_matters": "It is the founding impossibility of the field: the scheduler keeps identical robots symmetric, and most later assumptions (multiplicity detection, lights, compasses) are ways to break that symmetry."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Without multiplicity detection, a crowd looks like one robot",
+        "variant": "no-multiplicity",
+        "ref": "Prencipe2007Impossibility",
+        "idea": "Suppose the robots stand on only two points, say $n-1$ robots on $p$ and one robot on $q$. A robot that cannot detect multiplicities sees just two dots, exactly what it would see if there were only two robots. The robots are thrown back into the two-robot situation above, and the scheduler, by waking only some of the robots on a point, can move groups around so that they never all stand together. Prencipe shows that against any algorithm the scheduler can first drive the robots into such special configurations and then keep them from ever gathering; the full proof is a longer case analysis.",
+        "analysis": "The result holds for deterministic oblivious robots without multiplicity detection, for every $n \\ge 2$, in SSYNC and ASYNC [Prencipe2007Impossibility]. In the fully synchronous model, by contrast, gathering needs no multiplicity detection [Flocchini2026Universal], and in ASYNC weak multiplicity detection is enough [Cieliebak2012Gathering].",
+        "why_it_matters": "It explains why weak multiplicity detection became the standard assumption for gathering."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Short sight but a common compass: drift right, then down",
+        "variant": "limited-compass",
+        "ref": "Flocchini2005Limited",
+        "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**), but all robots agree on north and east.\n\n1. If you see a robot to your left, or above you on your own vertical line, do nothing.\n2. If you see robots only below you on your vertical line, move down towards the nearest one.\n3. If you see robots only to your right, move horizontally to the vertical line of the nearest one.\n4. If you see robots both below you and to your right, make a diagonal move right and down, chosen so that you lose sight of nobody.",
+        "analysis": "Robots only move right or down and never beyond the rightmost vertical line that holds a robot at the start, so they collect on that line and then at its lowest occupied point; the delicate part of the proof is that nobody is left behind out of sight. Flocchini, Prencipe, Santoro and Widmayer prove that this gathers ASYNC robots with non-rigid moves (Theorem 4.2 of [Flocchini2005Limited]), provided the start is connected (robots joined when at most $V$ apart); a disconnected start cannot be gathered at all. With agreement on one axis only, time linear in the initial diameter is achievable and optimal [Poudel2021TimeOptimal].",
+        "why_it_matters": "It shows how a shared direction can replace global vision: robots that see little can still agree where to go."
+      }
+    ]
+  },
+  "history": "Gathering started with an impossibility: two oblivious robots cannot meet in SSYNC [Suzuki1999Formation]. The community's main question became **the weakest set of capabilities that makes gathering solvable**: multiplicity detection [Cieliebak2012Gathering], a compass under limited visibility [Flocchini2005Limited], lights for two robots [Das2016Lights] [Flocchini2016Constant] [Heriban2018Optimally], and how many faulty robots can be tolerated [Agmon2006Fault] [Pattanayak2019Crash]. Running time (rounds, epochs) became a measure mainly for limited visibility [Degener2011Tight] [Castenow2022Unifying].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids",
+    "team"
+  ],
+  "variants": [
+    {
+      "id": "async-weak",
+      "title": "ASYNC with weak multiplicity detection",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "multiplicity": "weak",
+        "team": "three-plus",
+        "body": "point"
+      },
+      "summary": "With weak multiplicity detection, $n \\ge 3$ oblivious, disoriented, asynchronous robots gather from any initial configuration.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cieliebak2012Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best: solvable \"for any $n > 2$ and any initial configuration\", with non-rigid moves."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No epoch bound is recorded."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "How many epochs does oblivious ASYNC gathering with weak multiplicity detection need?"
+      ],
+      "notes": "Gathering is point formation, the pattern of a single point with multiplicity $n$ [Flocchini2017Uniform]. Under sequential schedulers, weak multiplicity detection is necessary and sufficient for gathering, and under FSYNC no multiplicity detection is needed [Flocchini2026Universal].",
+      "status": "verified"
+    },
+    {
+      "id": "no-multiplicity",
+      "title": "No multiplicity detection, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "team": "three-plus",
+        "body": "point"
+      },
+      "summary": "Without multiplicity detection, deterministic oblivious robots cannot gather, for any $n \\ge 2$, in SSYNC or ASYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Prencipe2007Impossibility",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "Theorem 2: deterministic oblivious robots, no multiplicity detection",
+            "$n \\ge 2$: Prencipe proves $n \\ge 3$ (Lemmas 5 and 6) and takes $n = 2$ from Suzuki and Yamashita",
+            "SSYNC (Atom) and ASYNC (Corda)",
+            "non-rigid moves, unlimited visibility, no common coordinate system"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Impossible in general."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Impossible for oblivious robots."
+        }
+      },
+      "open": [],
+      "notes": "Prencipe uses chirality to mean agreement on North and East (a compass), not handedness. [Agmon2006Fault] attribute the necessity of multiplicity detection in SSYNC and ASYNC to Prencipe's thesis (2002). Checked against the SIROCCO 2005 version; the TCS 2007 version was not read.",
+      "status": "verified"
+    },
+    {
+      "id": "two-ssync",
+      "title": "Two robots, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "team": "two",
+        "body": "point"
+      },
+      "summary": "Two oblivious robots without a common orientation cannot meet in SSYNC: rendezvous needs extra power.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2016Constant",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "$n = 2$, oblivious",
+            "without additional assumptions, already in SSYNC",
+            "first shown by [Suzuki1999Formation] (Theorem 3.1), in a model with common handedness and moves that reach their computed destination, so it holds without these"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Impossible."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Oblivious robots cannot do it; see the luminous variant."
+        }
+      },
+      "open": [],
+      "notes": "Two robots with unreliable compasses can gather if the deviation is below $\\pi/2$ (static compasses, SSYNC and ASYNC), $\\pi/4$ (dynamic, SSYNC) or $\\pi/6$ (dynamic, ASYNC, sufficient only) [Izumi2012TwoRobots].",
+      "status": "verified"
+    },
+    {
+      "id": "homonymous",
+      "title": "Homonymous robots, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "ids": "homonymous",
+        "body": "point"
+      },
+      "summary": "Two distinct identifiers (two different algorithms) are necessary and sufficient for gathering in SSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Asahiro2025MAS",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "with one identifier (anonymous robots)",
+            "with one crash fault, for any number of identifiers"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Asahiro2025MAS",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "2 identifiers"
+          ],
+          "note": "The minimum algorithm size of gathering is 2; gathering the non-faulty robots under crashes needs 3."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "What is the minimum number of identifiers for Byzantine-tolerant gathering? [Asahiro2025MAS]"
+      ],
+      "notes": "Homonymous robots were first studied for pattern formation [Bouzid2011Homonyms]; the term comes from Byzantine agreement with homonyms [Delporte2013Homonyms].",
+      "status": "verified"
+    },
+    {
+      "id": "crash",
+      "title": "Crash faults, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "crash",
+        "scheduler": "ssync",
+        "multiplicity": "weak",
+        "team": "three-plus",
+        "body": "point"
+      },
+      "summary": "With weak multiplicity detection and no common orientation, the correct robots gather despite up to $n-1$ crashes.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Pattanayak2019Crash",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "if the capabilities are relaxed further (the paper shows its model is minimal)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Agmon2006Fault",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "one crash",
+            "common chirality",
+            "$n \\ge 3$",
+            "a Look returns a multiset (multiplicities are seen)",
+            "initial configuration with at most one multiplicity point"
+          ],
+          "note": "Theorem 3.8, SSYNC, non-rigid moves of at least a fixed distance $S$; checked against the full text."
+        },
+        {
+          "ref": "Bouzid2013Crash",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "strong multiplicity detection",
+            "chirality",
+            "any $f < n$"
+          ],
+          "note": "Wait-free; arbitrary initial configurations."
+        },
+        {
+          "ref": "Bramas2015WaitFree",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "strong multiplicity detection",
+            "no chirality"
+          ]
+        },
+        {
+          "ref": "Pattanayak2019Crash",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$f \\le n-1$"
+          ],
+          "note": "Wait-free, weak multiplicity detection, no agreement on coordinates. In ASYNC with instantaneous computation it tolerates $\\lfloor n/2\\rfloor-2$ crashes for $n \\ge 7$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "\"The maximum number of faults under which a solution is still feasible, for gathering and other tasks, has yet to be established\" [Agmon2006Fault], in particular in ASYNC."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-ssync",
+      "title": "Byzantine faults, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "scheduler": "ssync",
+        "team": "three-plus",
+        "body": "point"
+      },
+      "summary": "Three robots with one Byzantine robot can neither gather nor converge in SSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Agmon2006Fault",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$n = 3$, $f = 1$ (Theorem 4.4); proved for SSYNC, hence also for ASYNC, which is what the abstract states",
+            "impossible for convergence too",
+            "holds even with common chirality and multiplicity detection (the paper's model)",
+            "the adversary moves the Byzantine robot to make the configurations seen by two correct robots equivalent, and stops correct robots early (non-rigid moves)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Impossible for $n=3$, $f=1$."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Impossible."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Agmon2006Fault]: Theorem 4.4 is stated for SSYNC; the abstract says \"in an asynchronous environment\", and the impossibility carries over to ASYNC because, as the paper notes citing Prencipe, every problem solvable in ASYNC is solvable in SSYNC. Theorem 4.1 first shows that any algorithm that sometimes keeps an active robot still fails.",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-fsync",
+      "title": "Byzantine faults, FSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "scheduler": "fsync",
+        "team": "three-plus",
+        "body": "point"
+      },
+      "summary": "In FSYNC, gathering tolerates $f$ Byzantine robots when $n \\ge 3f+1$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Agmon2006Fault",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 3f+1$",
+            "common chirality",
+            "a Look returns a multiset (multiplicities are seen)"
+          ],
+          "note": "Introductory and current best (Theorem 5.10, with $n \\ge 3f+1$); $n=3$ tolerates $f=1$ (Theorem 5.3). Checked against the full text."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Whether $3f+1$ is necessary is open."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Défago et al. study self-stabilizing gathering under crash or Byzantine faults (Distributed Computing 2020; bounds not checked).",
+      "status": "verified"
+    },
+    {
+      "id": "limited-compass",
+      "title": "Limited visibility with a compass, ASYNC",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "With a common compass, asynchronous robots with limited visibility gather in finite time.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2005Limited",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "if the initial distance graph is disconnected (Lemma 4.7)",
+            "two robots at distance more than $V$ under a fully synchronous scheduler see the same empty view and keep their distance",
+            "holds for any deterministic algorithm, with a compass"
+          ],
+          "note": "Not a bound on the variant itself: it shows that connectivity of the initial distance graph is necessary."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2005Limited",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best (Theorem 4.2): all robots gather at a point on the rightmost initial vertical axis. Non-rigid moves with a minimum distance $\\delta$.",
+          "assumes": [
+            "initial distance graph (edges between robots at distance at most $V$) connected",
+            "no multiplicity detection",
+            "agreement on the directions and orientations of both axes, not on unit or origin"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Flocchini2005Limited] (TCS 2005; preliminary version STACS 2001): robots are oblivious, anonymous, fully asynchronous (ASYNC), with non-rigid moves that cover at least a distance $\\delta_r > 0$, no multiplicity detection, and \"orientation\": agreement on the directions and orientations of both axes, but not on the unit distance or the origin. The authors conclude that \"with respect to gathering, orientation is at least as powerful as instantaneous movements\".",
+      "status": "verified"
+    },
+    {
+      "id": "limited-one-axis",
+      "title": "Limited visibility, one common axis, ASYNC",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "one-axis",
+        "body": "point"
+      },
+      "summary": "With one common axis, asynchronous robots with limited visibility gather in time linear in the initial diameter, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\Delta_0)",
+          "ref": "Poudel2021TimeOptimal",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$\\Delta_0$ = Euclidean diameter of the initial configuration"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Poudel2021TimeOptimal",
+          "role": "best",
+          "time": "O(\\Delta_0)",
+          "colours": "0",
+          "note": "Introductory and current best; FSYNC $O(g)$, $g$ the diameter (in hops) of the initial visibility graph, was known before."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\Delta_0)$."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "limited-fsync",
+      "title": "Limited visibility, FSYNC, disoriented",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "fsync",
+        "body": "point"
+      },
+      "summary": "Disoriented robots with limited visibility gather in $O(\\Delta_0^2)$ synchronous rounds, $\\Delta_0$ the initial diameter.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\Delta_0^2)",
+          "ref": "Castenow2022Unifying",
+          "bottleneck": "locality",
+          "preconditions": [
+            "only for protocols that move inside the local convex hull of the neighbourhood",
+            "$\\Delta_0$ = largest initial distance between two robots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Degener2011Tight",
+          "role": "introductory",
+          "time": "O(n^2)",
+          "colours": "0",
+          "note": "Go-To-The-Center; $\\Theta(n^2)$ for that algorithm (as restated by [Castenow2022Unifying])."
+        },
+        {
+          "ref": "Castenow2022Unifying",
+          "role": "best",
+          "time": "O(\\Delta_0^2)",
+          "colours": "0",
+          "note": "Every $\\lambda$-contracting protocol, including Go-To-The-Center; works in two and three dimensions."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Tight within the class of local convex-hull protocols; for arbitrary protocols only the trivial bound is known."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Is $\\Omega(\\Delta_0^2)$ necessary for every protocol, not only local convex-hull ones?"
+      ],
+      "notes": "$\\Delta_0$ here is a distance, not the maximum degree.",
+      "status": "verified"
+    },
+    {
+      "id": "two-lights",
+      "title": "Rendezvous, full lights (LUMI), ASYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "lights",
+        "body": "point"
+      },
+      "summary": "Two robots whose lights both can see meet in ASYNC with non-rigid moves using 2 colours, which is optimal, from any initial colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Viglietta2013Rendezvous",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Proposition 1.1: one colour is an oblivious robot, which cannot meet in SSYNC already with rigid moves (Suzuki and Yamashita)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2016Lights",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "4",
+          "note": "Theorem 3.3; the authors call it self-stabilizing."
+        },
+        {
+          "ref": "Viglietta2013Rendezvous",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Theorem 2.7: self-stabilizing, colours only; 3 colours are optimal among such algorithms (Theorems 4.10 and 4.11).",
+          "assumes": [
+            "class L: the destination is a point on the segment to the other robot and depends only on the colours"
+          ]
+        },
+        {
+          "ref": "Heriban2018Optimally",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Theorem 1: self-stabilizing; a robot only tests whether the other robot is at its own position.",
+          "assumes": [
+            "a robot can tell whether the other robot is at its position"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 2 colours."
+        }
+      },
+      "open": [],
+      "notes": "Easier settings were solved first with 2 colours: SSYNC with colours only, from any initial colours (Theorem 2.2 of [Viglietta2013Rendezvous]); rigid ASYNC from a preset colour (Theorem 2.4 of [Viglietta2013Rendezvous], Theorem 3 of [Okumura2017Rendezvous]); ASYNC in which no robot looks between another's Look and Compute, or with $\\delta$ known [Okumura2017Rendezvous]. A model checker confirms the 2- and 3-colour ASYNC algorithms and finds Viglietta's 2-colour SSYNC algorithm incorrect in ASYNC [Defago2023ModelChecking]. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fcom-ssync",
+      "title": "Rendezvous, external light (FCOM), SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fcom",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "With a light only the other robot sees, two robots meet in SSYNC with 3 colours, and 2 colours are impossible.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 1: 2 colours are impossible for external lights, for every $n \\ge 2$",
+            "holds even with rigid moves, chirality and a common unit"
+          ]
+        },
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Okumura2023External",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 8: for colour-only (class L) algorithms, rigid SSYNC"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2016Constant",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 16): self-stabilizing, non-rigid moves, no common unit.",
+          "assumes": [
+            "class L: the destination is a point on the segment to the other robot and depends only on the colours"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fcom",
+      "title": "Rendezvous, external light (FCOM), ASYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fcom",
+        "body": "point"
+      },
+      "summary": "In ASYNC with non-rigid moves, robots with external lights meet with 3 colours if they know the minimum move $\\delta$; without $\\delta$ the question is open, and colour-only algorithms cannot work.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "SSYNC bound (Theorem 1), hence also in ASYNC"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2016Constant",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 19), from a preset colour.",
+          "assumes": [
+            "the robots know the minimum move length $\\delta$"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "3 colours when $\\delta$ is known."
+        }
+      },
+      "open": [
+        "Rendezvous with external lights in non-rigid ASYNC when $\\delta$ is unknown [Flocchini2016Constant] [Masuzawa2026Disorientation]."
+      ],
+      "notes": "No colour-only (class L) algorithm with external lights works in ASYNC, for any number of colours (Theorem 14 of [Flocchini2016Constant]). If no robot looks between another robot's Look and Compute, colour-only algorithms with 3, 4 and 5 colours are optimal for rigid moves, non-rigid moves from equal colours, and self-stabilization respectively [Okumura2023External]. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fcom-rigid",
+      "title": "Rendezvous, external light (FCOM), ASYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fcom",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "With rigid moves, robots with external lights meet in ASYNC; the best count is 6 colours against a lower bound of 3.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "SSYNC bound (Theorem 1), hence also in ASYNC"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2016Constant",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "12",
+          "note": "Theorem 15, from a preset colour; each robot uses its own unit of distance."
+        },
+        {
+          "ref": "Masuzawa2026Disorientation",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "6",
+          "note": "Theorem 10, from a designated colour. A preprint, not peer reviewed.",
+          "assumes": [
+            "each robot keeps a fixed unit of distance, while its rotation and reflection may change at every Look"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$ colours; the exact number is between 3 and 6."
+        }
+      },
+      "open": [
+        "Close the gap between 3 and 6 colours [Masuzawa2026Disorientation]."
+      ],
+      "notes": "If the adversary may also rescale a robot's frame at every Look, rendezvous with external lights is impossible in ASYNC for any number of colours (Theorem 1(ii) of [Masuzawa2026Disorientation]). Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fsta",
+      "title": "Rendezvous, internal light (FSTA), SSYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fsta",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "A light only its owner sees, that is constant memory, lets two robots meet in SSYNC with 3 colours if they know $\\delta$; 2 colours are impossible.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 1: 2 colours are impossible, for every $n \\ge 2$",
+            "holds even with rigid moves, chirality and a common unit"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2016Constant",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 18).",
+          "assumes": [
+            "the robots know the minimum move length $\\delta$"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 colours when $\\delta$ is known."
+        }
+      },
+      "open": [
+        "Rendezvous with internal lights in non-rigid SSYNC when $\\delta$ is unknown."
+      ],
+      "notes": "No self-stabilizing algorithm with internal lights exists, for any number of colours [Otaka2026TwoState]. No colour-only (class L) algorithm works with internal lights, whatever the memory (Theorem 1 of [Flocchini2016Constant]). If the adversary may rescale a robot's frame at every Look, rendezvous with internal lights is impossible for any number of colours (Theorem 1(i) of [Masuzawa2026Disorientation]). Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fsta-rigid",
+      "title": "Rendezvous, internal light (FSTA), SSYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fsta",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "With rigid moves, robots with internal lights meet in SSYNC with exactly 3 colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 1: 2 colours are impossible"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2016Constant",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "6",
+          "note": "Theorem 13, from a preset state; each robot uses its own unit of distance."
+        },
+        {
+          "ref": "Masuzawa2026Disorientation",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Theorem 8, from a designated colour. A preprint, not peer reviewed.",
+          "assumes": [
+            "each robot keeps a fixed unit of distance, while its rotation and reflection may change at every Look"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-fsta-async",
+      "title": "Rendezvous, internal light (FSTA), ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "two",
+        "memory": "fsta",
+        "body": "point"
+      },
+      "summary": "Whether robots with internal lights can meet in ASYNC is open.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "SSYNC bound (Theorem 1), hence also in ASYNC"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Open."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "Open."
+        }
+      },
+      "open": [
+        "Can robots with internal lights solve rendezvous in ASYNC [Flocchini2016Constant] [Masuzawa2026Disorientation]?"
+      ],
+      "notes": "If no robot looks while another moves (Move-atomic ASYNC), 4 colours suffice with rigid moves (Theorem 9 of [Masuzawa2026Disorientation], a preprint). Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "two-lights-crash",
+      "title": "Rendezvous, full lights, a crash, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "crash",
+        "team": "two",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "frames": "compass",
+        "body": "point"
+      },
+      "statement": "Stand-up indulgent rendezvous: if one robot crashes, the other must reach the crashed robot's position.",
+      "summary": "If the correct robot must reach a crashed one, two robots cannot meet in SSYNC, even with unboundedly many colours, rigid moves and a common coordinate system.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Bramas2023Indulgent",
+          "bottleneck": "indistinguishable crashes",
+          "preconditions": [
+            "Theorem 1: SSYNC",
+            "holds with full lights of infinitely many colours, rigid moves and a common coordinate system"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Unsolvable."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Unsolvable for any number of colours."
+        }
+      },
+      "open": [],
+      "notes": "With mobility faults, where a faulty robot stops moving but its light keeps working, 3 colours are necessary and sufficient for two robots in ASYNC [Pramanick2025Mobility], a preprint. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-ssync",
+      "title": "Gathering, full lights, SSYNC, no multiplicity detection",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "three-plus",
+        "memory": "lights",
+        "scheduler": "ssync",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With lights and chirality, $n \\ge 3$ robots that cannot detect multiplicities gather in SSYNC with 2 colours, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Prencipe2007Impossibility",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "oblivious robots without multiplicity detection cannot gather in SSYNC (one colour)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Terai2023Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Introductory and current best (Theorem 5); non-rigid moves; a robot sees the set of colours at a point, not the number of robots."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 2 colours."
+        }
+      },
+      "open": [
+        "Gathering with lights without chirality [Terai2023Gathering]."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-async",
+      "title": "Gathering, full lights, ASYNC, no multiplicity detection",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "three-plus",
+        "memory": "lights",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With lights and chirality, $n \\ge 3$ robots gather in ASYNC with non-rigid moves and no multiplicity detection using 3 colours; whether 2 suffice is open.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Prencipe2007Impossibility",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "inherited: one colour is an oblivious robot"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Terai2023Gathering",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "10",
+          "note": "Concluding remarks: the SSYNC algorithm through the $5c$-colour simulation of a $c$-colour algorithm [Das2016Lights]."
+        },
+        {
+          "ref": "Nakai2021Asynchronous",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Theorem 6; 6 colours by a new $3c$-colour simulation (for a $c$-colour algorithm) of unfair SSYNC (Theorem 4). The authors conjecture that 3 is optimal."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$; the exact number is 2 or 3."
+        }
+      },
+      "open": [
+        "Is 3 the minimum number of colours for ASYNC gathering with lights, and can chirality be dropped [Nakai2021Asynchronous]?",
+        "Self-stabilizing gathering of $n$ robots with lights [Heriban2018Optimally]."
+      ],
+      "notes": "Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "fcom-ssync",
+      "title": "Gathering, external light (FCOM), SSYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "three-plus",
+        "memory": "fcom",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With external lights, $n \\ge 3$ robots gather in rigid SSYNC with 3 colours, which is optimal; 2 suffice if a robot sees who shares its point.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 2(1)",
+            "without seeing the robots at its own point"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Terai2023Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 6). With local awareness 2 colours suffice (Theorem 7), and local awareness cannot be dropped (Theorem 2(2) of [Otaka2026TwoState])."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 colours."
+        }
+      },
+      "open": [
+        "Gathering with external lights in ASYNC [Otaka2026TwoState]."
+      ],
+      "notes": "Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "fsta-ssync",
+      "title": "Gathering, internal light (FSTA), SSYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "three-plus",
+        "memory": "fsta",
+        "scheduler": "ssync",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With internal lights, 2 colours gather $n \\ge 3$ robots in SSYNC only from restricted starts; 2 colours do not suffice in general, and whether more do is open.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Otaka2026TwoState",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 1: 2 colours are impossible without restrictions on the start"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Terai2023Gathering",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Theorem 8, from starts in which robots are at most $2\\delta$ apart.",
+          "assumes": [
+            "$\\delta$ known and common",
+            "restricted initial configurations"
+          ]
+        },
+        {
+          "ref": "Otaka2026TwoState",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Theorem 3: far fewer excluded starts; the remaining exclusions cannot all be removed (Theorem 2(3)).",
+          "assumes": [
+            "$\\delta$ known and common",
+            "some two-point starts excluded"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "Unconditional gathering with more colours is open."
+        }
+      },
+      "open": [
+        "Gathering with internal lights in SSYNC from every start, with more than 2 colours, and in ASYNC [Otaka2026TwoState]."
+      ],
+      "notes": "Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "fcom-sequential",
+      "title": "Gathering, external light, sequential scheduler",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "team": "three-plus",
+        "memory": "fcom",
+        "scheduler": "sequential",
+        "body": "point"
+      },
+      "summary": "If one robot moves per round, 2 external colours gather $n \\ge 3$ robots, self-stabilizing, without chirality; oblivious robots cannot.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Terai2023Gathering",
+          "bottleneck": "memory",
+          "preconditions": [
+            "oblivious robots cannot gather under this scheduler"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Terai2023Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Introductory and current best (Theorem 9); non-rigid moves. With internal lights and a round-robin scheduler, 2 colours suffice with rigid moves (Theorem 10)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed; only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 2 colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "fat-few",
+      "title": "Fat robots, few robots, no common orientation",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "body": "fat",
+        "team": "three-plus"
+      },
+      "statement": "Fat robots (unit discs) cannot share a point: gathering asks for a connected configuration of touching discs in which every robot sees all others.",
+      "summary": "Three and four oblivious fat robots, which block each other's view and motion, gather in ASYNC without any common orientation.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Czyzowicz2009Fat",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\le 4$",
+            "robots know $n$"
+          ],
+          "note": "Introductory and current best for few robots: Theorem 3.1 ($n=3$) and the four-robot algorithm of Section 4."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Gathering any number of fat robots without chirality [Agathangelou2013Fat]."
+      ],
+      "notes": "Checked against the full text of [Czyzowicz2009Fat] (TCS 2009; OPODIS 2006). Model: closed unit discs, identical and anonymous, oblivious, silent, no common coordinate system (but a common unit, the radius), ASYNC. A robot sees another if some segment between their boundary circles meets no third robot; a robot that touches another stops and ends its cycle; the adversary may stop a move after a distance $\\delta$ unknown to the robots. Gathering means a connected union of discs in which every robot sees all others. The authors could not generalise to more robots (\"We were unable to do it\").",
+      "status": "verified"
+    },
+    {
+      "id": "fat",
+      "title": "Fat robots, chirality, any number",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "body": "fat",
+        "team": "three-plus",
+        "frames": "chirality"
+      },
+      "statement": "Gathering is Definition 1 of [Agathangelou2013Fat]: a connected configuration (every disc tangent to another), fully visible (every robot sees all others) and terminal, with all centres on the convex hull.",
+      "summary": "With chirality and known $n$, any number of opaque fat robots gather in ASYNC with non-rigid moves.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Agathangelou2013Fat",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n$ known",
+            "the radius is the common unit of distance",
+            "robots that become tangent stop"
+          ],
+          "note": "Introductory for any $n$ and current best (Theorem 26)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Remove the chirality assumption [Agathangelou2013Fat]."
+      ],
+      "notes": "Checked against the full text (arXiv 1209.3904).",
+      "status": "verified"
+    },
+    {
+      "id": "fat-transparent",
+      "title": "Transparent fat robots, no chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "body": "fat",
+        "team": "three-plus",
+        "opacity": "transparent"
+      },
+      "statement": "Transparent fat robots do not block sight but block movement. Gathering asks for a layered pattern around the centre of the smallest enclosing circle, with a unique robot at the centre [GanChaudhuri2015Leader].",
+      "summary": "Transparent fat robots without chirality gather into a layered pattern from every start whose robots can be ordered, which is exactly the asymmetric starts.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "GanChaudhuri2010Transparent",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "As described by [GanChaudhuri2015Leader]; not read."
+        },
+        {
+          "ref": "GanChaudhuri2015Leader",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$",
+            "robots start separated (no two discs touching)",
+            "rigid moves"
+          ],
+          "note": "A configuration can be ordered, and a leader elected, if and only if it is asymmetric (Theorem 6); the algorithm gathers from every orderable start."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Gathering transparent fat robots from symmetric starts; the paper proves no general impossibility [GanChaudhuri2015Leader]."
+      ],
+      "notes": "Gathering at a given point with limited visibility (dense packing around the point) is a different goal; it is studied by Cord-Landwehr et al. (SOFSEM 2011) and Sharma et al. (TAAS 2017), not yet read. Checked against the full text of [GanChaudhuri2015Leader] (arXiv 1208.4484).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Gathering: anonymous oblivious robots at distinct points of the plane must meet at one point, not fixed in advance, and stay there. Shown: the strategy of [Cieliebak2012Gathering] with weak multiplicity detection, in SSYNC rounds (ringed robots are activated; a move may stop early). In a symmetric start every robot computes the same centre; once a single multiplicity point exists, every robot walks to it.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: symmetric, no multiplicity: all aim at the centre",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              50.0
+            ]
+          },
+          {
+            "id": "b",
+            "p": [
+              29.1,
+              34.8
+            ]
+          },
+          {
+            "id": "c",
+            "p": [
+              37.1,
+              10.2
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              62.9,
+              10.2
+            ]
+          },
+          {
+            "id": "e",
+            "p": [
+              70.9,
+              34.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 1.2,
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              50.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                50.0
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              36.8
+            ]
+          },
+          {
+            "id": "b",
+            "p": [
+              29.1,
+              34.8
+            ]
+          },
+          {
+            "id": "c",
+            "p": [
+              37.1,
+              10.2
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              62.9,
+              10.2
+            ]
+          },
+          {
+            "id": "e",
+            "p": [
+              70.9,
+              34.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 1.2,
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              36.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                36.8
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              37.1,
+              10.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.1,
+                10.2
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              28.0
+            ]
+          },
+          {
+            "id": "b",
+            "p": [
+              29.1,
+              34.8
+            ]
+          },
+          {
+            "id": "c",
+            "p": [
+              43.5,
+              19.1
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              62.9,
+              10.2
+            ]
+          },
+          {
+            "id": "e",
+            "p": [
+              70.9,
+              34.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 1.2,
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              62.9,
+              10.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62.9,
+                10.2
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "A multiplicity point forms; all walk to it",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "2",
+            "c": "near"
+          },
+          {
+            "id": "b",
+            "p": [
+              29.1,
+              34.8
+            ]
+          },
+          {
+            "id": "c",
+            "p": [
+              43.5,
+              19.1
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "2",
+            "c": "near"
+          },
+          {
+            "id": "e",
+            "p": [
+              70.9,
+              34.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              29.1,
+              34.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                29.1,
+                34.8
+              ],
+              [
+                50.0,
+                28.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              43.5,
+              19.1
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                43.5,
+                19.1
+              ],
+              [
+                50.0,
+                28.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "b",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "c",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "d",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "e",
+            "p": [
+              70.9,
+              34.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              70.9,
+              34.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                70.9,
+                34.8
+              ],
+              [
+                50.0,
+                28.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "b",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "c",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "d",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "4",
+            "c": "near"
+          },
+          {
+            "id": "e",
+            "p": [
+              58.4,
+              30.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              58.4,
+              30.7
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.4,
+                30.7
+              ],
+              [
+                50.0,
+                28.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: all robots on one point",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "5",
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "5",
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "5",
+            "c": "tight"
+          },
+          {
+            "id": "d",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "5",
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "p": [
+              50.0,
+              28.0
+            ],
+            "r": 2.6,
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": []
+      }
+    ]
+  }
+}

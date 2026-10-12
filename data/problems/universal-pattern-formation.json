@@ -1,0 +1,1218 @@
+{
+  "id": "universal-pattern-formation",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Universal pattern formation",
+  "origin": {
+    "ref": "Flocchini2026Universal",
+    "year": 2025,
+    "note": "Introduced at SIROCCO 2025."
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "strengthening of",
+    "relation": "Pattern formation asks which patterns are formable from a given start; universal pattern formation asks for all patterns from all starts, which symmetry forbids under SSYNC and FSYNC but sequential schedulers allow [Flocchini2026Universal]."
+  },
+  "summary": "Robots must be able to form any pattern from any starting configuration, not only the ones symmetry allows.",
+  "statement": "From every initial configuration of $n$ robots (several robots may start on the same point, forming a multiplicity [Flocchini2026Universal]), the robots must form every given pattern of $n$ points (multiplicities allowed). With lights, universal dancing asks for any sequence of patterns.",
+  "primer": {
+    "intro": "Imagine a troupe that must be able to form every shape the director might ask for, from wherever its members happen to stand, even if some of them are standing on top of each other. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (no memory between cycles) and share no sense of direction. The **scheduler** here is **sequential**: in each round it wakes exactly one robot, and every robot is woken again and again. Universal pattern formation asks for one algorithm that, from every starting configuration, forms every given pattern of $n$ points (points may hold several robots) and then stops.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "One robot at a time: create enough points, agree on a map, fill it in",
+        "variant": "sequential",
+        "ref": "Flocchini2026Universal",
+        "idea": "1. **Initialization.** If the robots occupy fewer distinct points than the pattern has, robots leave crowded points one at a time until there are enough occupied points.\n2. Scale the pattern so that its smallest enclosing circle matches the robots' smallest enclosing circle.\n3. **Leader configuration.** Move robots so that all of them agree on how the pattern is laid over the robots' positions (a common map from robots to pattern points).\n4. **Partial formation.** Fill the empty pattern points one by one in an agreed order, moving along detours that never pass over another robot.\n5. **Finalization.** When only one robot is off the pattern, the last robots move to their places.",
+        "analysis": "Under a sequential scheduler only one robot moves at a time, so the moving robot is automatically different from all others; in particular, two robots on the same point can be separated, since only one of them moves. Flocchini, Navarra, Pattanayak, Piselli and Santoro show that this gives oblivious robots universal pattern formation with no extra assumption, except for the single point (gathering), which needs weak multiplicity detection, necessary and sufficient [Flocchini2026Universal]. The steps above are their high-level plan; the actual algorithm handles many special cases, and patterns with fewer than 5 points separately. Time is not analysed.",
+        "why_it_matters": "It shows that sequential activation is more than a way to elect a leader: it gives power that even a leader with full synchrony does not have."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Fully synchronous robots cannot split a pair",
+        "variant": "sequential",
+        "ref": "Flocchini2026Universal",
+        "idea": "Take three robots: two on one point, the third alone elsewhere. Under FSYNC every robot is woken in every round. The two robots on the shared point see the same snapshot; even if they share one coordinate system, move rigidly, can count robots on each point, and the third robot is a recognisable leader, the two compute the same destination and move together. They stay on one point forever, so no pattern with three distinct points is ever formed.",
+        "analysis": "This is Theorem 1 of [Flocchini2026Universal]: universal pattern formation is unsolvable under FSYNC for $n \\ge 3$, even with all these extra capabilities, and hence also under SSYNC and ASYNC, where the scheduler may choose to wake everyone. Gathering alone, in contrast, is solvable under FSYNC with no extra capability.",
+        "why_it_matters": "It shows that the fully synchronous and the sequential schedulers are incomparable: each solves something the other cannot."
+      }
+    ]
+  },
+  "history": "Universal pattern formation asked whether a **scheduler alone** can break the symmetry that blocks pattern formation: under sequential schedulers it can, except for a single point [Flocchini2026Universal]; with lights, robots can then perform any sequence of patterns [Feletti2026Dancing].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "sequential",
+      "title": "Sequential schedulers",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "sequential",
+        "body": "point"
+      },
+      "summary": "Under any sequential scheduler, oblivious robots can form every pattern from every starting configuration, except a single point, which needs weak multiplicity detection.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2026Universal",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "under FSYNC, even with strong extra capabilities"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2026Universal",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best; no additional assumptions except for point formation."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Universal pattern formation: from every configuration of $n$ robots, possibly with several robots on one point, the robots must be able to form every given pattern of $n$ points, including patterns with multiplicities [Flocchini2026Universal]. Shown, simplified, the plan of [Flocchini2026Universal] under the sequential scheduler (one ringed robot moves per round): a robot leaves a crowded point until the robots occupy as many points as the pattern (hollow), then the pattern points are filled one by one; the last robot creates the double point.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: 6 robots on 4 points; pattern has 5",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              16,
+              30
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "b",
+            "p": [
+              16,
+              30
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "d",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "e",
+            "p": [
+              86,
+              22
+            ]
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              30
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                16,
+                30
+              ],
+              [
+                22,
+                40
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Now 5 points: fill the pattern, one robot a round",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              16,
+              30
+            ]
+          },
+          {
+            "id": "b",
+            "p": [
+              22,
+              40
+            ]
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "d",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "e",
+            "p": [
+              86,
+              22
+            ]
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22,
+              40
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                22,
+                40
+              ],
+              [
+                30,
+                44
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              16,
+              30
+            ]
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "d",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "e",
+            "p": [
+              86,
+              22
+            ]
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16,
+              30
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                16,
+                30
+              ],
+              [
+                30,
+                12
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              30,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "d",
+            "p": [
+              62,
+              50
+            ],
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "e",
+            "p": [
+              86,
+              22
+            ]
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              50
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                50
+              ],
+              [
+                70,
+                44
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              30,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              70,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "p": [
+              86,
+              22
+            ]
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              22
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                70,
+                12
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              30,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              70,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "p": [
+              70,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "f",
+            "p": [
+              44,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44,
+              8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                44,
+                8
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              30,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              62,
+              50
+            ]
+          },
+          {
+            "id": "d",
+            "p": [
+              70,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "p": [
+              70,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "f",
+            "p": [
+              50,
+              28
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              50
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                62,
+                50
+              ],
+              [
+                50,
+                28
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: the pattern, with its double point",
+        "ents": [
+          {
+            "id": "a",
+            "p": [
+              30,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "b",
+            "p": [
+              30,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "c",
+            "p": [
+              50,
+              28
+            ],
+            "c": "tight",
+            "r": 2.6,
+            "l": "2"
+          },
+          {
+            "id": "d",
+            "p": [
+              70,
+              44
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "e",
+            "p": [
+              70,
+              12
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "f",
+            "p": [
+              50,
+              28
+            ],
+            "c": "tight",
+            "r": 2.6,
+            "l": "2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              30,
+              44
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              44
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              12
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70,
+              12
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 3.8,
+            "c": "tight",
+            "w": 0.4
+          }
+        ]
+      }
+    ]
+  }
+}

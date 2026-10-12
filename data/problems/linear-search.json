@@ -1,0 +1,1732 @@
+{
+  "id": "linear-search",
+  "model": "search-in-geometric-domains",
+  "name": "Linear search (cow path)",
+  "origin": {
+    "ref": "Beck1964Linear",
+    "year": 1964,
+    "note": "Bellman posed the problem in 1963 and Beck analysed it in 1964; computer scientists rediscovered it in the late 1980s as the cow-path problem [Kupavskii2018Lower]."
+  },
+  "summary": "A robot on a line (or on $m$ rays from a point) must find a target at unknown distance; how small can the competitive ratio be?",
+  "statement": "One or more unit-speed robots start at the origin of a line (or of $m$ rays sharing an endpoint). A target lies at an unknown point at distance $d \\ge 1$. **Time** is the competitive ratio: the worst case, over target positions, of the time until the target is found (in **search**: by the first robot; in **evacuation**: by all robots) divided by $d$.",
+  "primer": {
+    "intro": "A cow stands at a gate on an endless straight fence and knows that a hole is somewhere along the fence, but not on which side or how far. She walks at unit speed and sees the hole only when she reaches it. In linear search, one robot starts at the origin of a line, the target is at an unknown distance $d \\ge 1$ on an unknown side, and we measure the *competitive ratio*: the worst case, over all target positions, of (time to find the target) divided by $d$. A ratio of 9 means the robot never walks more than about nine times the distance it would walk if it knew where the target was.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Doubling: go 1 right, 2 left, 4 right, ...",
+        "variant": "line",
+        "ref": "BaezaYates1993Searching",
+        "idea": "1. Set $i = 0$.\n2. Walk distance $2^i$ to one side (right when $i$ is even, left when $i$ is odd), checking for the target.\n3. If it is not there, walk back to the origin.\n4. Increase $i$ by one and repeat.",
+        "analysis": "The worst place for the target is just past a turning point, say at $d = 2^i + \\varepsilon$: the robot turned back there and finds it only on the next trip to that side, trip $i+2$. By then it has walked $2(1 + 2 + \\dots + 2^{i+1}) = 2(2^{i+2}-1) < 8 \\cdot 2^i < 8d$, plus the final $d$, in total less than $9d$. So the ratio is at most 9, and [BaezaYates1993Searching] prove that this is optimal for deterministic strategies.",
+        "why_it_matters": "Doubling is the universal answer to \"I do not know how far it is\": it reappears in search on rays, in online algorithms, and in robots that do not know $n$."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Why no deterministic strategy beats 9",
+        "variant": "line",
+        "ref": "BaezaYates1993Searching",
+        "idea": "Any deterministic strategy can be described by its turning points $x_1, x_2, x_3, \\dots$, alternating sides, and one can show it is enough to consider growing ones. The adversary puts the target just beyond $x_i$, on that side. The robot finds it only after the next turning point on the other side, so its time is at least $2(x_1 + \\dots + x_{i+1}) + x_i$. Write $S_j = x_1 + \\dots + x_j$. A ratio at most $1 + 2c$ for every $i$ needs $S_{i+1} \\le c\\, x_i = c(S_i - S_{i-1})$.",
+        "analysis": "Let $q_i = S_{i+1}/S_i$, which is greater than 1. Dividing the inequality by $S_i$ gives $q_i \\le c - c/q_{i-1}$. Because $q + c/q \\ge 2\\sqrt c$ for every $q > 0$, we get $q_i \\le q_{i-1} - (2\\sqrt c - c)$. If $c < 4$, the amount $2\\sqrt c - c$ is a fixed positive number, so $q_i$ drops by at least that much at every step and eventually falls below 1, a contradiction. Hence $c \\ge 4$ and the ratio is at least $1 + 2 \\cdot 4 = 9$, matching doubling (up to small terms in $d$) [BaezaYates1993Searching], [Beck1964Linear].",
+        "why_it_matters": "It is the prototype adversary argument for online search: hide the target just past the point where the searcher gave up."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Randomize the first side and the scale",
+        "variant": "line-randomized",
+        "ref": "Kao1996Randomized",
+        "idea": "1. Toss a coin to choose which side to try first.\n2. Choose a random starting distance.\n3. From then on, multiply the turning distance by the same fixed factor on every trip, alternating sides.",
+        "analysis": "The adversary, who must fix the target before the coins are tossed, no longer knows where the turning points are, so it cannot always place the target just past one. The expected ratio drops to about $4.5911$, and [Kao1996Randomized] prove that no randomized strategy does better on the line. On $m$ rays (half-lines from one point) the optimal deterministic ratio is $1 + 2m^m/(m-1)^{m-1}$ [BaezaYates1993Searching], which gives 9 for $m = 2$.",
+        "why_it_matters": "It shows how randomness weakens an adversary that relies on knowing your plan."
+      }
+    ]
+  },
+  "history": "The first question was the **optimal search plan** for one searcher on a line [Beck1964Linear], posed by Bellman. Computer scientists recast it as competitive analysis and found that doubling is optimal with ratio 9, and the exact ratio for $m$ rays, where the turning distances grow by the factor $m/(m-1)$ [BaezaYates1993Searching]; randomization lowers the ratio on the line to about 4.5911 [Kao1996Randomized]. Recent work asks for **group search with faulty robots** [Czyzowicz2019FaultyLine] [Kupavskii2018Lower] [Czyzowicz2021Byzantine] and robots of different speeds [Bampas2019Speeds].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Competitive ratio",
+      "description": "worst-case time divided by the distance to the target"
+    }
+  ],
+  "axes": [
+    {
+      "id": "domain",
+      "name": "Domain",
+      "values": [
+        {
+          "id": "rays",
+          "level": 0,
+          "label": "$m$ rays from a common origin",
+          "short": "$m$ rays",
+          "definition": "$m\\ge2$ half-lines sharing their endpoint, the origin, where the robots start."
+        },
+        {
+          "id": "line",
+          "level": 1,
+          "label": "the line (two rays)",
+          "short": "line",
+          "definition": "The real line, robots start at $0$; the target is at an unknown $x$ with $|x|\\ge1$."
+        }
+      ],
+      "origin": "Bellman and Beck posed search for a target on the real line [Bellman1963Optimal] [Beck1964Linear] (as reported by [Czyzowicz2021Byzantine]). Baeza-Yates, Culberson and Rawlins treated the line as two rays and generalised to $m$ rays from a common origin, with the optimal deterministic competitive ratio $1 + 2m^m/(m-1)^{m-1}$, attained by turning at distances $(m/(m-1))^i$ while visiting the rays cyclically (Theorem 2.3 of [BaezaYates1993Searching]). Searching on $m$ concurrent rays has, in the words of Hammar et al. quoted by Brandt et al., \"paradigmatic status\" in competitive analysis [Brandt2020Rays]. The ray star is level 0 here because it contains the line ($m = 2$) as a special case."
+    },
+    {
+      "id": "robots",
+      "name": "Number of robots",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number $k$ of robots",
+          "short": "any $k$",
+          "definition": "$k\\ge1$ robots."
+        },
+        {
+          "id": "one",
+          "level": 1,
+          "label": "a single robot",
+          "short": "one robot",
+          "definition": "A single robot."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two robots",
+          "short": "two robots",
+          "definition": "Two robots."
+        }
+      ],
+      "origin": "The classical problem has one searcher [Beck1964Linear] [BaezaYates1993Searching]. Chrobak et al. and Czyzowicz et al. proposed parallel versions with $k$ robots on the line, where communication and faults make the team size matter [Chrobak2015GroupSearch] [Czyzowicz2019FaultyLine] (as reported by [Kupavskii2018Lower]). With $k$ fault-free robots, two of them already finish in time equal to the distance by going in opposite directions, so the multi-robot questions are interesting only with faults, with evacuation, or with unequal speeds [Kupavskii2018Lower] [Bampas2019Speeds]. Two robots are the smallest team in which speeds and communication interact, and Bampas et al. solve that case for every speed ratio [Bampas2019Speeds]."
+    },
+    {
+      "id": "goal",
+      "name": "Goal",
+      "values": [
+        {
+          "id": "evacuation",
+          "level": 0,
+          "label": "evacuation: every robot must reach the target",
+          "short": "evacuation",
+          "definition": "The task ends when every robot has reached the target."
+        },
+        {
+          "id": "search",
+          "level": 1,
+          "label": "search: the first robot to reach the target ends the task",
+          "short": "search",
+          "definition": "The task ends when the first robot reaches the target (and, with faults, the others can be sure of it)."
+        }
+      ],
+      "origin": "In search the time is the first arrival at the target, while in group evacuation it is the arrival of the last robot [Bampas2019Speeds] [Czyzowicz2021GroupEvacuation]. Chrobak et al. showed that evacuating several uniform agents on the line is as hard as the cow-path problem (as reported by [Czyzowicz2014Evacuating]) [Chrobak2015GroupSearch]. Bampas et al. compare search with rendezvous: in both the time is set by the last robot to arrive, but in search the meeting point is chosen by the adversary [Bampas2019Speeds]. With faults the two goals are closely linked: when $k = 2f+1$ all agents may have to reach the target, and crash evacuation is then \"a sub-problem of the more difficult byzantine search problem\" [Czyzowicz2021NearMajority]."
+    }
+  ],
+  "axis_order": [
+    "domain",
+    "robots",
+    "goal",
+    "communication",
+    "faults",
+    "speeds",
+    "algorithm"
+  ],
+  "variants": [
+    {
+      "id": "line",
+      "title": "One robot on a line",
+      "standard": true,
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "goal": "search"
+      },
+      "summary": "Doubling the turning point each time gives competitive ratio 9, and nothing deterministic does better.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "9",
+          "ref": "BaezaYates1993Searching",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "deterministic",
+            "target at an unknown integer distance $d$ on an unknown side",
+            "ratio up to lower-order terms in $d$"
+          ],
+          "note": "Theorem 2.1 of [BaezaYates1993Searching]. Also due to [Beck1964Linear] in the original formulation."
+        }
+      ],
+      "results": [
+        {
+          "ref": "BaezaYates1993Searching",
+          "role": "best",
+          "time": "9",
+          "note": "Introductory (in the competitive formulation) and current best: linear spiral search (turning points $2^i$) walks at most $9d$ steps; there are algorithms with $9d - \\Theta((\\log d)^i)$ steps for any $i$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 9."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [BaezaYates1993Searching] (scan, Section 2.1). The bound is on the constant multiple of the distance; lower-order terms are not optimised.",
+      "status": "verified"
+    },
+    {
+      "id": "rays",
+      "title": "One robot on $m$ rays",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "one",
+        "goal": "search"
+      },
+      "summary": "On $m$ rays the optimal deterministic ratio is $1 + 2m^m/(m-1)^{m-1}$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac{2m^m}{(m-1)^{m-1}}",
+          "ref": "BaezaYates1993Searching",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "deterministic",
+            "target at an unknown integer distance on one of $m$ rays",
+            "ratio up to lower-order terms",
+            "also the special case $k=1$, $f=0$ of [Kupavskii2018Lower]"
+          ],
+          "note": "Theorem 2.3 of [BaezaYates1993Searching]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "BaezaYates1993Searching",
+          "role": "best",
+          "time": "1+\\frac{2m^m}{(m-1)^{m-1}}",
+          "note": "Introductory and current best: generalized linear spiral search, turning points $(m/(m-1))^i$ and rays visited cyclically."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [BaezaYates1993Searching] (scan, Section 2.3).",
+      "status": "verified"
+    },
+    {
+      "id": "line-randomized",
+      "title": "One randomized robot on a line",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "goal": "search",
+        "algorithm": "randomized"
+      },
+      "summary": "Randomization lowers the optimal expected ratio on the line to about 4.5911.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 4.5911",
+          "ref": "Kao1996Randomized",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "expected competitive ratio",
+            "any randomized algorithm",
+            "goal position fixed in advance (oblivious adversary)",
+            "two paths (the line)"
+          ],
+          "note": "Theorem 4.1 of [Kao1996Randomized]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kao1996Randomized",
+          "role": "best",
+          "time": "\\approx 4.5911",
+          "note": "Introductory and current best (SmartCow): randomness only in a random permutation of the paths and a random initial distance; ratio $\\approx 4.5911$ on the line, and about $3.088\\,m + o(m)$ on $m$ rays."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Optimal among randomized algorithms."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Kao1996Randomized]. The ratio is the fixed point of an equation and is computed numerically (Theorem 5.1). Kao, Reif and Tate say Gal had obtained many of these results earlier in a game-theoretic setting, and that optimality for every number $m \\ge 2$ of rays was proved afterwards by Kao et al. (SODA 1994; not in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "line-crash",
+      "title": "$k$ robots on a line, $f$ crash faults",
+      "assumptions": {
+        "faults": "crash",
+        "speeds": "equal",
+        "domain": "line",
+        "goal": "search",
+        "communication": "wireless"
+      },
+      "summary": "With $k$ wireless robots of which $f$ may fail to report the target, the optimal ratio is known exactly.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "2\\rho^{\\rho}/(\\rho-1)^{\\rho-1}+1",
+          "ref": "Kupavskii2018Lower",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "$\\rho = 2(f+1)/k$, for $k < 2(f+1)$",
+            "ratio 1 if $k \\ge 2f+2$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2019FaultyLine",
+          "role": "best",
+          "time": "2\\rho^{\\rho}/(\\rho-1)^{\\rho-1}+1",
+          "note": "Introductory and current best (proportional schedules); optimality proved by [Kupavskii2018Lower]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Matching bounds."
+        }
+      },
+      "open": [],
+      "notes": "On $m$ rays the same formula holds with $\\rho = m(f+1)/k$ [Kupavskii2018Lower].",
+      "status": "verified"
+    },
+    {
+      "id": "line-byzantine",
+      "title": "$k$ robots on a line, Byzantine faults",
+      "assumptions": {
+        "speeds": "equal",
+        "domain": "line",
+        "goal": "search",
+        "communication": "wireless"
+      },
+      "summary": "Byzantine robots may lie about the target; the optimal ratio is known only for some densities $f/k$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 5.23",
+          "ref": "Kupavskii2018Lower",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$k = 3$, $f = 1$",
+            "improves 3.93 of [Czyzowicz2021Byzantine]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2021Byzantine",
+          "role": "best",
+          "time": "\\text{depends on } f/k",
+          "note": "Introductory and current best; optimal for some densities of faulty robots."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "For $k=3$, $f=1$ the upper bound is not matched."
+        }
+      },
+      "open": [
+        "Determine the optimal competitive ratio $B(k,f)$ for Byzantine search on the line; already $B(3,1)$ is open."
+      ],
+      "notes": "For three robots with one Byzantine robot the upper bound is about $7.437$ [Czyzowicz2021NearMajority], improving $8.653$ [Sun2020Byzantine].",
+      "status": "verified"
+    },
+    {
+      "id": "two-speeds",
+      "title": "Two robots of different speeds, both must reach the target",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two"
+      },
+      "summary": "For two robots with different maximum speeds that must both reach the target, the optimal strategy is known for every speed ratio when they communicate by meeting.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{matching}",
+          "ref": "Bampas2019Speeds",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "face-to-face communication",
+            "all speed ratios"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bampas2019Speeds",
+          "role": "best",
+          "time": "\\text{optimal for every speed ratio}",
+          "note": "Wireless communication helps only while the faster robot is at most $\\sqrt{17}+4 \\approx 8.12$ times faster."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Optimal (face-to-face); the wireless case is optimal within the stated speed range."
+        }
+      },
+      "open": [],
+      "notes": "Introduced by Chrobak, Gąsieniec, Gorry and Martin (SOFSEM 2015, not yet in the bibliography).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Linear search (cow path): a robot starts at the origin of a line and must reach a target at unknown distance $d \\ge 1$ on an unknown side. The animation runs the doubling strategy at unit speed, turning at $1, -2, 4, -8, \\dots$ (trace above the line, one level per trip); the target, at $d = 2.5$ just beyond the turning point $-2$, is found on the next trip to the left at time $16.5 = 6.6\\,d$. In the worst case the strategy finds the target within time $9d$, which is optimal [BaezaYates1993Searching].",
+    "view": [
+      100,
+      54
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            3,
+            12
+          ],
+          [
+            97,
+            12
+          ]
+        ],
+        "c": "fg",
+        "w": 0.8
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            50,
+            10.5
+          ],
+          [
+            50,
+            13.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          50,
+          7
+        ],
+        "s": "0"
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            60,
+            10.5
+          ],
+          [
+            60,
+            13.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          60,
+          7
+        ],
+        "s": "1"
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            30,
+            10.5
+          ],
+          [
+            30,
+            13.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          30,
+          7
+        ],
+        "s": "−2"
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            90,
+            10.5
+          ],
+          [
+            90,
+            13.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          90,
+          7
+        ],
+        "s": "4"
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            10,
+            10.5
+          ],
+          [
+            10,
+            13.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          10,
+          7
+        ],
+        "s": "−4"
+      },
+      {
+        "t": "text",
+        "p": [
+          25.0,
+          7
+        ],
+        "s": "d",
+        "c": "near"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              50.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [],
+        "label": "Start: robot at 0; the target is somewhere"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              60.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60.0,
+                18.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ],
+        "label": "Turn at 1, back to 0"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              50.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50.0,
+                22.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              40.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                40.0,
+                27.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              30.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30.0,
+                27.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ],
+        "label": "Turn at −2: the target lies just beyond"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              40.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                40.0,
+                31.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              50.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50.0,
+                31.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              60.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                60.0,
+                36.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              70.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                70.0,
+                36.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              80.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                80.0,
+                36.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              90.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90.0,
+                36.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ],
+        "label": "Turn at 4, back to 0"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              80.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                80.0,
+                40.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              70.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                70.0,
+                40.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              60.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                60.0,
+                40.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              50.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                50.0,
+                40.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ],
+        "label": "Left again, up to −8: found on this trip"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              40.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                50,
+                40.5
+              ],
+              [
+                50,
+                45.0
+              ],
+              [
+                40.0,
+                45.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              30.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                50,
+                40.5
+              ],
+              [
+                50,
+                45.0
+              ],
+              [
+                30.0,
+                45.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              25.0,
+              12
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              25.0,
+              12
+            ],
+            "k": "target",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                18.0
+              ],
+              [
+                60,
+                18.0
+              ],
+              [
+                60,
+                22.5
+              ],
+              [
+                50,
+                22.5
+              ],
+              [
+                50,
+                27.0
+              ],
+              [
+                30,
+                27.0
+              ],
+              [
+                30,
+                31.5
+              ],
+              [
+                50,
+                31.5
+              ],
+              [
+                50,
+                36.0
+              ],
+              [
+                90,
+                36.0
+              ],
+              [
+                90,
+                40.5
+              ],
+              [
+                50,
+                40.5
+              ],
+              [
+                50,
+                45.0
+              ],
+              [
+                25.0,
+                45.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          }
+        ],
+        "label": "Final: found at time 16.5 = 6.6 d (worst case < 9d)"
+      }
+    ]
+  }
+}

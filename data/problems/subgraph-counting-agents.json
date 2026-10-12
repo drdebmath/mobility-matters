@@ -1,0 +1,2069 @@
+{
+  "id": "subgraph-counting-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Triangle and butterfly counting by agents",
+  "origin": {
+    "ref": "Chand2026Triangle",
+    "year": 2024,
+    "note": "Agent-based triangle counting (arXiv 2024; IEEE Transactions on Networking 2026)."
+  },
+  "summary": "$n$ agents in an anonymous graph must count small subgraphs (triangles; butterflies in bipartite graphs) at every node.",
+  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must compute, at every node, the number of triangles (or butterflies) it belongs to: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Imagine $n$ agents, one in each room of a building, who want to know how tightly the rooms are linked: for each room, how many pairs of its neighbouring rooms are also linked to each other. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$ (most corridors at one room); a *triangle* is three nodes all joined to each other. Agents have distinct IDs between $1$ and $L$, can talk only to agents in the same room, and move in synchronous *rounds* (talk, then walk along at most one corridor). For the basic version the agents start anywhere and know nothing about the graph; at the end the agent on each node $v$ must know the number of triangles containing $v$. We count rounds and bits of memory per agent. Like all problems in this family, the work starts by spreading out one agent per node and letting neighbouring agents meet, the method explained under leader election by agents.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Learn your neighbours, then compare lists",
+        "variant": "triangles",
+        "ref": "Chand2026Triangle",
+        "idea": "1. **Get organised.** The agents spread out (one per node), elect a leader and build a spanning tree, learning $\\Delta$ on the way.\n2. **Meet your neighbours.** Write IDs with $\\log L$ bits. In block $i$ (of $2\\Delta$ rounds), agents whose $i$-th bit is $1$ visit their neighbours one by one, and agents whose bit is $0$ stay home. Every pair of neighbours meets in some block, and each agent writes down the IDs of all its neighbours.\n3. **Compare lists.** Repeat the meetings. When the agents on neighbouring nodes $v$ and $u$ meet, they count the IDs that appear on both lists: that is the number of triangles that contain the edge $\\{v, u\\}$.\n4. **Add up.** The agent on $v$ adds these counts over all its neighbours and divides by 2: each triangle $\\{v, u, w\\}$ was counted once through $u$ and once through $w$.",
+        "analysis": "Step 2 and step 3 each take $\\log L$ blocks of $2\\Delta$ rounds, i.e. $O(\\Delta\\log L)$ rounds, and each agent stores up to $\\Delta$ IDs, i.e. $O(\\Delta\\log L)$ bits. Step 1 costs $O(n\\log^2 n)$ rounds, and it dominates the total $O(n\\log^2 n + \\Delta\\log L)$ [Chand2026Triangle]. The same counts per edge give truss decomposition and local clustering coefficients. No lower bound is proved.",
+        "why_it_matters": "It shows that once agents are organised, local graph statistics cost only $O(\\Delta\\log L)$ rounds, so the bottleneck is getting organised, not counting."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "The total count needs information from both ends of the graph",
+        "variant": "triangles",
+        "idea": "Besides the per-node counts, the algorithm also lets the agents learn the total number of triangles. Information moves at most one edge per round, because it travels only inside agents and a agent walks at most one edge per round. So after $t$ rounds, what a agent standing on node $y$ knows depends only on the part of the graph within distance $t$ of $y$. Take a long path and, at each end, attach two extra nodes $a$ and $b$ to the end node; adding the edge $\\{a, b\\}$ closes a triangle. If a agent announces the total after fewer than about $D/2$ rounds, where $D$ is the *diameter* (largest distance between two nodes), one end lies outside what it can know about. Adding or removing the edge $\\{a, b\\}$ there changes the true total but not what this agent knows, so in one of the two graphs its answer is wrong.",
+        "analysis": "So computing the total needs $\\Omega(D)$ rounds. This is our own short argument, not a result recorded in the catalogue; the known algorithm needs $O(n + \\Delta\\log L)$ rounds for the total after the set-up, and on a path $D$ is about $n$, so it is optimal there up to a constant factor. For the per-node counts this argument gives nothing, because they depend only on nearby nodes.",
+        "why_it_matters": "This \"information moves one edge per round\" argument is the simplest lower-bound tool for agents, and it separates local tasks (per-node counts) from global ones (totals)."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Bipartite graphs: one side walks while the other waits",
+        "variant": "butterflies",
+        "ref": "Chand2025Butterfly",
+        "idea": "In a *bipartite* graph the nodes split into two sides $V_1$ and $V_2$ and every edge joins the two sides. A *butterfly* is a 4-cycle: two nodes $a, a'$ on one side with two common neighbours on the other.\n\n1. The agents, starting one per node, elect a leader, build a spanning tree and learn which side they are on.\n2. In odd rounds the agents on one side visit their neighbours while the other side waits at home; in even rounds the roles swap. Within $2\\Delta$ rounds every agent knows its neighbours' IDs.\n3. The agent on $a$ visits its neighbours again and reads their lists, so it learns, for every $a'$ on its side, the number $c$ of common neighbours of $a$ and $a'$.\n4. Each such pair lies on $\\binom{c}{2}$ butterflies (choose two of the common neighbours); summing over $a'$ gives the number of butterflies through $a$.",
+        "analysis": "Because the two sides take turns, no ID-bit schedule is needed: neighbours meet within $2\\Delta$ rounds rather than $O(\\Delta\\log L)$, and the per-node counts take $O(\\Delta)$ rounds. The set-up takes $O(n\\log L)$ rounds, for a total of $O(n\\log L + \\Delta)$ rounds with $O(\\Delta\\log L)$ bits per agent [Chand2025Butterfly].",
+        "why_it_matters": "Knowing more structure (here, a 2-colouring of the graph) can remove the $\\log L$ cost of making neighbours meet."
+      }
+    ]
+  },
+  "history": "Counting problems extend agent-based computing from symmetry breaking to **graph analytics**: triangle counting and its applications [Chand2026Triangle], and butterfly counting in bipartite graphs [Chand2025Butterfly].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "knowledge",
+    "initial",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of graph parameters",
+          "short": "no knowledge",
+          "definition": "Agents know no graph parameter ($n$, $m$, $\\Delta$, $D$)."
+        },
+        {
+          "id": "n-delta",
+          "level": 1,
+          "label": "$n$ and $\\Delta$ are known",
+          "short": "knows $n$, $\\Delta$",
+          "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
+        }
+      ],
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For triangle counting, Chand, Das and Molla remove the need to know $\\Delta$ in exactly this way [Chand2026Triangle]; their butterfly counting still assumes $L$ [Chand2025Butterfly]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "triangles",
+      "title": "Triangle counting",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "summary": "From an arbitrary placement and without prior knowledge, agents count triangles per node and per edge, which yields truss decomposition, triangle centrality and local clustering coefficients.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chand2026Triangle",
+          "role": "best",
+          "time": "O(n\\log^2 n + \\Delta\\log L)",
+          "memory": "O(\\Delta\\log L)",
+          "note": "Introductory and current best (Theorem 2): dispersion, leader election and a spanning tree in $O(n\\log^2 n)$ rounds, then per-node and per-edge counts in $O(\\Delta\\log L)$ rounds and the total in $O(n+\\Delta\\log L)$. Applications: truss decomposition in $O(m\\Delta\\log L + mD)$ rounds with $O(\\Delta^2\\log L)$ bits; triangle centrality and local clustering coefficients in $O(\\Delta\\log L)$ rounds."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is proved."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No lower bound is proved."
+        }
+      },
+      "open": [],
+      "notes": "$L$ is the largest agent identifier, at most $n^\\kappa$, so $\\log L = O(\\log n)$. Exactly $n$ agents. The problem is posed from a dispersed start, but Theorem 2 needs none. Checked against the full text (arXiv 2402.03653, version 3).",
+      "status": "verified"
+    },
+    {
+      "id": "butterflies",
+      "title": "Butterfly counting in bipartite graphs",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "bipartite"
+      },
+      "summary": "In a bipartite graph, agents starting dispersed count butterflies ($K_{2,2}$) per node in $O(n\\log L + \\Delta)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chand2025Butterfly",
+          "role": "best",
+          "time": "O(n\\log L + \\Delta)",
+          "memory": "O(\\Delta\\log L)",
+          "assumes": [
+            "knows $L$, an upper bound on the identifiers"
+          ],
+          "note": "Introductory and current best. Leader election, a spanning tree and the two sides of the bipartition take $O(n\\log L)$ rounds with $O(\\log L)$ bits (Theorem 3.5), on any graph; per-node butterfly counts then take $O(\\Delta)$ rounds and the total $O(\\Delta + \\min\\{|V_1|,|V_2|\\})$ (Theorem 4.4), with $O(\\Delta\\log L)$ bits (Lemma 4.3)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "$V_1$ and $V_2$ are the two sides of the bipartite graph. Checked against the full text (arXiv 2506.17721).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Triangle counting [Chand2026Triangle] on a triangle: after dispersing (one agent per node), electing a leader and learning $\\Delta$ (not shown), the agents write their IDs in 2 bits. In block $i$ (of $2\\Delta = 4$ rounds) agents whose $i$-th bit is 1 walk to each neighbour and back, one edge per round, while the others wait. In the first pass a visit to a waiting neighbour records both IDs (green edges); in the second pass, round by round with the same walks, the two ends of each edge count the IDs on both lists (blue numbers). Each agent adds its edges' counts and halves the sum: the number of triangles at its node.",
+    "view": [
+      100,
+      46
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          14,
+          8
+        ],
+        "b": [
+          50,
+          36
+        ],
+        "c": [
+          86,
+          8
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "a",
+          "c"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: dispersed; IDs written in 2 bits",
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Pass 1, block 1: 2, 3 visit; record IDs"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                14,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Pass 1, block 2: 1, 3 visit; record IDs"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                8
+              ],
+              [
+                14,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Pass 2, block 1: 2, 3 visit; compare lists"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              29.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                14,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Pass 2, block 2: 1, 3 visit; compare lists"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              29.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              29.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                8
+              ],
+              [
+                14,
+                8
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "fill": "soft",
+            "c": "line"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                50,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                8
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                36
+              ],
+              [
+                86,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.4
+          },
+          {
+            "t": "text",
+            "p": [
+              10,
+              2.5
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              37
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              90,
+              2.5
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              29.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              4.5
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              71.0,
+              25.0
+            ],
+            "s": "1",
+            "c": "accent",
+            "size": 3.0
+          },
+          {
+            "t": "text",
+            "p": [
+              9,
+              10
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3.4
+          },
+          {
+            "t": "text",
+            "p": [
+              44,
+              38
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3.4
+          },
+          {
+            "t": "text",
+            "p": [
+              91,
+              10
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 3.4
+          }
+        ],
+        "label": "Final: (1 + 1) / 2 = 1 triangle at every node"
+      }
+    ]
+  }
+}

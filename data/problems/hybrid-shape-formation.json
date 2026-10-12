@@ -1,0 +1,2479 @@
+{
+  "id": "hybrid-shape-formation",
+  "model": "programmable-matter",
+  "name": "Shape formation by hybrid programmable matter",
+  "origin": {
+    "ref": "Gmyr2020Tile",
+    "year": 2017,
+    "note": "First presented at EuroCG 2017 (non-archival); DNA 24 (2018); Natural Computing 2020. The work began at a Dagstuhl seminar in 2016."
+  },
+  "related": [
+    {
+      "problem": "shape-formation-amoebots",
+      "relation": "In the hybrid model the tiles are passive and one active agent moves them; in the amoebot model every particle is active."
+    }
+  ],
+  "summary": "One finite-automaton agent rearranges passive tiles into a target shape.",
+  "statement": "$n$ passive hexagonal tiles (rhombic dodecahedra in 3D) occupy nodes of a lattice and form a connected structure. A single active agent, a deterministic finite automaton, starts on a tile, must always stand on or next to a tile, sees its node and the adjacent nodes, and in each step lifts a tile, places the tile it carries, or moves to an adjacent node; it carries at most one tile, and the tiles (with the carried tile counted at the agent's node) must stay connected. It must rearrange the tiles into a target shape (a line, a triangle, or an intermediate structure such as a block or a tree). **Time** counts the agent's steps (rounds).",
+  "primer": {
+    "intro": "Imagine a single small robot on a beach of hexagonal tiles, which can pick up one tile at a time, carry it, and put it down elsewhere, and must rebuild the whole pile into a given shape. Here $n$ passive hexagonal tiles sit on nodes of the triangular grid and form a connected structure; one active robot, with only a fixed finite memory (a *finite automaton*), starts on a tile. Unlike in the amoebot model, the tiles cannot expand or contract; only the robot moves, one step to a neighbouring node per round, always staying on or next to a tile, and it may lift the tile under it or place the tile it carries. The tiles (counting the carried one) must stay connected. The goal is a target shape such as a straight line or a triangle; time is the number of the robot's steps, and $D$ is the diameter of the initial structure.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Build a line by moving top-left tiles down",
+        "variant": "planar",
+        "ref": "Gmyr2020Tile",
+        "idea": "The line will be a vertical column of tiles.\\n\\n1. The robot walks south (down) as long as there is a tile below it.\\n2. **Search.** It walks north, north-west or south-west (in that order of preference) as long as one of these has a tile. It stops on a tile that is locally top-left.\\n3. **Move.** It lifts that tile, steps once to the south-east, walks south until it reaches an empty node, and places the tile there.\\n4. It repeats from step 2. When a search finds no tile to the east or west, the structure is a line and the robot stops.",
+        "analysis": "The tile it moves is never needed to hold the structure together, because it is placed back where it reconnects any neighbours it might have separated. Tiles only move south-east and south, and each tile moves at most about $2n$ steps, so there are $O(n^2)$ moving steps; a bookkeeping argument bounds the searching steps by the same amount. Total: $O(n^2)$ rounds [Gmyr2020Tile]. The same paper builds a more compact intermediate shape (a *block*) in $O(nD)$ rounds, and from it a triangle in $O(nD)$ rounds, which is $O(n^{3/2})$ when $D$ is about $\\sqrt n$.",
+        "why_it_matters": "It shows a robot with constant memory can reshape a large structure, using simple intermediate shapes it can navigate."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Carrying one tile at a time is slow",
+        "variant": "planar",
+        "ref": "Gmyr2020Tile",
+        "idea": "Start from a compact blob of $n$ tiles, of diameter about $\\sqrt n$, and ask for a line. As in shape formation, a constant fraction of the tiles must end at distance proportional to $n$ from where they started. The robot carries one tile at a time and moves one node per step, so each such tile costs it about $n$ steps of carrying.",
+        "analysis": "So a constant fraction of $n$ tiles times about $n$ steps each gives $\\Omega(n^2)$ steps [Gmyr2020Tile], and the line algorithm above is optimal. A similar argument gives $\\Omega(nD)$ for the block, so the block algorithm is optimal as well.",
+        "why_it_matters": "With a single worker, the total distance tiles must travel directly bounds the time."
+      },
+      {
+        "kind": "impossibility",
+        "title": "A robot with finite memory cannot find a safe tile",
+        "variant": "planar",
+        "ref": "Gmyr2020Tile",
+        "idea": "The naive approach would be: find a tile whose removal keeps the structure connected (a *safely removable* tile), carry it to the target, repeat. Consider a large hollow hexagon of tiles, a closed ring. A robot with $s$ memory states walking along a long side of the ring sees the same thing at every step, so after at most $s$ steps it repeats its behaviour; it cannot count the length of a side. So it cannot tell this ring apart from a structure that looks the same nearby but is not closed far away, where the same tile is no longer safe to remove. [Gmyr2020Tile] (Theorem 1) make this precise with hollow hexagons and spirals; the full proof is longer.",
+        "analysis": "No finite automaton can, without lifting tiles, always stop on a safely removable tile. With a single *pebble*, a marker it can drop and pick up, it can find one in $O(n^2)$ rounds [Gmyr2020Tile] (Theorem 2). This is why the algorithms above move tiles only in ways that are always locally safe.",
+        "why_it_matters": "It shows how far a finite memory falls short of seeing the whole picture, and why a single marker helps so much."
+      }
+    ]
+  },
+  "history": "The hybrid model asked what **one weak active agent** can build from passive material; the first answer was that it cannot always find a tile that is safe to remove, so it builds intermediate structures by local moves instead [Gmyr2020Tile], and then whether the same holds in 3D [Hinnenthal2024Shape3D].",
+  "ignore_axes": [
+    "orientation",
+    "scheduler",
+    "memory",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "axes": [
+    {
+      "id": "space",
+      "name": "Space",
+      "values": [
+        {
+          "id": "3d",
+          "level": 0,
+          "label": "three-dimensional lattice",
+          "short": "3D",
+          "definition": "Tiles occupy nodes of the face-centred cubic lattice; planar structures are a special case."
+        },
+        {
+          "id": "2d",
+          "level": 1,
+          "label": "the triangular lattice (planar)",
+          "short": "2D",
+          "definition": "Tiles occupy nodes of the triangular lattice."
+        }
+      ],
+      "origin": "The hybrid model has a few active agents with the power of finite automata and many passive tiles that the agents pick up, carry and place [Hinnenthal2024Shape3D]. It is motivated by the observation that \"while fabricating computing DNA robots remains challenging, producing simple passive tiles from folded DNA strands is efficient and scalable\", and an agent can be reused after a task [Hinnenthal2024Shape3D]. The earliest paper of the model in this atlas, by Gmyr et al. (DNA 24, 2018), works in the plane [Gmyr2020Tile]. Hinnenthal, Liedtke and Scheideler moved to three dimensions, with rhombic-dodecahedral tiles on the face-centred cubic lattice. There \"complexity increases significantly, with instances where any tile movement can locally disconnect the structure\" [Hinnenthal2024Shape3D]. Coating in 3D followed [Kostitsyna2024Coating3D]."
+    }
+  ],
+  "axis_order": [
+    "space"
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds; in each round the agent performs one Look-Compute-Move step"
+    }
+  ],
+  "variants": [
+    {
+      "id": "planar",
+      "title": "Planar",
+      "standard": true,
+      "assumptions": {
+        "space": "2d"
+      },
+      "summary": "One agent builds a line or a tree in $O(n^2)$ rounds and a block in $O(nD)$ rounds, which is asymptotically optimal, and then a triangle in $O(nD)$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Gmyr2020Tile",
+          "bottleneck": "one active agent",
+          "preconditions": [
+            "line formation from an initial configuration of diameter $O(\\sqrt n)$: a constant fraction of the tiles must move a distance linear in $n$",
+            "a single agent carrying one tile at a time"
+          ],
+          "note": "Stated after Theorem 3 with a one-line argument (\"not hard to see\"); a similar argument gives $\\Omega(nD)$ for a block."
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Gmyr2020Tile",
+          "bottleneck": "memory",
+          "preconditions": [
+            "the agent must stop on a safely removable tile (not a cut vertex) without lifting any tile",
+            "no pebble",
+            "instances: hollow hexagons and a spiral of long segments"
+          ],
+          "note": "Theorem 1: no finite automaton finds a safely removable tile in general; with one pebble it takes $O(n^2)$ rounds (Theorem 2). This rules out the naive approach, not shape formation."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gmyr2020Tile",
+          "role": "best",
+          "time": "O(n^2)",
+          "assumes": [
+            "no compass needed: the agent keeps its orientation relative to its initial one"
+          ],
+          "note": "Introductory and current best: line in $O(n^2)$ (Theorem 3), block of diameter $O(D)$ in $O(nD)$ (Theorem 4), tree inside the initial convex hull in $O(n^2)$ (Theorem 5), triangle in $O(nD)$ (Theorem 6), hence $O(n^{3/2})$ when $D = O(\\sqrt n)$. With several agents, line formation was sped up almost linearly for a small number of agents in simulations only."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ for the line and $\\Theta(nD)$ for the block in the worst case; the lower bounds are sketched."
+        }
+      },
+      "open": [],
+      "notes": "$D$ is the diameter of the initial tile set. Checked against the full text of [Gmyr2020Tile] (Natural Computing version).",
+      "status": "verified"
+    },
+    {
+      "id": "space",
+      "title": "Three-dimensional",
+      "assumptions": {
+        "space": "3d"
+      },
+      "summary": "In 3D, one agent turns any connected tile structure into a low-diameter icicle in $O(n^3)$ steps.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Hinnenthal2024Shape3D",
+          "role": "best",
+          "time": "O(n^3)",
+          "note": "Introductory and current best (Theorem 14); matches the prior runtime of 3D line formation.",
+          "assumes": [
+            "the agent starts carrying a tile",
+            "a consistent compass",
+            "the agent may pass through tiles"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Shape formation by hybrid programmable matter, the line algorithm of [Gmyr2020Tile]: a single robot (blue ring), a finite automaton, walks on passive hexagonal tiles and carries at most one tile (amber). It first walks south as far as there are tiles; then it repeatedly searches, walking N, NW or SW (in that order) while there is a tile there, until it stands on a locally north-westernmost tile; it lifts that tile, steps once SE, walks S to the first empty node and places the tile there. One frame per step (move, lift or place); the tiles, with the carried tile counted at the robot, stay connected. It stops when the tiles form a single north-south line.",
+    "view": [
+      100,
+      56
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            96.77,
+            1.0
+          ],
+          [
+            99.0,
+            2.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            82.91,
+            1.0
+          ],
+          [
+            99.0,
+            10.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            69.05,
+            1.0
+          ],
+          [
+            99.0,
+            18.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            55.2,
+            1.0
+          ],
+          [
+            99.0,
+            26.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            41.34,
+            1.0
+          ],
+          [
+            99.0,
+            34.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            27.48,
+            1.0
+          ],
+          [
+            99.0,
+            42.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            13.63,
+            1.0
+          ],
+          [
+            99.0,
+            50.29
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            1.71
+          ],
+          [
+            93.3,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            9.71
+          ],
+          [
+            79.44,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            17.71
+          ],
+          [
+            65.59,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            25.71
+          ],
+          [
+            51.73,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            33.71
+          ],
+          [
+            37.88,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            41.71
+          ],
+          [
+            24.02,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            49.71
+          ],
+          [
+            10.16,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.5,
+            1.0
+          ],
+          [
+            1.5,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            8.43,
+            1.0
+          ],
+          [
+            8.43,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            15.36,
+            1.0
+          ],
+          [
+            15.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            22.29,
+            1.0
+          ],
+          [
+            22.29,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            29.22,
+            1.0
+          ],
+          [
+            29.22,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            36.14,
+            1.0
+          ],
+          [
+            36.14,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            43.07,
+            1.0
+          ],
+          [
+            43.07,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            50.0,
+            1.0
+          ],
+          [
+            50.0,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            56.93,
+            1.0
+          ],
+          [
+            56.93,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            63.86,
+            1.0
+          ],
+          [
+            63.86,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            70.78,
+            1.0
+          ],
+          [
+            70.78,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            77.71,
+            1.0
+          ],
+          [
+            77.71,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            84.64,
+            1.0
+          ],
+          [
+            84.64,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            91.57,
+            1.0
+          ],
+          [
+            91.57,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            98.5,
+            1.0
+          ],
+          [
+            98.5,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            2.29
+          ],
+          [
+            3.23,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            10.29
+          ],
+          [
+            17.09,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.29
+          ],
+          [
+            30.95,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            26.29
+          ],
+          [
+            44.8,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            34.29
+          ],
+          [
+            58.66,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            42.29
+          ],
+          [
+            72.52,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            50.29
+          ],
+          [
+            86.37,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            6.7,
+            55.0
+          ],
+          [
+            99.0,
+            1.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            20.56,
+            55.0
+          ],
+          [
+            99.0,
+            9.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            34.41,
+            55.0
+          ],
+          [
+            99.0,
+            17.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            48.27,
+            55.0
+          ],
+          [
+            99.0,
+            25.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            62.12,
+            55.0
+          ],
+          [
+            99.0,
+            33.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            75.98,
+            55.0
+          ],
+          [
+            99.0,
+            41.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            89.84,
+            55.0
+          ],
+          [
+            99.0,
+            49.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: connected tiles, robot on a tile",
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Walk south while there is a tile",
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Search for a north-westernmost tile",
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Lift it, step SE, walk S",
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              43.07,
+              42.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Place it at the first empty node",
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              43.07,
+              34.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "near",
+            "r": 2.6
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "muted",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "t0",
+            "k": "tile",
+            "p": [
+              50.0,
+              22.0
+            ],
+            "c": "tight",
+            "r": 4.0
+          },
+          {
+            "id": "t1",
+            "k": "tile",
+            "p": [
+              50.0,
+              30.0
+            ],
+            "c": "tight",
+            "r": 4.0
+          },
+          {
+            "id": "t2",
+            "k": "tile",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "tight",
+            "r": 4.0
+          },
+          {
+            "id": "t3",
+            "k": "tile",
+            "p": [
+              50.0,
+              6.0
+            ],
+            "c": "tight",
+            "r": 4.0
+          },
+          {
+            "id": "t4",
+            "k": "tile",
+            "p": [
+              50.0,
+              14.0
+            ],
+            "c": "tight",
+            "r": 4.0
+          },
+          {
+            "id": "robot",
+            "k": "agent",
+            "p": [
+              50.0,
+              38.0
+            ],
+            "c": "accent"
+          }
+        ],
+        "label": "Final: the tiles form a line"
+      }
+    ]
+  }
+}

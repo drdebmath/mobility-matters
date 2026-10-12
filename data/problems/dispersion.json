@@ -1,0 +1,2831 @@
+{
+  "id": "dispersion",
+  "model": "mobile-agents-on-graphs",
+  "derived_from": {
+    "problem": "collaborative-exploration",
+    "relation": "With $k = n$ agents, a dispersed configuration has an agent on every node, so any dispersion algorithm solves $n$-agent collaborative exploration under the same assumptions [Augustine2018Tradeoffs]. Consequently every lower bound for $n$-agent exploration is a lower bound for dispersion (this is how the $\\Omega(D^2)$ tree bound of [Disser2020General] enters), and every dispersion algorithm is an exploration algorithm for anonymous graphs with local communication. For $k < n$ dispersion asks for less: only $k$ nodes must be occupied."
+  },
+  "name": "Dispersion",
+  "origin": {
+    "ref": "Augustine2018Tradeoffs",
+    "year": 2018,
+    "note": "Posed at ICDCN 2018, fourteen years after collaborative exploration; the introductory paper already relates dispersion to $n$-robot collaborative exploration and takes its tree lower bound from it."
+  },
+  "summary": "Spread $k \\le n$ agents over the nodes of an $n$-node anonymous graph so that no node hosts more than one agent, as fast as possible and with as little memory per agent as possible.",
+  "statement": "Given a connected graph $G$ with $n$ nodes and $m$ edges, and $k \\le n$ agents placed on the nodes of $G$ in any initial configuration (several agents may share a node), the agents must reach a configuration in which **every node hosts at most one agent**, and stay there.\n\n**Time** is the number of rounds (synchronous) or epochs (asynchronous) until the dispersed configuration is reached; where a result also makes every agent terminate explicitly, the notes say so. **Memory** is the number of bits of persistent memory each agent needs, counting its $O(\\log k)$-bit identifier. Unless a variant or a result says otherwise, agents know nothing about $n$, $m$, $k$, $\\Delta$ or $D$.\n\nDispersion is the natural \"one agent per node\" problem: it is equivalent to leaving one agent at every node of a DFS tree of $k$ nodes, which is why DFS traversal bounds such as $\\min(m, k\\Delta)$ appear throughout, and it is a building block for exploration, leader election and self-deployment of agents.",
+  "primer": {
+    "intro": "Think of $k$ electric cars arriving in a town where each charging point (a node) can serve only one car, and no car has a map. The town is a connected graph with $n$ nodes and $m$ edges, and $k \\le n$ agents with distinct identifiers (ID numbers) start on nodes, several possibly on the same node. Time passes in synchronous **rounds**: in each round, agents at the same node can read each other's memory (**local communication**), and then each agent may move along one edge, choosing it by its port number (the local number of that edge at the node). The agents know nothing about the graph, not even $n$. They must reach a configuration in which **every node holds at most one agent**; we measure the number of rounds and the number of bits of memory each agent needs.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Depth-first search with a settled agent per node",
+        "variant": "rooted",
+        "ref": "Augustine2018Tradeoffs",
+        "idea": "When all $k$ agents start on one node (the **rooted** case), the agents move as one group and use settled agents as markers, as in [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient].\n1. At the start node, the agent with the smallest ID **settles**: it stays there for good and remembers by which port the group arrived (its **parent port**; none at the start).\n2. The rest of the group leaves by the next port not yet tried at this node.\n3. If the node it reaches already has a settled agent, it has been visited: the group goes back by the port it came in and tries the next port there.\n4. If the node is empty, the smallest ID in the group settles there and records the parent port; go to step 2.\n5. When every port of a node has been tried, the group goes back through that node's parent port, which the settled agent tells it.\n6. The group shrinks by one at each new node, and the procedure ends when the last agent settles.",
+        "analysis": "This is a depth-first search in which the settled agents replace the \"visited\" marks that anonymous nodes cannot hold. Each edge is tried at most once from each of its two endpoints, and each try costs two moves (there and back) or turns into a tree edge, so the time is $O(m)$ rounds; tries happen only at the at most $k$ nodes that receive an agent, each with at most $\\Delta$ ports, which gives $O(\\min(m, k\\Delta))$, where $\\Delta$ is the maximum degree. A settled agent remembers its ID and a few port numbers, $O(\\log(k+\\Delta))$ bits. The current best is $O(k)$ rounds with $O(\\log(k+\\Delta))$ bits, from any start [Kshemkalyani2025Almost]: it gets rid of the cost of checking every port, which held the field at $O(\\min(m,k\\Delta))$ until [Sudo2024NearLinear].",
+        "why_it_matters": "Using the agents themselves as markers is the idea every dispersion algorithm builds on, and it links dispersion to collaborative exploration with anonymous nodes."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Distance: Omega(k) rounds",
+        "variant": "base",
+        "ref": "Kshemkalyani2019Efficient",
+        "idea": "Put all $k$ agents on one end of a path (dots in a row). In the end the $k$ agents must stand on $k$ different nodes of the path, so one of them stands at least $k-1$ edges from the end where they all started. An agent crosses at most one edge per round.",
+        "analysis": "So some agent needs at least $k-1$ rounds, whatever the algorithm: $\\Omega(k)$ [Kshemkalyani2019Efficient]. The argument uses only distance, so it holds even for randomised algorithms, unlimited memory and global communication. The $O(k)$ algorithm of [Kshemkalyani2025Almost] matches it, so the time question is settled up to a constant factor.",
+        "why_it_matters": "It fixed the target: after it, every dispersion algorithm was measured by how far it is from $k$ rounds."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Symmetry: Omega(log k) bits",
+        "variant": "base",
+        "ref": "Augustine2018Tradeoffs",
+        "idea": "Suppose all agents run the same deterministic algorithm with the same amount of memory, and put them all on one node. If two of them start with exactly the same memory contents, they see the same things, make the same decisions and take the same ports in every round, so they stay together forever and dispersion fails. Hence the $k$ agents on that node need $k$ different memory contents at the start.",
+        "analysis": "With $b$ bits there are $2^b$ possible memory contents, so $2^b \\ge k$, that is $b \\ge \\log k$ [Augustine2018Tradeoffs]. This is why the bound counts the identifier: the ID is exactly what makes the memories differ. The best algorithms use $O(\\log(k+\\Delta))$ bits, so memory is optimal whenever $\\Delta$ is at most polynomial in $k$; whether the $\\log\\Delta$ term is needed has no published proof for agents with identifiers.",
+        "why_it_matters": "It is the simplest instance of symmetry breaking, the obstacle behind the anonymous-agent results in dispersion, rendezvous and gathering."
+      }
+    ]
+  },
+  "history": "Augustine and Moses Jr. posed dispersion as **a study of memory–time trade-offs** [Augustine2018Tradeoffs]: the primary aim was to **minimise the number of rounds**, and then the **memory per agent**, with $\\Omega(k)$ rounds and $\\Omega(\\log k)$ bits as the targets. Most of the later work closes these two gaps under weaker assumptions (arbitrary start, asynchrony, faults, dynamic graphs); the time-optimal $O(k)$ algorithm with $O(\\log(k+\\Delta))$ bits came in 2025 [Kshemkalyani2025Almost]. Its roots are in $n$-agent collaborative exploration, which a dispersion with $k = n$ solves.",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds in the synchronous model, epochs in the asynchronous model, until dispersion is reached"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits of persistent memory per agent, including its identifier"
+    }
+  ],
+  "variants": [
+    {
+      "id": "base",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "standard": true,
+      "title": "Arbitrary graph, arbitrary initial configuration",
+      "summary": "The standard setting: $k \\le n$ agents with unique identifiers, anywhere on an arbitrary anonymous graph, synchronous rounds, local communication, no faults, no knowledge of the graph.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "A path with all $k$ agents at one end. Also $\\Omega(D)$, and $\\Omega(n)$ in the worst case, when $k = n$ [Augustine2018Tradeoffs].",
+          "bottleneck": "distance",
+          "preconditions": [
+            "worst case over inputs: a path with all $k$ agents on one endpoint",
+            "one edge per round",
+            "holds for randomized algorithms, unbounded memory and global communication"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "note": "Two agents with identical state move in lockstep forever; stated as $\\Omega(\\log n)$ for $k = n$. Several papers quote $\\Omega(\\log(k+\\Delta))$, but the $\\log\\Delta$ term has no published proof for deterministic agents with identifiers.",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "introductory",
+          "time": "O(mn)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$ and $m$"
+          ],
+          "note": "Also $O(m)$ time with $O(n\\log n)$ bits. Introduces the problem and the memory–time trade-off view."
+        },
+        {
+          "ref": "Kshemkalyani2019Efficient",
+          "role": "other",
+          "time": "O(m)",
+          "memory": "O(k\\log\\Delta)",
+          "assumes": [
+            "knows $k$"
+          ],
+          "note": "First treatment of $k \\le n$. Also $O((m-n)k)$ time with $O(\\log k + \\log\\Delta)$ bits."
+        },
+        {
+          "ref": "Kshemkalyani2019Fast",
+          "role": "other",
+          "time": "O(\\min(m, k\\Delta)\\log k)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "knows $m$, $\\Delta$, $k$"
+          ],
+          "note": "Parallel DFS traversals merged over $O(\\log \\ell)$ passes ($\\ell$ = number of initially occupied nodes, so $\\log\\ell \\le \\log k$). Without knowing $m$: $O(k\\Delta\\log k)$ time with $O(\\log(k+\\Delta))$ bits."
+        },
+        {
+          "ref": "Shintaku2020Knowledge",
+          "role": "other",
+          "time": "O(\\min(m, k\\Delta, k^2)\\log \\ell)",
+          "memory": "O(\\log(k+\\Delta))",
+          "assumes": [
+            "knows a polynomial upper bound on identifiers"
+          ],
+          "note": "Same time as [Kshemkalyani2019Fast] with no knowledge of $m$, $k$ or $\\Delta$."
+        },
+        {
+          "ref": "Kshemkalyani2021NearOptimal",
+          "role": "other",
+          "time": "O(\\min(m, k\\Delta))",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Removes the $\\log\\ell$ factor; matches single-source DFS. Optimal in time and memory on constant-degree graphs. Holds in the asynchronous model too."
+        },
+        {
+          "ref": "Sudo2024NearLinear",
+          "role": "other",
+          "time": "O(k\\log k\\,\\log\\min(k,\\Delta))",
+          "memory": "O(\\log(k+\\Delta))",
+          "assumes": [
+            "knows a polynomial upper bound on identifiers"
+          ],
+          "note": "First bound independent of $m$ and $\\Delta$: $O(k\\log^2 k)$. Terminating all agents simultaneously needs upper bounds on $k$ and on the number of edges among any $k$ nodes."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Time-optimal. Settled agents oscillate between their node and a neighbour so that the DFS head can test whether a neighbour is occupied in $O(1)$ rounds; multiple DFS traversals are merged without the $\\log$ factors."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(k)$ matches $\\Omega(k)$ as of 2025; the question raised in 2019–2021 of whether $\\Omega(\\min(m,k\\Delta))$ could be a lower bound is settled in the negative."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ versus $\\Omega(\\log k)$: the two differ only when $\\Delta$ is super-polynomial in $k$, and no $\\Omega(\\log\\Delta)$ lower bound is proven."
+        }
+      },
+      "open": [
+        "Can the memory be reduced to $O(\\log k)$ bits, independent of $\\Delta$, while keeping $O(k)$ time? Equivalently, is there an $\\Omega(\\log\\Delta)$ memory lower bound for deterministic agents with identifiers? The bound $\\Omega(\\log(k+\\Delta))$ is quoted in several papers but only the $\\log k$ term is argued.",
+        "Can all agents **terminate explicitly** in $O(k)$ rounds without any knowledge of $k$, $m$ or $\\Delta$? [Sudo2024NearLinear] terminates the rooted case in $O(k)$ extra rounds but needs global upper bounds in the general case; [Kshemkalyani2025Almost] does not address termination detection for arbitrary initial configurations.",
+        "**Ongoing dispersion** [Kshemkalyani2019Efficient]: agents that have settled must periodically leave (for example to recharge) and the configuration must be re-dispersed; no bounds beyond the original proposal are known."
+      ],
+      "notes": "**Progression.** [Augustine2018Tradeoffs] posed the problem for $k = n$ with $O(mn)$ time and $O(\\log n)$ bits, or $O(m)$ time with $O(n\\log n)$ bits, and asked whether $o(m)$ time was possible. [Kshemkalyani2019Efficient] allowed $k \\le n$, gave $O(m)$ time with $O(k\\log\\Delta)$ bits and proved the $\\Omega(k)$ time bound that every later paper is measured against. [Kshemkalyani2019Fast] reached $O(\\min(m,k\\Delta)\\log k)$ time with logarithmic memory but needed $m$, $\\Delta$ and $k$; [Shintaku2020Knowledge] removed that knowledge; [Kshemkalyani2021NearOptimal] removed the $\\log$ factor and reached the DFS bound $O(\\min(m,k\\Delta))$, optimal for constant degree. The DFS barrier was broken by [Sudo2024NearLinear] with $O(k\\log^2 k)$, and [Kshemkalyani2025Almost] closed the time question with $O(k)$.\n\n**What the DFS barrier was.** A DFS head arriving at a node $v$ cannot tell which neighbours already hold an agent without visiting them, which costs $\\Theta(\\deg(v))$ rounds per node and $\\Theta(\\min(m,k\\Delta))$ in total. The near-linear and linear algorithms avoid this by letting settled agents advertise themselves at neighbours ([Sudo2024NearLinear]: time slots; [Kshemkalyani2025Almost]: oscillation), or in the asynchronous case by exploiting the port-one tree structure ([Pattanayak2025OptimalAsync]).\n\n**Knowledge.** Where a result needs knowledge of a parameter it is listed on the result. The 2025 linear-time algorithms do not state any parameter knowledge explicitly; their descriptions use $k$ (for example, to select $\\lceil k/3\\rceil$ seekers), so treat \"no knowledge\" for them as unconfirmed.",
+      "status": "verified"
+    },
+    {
+      "id": "rooted",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "rooted"
+      },
+      "title": "Rooted initial configuration",
+      "summary": "All $k$ agents start on the same node, so a single DFS traversal that drops one agent per new node solves the problem; the question is how fast and with how little memory.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "The $\\Omega(k)$ argument is already rooted: all agents at one end of a path.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "worst case over inputs: a path with all $k$ agents on one endpoint",
+            "one edge per round",
+            "holds for randomized algorithms, unbounded memory and global communication"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$ and $m$"
+          ],
+          "note": "DFS that leaves the smallest-identifier agent at every newly discovered node; time $O(\\min(m, k\\Delta))$ for $k \\le n$ in later restatements."
+        },
+        {
+          "ref": "Sudo2024NearLinear",
+          "role": "other",
+          "time": "O(k\\log\\min(k,\\Delta))",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Also $O(k)$ time with $O(\\Delta + \\log k)$ bits, the first linear-time algorithm. Both terminate: the last settled agent detects completion and relays it through the DFS tree in $O(k)$ extra rounds. Work under any fair scheduler with atomic moves."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Linear time with logarithmic memory."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(k)$ versus $\\Omega(k)$."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ versus $\\Omega(\\log k)$; see the base case."
+        }
+      },
+      "open": [
+        "Is $O(k)$ time achievable with $O(\\log k)$ bits? Memory $O(\\log(k+\\Delta))$ is needed by every known algorithm to remember a port number."
+      ],
+      "notes": "The rooted case is the one solved first and the one where every measure is settled up to the $\\log\\Delta$ term. In the asynchronous model the rooted case also has $O(k)$ epochs [Pattanayak2025OptimalAsync] (and $O(k\\log k)$ in [Kshemkalyani2025Almost]).",
+      "status": "verified"
+    },
+    {
+      "id": "async",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "async"
+      },
+      "title": "Asynchronous agents",
+      "summary": "Each agent's communicate–compute–move step takes finite but unbounded time; time is counted in epochs, intervals in which every agent completes at least one step.",
+      "statement": "Same task; an adversarial scheduler activates agents at arbitrary speeds. An **epoch** is an interval of time in which every agent performs at least one full step; it need not be the shortest one, and bounds hold for every division of the execution into consecutive epochs. Settled agents must typically stay active, because an agent that stops cannot be told that it is needed.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "Epochs; the synchronous argument carries over.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "worst case over inputs: a path with all $k$ agents on one endpoint",
+            "one edge per round",
+            "holds for randomized algorithms, unbounded memory and global communication",
+            "counted in epochs"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kshemkalyani2019Efficient",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(k\\log\\Delta)",
+          "assumes": [
+            "knows $k$"
+          ],
+          "note": "Three asynchronous algorithms; the only terminating one uses $O(D\\log\\Delta)$ bits and $O(\\Delta^D)$ time. [Kshemkalyani2025AsyncTCS] is the journal treatment: $O(\\min(m,k\\Delta))$ time with $O(k\\log\\Delta)$ bits and no parameter knowledge."
+        },
+        {
+          "ref": "Kshemkalyani2021NearOptimal",
+          "role": "other",
+          "time": "O(\\min(m, k\\Delta))",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Same bounds as its synchronous algorithm, in epochs."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "other",
+          "time": "O(k\\log k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "First near-linear asynchronous bound, for rooted and arbitrary configurations."
+        },
+        {
+          "ref": "Pattanayak2025OptimalAsync",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Time-optimal, rooted and arbitrary configurations. Uses the **port-one tree**: following port 1 from every node defines a structure that lets an agent check a neighbour's status in $O(1)$ epochs without timing assumptions."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(k)$ epochs versus $\\Omega(k)$."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ versus $\\Omega(\\log k)$."
+        }
+      },
+      "open": [
+        "Can an asynchronous algorithm let every agent **terminate** in polynomial time without knowledge of the graph? The only terminating asynchronous algorithm known uses $O(\\Delta^{\\min(D,k)+1})$ time [Kshemkalyani2025AsyncTCS]; the linear-time algorithms keep settled agents active.",
+        "Semi-synchronous schedulers sit between the two models; no separation or dedicated bound is known."
+      ],
+      "notes": "The asynchronous time gap closed in two steps in 2025: $O(k\\log k)$ [Kshemkalyani2025Almost], then $O(k)$ [Pattanayak2025OptimalAsync]. [Sudo2024NearLinear]'s rooted algorithms also work under any fair scheduler with atomic moves, but its general-configuration algorithm needs full synchrony.",
+      "status": "verified"
+    },
+    {
+      "id": "global",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "global",
+        "timing": "sync"
+      },
+      "title": "Global communication",
+      "summary": "Any agent can read the state of any other agent at any time, but still does not know the graph or where the others are.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2022GlobalJ",
+          "note": "Re-proven for the global model; $\\Omega(D^2)$ on trees when $k = n$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "worst case over inputs: a path with all $k$ agents on one endpoint",
+            "one edge per round",
+            "re-proven for global communication"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2022GlobalJ",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier",
+            "identifiers in $[1,k]$ counted as memory"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kshemkalyani2022GlobalJ",
+          "role": "introductory",
+          "time": "O(k\\Delta)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Or $O(\\min(m,k\\Delta))$ time with $O(\\Delta+\\log k)$ bits. A BFS-based algorithm gives $O((D+k)\\Delta(D+\\Delta))$ time with $O(\\log D + \\Delta\\log k)$ bits. The conference version [Kshemkalyani2020Global] claimed $O(\\min(m,k\\Delta))$ time with $O(\\log(k+\\Delta))$ bits; the journal version withdraws that combination."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Inherited from the local-communication model, which is weaker; no algorithm specific to global communication does better."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Inherited $O(k)$ versus $\\Omega(k)$."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ versus $\\Omega(\\log k)$."
+        }
+      },
+      "open": [
+        "Does global communication buy anything for dispersion? Since $O(k)$ time with $O(\\log(k+\\Delta))$ bits holds with local communication, a separation could only come from memory ($O(\\log k)$ bits), from termination detection, or from the BFS-style question of achieving time close to $O(D)$-dependent bounds for small $D$.",
+        "[Kshemkalyani2022GlobalJ] asks for $O(\\min(m,k\\Delta))$ time with only $O(\\log(k+\\Delta))$ bits in the global model; this is implied by the later local-model result, so the live version of the question is the memory question above."
+      ],
+      "notes": "The global model was introduced to see how much easier dispersion becomes when agents can coordinate freely. The answer so far is: asymptotically not at all in time, once the local-model algorithms of 2025 are taken into account.",
+      "status": "verified"
+    },
+    {
+      "id": "more-agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "any",
+        "ids": "anonymous",
+        "algorithm": "randomized",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "More agents than nodes",
+      "summary": "With $k > n$ the target is a balanced placement: at most $\\lceil k/n\\rceil$ agents per node. Only randomized anonymous results exist.",
+      "statement": "$k > n$ agents must reach a configuration in which every node hosts at most $\\lceil k/n \\rceil$ agents (sometimes called $k$-dispersion). Agents do not know $n$.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log\\Delta)",
+          "ref": "Molla2019Randomness",
+          "note": "Theorem 7 of [Molla2019Randomness]; it rests on that paper's port-visibility assumption, not on a general information argument.",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "all agents have the same memory bound",
+            "model assumption of [Molla2019Randomness]: an agent with $b$ bits sees at most $2^b$ ports of its node, and the adversary chooses which",
+            "holds for randomized algorithms"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Molla2019Randomness",
+          "role": "best",
+          "time": "O(m + k)",
+          "memory": "O(\\Delta)",
+          "note": "Introductory and current best. Rooted configurations on arbitrary graphs; the bound is a sketched modification of the rooted algorithm in Section 8, not a numbered theorem. The same paper gives $O(mk/n)$ rounds with $O(\\max\\{\\log\\Delta,\\log D\\})$ bits, and $O(k)$ rounds with $O(\\log\\Delta)$ bits on rooted rings and rooted trees."
+        },
+        {
+          "ref": "Molla2019Randomness",
+          "role": "other",
+          "time": "\\text{cover time}",
+          "memory": "O(\\log\\Delta)",
+          "assumes": [
+            "arbitrary initial configuration",
+            "$n < k \\le \\Delta^{\\kappa} n$"
+          ],
+          "note": "With high probability; this algorithm does not terminate: settled agents stay active forever."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "The $\\Omega(k)$ path argument of [Kshemkalyani2019Efficient] is stated for $k \\le n$; no time lower bound for $k > n$ is published."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(\\Delta)$ or $O(\\max\\{\\log\\Delta,\\log D\\})$ bits on general rooted graphs against $\\Omega(\\log\\Delta)$; tight on rooted rings and trees. Open Problem 2 of [Molla2019Randomness]."
+        }
+      },
+      "open": [
+        "**Deterministic** dispersion with $k > n$ agents with identifiers on static graphs has not been studied: no algorithm and no lower bound beyond $\\Omega(k)$ is recorded in the literature surveyed here. (Related work exists only on dynamic rings and dynamic graphs under the name balanced dispersion.)",
+        "Is $O(k)$ time possible for rooted configurations when $k > n$, matching the $k \\le n$ case?",
+        "Terminating dispersion with $k > n$ on general rooted graphs with $O(\\log\\Delta)$ bits per agent (Open Problem 2 of [Molla2019Randomness])."
+      ],
+      "notes": "The balanced target, at most $\\lceil k/n\\rceil$ agents per node, is the formulation of [Molla2019Randomness] itself. Many agents may cross one edge in the same round, so the $\\Omega(k)$ argument for $k \\le n$ does not carry over. Checked against the full text (arXiv 1902.10489).",
+      "status": "verified"
+    },
+    {
+      "id": "ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "title": "Rings and paths",
+      "summary": "Degree two everywhere; both measures are settled.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "$\\Omega(n)$ when $k = n$, since $D = \\Theta(n)$ [Augustine2018Tradeoffs].",
+          "bottleneck": "distance",
+          "preconditions": [
+            "all $k$ agents on one node: the farthest target is $k/2$ away",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "introductory",
+          "time": "O(n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$"
+          ],
+          "note": "One algorithm for paths, rings and trees; optimal in both measures on paths and rings for $k = n$."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log k)",
+          "note": "Inherited from arbitrary graphs; $O(\\log(k+\\Delta)) = O(\\log k)$ because $\\Delta = 2$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(k)$ versus $\\Omega(k)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$O(\\log k)$ versus $\\Omega(\\log k)$."
+        }
+      },
+      "open": [
+        "Anonymous randomized agents disperse from a **rooted** ring configuration with $O(1)$ bits in $O(n)$ rounds [Molla2019Randomness]. From an **arbitrary** configuration the known algorithm never terminates; is $O(1)$-bit dispersion with termination possible on rings?"
+      ],
+      "notes": "The ring is the testbed for every harder variant: silent agents, Byzantine agents and dynamic edges all have ring-specific results, catalogued under those branches.",
+      "status": "verified"
+    },
+    {
+      "id": "tree",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "title": "Trees",
+      "summary": "No cycles, so a DFS never needs to test for revisits; the difficulty is spreading agents that start far apart across long branches.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(D^2)",
+          "ref": "Disser2020General",
+          "note": "Transferred from collaborative tree exploration (Theorem 2.5 of [Disser2020General]) by [Augustine2018Tradeoffs]; re-proven for the global model in [Kshemkalyani2022GlobalJ]. In addition $\\Omega(k)$ [Kshemkalyani2019Efficient].",
+          "bottleneck": "collaborative tree exploration",
+          "preconditions": [
+            "$k = n$: every node must be reached",
+            "deterministic",
+            "**existential in $D$**: the hard tree has height $D=\\lceil\\sqrt{\\log n}\\rceil$, so the bound is about $\\log n$ rounds; it is not shown for larger heights",
+            "proved for collaborative exploration with labelled nodes and global communication, so it holds for dispersion [Augustine2018Tradeoffs] [Kshemkalyani2022GlobalJ]"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "introductory",
+          "time": "O(n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$"
+          ],
+          "note": "Memory-optimal; the authors ask whether $o(n)$ rounds are possible."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Inherited from arbitrary graphs. For $k = n$ this is $O(n)$, no better than 2018."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(n)$ for $k = n$ versus a lower bound of $\\Omega(D^2)$ that is proved only for $D\\approx\\sqrt{\\log n}$; in general the gap is polynomial."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ versus $\\Omega(\\log k)$."
+        }
+      },
+      "open": [
+        "[Augustine2018Tradeoffs] asked for $o(n)$-round dispersion on arbitrary trees. Precisely: for $k = n$ and an arbitrary initial configuration, is there an algorithm whose time is bounded by a function of $D$ alone, ideally $O(D^2)$ as in the rooted case? No tree-specific algorithm has appeared since 2018; the linear-time general algorithms give only $O(n)$.",
+        "With global communication, trees admit $O(D\\cdot\\max(D,k))$ rounds with $O(\\max(D, \\Delta\\log k))$ bits (arXiv version of [Kshemkalyani2020Global]); whether the $\\max(D,k)$ factor can be reduced to $D$, and whether local communication suffices, is open."
+      ],
+      "notes": "Anonymous randomized agents from a rooted tree configuration: $O(n)$ rounds with $O(\\log\\Delta)$ bits [Molla2019Randomness].",
+      "status": "verified"
+    },
+    {
+      "id": "tree-rooted",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "tree",
+        "initial": "rooted"
+      },
+      "title": "Rooted trees",
+      "summary": "All agents start at one node of a tree; the time is governed by the diameter, as in collaborative tree exploration.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(D^2)",
+          "ref": "Disser2020General",
+          "note": "Transferred from collaborative tree exploration (Theorem 2.5 of [Disser2020General]) by [Augustine2018Tradeoffs]; re-proven for the global model in [Kshemkalyani2022GlobalJ].",
+          "bottleneck": "collaborative tree exploration",
+          "preconditions": [
+            "$k = n$: every node must be reached",
+            "deterministic",
+            "**existential in $D$**: the hard tree has height $D=\\lceil\\sqrt{\\log n}\\rceil$, so the bound is about $\\log n$ rounds; it is not shown for larger heights",
+            "proved for collaborative exploration with labelled nodes and global communication, so it holds for dispersion [Augustine2018Tradeoffs] [Kshemkalyani2022GlobalJ]"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "best",
+          "time": "O(D^2)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$"
+          ],
+          "note": "Introductory and current best; the full (arXiv) version improves the memory from $O(\\log n + \\Delta)$ in the conference version to $O(\\log n)$."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "other",
+          "time": "O(k)",
+          "memory": "O(\\log(k+\\Delta))",
+          "note": "Inherited; better than $O(D^2)$ only when $k = o(D^2)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(D^2)$ is matched only for trees of height about $\\sqrt{\\log n}$; for larger heights only $\\Omega(D)$ is known, a factor $D$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$ for $k = n$."
+        }
+      },
+      "open": [
+        "For $k < n$ the lower bound $\\Omega(D^2)$ no longer applies (only $k$ nodes must be reached). Whether $O(\\min(k, D^2))$ time is achievable, and whether it is necessary, has not been addressed.",
+        "For $k=n$ agents rooted on a tree of height $D$ much larger than $\\sqrt{\\log n}$, is $\\Omega(D^2)$ time necessary? The known bound is existential in $D$ [Disser2020General]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "grid",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "grid"
+      },
+      "title": "Grids",
+      "summary": "A $\\sqrt n \\times \\sqrt n$ anonymous grid; the diameter gives an $\\Omega(\\sqrt k)$ bound and the question is whether local communication can reach it for small $k$.",
+      "statement": "The graph is a $\\sqrt n\\times\\sqrt n$ grid with $\\Delta = 4$. Whether an agent can tell the four directions apart consistently (an **oriented** grid) or only sees locally labelled ports (an **unoriented** grid) is stated on each result.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt k)",
+          "ref": "Kshemkalyani2020Grids",
+          "note": "Any $k$ agents on one node must spread over a region of diameter $\\Omega(\\sqrt k)$; $\\Omega(\\sqrt n)$ when $k = \\Omega(n)$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k$ agents on one node: a grid ball of radius $r$ holds $O(r^2)$ nodes",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2020Grids",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kshemkalyani2020Grids",
+          "role": "best",
+          "time": "O(\\min(k, \\sqrt n))",
+          "memory": "O(\\log k)",
+          "assumes": [
+            "knows $n$ and $k$ (arXiv version)"
+          ],
+          "note": "Introductory and current best for square grids with local communication; optimal in both measures when $k = \\Omega(n)$. With global communication: $O(\\sqrt k)$ rounds and $O(\\log k)$ bits for every $k$, optimal."
+        },
+        {
+          "ref": "Banerjee2024UnorientedGrids",
+          "role": "other",
+          "time": "O(\\sqrt n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "unoriented grid",
+            "knows $n$"
+          ],
+          "note": "First result without a sense of direction; the authors note the algorithm can be adapted to unknown $n$. Crash-tolerant versions are under the crash-fault branch."
+        },
+        {
+          "ref": "Himani2025TriangularGrids",
+          "role": "other",
+          "time": "O(\\sqrt n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "unoriented triangular grid"
+          ],
+          "note": "No knowledge of $n$; the agents compute $\\sqrt n$ themselves."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(\\min(k,\\sqrt n))$ versus $\\Omega(\\sqrt k)$: tight for $k = \\Omega(n)$, a factor $\\sqrt k$ apart for $k \\le \\sqrt n$ under local communication."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log k)$."
+        }
+      },
+      "open": [
+        "Can $k \\le n$ agents disperse on a grid in $O(\\sqrt k)$ rounds with **local** communication? Global communication achieves it [Kshemkalyani2020Grids]; asked again in [Banerjee2025OrientedGridsFT].",
+        "A lower bound in terms of $k$ for $k = o(\\sqrt n)$ with $O(\\log n)$ memory on unoriented grids [Banerjee2024UnorientedGrids].",
+        "Unoriented grids with no knowledge of $n$ and with faults, matching the fault-free bounds [Banerjee2024UnorientedGrids]."
+      ],
+      "notes": "Grids are the one class where global communication is known to help: $O(\\sqrt k)$ versus $O(\\min(k,\\sqrt n))$. Rectangular $x\\times y$ grids with $x, y$ known: $O(\\min(k, \\max(x,y)))$ rounds with $\\Theta(\\log k)$ bits (arXiv version of [Kshemkalyani2020Grids]).",
+      "status": "verified"
+    },
+    {
+      "id": "directed",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Directed graphs",
+      "summary": "Edges can be traversed in one direction only, so an agent cannot backtrack; the problem is solvable only on strongly connected digraphs and the known time bounds are quadratic in $k$.",
+      "statement": "$G$ is a directed graph with maximum out-degree $\\Delta_{out}$; at a node an agent sees only the out-ports $1,\\dots,\\deg_{out}(v)$. Dispersion is not always solvable when $G$ is not strongly connected, so results assume strong connectivity. $\\phi$ denotes the deficiency of $G$, the number of arcs whose addition makes $G$ Eulerian; $f \\le k$ agents may crash.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Theorem 3: deterministic",
+            "a directed cycle"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(D^2)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "collaborative tree exploration",
+          "preconditions": [
+            "Theorem 4: deterministic, $k = n$, $D = \\omega(1)$",
+            "a strongly connected digraph built from a tree, after the exploration bound of [Disser2020General]"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(k\\cdot\\min\\{k,\\phi\\})",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "no backtracking",
+          "preconditions": [
+            "Theorem 5: only for algorithms based on DFS traversal",
+            "deficiency $\\phi > 0$"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "no backtracking",
+          "preconditions": [
+            "Theorem 2: on some digraphs that are not strongly connected",
+            "a rooted start at a node from which some node is unreachable"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 6: deterministic",
+            "a rooted start",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Italiano2022Directed",
+          "role": "best",
+          "time": "O(k^2\\Delta_{out})",
+          "memory": "\\Theta(\\log(k+\\Delta_{out}))",
+          "note": "Introductory and current best (Theorem 1(b)): DFS with ranked backtracking paths of at most $k-1$ arcs; $O(f k^2\\Delta_{out})$ with $f$ crashes. Optimal memory."
+        },
+        {
+          "ref": "Italiano2022Directed",
+          "role": "other",
+          "time": "O(\\phi k^2)",
+          "memory": "O(k\\log(k+\\Delta_{out}))",
+          "note": "Theorem 1(a), simulating Kwek's exploration; $O(f \\phi k^2)$ with $f$ crashes. Better when $\\phi < \\Delta_{out}$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(k^2\\Delta_{out})$ versus $\\Omega(k)$ in general; DFS-based algorithms need $\\Omega(k\\min\\{k,\\phi\\})$, which $O(\\phi k^2)$ nearly matches."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$\\Theta(\\log(k+\\Delta_{out}))$ is achieved; the proved lower bound is $\\Omega(\\log k)$."
+        }
+      },
+      "open": [
+        "Close the time gaps; in particular $O((k+f)k\\Delta_{out})$ with $f$ crashes [Italiano2022Directed].",
+        "BFS-based dispersion in the local model, without 1-hop communication [Italiano2022Directed].",
+        "Dispersion on dynamic directed graphs, and in semi-synchronous and asynchronous settings [Italiano2022Directed]."
+      ],
+      "notes": "The algorithms do not terminate on their own: agents cannot tell that dispersion is complete. With $k$, $\\Delta_{out}$, $f$ (and $\\phi$ or $D$) known in advance, a round counter makes them terminate (Corollary 1). Checked against the full text of the JPDC version.",
+      "status": "verified"
+    },
+    {
+      "id": "directed-hop",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "h-hop",
+        "timing": "sync"
+      },
+      "title": "Directed graphs, 1-hop communication",
+      "summary": "On strongly connected digraphs, agents that also talk to agents on neighbouring nodes disperse in $O(kD)$ rounds by breadth-first search, at the price of $O(k\\log(k+\\Delta_{out}))$ bits.",
+      "statement": "$G$ is a directed graph with maximum out-degree $\\Delta_{out}$; at a node an agent sees only the out-ports $1,\\dots,\\deg_{out}(v)$. Dispersion is not always solvable when $G$ is not strongly connected, so results assume strong connectivity. $\\phi$ denotes the deficiency of $G$, the number of arcs whose addition makes $G$ Eulerian; $f \\le k$ agents may crash. Agents communicate with co-located agents and with agents on nodes at distance 1 ($h = 1$); communication does not follow arc directions.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Theorem 3: deterministic",
+            "a directed cycle",
+            "stated for any deterministic algorithm, so it holds with 1-hop communication"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(D^2)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "collaborative tree exploration",
+          "preconditions": [
+            "Theorem 4: deterministic, $k = n$, $D = \\omega(1)$",
+            "a strongly connected digraph built from a tree, after the exploration bound of [Disser2020General]",
+            "stated for any deterministic algorithm, so it holds with 1-hop communication"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "no backtracking",
+          "preconditions": [
+            "Theorem 2: on some digraphs that are not strongly connected",
+            "a rooted start at a node from which some node is unreachable",
+            "stated for any deterministic algorithm, so it holds with 1-hop communication"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Italiano2022Directed",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 6: deterministic",
+            "a rooted start",
+            "memory counts the identifier",
+            "stated for any deterministic algorithm, so it holds with 1-hop communication"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Italiano2022Directed",
+          "role": "best",
+          "time": "O(kD)",
+          "memory": "O(k\\log(k+\\Delta_{out}))",
+          "assumes": [
+            "$h = 1$"
+          ],
+          "note": "Introductory and current best (Theorem 1(c)): BFS-based; in every $O(D)$ rounds at least one agent settles on an empty node. The bound also holds with $f \\le k$ crashes, with no extra time."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(kD)$ against $\\Omega(k)$ (and $\\Omega(D^2)$ for $k = n$): a factor up to $D$."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(k\\log(k+\\Delta_{out}))$ against $\\Omega(\\log k)$: a factor $k$."
+        }
+      },
+      "open": [
+        "A BFS-based algorithm with $O(\\log(k+\\Delta_{out}))$ bits per agent, as with local communication [Italiano2022Directed].",
+        "Does $O(kD)$ improve to $O(k + D^2)$ or $O(k)$ with 1-hop communication?"
+      ],
+      "notes": "The lower bounds of Theorems 2, 3, 4 and 6 of [Italiano2022Directed] are stated for every deterministic algorithm and hold here; Theorem 5 bounds only DFS-based algorithms and does not apply to the BFS algorithm. Italiano, Pattanayak and Sharma remark that 1-hop information \"is of no use in the DFS based algorithm\". Checked against the full text of the JPDC version.",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Dynamic graphs (1-interval connected)",
+      "summary": "An adversary changes the edge set every round, keeping the graph connected in every round. With only local communication the problem is impossible.",
+      "statement": "The node set is fixed; in every round the adversary chooses the edge set, subject to the graph being connected in that round (1-interval connectivity). Agents see the ports of the current round. **1-neighbourhood knowledge** means an agent knows which neighbouring nodes are occupied and by whom.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Kshemkalyani2020Dynamic",
+          "note": "For $k \\ge 5$ with local communication, even with 1-neighbourhood knowledge and unbounded memory. Also impossible for $k \\ge 3$ without 1-neighbourhood knowledge, even with global communication. $\\Omega(k)$ rounds where solvable.",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "$k \\ge 5$",
+            "deterministic",
+            "local communication",
+            "holds even with 1-neighbourhood knowledge and unbounded memory"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\text{impossible}",
+          "ref": "Kshemkalyani2020Dynamic",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "$k \\ge 5$",
+            "deterministic",
+            "local communication"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Local communication is not enough; see the global-communication branch."
+        },
+        "memory": {
+          "status": "impossible"
+        }
+      },
+      "open": [
+        "Which combination of communication range and visibility is **necessary** for dispersion on $T$-interval connected graphs with $T > 1$, where the impossibility proof for $T = 1$ does not apply? [Saxena2025PathConnected]",
+        "Dynamic graphs with a bounded number of missing edges per round: [Saxena2025Balanced] gives impossibilities on 1-bounded 1-interval connected graphs for several weaker communication and visibility combinations and an $O(k)$ algorithm with global communication and 1-hop visibility; the local-communication case with few missing edges is not settled."
+      ],
+      "notes": "The impossibility is the reason the dynamic-graph literature works with global communication. Rings are the exception: with full visibility of the ring, dispersion on a dynamic ring is possible with no communication model at all (see the dynamic ring branch).",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-global",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "global",
+        "timing": "sync"
+      },
+      "title": "Dynamic graphs with global communication",
+      "summary": "Global communication plus 1-neighbourhood knowledge make dispersion solvable on 1-interval connected graphs, and in optimal $\\Theta(k)$ time.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2020Dynamic",
+          "note": "On a 1-interval connected tree with dynamic diameter $O(1)$, even with unbounded memory. $\\Omega(kT)$ on $T$-path connected graphs [Saxena2025PathConnected].",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "a 1-interval connected dynamic tree with dynamic diameter $O(1)$",
+            "even with unbounded memory and global communication",
+            "$\\Omega(kT)$: $T$-path connected graphs, even with full visibility and known $k$, $n$, $T$"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2020Dynamic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kshemkalyani2020Dynamic",
+          "role": "best",
+          "time": "\\Theta(k)",
+          "memory": "\\Theta(\\log k)",
+          "assumes": [
+            "1-neighbourhood knowledge"
+          ],
+          "note": "Introductory and current best. With $f \\le k$ crash faults the same algorithm runs in $O(k - f)$ rounds."
+        },
+        {
+          "ref": "Saxena2025PathConnected",
+          "role": "other",
+          "time": "\\Theta(kT)",
+          "memory": "O(\\log\\max(k,T))",
+          "assumes": [
+            "1-hop visibility",
+            "knows $T$ (for termination)"
+          ],
+          "note": "$T$-path connected graphs: every pair of nodes shares a connected component at least once in every window of $T$ rounds, so the graph may be disconnected in some rounds. Impossible on connectivity-time graphs (union of $T$ consecutive rounds connected) for $k \\ge 3$."
+        },
+        {
+          "ref": "Saxena2025Balanced",
+          "role": "other",
+          "time": "O(k)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "1-hop visibility",
+            "$\\ell$-bounded 1-interval connected",
+            "any $k$, including $k > n$"
+          ],
+          "note": "**Balanced** dispersion: every node ends with $\\lfloor k/n\\rfloor$ or $\\lceil k/n\\rceil$ agents. Impossible on temporally connected graphs even with unbounded memory and full visibility."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(k)$; $\\Theta(kT)$ in the $T$-path connected model."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log k)$."
+        }
+      },
+      "open": [
+        "Byzantine agents on dynamic graphs [Kshemkalyani2020Dynamic].",
+        "Memory $O(\\log k)$ instead of $O(\\log\\max(k,T))$ on $T$-path connected graphs when $T$ need not be known [Saxena2025PathConnected]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-ring",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "title": "Dynamic rings",
+      "summary": "A ring from which the adversary removes at most one edge per round (or permutes the nodes); solvable without communication if agents can see the whole ring.",
+      "statement": "Two kinds of dynamism are studied: **1-interval connectivity** (at most one edge missing per round) and **vertex permutation** (the adversary reorders the nodes every round, keeping a ring). Visibility is a parameter: with full visibility an agent sees which nodes of the ring are empty, single or multiply occupied.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Mondal2025DkDDynamicRing",
+          "note": "For rooted configurations on an $n$-node ring, static or 1-interval connected; a distance argument already in [Agarwalla2018DynamicRings].",
+          "bottleneck": "distance",
+          "preconditions": [
+            "rooted configuration on an $n$-node ring, static or 1-interval connected",
+            "$k = n$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Agarwalla2018DynamicRings",
+          "role": "best",
+          "time": "O(n)",
+          "memory": "O(1)",
+          "assumes": [
+            "$k = n$",
+            "full visibility",
+            "chirality"
+          ],
+          "note": "Introductory and current best. $O(n)$ rounds under vertex permutation, under 1-interval connectivity, and under both. Without chirality: $O(n)$ for rooted configurations and for odd $n$, $O(1)$ for $n = 4$. The algorithms are essentially memoryless. Without any visibility the problem is impossible (vertex permutation, $n \\ge 3$; 1-interval connectivity, $n \\ge 2$)."
+        },
+        {
+          "ref": "Mondal2025DkDDynamicRing",
+          "role": "other",
+          "time": "\\Theta(n)",
+          "assumes": [
+            "rooted",
+            "chirality",
+            "limited visibility"
+          ],
+          "note": "Distance-$k$-dispersion on a 1-interval connected ring with local communication; $k = 1$ is dispersion. Impossible under a semi-synchronous scheduler if the initial configuration has a multiplicity node. Memory not recorded here."
+        },
+        {
+          "ref": "Mondal2025SimulatingChirality",
+          "role": "other",
+          "time": "O(\\ell n)",
+          "assumes": [
+            "no chirality",
+            "$\\ell$ agents, $3 \\le \\ell \\le n$"
+          ],
+          "note": "Arbitrary initial configurations without chirality; partially answers the even-ring question of [Agarwalla2018DynamicRings]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$O(n)$ versus $\\Omega(n)$ with full visibility and chirality."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Memoryless apart from identifiers."
+        }
+      },
+      "open": [
+        "Visibility strictly between none and full: how much must an agent see of a dynamic ring for dispersion to be possible? [Agarwalla2018DynamicRings]",
+        "Achiral agents on even rings of size at least 6 under vertex permutation and 1-interval connectivity: is $O(n)$ time possible from arbitrary configurations? [Agarwalla2018DynamicRings]; $O(\\ell n)$ is known without vertex permutation [Mondal2025SimulatingChirality]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "anonymous-randomized",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "anonymous",
+        "algorithm": "randomized",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Anonymous agents with randomness",
+      "summary": "Agents have no identifiers but private coins. Both axes change together: identical deterministic agents on one node can never behave differently, so randomness is needed to break symmetry.",
+      "statement": "Agents are identical and run a randomized algorithm; deterministic algorithms are impossible for anonymous agents [Das2021MemoryOptimal]. Memory is measured without an identifier, so bounds below $\\log k$ become possible. Results hold with high probability unless stated otherwise.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "The path argument does not use identifiers.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "a path with all $k$ agents on one endpoint",
+            "no identifiers needed",
+            "holds for randomized algorithms"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log\\Delta)",
+          "ref": "Molla2019Randomness",
+          "note": "For any randomized algorithm when all agents have the same amount of memory.",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "all agents have the same memory bound",
+            "an agent with $b$ bits can choose among at most $2^b$ ports",
+            "worst case over graphs: a node of degree $\\Delta$ whose ports lead to the free nodes",
+            "holds for randomized algorithms"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Molla2019Randomness",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(\\max(\\log\\Delta, \\log D))",
+          "assumes": [
+            "rooted"
+          ],
+          "note": "Local leader election by coin flips replaces identifiers. Rooted graphs: $O(m)$ rounds with $O(\\max(\\log\\Delta,\\log D))$ or $O(\\Delta)$ bits; rooted rings with $O(1)$ bits and rooted trees with $O(\\log\\Delta)$ bits in $O(n)$ rounds. Arbitrary configurations ($k = n$): a random-walk algorithm with $O(\\log\\Delta)$ bits disperses within the cover time of $G$ but the agents never terminate."
+        },
+        {
+          "ref": "Das2021MemoryOptimal",
+          "role": "best",
+          "time": "O(k^2)",
+          "memory": "O(\\log\\Delta)",
+          "assumes": [
+            "rooted"
+          ],
+          "note": "Memory matches the $\\Omega(\\log\\Delta)$ lower bound; the agents terminate. The time is $\\Theta(k^2)$ in the worst case for this algorithm."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$\\Theta(k^2)$ versus $\\Omega(k)$ for rooted configurations; for arbitrary configurations only the cover time of $G$, up to $O(nm)$, without termination."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log\\Delta)$ for rooted configurations."
+        }
+      },
+      "open": [
+        "Close the gap between $\\Omega(k)$ and $\\Theta(k^2)$ rounds for anonymous agents from a rooted configuration with $O(\\log\\Delta)$ bits [Das2021MemoryOptimal].",
+        "Can anonymous randomized agents disperse from an **arbitrary** configuration and then stop, rather than staying active forever? [Molla2019Randomness] [Das2021MemoryOptimal]",
+        "On rings the memory bound is $O(1)$; is $O(1)$-bit dispersion with termination possible on rings from arbitrary configurations?"
+      ],
+      "notes": "The deterministic memory bound $\\Omega(\\log k)$ comes entirely from storing an identifier. Removing identifiers and adding coins lowers the bound to $\\Omega(\\log\\Delta)$, achieved for rooted configurations.",
+      "status": "verified"
+    },
+    {
+      "id": "crash",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "crash",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Crash faults",
+      "summary": "Up to $f \\le k$ agents may crash at any time; a crashed agent disappears with everything it knew, and the surviving $k - f$ agents must still end on distinct nodes.",
+      "statement": "An adversary may crash up to $f \\le k$ agents at arbitrary times. A crashed agent loses its memory and can no longer move or be seen by others. Dispersion is achieved when the $k-f$ non-faulty agents occupy $k-f$ distinct nodes. $\\ell$ is the number of initially occupied nodes.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "Fault-free lower bound; no crash-specific lower bound is known.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "fault-free bound ($f = 0$)",
+            "worst case over inputs: a path with all $k$ agents on one endpoint",
+            "one edge per round",
+            "holds for randomized algorithms, unbounded memory and global communication"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2021Tolerating",
+          "role": "introductory",
+          "time": "O(f\\cdot\\min(m, k\\Delta))",
+          "memory": "O(\\log(k+\\Delta))",
+          "assumes": [
+            "rooted"
+          ],
+          "note": "First crash-tolerant dispersion on arbitrary graphs: a DFS that restarts whenever the agent carrying the traversal state crashes."
+        },
+        {
+          "ref": "Chand2023FaultTolerant",
+          "role": "other",
+          "time": "O(k^2)",
+          "memory": "O(\\log(k+\\Delta))",
+          "assumes": [
+            "rooted"
+          ],
+          "note": "Independent of $f$. For arbitrary configurations: $O((f+\\ell)\\cdot\\min(m, k\\Delta, k^2))$ rounds with $O(\\log(k+\\Delta))$ bits when $k$, $f$, $\\Delta$, $\\ell$ and $m$ are known, and $O(k^3)$ when only $k$ is known."
+        },
+        {
+          "ref": "Pattanayak2023Spite",
+          "role": "best",
+          "time": "O(\\min(m, k\\Delta))",
+          "memory": "O(k\\log(k+\\Delta))",
+          "note": "Arbitrary configurations, no knowledge of $m$, $\\Delta$, $\\ell$, $k$ or $f$, time independent of $f$. A second algorithm trades memory for time: $O(\\min(m,k\\Delta)\\cdot(\\ell+f))$ rounds with $O(\\log(k+\\Delta))$ bits."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(\\min(m,k\\Delta))$ versus $\\Omega(k)$: a factor $\\Delta$, as in the fault-free DFS era; the fault-free $O(k)$ techniques (oscillating settled agents) have not been made crash-tolerant."
+        },
+        "memory": {
+          "status": "near",
+          "note": "$O(\\log(k+\\Delta))$ bits are enough but only with an extra factor $(\\ell+f)$ in time; the fast algorithm uses $O(k\\log(k+\\Delta))$."
+        }
+      },
+      "open": [
+        "Is $O(k)$ time achievable with crash faults, or does fault tolerance cost a factor of $\\Delta$? No lower bound beyond the fault-free $\\Omega(k)$ is known, even with $O(\\log(k+\\Delta))$ memory [Chand2023FaultTolerant].",
+        "Simultaneously $O(\\min(m,k\\Delta))$ (or better) time and $O(\\log(k+\\Delta))$ memory for arbitrary configurations, without knowledge of $f$, $\\ell$, $\\Delta$ or $m$ [Chand2023FaultTolerant] [Pattanayak2023Spite].",
+        "Crash faults under asynchrony: no result exists."
+      ],
+      "notes": "On 1-interval connected dynamic graphs with global communication, crashes cost nothing: $O(k-f)$ rounds with $\\Theta(\\log k)$ bits [Kshemkalyani2020Dynamic]. The directed-graph algorithms of [Italiano2022Directed] also extend to crash faults (bounds not transcribed here).",
+      "status": "verified"
+    },
+    {
+      "id": "crash-grid",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "crash",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "grid"
+      },
+      "title": "Crash faults on grids",
+      "summary": "On oriented grids crashes are free: the fault-free $\\Theta(\\sqrt n)$ bound survives any number of crashes.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt k)",
+          "ref": "Kshemkalyani2020Grids",
+          "note": "$\\Omega(\\sqrt n)$ when $k = \\Omega(n)$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k$ agents on one node: a grid ball of radius $r$ holds $O(r^2)$ nodes",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2020Grids",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Banerjee2024UnorientedGrids",
+          "role": "introductory",
+          "time": "O(\\sqrt n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "oriented grid",
+            "knows $n$"
+          ],
+          "note": "Unoriented grid with crashes: $O(\\sqrt n\\log n)$ rounds with $O(\\sqrt n\\log n)$ bits."
+        },
+        {
+          "ref": "Banerjee2025OrientedGridsFT",
+          "role": "best",
+          "time": "O(\\sqrt n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "oriented grid"
+          ],
+          "note": "Any $f \\le n$, no knowledge of $n$; optimal in both measures for $k = \\Omega(n)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\sqrt n)$ on oriented grids for $k = \\Omega(n)$; the small-$k$ question is the same as in the fault-free case."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$."
+        }
+      },
+      "open": [
+        "Unoriented grids with crashes: close the gap between $O(\\sqrt n\\log n)$ rounds with $O(\\sqrt n\\log n)$ bits and the fault-free $O(\\sqrt n)$, $O(\\log n)$ [Banerjee2024UnorientedGrids]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "byzantine",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "weak-byzantine",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Weak Byzantine agents",
+      "summary": "Up to $f$ agents behave arbitrarily and may lie, but cannot fake their identifiers; the non-faulty agents must still settle on distinct nodes and terminate.",
+      "statement": "Up to $f$ agents are controlled by an adversary that knows the algorithm and the honest agents' states; they may move and communicate arbitrarily but cannot change their identifiers. The goal is a configuration in which every node holds at most one **non-Byzantine** agent, with all non-Byzantine agents terminated. Results below take $k = n$ and assume the agents know $n$. $X(n)$ denotes the time to explore any $n$-node graph, $\\tilde O(n^5)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "Fault-free bound; no Byzantine-specific time lower bound is known.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "fault-free bound ($f = 0$)",
+            "a path with all $k$ agents on one endpoint"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Molla2021ByzantineGraphs",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$\\lceil k/n\\rceil > \\lceil (k-f)/n\\rceil$",
+            "weak Byzantine agents",
+            "deterministic",
+            "even with known $n$, $k$ and $f$"
+          ],
+          "note": "The Byzantine agents can behave exactly like honest agents and occupy nodes, so the honest agents cannot reach the balanced target."
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Molla2021ByzantineGraphs",
+          "role": "best",
+          "time": "\\tilde O(n^9)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$",
+            "$f \\le \\lfloor n/2 \\rfloor - 1$"
+          ],
+          "note": "Introductory and current best on general graphs. Precisely $O(n^4\\cdot|\\Lambda_{good}|\\cdot X(n))$ rounds for arbitrary configurations, $|\\Lambda_{good}|$ the length of the largest honest identifier; $O(n^4)$ if the agents start gathered; $O(n^3)$ gathered with $f \\le \\lfloor n/3\\rfloor - 1$; $O((f + |\\Lambda|)\\cdot X(n))$ for $f = O(\\sqrt n)$. Tolerates $f \\le n-1$ in polynomial time on graphs isomorphic to their quotient graph. Memory per agent is not analysed except for that last algorithm ($O(m\\log n)$ bits)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Polynomial, but $\\tilde O(n^9)$ versus $\\Omega(n)$; the bottleneck is Byzantine gathering."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in the general-graph algorithms."
+        }
+      },
+      "open": [
+        "Faster Byzantine dispersion on general graphs: the time is dominated by Byzantine gathering, and the authors ask whether building a map before settling is necessary [Molla2021ByzantineGraphs].",
+        "Tolerating more than $n/2$ weak Byzantine agents on general graphs (possible only on the restricted class so far) [Molla2021ByzantineGraphs].",
+        "Byzantine dispersion with bounded memory per agent, on trees, with $k < n$, or under asynchrony: nothing is known [Molla2020WeakRing] [Chand2023FaultTolerant]."
+      ],
+      "notes": "Byzantine dispersion was introduced on rings [Molla2020WeakRing] and then on general graphs [Molla2021ByzantineGraphs]; no general-graph improvement has appeared since 2021.",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "weak-byzantine",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "title": "Weak Byzantine agents on rings",
+      "summary": "Optimal $O(n)$ time and $O(\\log n)$ bits are possible on rings when fewer than $n/17$ agents are Byzantine and $f$ is known.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Molla2020WeakRing",
+          "note": "Diameter $n/2$, $k = n$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k = n$: the ring has diameter $n/2$",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "$k = n$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Molla2020WeakRing",
+          "role": "best",
+          "time": "O(n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$ and $f$",
+            "$f \\le \\lfloor (n-4)/17\\rfloor$",
+            "identifiers in $[1,n]$"
+          ],
+          "note": "Introductory and current best. Without those assumptions: $O(n^2)$ rounds with $O(\\log n)$ bits for any $f \\le n-1$ ($O(fn)$ if $f$ is known), or $n$ rounds with $O(n\\log n)$ bits. From a rooted configuration, $n-1$ rounds with $O(\\log n)$ bits for any $f \\le k-1$ without knowing $n$ or $f$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ under the four assumptions; $O(n^2)$ without them."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$."
+        }
+      },
+      "open": [
+        "Keep $O(n)$ time and $O(\\log n)$ bits while dropping any of: identifiers in $[1,n]$, knowledge of $f$, the bound $f \\le (n-4)/17$, the follow primitive [Molla2020WeakRing].",
+        "Asynchronous Byzantine dispersion on rings [Molla2020WeakRing]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-grid",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "weak-byzantine",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "grid"
+      },
+      "title": "Weak Byzantine agents on grids",
+      "summary": "Time-optimal $O(\\sqrt n)$ rounds on oriented grids for any number of weak Byzantine agents, at the price of $O(n\\log n)$ bits.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt n)",
+          "ref": "Kshemkalyani2020Grids",
+          "note": "$k = n$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k = n$: the grid has diameter $2\\sqrt n$",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Augustine2018Tradeoffs",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "$k = n$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Banerjee2025OrientedGridsFT",
+          "role": "best",
+          "time": "O(\\sqrt n)",
+          "memory": "O(n\\log n)",
+          "assumes": [
+            "oriented grid",
+            "$k = n$",
+            "$f \\le n$"
+          ],
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\sqrt n)$."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(n\\log n)$ versus $\\Omega(\\log n)$."
+        }
+      },
+      "open": [
+        "Reduce the memory below $O(n\\log n)$ bits on grids with weak Byzantine agents.",
+        "Strong Byzantine agents (able to fake identifiers) on grids [Banerjee2025OrientedGridsFT]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "strong-byzantine",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "strong-byzantine",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "title": "Strong Byzantine agents",
+      "summary": "Byzantine agents can also fake identifiers; polynomial time is known only from a gathered start, or with a trusted shepherd agent.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)",
+          "ref": "Kshemkalyani2019Efficient",
+          "note": "Fault-free bound.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "fault-free bound ($f = 0$)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Molla2021ByzantineGraphs",
+          "role": "introductory",
+          "time": "O(n^3)",
+          "assumes": [
+            "$k = n$",
+            "knows $n$",
+            "$f \\le \\lfloor n/4\\rfloor - 1$",
+            "gathered start"
+          ],
+          "note": "From an arbitrary configuration the time is exponential in $n$ and $f$ must be known."
+        },
+        {
+          "ref": "Moses2024Shepherd",
+          "role": "best",
+          "time": "O(X(n) + n^3)",
+          "assumes": [
+            "one trusted shepherd agent",
+            "$f < \\lfloor (k-1)/2\\rfloor$",
+            "shepherd knows $n$ and $k$"
+          ],
+          "note": "A single never-Byzantine agent recognisable by others makes arbitrary-configuration strong-Byzantine dispersion polynomial, $O(n^3)$ if gathered; also handles nodes with capacities. Memory is unbounded in this analysis. Without a shepherd, $X(n)$ rounds for $f < k$ when the total node capacity exceeds $z f + k - f$, $z$ the number of nodes of non-zero capacity."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Polynomial only with a gathered start or a shepherd; exponential otherwise."
+        },
+        "memory": {
+          "status": "unknown"
+        }
+      },
+      "open": [
+        "Polynomial-time strong-Byzantine dispersion from arbitrary configurations without a trusted agent, and the largest tolerable $f$.",
+        "Asynchronous versions: a slow agent cannot be distinguished from a silent Byzantine one [Moses2024Shepherd]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "silent",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "none",
+        "timing": "sync"
+      },
+      "title": "Silent agents (no communication)",
+      "summary": "Agents cannot exchange any information; at its node an agent only learns whether it is alone and whether the number of agents there went up or down since the last round.",
+      "statement": "No communication at all. At the start of a round an agent at $v$ learns (i) whether it is alone at $v$ and (ii) whether the number of agents at $v$ increased or decreased since the previous round. Agents have identifiers in $[0, L]$ and know only their own; memory is counted as **additional** bits beyond the identifier.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k + \\log L)",
+          "ref": "Das2025SilentRing",
+          "note": "Proven on rings, hence for arbitrary graphs.",
+          "bottleneck": "timing is the only channel",
+          "preconditions": [
+            "no communication: only alone / count-change sensing",
+            "identifiers in $[0,L]$, unknown to the other agents",
+            "$\\Omega(k)$ from distance; $\\Omega(\\log L)$ from distinguishing identifiers by waiting",
+            "proven on rings, hence for arbitrary graphs"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log L + \\log\\Delta)",
+          "ref": "Gorain2022Silent",
+          "note": "Additional bits; no algorithm with o(log L + log Δ) additional bits exists in this model.",
+          "bottleneck": "encoding identifier and ports",
+          "preconditions": [
+            "additional bits beyond the identifier",
+            "rooted configuration",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gorain2022Silent",
+          "role": "best",
+          "time": "O(k\\log L + k^2\\log\\Delta)",
+          "memory": "O(\\log L + \\log\\Delta)",
+          "assumes": [
+            "rooted"
+          ],
+          "note": "Introductory and current best for general graphs; the agents terminate. Information is conveyed only by the timing of moves and by counts of co-located agents."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(k\\log L + k^2\\log\\Delta)$ versus $\\Omega(k + \\log L)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log L + \\log\\Delta)$ additional bits."
+        }
+      },
+      "open": [
+        "Close the time gap on general graphs: is $O(k + \\log L)$ achievable, as on rings?",
+        "Arbitrary (multi-source) initial configurations on general graphs; only rings are solved [Das2025SilentRing].",
+        "Weaker sensing: agents that only learn whether they are alone and whether the count decreased, and agents that wake up at different times (a 2026 ICDCIT paper by Gorain, Mandal and Sharma treats this; its bounds are not recorded here)."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "silent-ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "none",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "title": "Silent agents on rings",
+      "summary": "On an oriented ring, silent agents from arbitrary configurations disperse in optimal $\\Theta(k + \\log L)$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k + \\log L)",
+          "ref": "Das2025SilentRing",
+          "bottleneck": "timing is the only channel",
+          "preconditions": [
+            "no communication: only alone / count-change sensing",
+            "identifiers in $[0,L]$, unknown to the other agents"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log L)",
+          "ref": "Gorain2022Silent",
+          "note": "$\\Delta = 2$.",
+          "bottleneck": "encoding the identifier",
+          "preconditions": [
+            "additional bits beyond the identifier",
+            "$\\Delta = 2$, so only the $\\log L$ term remains"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2025SilentRing",
+          "role": "best",
+          "time": "O(k + \\log L)",
+          "memory": "O(\\log L)",
+          "assumes": [
+            "oriented ring"
+          ],
+          "note": "Introductory and current best; arbitrary initial configurations."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(k + \\log L)$."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log L)$."
+        }
+      },
+      "open": [
+        "Unoriented rings, and rings where agents cannot detect count changes."
+      ],
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Dispersion from a rooted start, by the depth-first search of [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient]: $k = 5$ agents start on one node of an anonymous port-labelled graph and move as one group. At each new node the smallest ID settles (green) and records its parent port; the group tries the ports in order, goes back when a node is occupied, and returns through the parent port when no port is left. One frame per round; the green edges form the depth-first tree.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          10,
+          28
+        ],
+        "b": [
+          34,
+          46
+        ],
+        "c": [
+          34,
+          12
+        ],
+        "d": [
+          62,
+          50
+        ],
+        "e": [
+          62,
+          12
+        ],
+        "f": [
+          88,
+          22
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "a",
+          "c"
+        ],
+        [
+          "b",
+          "d"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "e"
+        ],
+        [
+          "e",
+          "f"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          13.9,
+          32.8
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          15.8,
+          25.9
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          30.1,
+          41.2
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          39.7,
+          48.3
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          35.5,
+          40.0
+        ],
+        "s": "3",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          28.2,
+          14.1
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          32.5,
+          18.0
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          40.0,
+          13.5
+        ],
+        "s": "3",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          56.3,
+          47.7
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          56.0,
+          10.5
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          67.1,
+          15.6
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          82.9,
+          18.4
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: k = 5 agents on one node; ports numbered at each node",
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "at": "a",
+            "k": "agent",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "at": "a",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "at": "b",
+            "k": "agent",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "at": "b",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                12.7,
+                30.0
+              ],
+              [
+                31.3,
+                44.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Smallest ID settles; the rest take the next untried port"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "at": "d",
+            "k": "agent",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "at": "d",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.4,
+                46.5
+              ],
+              [
+                58.6,
+                49.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "b",
+            "k": "agent",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "at": "b",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.6,
+                49.5
+              ],
+              [
+                37.4,
+                46.5
+              ]
+            ],
+            "c": "near",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "No untried port: back through the parent port"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "at": "c",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                34.0,
+                42.6
+              ],
+              [
+                34.0,
+                15.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "at": "a",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                34,
+                12
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                31.2,
+                13.9
+              ],
+              [
+                12.8,
+                26.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Node already occupied (agent 1 settled here)"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "at": "c",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                34,
+                12
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.8,
+                26.1
+              ],
+              [
+                31.2,
+                13.9
+              ]
+            ],
+            "c": "gap",
+            "w": 0.9,
+            "arrow": true,
+            "dash": true
+          }
+        ],
+        "label": "Back by the same port; try the next port there"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "at": "e",
+            "k": "agent",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                34,
+                12
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                37.4,
+                12.0
+              ],
+              [
+                58.6,
+                12.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: agent 5 settles; at most one agent per node",
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "at": "e",
+            "k": "agent",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                28
+              ],
+              [
+                34,
+                46
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                62,
+                50
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                46
+              ],
+              [
+                34,
+                12
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                12
+              ],
+              [
+                62,
+                12
+              ]
+            ],
+            "c": "tight",
+            "w": 1.3
+          }
+        ]
+      }
+    ]
+  }
+}

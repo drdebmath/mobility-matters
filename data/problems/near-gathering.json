@@ -1,0 +1,2815 @@
+{
+  "id": "near-gathering",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Near-gathering",
+  "origin": {
+    "ref": "Pagli2015Near",
+    "year": 2012,
+    "note": "Introduced at SIROCCO 2012."
+  },
+  "derived_from": {
+    "problem": "gathering",
+    "kind": "relaxation of",
+    "relation": "Gathering requires a common point; near-gathering only requires being close, but forbids collisions. It is used as a first phase before forming patterns."
+  },
+  "summary": "Robots must get within a small distance of each other without ever colliding.",
+  "statement": "Robots with limited visibility, starting from a connected configuration at distinct points, must reach a configuration in which every robot sees all others, without two robots ever being at the same point.",
+  "primer": {
+    "intro": "Picture short-sighted people in fog who must come close enough that everybody can see everybody, without bumping into each other. There are $n$ robots, points at distinct places in the plane, and each sees only the robots within distance $V$ (its **visibility radius**). Draw a line between two robots when they are within distance $V$: at the start this picture is **connected** (every robot can be reached from every other along lines). Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles); in the basic version they agree on the direction of one axis, and the scheduler is ASYNC (each phase may take any finite time). The robots must reach a configuration in which every robot sees all others, and two robots may never be at the same point.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Go to the centre of what you see, in small steps, keeping your neighbours",
+        "variant": "ssync-disoriented",
+        "ref": "Castenow2022Unifying",
+        "idea": "1. Compute the **smallest enclosing circle** of the robots you can see, and aim for its centre (the **Go-To-the-Center** rule).\n2. For every robot you see, stay inside the disc of radius $V/2$ around the midpoint between you and it. Your neighbour obeys the same rule, so the two of you stay within distance $V$ and the picture stays connected.\n3. To avoid collisions, move only a short distance and only part of the way to your target. Robots see a little farther than the connection distance, so a robot can also compute where its nearby neighbours are heading and keep clear of them.\n4. Stop when everyone you see is very close: since the picture is connected, then everyone is close.",
+        "analysis": "Collisions are the new difficulty compared with gathering. Even for two robots, the simple rule \\\"move half-way to the centre of gravity\\\" can collide in ASYNC: robot $r$ at $(0,0)$ heads for $(781, 0)$; the scheduler pauses it at $(52, 0)$ while robot $s$, starting at $(3124, 0)$ and always seeing $r$ at $(52, 0)$, makes five cycles and arrives at $(781, 0)$; then $r$ finishes its move onto $s$ [Pagli2015Near]. Castenow, Harbig, Jung, Kling, Knollmann and Meyer auf der Heide show that any gathering rule of a broad class, including Go-To-the-Center, can be made collision-free and solves near-gathering for disoriented robots in $O(\\Delta_0^2)$ epochs in SSYNC, where $\\Delta_0$ is the initial diameter (largest distance between two robots) and $V$ is the unit (Theorem 18 of [Castenow2022Unifying]). The steps above simplify their construction.",
+        "why_it_matters": "It lets short-sighted robots reach a state where they all see each other, after which any algorithm for robots with unlimited visibility can take over."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A big regular polygon shrinks slowly",
+        "variant": "ssync-disoriented",
+        "ref": "Castenow2022Unifying",
+        "idea": "Place $n$ robots on a regular $n$-gon with sides of length 1, the visibility radius, so each robot sees only its two neighbours. The adversary chooses coordinate systems so that all robots see the same thing and the polygon stays regular forever. Each robot sees itself and two neighbours nearly on a straight line: the triangle they form has height at most about $\\pi/n$. If a robot always moves inside the triangle of what it sees, it moves towards the centre by at most about $\\pi/n$ per round. The polygon's radius is about $n/(2\\pi)$, so shrinking it to two thirds of its size takes about $n^2$ rounds.",
+        "analysis": "The diameter of this start is $\\Delta_0 \\approx n/\\pi$, so $\\Omega(\\Delta_0^2)$ rounds are needed by every protocol whose robots always move inside the region spanned by what they see (Theorem 4 of [Castenow2022Unifying]); Go-To-the-Center and its collision-free version are of this kind, so their $O(\\Delta_0^2)$ bound is tight for them. Whether moving outside that region can be faster is open.",
+        "why_it_matters": "It shows that local rules pay quadratically in the size of the swarm, and points to where a faster algorithm would have to do something different."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Robots that see nobody stay apart",
+        "variant": "async-one-axis",
+        "ref": "Pagli2015Near",
+        "idea": "Why must the start be connected? Take two robots farther apart than $V$. Each sees only itself, in every cycle. A deterministic oblivious robot with the same snapshot always computes the same move in its own coordinates. The adversary gives both robots the same orientation and unit and wakes them together: they make exactly the same move in the plane, so their distance never changes. They never see each other.",
+        "analysis": "So near-gathering cannot be solved from a disconnected start, which Pagli, Prencipe and Viglietta note is \\\"easily seen\\\" [Pagli2015Near]; the same holds for gathering [Flocchini2005Limited]. From a connected start, Pagli et al. solve near-gathering in ASYNC, without collisions and with termination, for robots that agree on one axis [Pagli2015Near].",
+        "why_it_matters": "It is the reason every limited-visibility algorithm assumes a connected start and works hard to keep it connected."
+      }
+    ]
+  },
+  "history": "Near-gathering was introduced to **get robots close without collisions**, a safe first phase for other tasks [Pagli2015Near]; later work asked how fast disoriented robots can do it [Castenow2022Unifying].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "async-one-axis",
+      "title": "ASYNC, limited visibility, one common axis",
+      "standard": true,
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "one-axis",
+        "body": "point"
+      },
+      "summary": "Robots get close together without ever colliding, from a connected start, if they agree on one axis.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Pagli2015Near",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best; collision-free with termination."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Pagli, Prencipe and Viglietta conjecture that near-gathering is impossible without agreement on one axis."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "ssync-disoriented",
+      "title": "SSYNC, limited visibility, disoriented",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "Disoriented robots near-gather in $O(\\Delta_0^2)$ epochs in SSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\Delta_0^2)",
+          "ref": "Castenow2022Unifying",
+          "bottleneck": "locality",
+          "preconditions": [
+            "only for $\\lambda$-contracting protocols"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Castenow2022Unifying",
+          "role": "best",
+          "time": "O(\\Delta_0^2)",
+          "colours": "0",
+          "note": "Theorem 18; first near-gathering protocols for disoriented robots."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Within contracting protocols."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Near-gathering in $O(\\Delta_0)$ epochs?"
+      ],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Near-gathering: robots with limited visibility, starting at distinct points whose visibility graph is connected, must come close enough that every robot sees all others, without two robots ever occupying the same point [Pagli2015Near]. Shown in FSYNC rounds: the Go-To-the-Center rule of [Castenow2022Unifying]: each robot moves part of the way towards the centre of the smallest circle enclosing the robots it sees, staying within $V/2$ of the midpoint with each neighbour, so links (lines) are never lost.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              10,
+              22
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              28,
+              44
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              34,
+              12
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              52,
+              32
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              72,
+              46
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              74,
+              16
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              92,
+              30
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                22
+              ],
+              [
+                34,
+                12
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                28,
+                44
+              ],
+              [
+                52,
+                32
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34,
+                12
+              ],
+              [
+                52,
+                32
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52,
+                32
+              ],
+              [
+                72,
+                46
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52,
+                32
+              ],
+              [
+                74,
+                16
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                72,
+                46
+              ],
+              [
+                92,
+                30
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                74,
+                16
+              ],
+              [
+                92,
+                30
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ],
+        "label": "Start: neighbours within $V$ are linked"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              16.0,
+              19.5
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              34.0,
+              41.0
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              32.5,
+              19.5
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              51.6,
+              31.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              72.0,
+              38.5
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              73.0,
+              23.5
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              84.3,
+              30.6
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                16.0,
+                19.5
+              ],
+              [
+                32.5,
+                19.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34.0,
+                41.0
+              ],
+              [
+                32.5,
+                19.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34.0,
+                41.0
+              ],
+              [
+                51.6,
+                31.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                32.5,
+                19.5
+              ],
+              [
+                51.6,
+                31.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.6,
+                31.1
+              ],
+              [
+                72.0,
+                38.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.6,
+                31.1
+              ],
+              [
+                73.0,
+                23.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                72.0,
+                38.5
+              ],
+              [
+                73.0,
+                23.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                72.0,
+                38.5
+              ],
+              [
+                84.3,
+                30.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                73.0,
+                23.5
+              ],
+              [
+                84.3,
+                30.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ],
+        "label": "Each robot moves part way to the centre of what it sees"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              20.1,
+              19.5
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              36.6,
+              35.4
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.1,
+              22.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              51.9,
+              30.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              70.0,
+              34.7
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              70.5,
+              27.2
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              80.2,
+              30.9
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                20.1,
+                19.5
+              ],
+              [
+                36.6,
+                35.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                20.1,
+                19.5
+              ],
+              [
+                33.1,
+                22.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.6,
+                35.4
+              ],
+              [
+                33.1,
+                22.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.6,
+                35.4
+              ],
+              [
+                51.9,
+                30.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.1,
+                22.4
+              ],
+              [
+                51.9,
+                30.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.9,
+                30.1
+              ],
+              [
+                70.0,
+                34.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.9,
+                30.1
+              ],
+              [
+                70.5,
+                27.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                70.0,
+                34.7
+              ],
+              [
+                70.5,
+                27.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                70.0,
+                34.7
+              ],
+              [
+                80.2,
+                30.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                70.5,
+                27.2
+              ],
+              [
+                80.2,
+                30.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.3,
+              23.5
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              36.3,
+              30.1
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              34.6,
+              23.6
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              51.7,
+              29.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              68.0,
+              32.6
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              69.4,
+              28.0
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              77.3,
+              31.1
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                24.3,
+                23.5
+              ],
+              [
+                36.3,
+                30.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24.3,
+                23.5
+              ],
+              [
+                34.6,
+                23.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.3,
+                30.1
+              ],
+              [
+                34.6,
+                23.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.3,
+                30.1
+              ],
+              [
+                51.7,
+                29.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                34.6,
+                23.6
+              ],
+              [
+                51.7,
+                29.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.7,
+                29.3
+              ],
+              [
+                68.0,
+                32.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.7,
+                29.3
+              ],
+              [
+                69.4,
+                28.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.7,
+                29.3
+              ],
+              [
+                77.3,
+                31.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.0,
+                32.6
+              ],
+              [
+                69.4,
+                28.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.0,
+                32.6
+              ],
+              [
+                77.3,
+                31.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.4,
+                28.0
+              ],
+              [
+                77.3,
+                31.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              27.3,
+              25.1
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.2,
+              28.2
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              35.4,
+              24.3
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              53.8,
+              28.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              66.3,
+              31.4
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              69.1,
+              28.1
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              74.1,
+              30.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                27.3,
+                25.1
+              ],
+              [
+                37.2,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                27.3,
+                25.1
+              ],
+              [
+                35.4,
+                24.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                27.3,
+                25.1
+              ],
+              [
+                53.8,
+                28.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.2,
+                28.2
+              ],
+              [
+                35.4,
+                24.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.2,
+                28.2
+              ],
+              [
+                53.8,
+                28.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                35.4,
+                24.3
+              ],
+              [
+                53.8,
+                28.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                53.8,
+                28.3
+              ],
+              [
+                66.3,
+                31.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                53.8,
+                28.3
+              ],
+              [
+                69.1,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                53.8,
+                28.3
+              ],
+              [
+                74.1,
+                30.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                66.3,
+                31.4
+              ],
+              [
+                69.1,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                66.3,
+                31.4
+              ],
+              [
+                74.1,
+                30.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.1,
+                28.1
+              ],
+              [
+                74.1,
+                30.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              30.6,
+              25.5
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              38.9,
+              27.5
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              35.7,
+              24.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              52.3,
+              28.2
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              65.1,
+              30.5
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              68.7,
+              28.2
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              72.8,
+              30.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.6,
+                25.5
+              ],
+              [
+                38.9,
+                27.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.6,
+                25.5
+              ],
+              [
+                35.7,
+                24.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.6,
+                25.5
+              ],
+              [
+                52.3,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.9,
+                27.5
+              ],
+              [
+                35.7,
+                24.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.9,
+                27.5
+              ],
+              [
+                52.3,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.9,
+                27.5
+              ],
+              [
+                65.1,
+                30.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                35.7,
+                24.4
+              ],
+              [
+                52.3,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.3,
+                28.2
+              ],
+              [
+                65.1,
+                30.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.3,
+                28.2
+              ],
+              [
+                68.7,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.3,
+                28.2
+              ],
+              [
+                72.8,
+                30.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                65.1,
+                30.5
+              ],
+              [
+                68.7,
+                28.2
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                65.1,
+                30.5
+              ],
+              [
+                72.8,
+                30.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.7,
+                28.2
+              ],
+              [
+                72.8,
+                30.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              31.3,
+              25.6
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              43.4,
+              27.7
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              38.6,
+              25.6
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              52.0,
+              28.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.5,
+              29.8
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              65.6,
+              28.8
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              70.3,
+              30.4
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                31.3,
+                25.6
+              ],
+              [
+                43.4,
+                27.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.3,
+                25.6
+              ],
+              [
+                38.6,
+                25.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.3,
+                25.6
+              ],
+              [
+                52.0,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.4,
+                27.7
+              ],
+              [
+                38.6,
+                25.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.4,
+                27.7
+              ],
+              [
+                52.0,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.4,
+                27.7
+              ],
+              [
+                60.5,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.4,
+                27.7
+              ],
+              [
+                65.6,
+                28.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.4,
+                27.7
+              ],
+              [
+                70.3,
+                30.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.6,
+                25.6
+              ],
+              [
+                52.0,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.6,
+                25.6
+              ],
+              [
+                60.5,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.6,
+                25.6
+              ],
+              [
+                65.6,
+                28.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.0,
+                28.1
+              ],
+              [
+                60.5,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.0,
+                28.1
+              ],
+              [
+                65.6,
+                28.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.0,
+                28.1
+              ],
+              [
+                70.3,
+                30.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.5,
+                29.8
+              ],
+              [
+                65.6,
+                28.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.5,
+                29.8
+              ],
+              [
+                70.3,
+                30.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                65.6,
+                28.8
+              ],
+              [
+                70.3,
+                30.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              33.9,
+              25.9
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              47.1,
+              27.9
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              41.1,
+              26.0
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              51.4,
+              28.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              57.5,
+              28.9
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              62.8,
+              28.6
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              66.9,
+              30.0
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                33.9,
+                25.9
+              ],
+              [
+                47.1,
+                27.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.9,
+                25.9
+              ],
+              [
+                41.1,
+                26.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.9,
+                25.9
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.9,
+                25.9
+              ],
+              [
+                57.5,
+                28.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.1,
+                27.9
+              ],
+              [
+                41.1,
+                26.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.1,
+                27.9
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.1,
+                27.9
+              ],
+              [
+                57.5,
+                28.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.1,
+                27.9
+              ],
+              [
+                62.8,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.1,
+                27.9
+              ],
+              [
+                66.9,
+                30.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                41.1,
+                26.0
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                41.1,
+                26.0
+              ],
+              [
+                57.5,
+                28.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                41.1,
+                26.0
+              ],
+              [
+                62.8,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                41.1,
+                26.0
+              ],
+              [
+                66.9,
+                30.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                57.5,
+                28.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                62.8,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                66.9,
+                30.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                57.5,
+                28.9
+              ],
+              [
+                62.8,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                57.5,
+                28.9
+              ],
+              [
+                66.9,
+                30.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.8,
+                28.6
+              ],
+              [
+                66.9,
+                30.0
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              36.8,
+              26.3
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              47.2,
+              27.9
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              42.2,
+              26.3
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              51.4,
+              28.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              55.7,
+              28.7
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              60.6,
+              28.5
+            ]
+          },
+          {
+            "id": "6",
+            "p": [
+              65.3,
+              29.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                36.8,
+                26.3
+              ],
+              [
+                47.2,
+                27.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.8,
+                26.3
+              ],
+              [
+                42.2,
+                26.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.8,
+                26.3
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.8,
+                26.3
+              ],
+              [
+                55.7,
+                28.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.8,
+                26.3
+              ],
+              [
+                60.6,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                42.2,
+                26.3
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                55.7,
+                28.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                60.6,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                65.3,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.2,
+                26.3
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.2,
+                26.3
+              ],
+              [
+                55.7,
+                28.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.2,
+                26.3
+              ],
+              [
+                60.6,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.2,
+                26.3
+              ],
+              [
+                65.3,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                55.7,
+                28.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                60.6,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                65.3,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                55.7,
+                28.7
+              ],
+              [
+                60.6,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                55.7,
+                28.7
+              ],
+              [
+                65.3,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.6,
+                28.5
+              ],
+              [
+                65.3,
+                29.8
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              37.6,
+              26.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              47.2,
+              27.9
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              42.8,
+              26.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              51.4,
+              28.1
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              55.5,
+              28.6
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              60.0,
+              28.5
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "6",
+            "p": [
+              64.6,
+              29.7
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                47.2,
+                27.9
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                42.8,
+                26.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                55.5,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                60.0,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.6,
+                26.4
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                42.8,
+                26.4
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                55.5,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                60.0,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                47.2,
+                27.9
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.8,
+                26.4
+              ],
+              [
+                51.4,
+                28.1
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.8,
+                26.4
+              ],
+              [
+                55.5,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.8,
+                26.4
+              ],
+              [
+                60.0,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                42.8,
+                26.4
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                55.5,
+                28.6
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                60.0,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.4,
+                28.1
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                55.5,
+                28.6
+              ],
+              [
+                60.0,
+                28.5
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                55.5,
+                28.6
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.0,
+                28.5
+              ],
+              [
+                64.6,
+                29.7
+              ]
+            ],
+            "c": "line",
+            "w": 0.4
+          }
+        ],
+        "label": "Final: every robot sees all, none collide"
+      }
+    ]
+  }
+}

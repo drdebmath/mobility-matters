@@ -1,0 +1,1871 @@
+{
+  "id": "k-grouping",
+  "model": "mobile-robots-in-the-plane",
+  "name": "k-grouping",
+  "origin": {
+    "ref": "Efrima2009Partition",
+    "year": 2007,
+    "note": "Splitting a swarm into a given number of groups was introduced at SIROCCO 2007, under the name partitioning. No paper titled \"k-grouping\" was found."
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "special case of",
+    "relation": "When the groups sit at points, $k$-grouping forms a pattern of $k$ points; which points, and how many robots each holds, is up to the robots. Gathering is its special case $k = 1$. Splitting needs symmetry breaking [Efrima2009Partition]."
+  },
+  "related": [
+    {
+      "problem": "partitioning-plane",
+      "relation": "$k$-grouping fixes the number of groups; partitioning fixes the size of each group. With equal sizes the two coincide: $k$ groups of $n/k$ robots."
+    }
+  ],
+  "summary": "Robots must form $k$ distinct groups, each group at its own point.",
+  "statement": "$n$ robots must form exactly $k$ distinct groups, each group gathered at its own point or converging towards one, and stay apart. The number of groups $k$ is given; the group sizes are free unless the variant fixes them. With $k = 1$ this is gathering (or convergence).",
+  "primer": {
+    "intro": "Imagine a swarm that must split into $k$ teams of equal size, each team clustering in its own place, far from the others. There are $n$ robots, points at distinct places in the plane, and $k$ divides $n$. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (no memory between cycles). In the basic version robots share a **compass** (all agree on north and east, though not on origin or unit of length), the scheduler is ASYNC (each phase may take any finite time), and some robots may **crash** (stop forever). The robots must split into $k$ groups of $n/k$ robots each, every group converging towards its own point, with the groups staying a fixed distance apart; with $k = 1$ this is just convergence.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Sort by the compass, cut into blocks, converge within each block",
+        "variant": "equal-groups",
+        "ref": "Efrima2009Partition",
+        "idea": "1. Sort the robots from west to east, and robots on one north-south line from south to north. All robots get the same order, because they share north and east.\n2. Cut the order into $k$ consecutive blocks of $n/k$ robots: the first $n/k$ robots, the next $n/k$, and so on. Each robot finds its own block.\n3. Move towards the **centre of gravity** of your block, the average of the positions of its robots.",
+        "analysis": "The region spanned by a block's robots and their destinations never grows when they move to their centre of gravity (Lemma 2.5 of [Efrima2009Partition], from Cohen and Peleg). The blocks start in disjoint regions ordered from west to east, so two robots of different blocks can never swap order, and the blocks computed in step 1 stay the same forever, even though robots forget them. Each block therefore converges on its own, and a crashed robot simply stays inside its block's region, so any number of crashes is tolerated (Proposition 2.7 of [Efrima2009Partition]). This is the catalogue's introductory and current best result.",
+        "why_it_matters": "It shows a clean way to make oblivious robots keep an agreement forever: choose it so that the motion itself preserves it."
+      },
+      {
+        "kind": "impossibility",
+        "title": "No compass: the regular polygon cannot be split",
+        "variant": "no-compass",
+        "ref": "Efrima2009Partition",
+        "idea": "Start the $n$ robots on the corners of a regular $n$-gon, with coordinate systems that are copies of each other turned around the centre. Every robot sees the same snapshot, so in every round of the fully synchronous scheduler all robots make the same move up to rotation, and the configuration stays a regular polygon (or a single point). But $k \\ge 2$ groups of several robots each, far apart, never look like a regular polygon or a point. So the groups never form.",
+        "analysis": "This is Proposition 3.3 of [Efrima2009Partition]: deterministic robots without a compass cannot partition themselves into $k > 1$ groups, already in FSYNC and therefore in SSYNC and ASYNC. Agreeing only on the axis lines but not their directions is still not enough for some $n$ and $k$ (a symmetric square with $n = 4$, $k = 2$; Proposition 3.4).",
+        "why_it_matters": "It shows that partitioning, unlike gathering, needs a way to break symmetry."
+      },
+      {
+        "kind": "algorithm",
+        "title": "A coin flip breaks the tie",
+        "variant": "randomized-ssync",
+        "ref": "Efrima2009Partition",
+        "idea": "Without a compass, the trouble is groups of robots that look exactly alike. Randomness helps: a robot in such a tied group chooses its direction of motion at random. Two robots that would otherwise mirror each other forever now choose differently with probability at least $1/2$ in each attempt, so the tie is broken after a few attempts on average, and the robots then proceed with the deterministic method.",
+        "analysis": "Efrima and Peleg give a randomized algorithm, of the kind that always ends correctly and is only random in its running time, that partitions robots without any common orientation in FSYNC and SSYNC and tolerates crashes [Efrima2009Partition]. The description above is simplified: in the paper the random choice is used only to separate robots that lie on the same line.",
+        "why_it_matters": "It is the standard illustration that randomness breaks the symmetry that defeats deterministic robots."
+      }
+    ]
+  },
+  "history": "Splitting a swarm into a given number of groups was asked as **solvability under each timing model and amount of orientation** [Efrima2009Partition], who called it partitioning and required equal group sizes. Team assembling of heterogeneous robots, where the composition of each team is prescribed, is a related task [Liu2018Team].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "equal-groups",
+      "title": "$k$ groups of equal size",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "crash",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "Robots split into $k$ groups of $n/k$ that converge apart; with a full compass a deterministic crash-tolerant algorithm works in ASYNC.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Efrima2009Partition",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "strong multiplicity detection"
+          ],
+          "note": "Introductory and current best: deterministic, crash-fault tolerant, in every timing model with a full compass. Also crash-tolerant in FSYNC and SSYNC with a half compass (both axis directions, one positive orientation, no chirality), and not crash-tolerant in ASYNC with a half compass."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Efrima and Peleg call this partitioning; the catalogue's partitioning fixes the group size instead, and the two coincide for equal groups. Convergence is Partition$(n,1)$. Checked against the full text.",
+      "status": "verified",
+      "statement": "Partition$(n,k)$ of Efrima and Peleg: $k$ is given to the robots, every group has exactly $n/k$ robots ($\\lfloor n/k\\rfloor$ or $\\lfloor n/k\\rfloor + 1$ when $k$ does not divide $n$), robots in one group **converge** (for every $\\varepsilon$ they are eventually within $\\varepsilon$ of each other) and groups stay more than $2\\eta$ apart, for some fixed $\\eta > 0$. Robots start at distinct points and can count the robots at a point."
+    },
+    {
+      "id": "no-compass",
+      "title": "$k$ equal groups, no common orientation, deterministic",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "fsync",
+        "body": "point"
+      },
+      "statement": "Partition$(n,k)$ of Efrima and Peleg: $k$ is given to the robots, every group has exactly $n/k$ robots ($\\lfloor n/k\\rfloor$ or $\\lfloor n/k\\rfloor + 1$ when $k$ does not divide $n$), robots in one group **converge** (for every $\\varepsilon$ they are eventually within $\\varepsilon$ of each other) and groups stay more than $2\\eta$ apart, for some fixed $\\eta > 0$. Robots start at distinct points and can count the robots at a point.",
+      "summary": "Without any common orientation no deterministic algorithm partitions robots into $k > 1$ groups, already in FSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Efrima2009Partition",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Proposition 3.3: deterministic, $k > 1$",
+            "robots start at the vertices of a regular $n$-gon and always make the same move",
+            "holds even in FSYNC, hence in SSYNC and ASYNC",
+            "with common axes but no orientation, still unsolvable for some $n, k$ (Proposition 3.4)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Deterministically unsolvable for $k > 1$."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "In a companion paper the same authors show that the problem becomes solvable in ASYNC without a compass if the start is asymmetric, if one robot is identifiable, or, randomized against a non-adaptive adversary, with one bit of memory and communication (as stated in [Efrima2009Partition]). Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "randomized-ssync",
+      "title": "$k$ equal groups, randomized, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "crash",
+        "scheduler": "ssync",
+        "algorithm": "randomized",
+        "body": "point"
+      },
+      "statement": "Partition$(n,k)$ of Efrima and Peleg: $k$ is given to the robots, every group has exactly $n/k$ robots ($\\lfloor n/k\\rfloor$ or $\\lfloor n/k\\rfloor + 1$ when $k$ does not divide $n$), robots in one group **converge** (for every $\\varepsilon$ they are eventually within $\\varepsilon$ of each other) and groups stay more than $2\\eta$ apart, for some fixed $\\eta > 0$. Robots start at distinct points and can count the robots at a point.",
+      "summary": "With randomness, robots without any common orientation partition in SSYNC, tolerating crashes.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Efrima2009Partition",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "strong multiplicity detection",
+            "adaptive adversary"
+          ],
+          "note": "Introductory and current best: randomized, crash-fault tolerant, FSYNC and SSYNC."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only solvability."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Partitioning in ASYNC without a common orientation, by a randomized algorithm with no extra memory."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "$k$-grouping: $n$ robots must split into exactly $k$ groups, each gathered at (or converging to) its own point, the points distinct. Shown: the algorithm of [Efrima2009Partition] with a common compass, $n = 9$, $k = 3$, in SSYNC rounds: robots are cut into blocks of $n/k$ by $x$-order (colours), and each ringed (activated) robot moves towards the centre of gravity (star) of its block, possibly stopping early; blocks never mix.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: $n=9$, $k=3$; blocks of 3 by $x$-order",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              8,
+              20
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              14,
+              46
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              36,
+              10
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42,
+              48
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              50,
+              26
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              64,
+              42
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              74,
+              12
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              92,
+              36
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.0,
+                2
+              ],
+              [
+                30.0,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                57.0,
+                2
+              ],
+              [
+                57.0,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              15.3,
+              32.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              42.7,
+              28.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              76.7,
+              30.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              8,
+              20
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                8,
+                20
+              ],
+              [
+                15.3,
+                32.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              42,
+              48
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                42,
+                48
+              ],
+              [
+                42.7,
+                28.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              92,
+              36
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                92,
+                36
+              ],
+              [
+                76.7,
+                30.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.4,
+              27.2
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              14,
+              46
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              36,
+              10
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.5,
+              34.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              50,
+              26
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              64,
+              42
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              74,
+              12
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              82.8,
+              32.4
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.0,
+                2
+              ],
+              [
+                30.0,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                57.0,
+                2
+              ],
+              [
+                57.0,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              16.8,
+              34.4
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              42.8,
+              23.3
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              73.6,
+              28.8
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              46
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                14,
+                46
+              ],
+              [
+                16.8,
+                34.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              10
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36,
+                10
+              ],
+              [
+                42.8,
+                23.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              42
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64,
+                42
+              ],
+              [
+                73.6,
+                28.8
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Activated robots move to their block's centre",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.4,
+              27.2
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.0,
+              37.9
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              24,
+              30
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              40.1,
+              18.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.5,
+              34.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              50,
+              26
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              71.7,
+              31.4
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              74,
+              12
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              82.8,
+              32.4
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                32.0,
+                2
+              ],
+              [
+                32.0,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.8,
+                2
+              ],
+              [
+                60.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              17.5,
+              31.7
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              44.2,
+              26.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              76.2,
+              25.3
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              30
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                24,
+                30
+              ],
+              [
+                17.5,
+                31.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              26
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                26
+              ],
+              [
+                44.2,
+                26.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              74,
+              12
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                74,
+                12
+              ],
+              [
+                76.2,
+                25.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              12.4,
+              27.2
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.0,
+              37.9
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              20.1,
+              31.0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              40.1,
+              18.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.5,
+              34.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              45.9,
+              26.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              71.7,
+              31.4
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              75.5,
+              21.3
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              82.8,
+              32.4
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.1,
+                2
+              ],
+              [
+                30.1,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                58.8,
+                2
+              ],
+              [
+                58.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              16.1,
+              32.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              42.8,
+              26.0
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              76.7,
+              28.4
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              12.4,
+              27.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.4,
+                27.2
+              ],
+              [
+                16.1,
+                32.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              42.5,
+              34.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                42.5,
+                34.0
+              ],
+              [
+                42.8,
+                26.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              71.7,
+              31.4
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                71.7,
+                31.4
+              ],
+              [
+                76.7,
+                28.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              82.8,
+              32.4
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                82.8,
+                32.4
+              ],
+              [
+                76.7,
+                28.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              15.0,
+              30.6
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.0,
+              37.9
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              20.1,
+              31.0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              40.1,
+              18.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.7,
+              29.2
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              45.9,
+              26.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              74.7,
+              29.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              75.5,
+              21.3
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              78.5,
+              29.6
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.1,
+                2
+              ],
+              [
+                30.1,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.3,
+                2
+              ],
+              [
+                60.3,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              17.0,
+              33.2
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              42.9,
+              24.4
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              76.2,
+              26.8
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.0,
+              37.9
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                16.0,
+                37.9
+              ],
+              [
+                17.0,
+                33.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              20.1,
+              31.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                20.1,
+                31.0
+              ],
+              [
+                17.0,
+                33.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.1,
+              18.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                40.1,
+                18.0
+              ],
+              [
+                42.9,
+                24.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.5,
+              21.3
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                75.5,
+                21.3
+              ],
+              [
+                76.2,
+                26.8
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              15.0,
+              30.6
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.6,
+              35.0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              17.6,
+              32.7
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              42.1,
+              22.5
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.7,
+              29.2
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              45.9,
+              26.0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              74.7,
+              29.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              75.9,
+              24.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              78.5,
+              29.6
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                29.8,
+                2
+              ],
+              [
+                29.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60.3,
+                2
+              ],
+              [
+                60.3,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              16.4,
+              32.8
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              43.6,
+              25.9
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              76.4,
+              27.9
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              45.9,
+              26.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                45.9,
+                26.0
+              ],
+              [
+                43.6,
+                25.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              78.5,
+              29.6
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                78.5,
+                29.6
+              ],
+              [
+                76.4,
+                27.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              15.0,
+              30.6
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                15.0,
+                30.6
+              ],
+              [
+                16.4,
+                32.8
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              15.9,
+              31.9
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.6,
+              35.0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              17.6,
+              32.7
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              42.1,
+              22.5
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.7,
+              29.2
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              44.0,
+              25.9
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              74.7,
+              29.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              75.9,
+              24.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              77.0,
+              28.4
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                29.8,
+                2
+              ],
+              [
+                29.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.4,
+                2
+              ],
+              [
+                59.4,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              16.7,
+              33.2
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              42.9,
+              25.9
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "star",
+            "p": [
+              75.9,
+              27.5
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              42.7,
+              29.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                42.7,
+                29.2
+              ],
+              [
+                42.9,
+                25.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              74.7,
+              29.6
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                74.7,
+                29.6
+              ],
+              [
+                75.9,
+                27.5
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.6,
+              35.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                16.6,
+                35.0
+              ],
+              [
+                16.7,
+                33.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: 3 groups, each converging on its own point",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              15.9,
+              31.9
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "p": [
+              16.7,
+              33.8
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "p": [
+              17.6,
+              32.7
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "p": [
+              42.1,
+              22.5
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "4",
+            "p": [
+              42.9,
+              26.9
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "p": [
+              44.0,
+              25.9
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "6",
+            "p": [
+              75.5,
+              28.2
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "7",
+            "p": [
+              75.9,
+              24.6
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "8",
+            "p": [
+              77.0,
+              28.4
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                29.8,
+                2
+              ],
+              [
+                29.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.8,
+                2
+              ],
+              [
+                59.8,
+                54
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          }
+        ]
+      }
+    ]
+  }
+}

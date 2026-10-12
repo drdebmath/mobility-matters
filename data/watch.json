@@ -1,0 +1,858 @@
+{
+  "about": "Watch list for scripts/discover.py. Authors are generated from references.json (cited at least twice); add people under extra_authors and phrases under keywords.",
+  "categories": [
+    "cs.DC",
+    "cs.DS",
+    "cs.RO",
+    "cs.MA",
+    "cs.CG",
+    "cs.NI",
+    "cs.ET"
+  ],
+  "keywords": [
+    "oblivious robots",
+    "oblivious mobile robots",
+    "anonymous agents",
+    "anonymous mobile agents",
+    "port-labeled",
+    "port-labelled",
+    "luminous robots",
+    "robots with lights",
+    "look-compute-move",
+    "dispersion",
+    "graph exploration",
+    "collaborative exploration",
+    "collective exploration",
+    "treasure hunt",
+    "rendezvous",
+    "gathering",
+    "black hole search",
+    "network decontamination",
+    "map construction",
+    "pattern formation",
+    "circle formation",
+    "mutual visibility",
+    "convergence of robots",
+    "near-gathering",
+    "scattering",
+    "flocking",
+    "uniform deployment",
+    "leader election",
+    "programmable matter",
+    "amoebot",
+    "shape formation",
+    "coating",
+    "compression",
+    "linear search",
+    "cow path",
+    "group search",
+    "evacuation",
+    "patrolling",
+    "fence patrolling",
+    "pebble",
+    "finite automaton",
+    "recolourable",
+    "recolorable",
+    "rotor-router",
+    "whiteboard",
+    "temporal graph exploration",
+    "byzantine agents",
+    "robots in the plane",
+    "swarm of robots",
+    "silent robots"
+  ],
+  "theory": [
+    "distributed",
+    "deterministic",
+    "randomized",
+    "lower bound",
+    "upper bound",
+    "rounds",
+    "epochs",
+    "oblivious",
+    "anonymous",
+    "adversar",
+    "competitive ratio",
+    "port",
+    "synchronous",
+    "asynchronous",
+    "impossib",
+    "optimal",
+    "algorithm",
+    "colors",
+    "colours",
+    "memory",
+    "byzantine",
+    "crash"
+  ],
+  "exclude": [
+    "large language model",
+    "llm",
+    "gui agent",
+    "smartphone",
+    "lidar",
+    "slam",
+    "trajectory planning",
+    "path planning",
+    "reinforcement learning",
+    "authentication",
+    "superplasticizer",
+    "drug",
+    "particle size"
+  ],
+  "openalex_queries": [
+    "dispersion mobile agents graph",
+    "graph exploration mobile agent",
+    "collaborative tree exploration",
+    "oblivious mobile robots",
+    "luminous robots",
+    "robots with lights",
+    "amoebot",
+    "programmable matter distributed",
+    "black hole search",
+    "rendezvous mobile agents",
+    "gathering mobile robots",
+    "gathering mobile agents graph",
+    "arbitrary pattern formation robots",
+    "mutual visibility robots",
+    "evacuation robots disk",
+    "linear search competitive ratio",
+    "treasure hunt mobile agent",
+    "network decontamination agents",
+    "fence patrolling robots",
+    "rotor-router exploration",
+    "recolorable graph exploration",
+    "leader election mobile agents"
+  ],
+  "authors": [
+    {
+      "name": "Paola Flocchini",
+      "papers": 35
+    },
+    {
+      "name": "Nicola Santoro",
+      "papers": 35
+    },
+    {
+      "name": "Evangelos Kranakis",
+      "papers": 28
+    },
+    {
+      "name": "Andrzej Pelc",
+      "papers": 28
+    },
+    {
+      "name": "Gokarna Sharma",
+      "papers": 26
+    },
+    {
+      "name": "Anisur Rahaman Molla",
+      "papers": 24
+    },
+    {
+      "name": "Konstantinos Georgiou",
+      "papers": 24
+    },
+    {
+      "name": "Jurek Czyzowicz",
+      "papers": 22
+    },
+    {
+      "name": "Debasish Pattanayak",
+      "papers": 20
+    },
+    {
+      "name": "Giuseppe Prencipe",
+      "papers": 20
+    },
+    {
+      "name": "Sébastien Tixeuil",
+      "papers": 17
+    },
+    {
+      "name": "David Ilcinkas",
+      "papers": 15
+    },
+    {
+      "name": "Quentin Bramas",
+      "papers": 15
+    },
+    {
+      "name": "Koichi Wada",
+      "papers": 15
+    },
+    {
+      "name": "Anissa Lamani",
+      "papers": 14
+    },
+    {
+      "name": "Andréa W. Richa",
+      "papers": 14
+    },
+    {
+      "name": "Ajay D. Kshemkalyani",
+      "papers": 13
+    },
+    {
+      "name": "Pierre Fraigniaud",
+      "papers": 13
+    },
+    {
+      "name": "Yoann Dieudonné",
+      "papers": 13
+    },
+    {
+      "name": "Yuichi Sudo",
+      "papers": 12
+    },
+    {
+      "name": "Kaushik Mondal",
+      "papers": 12
+    },
+    {
+      "name": "Danny Krizanc",
+      "papers": 12
+    },
+    {
+      "name": "Shantanu Das",
+      "papers": 12
+    },
+    {
+      "name": "Christian Scheideler",
+      "papers": 12
+    },
+    {
+      "name": "Buddhadeb Sau",
+      "papers": 11
+    },
+    {
+      "name": "Partha Sarathi Mandal",
+      "papers": 11
+    },
+    {
+      "name": "Masafumi Yamashita",
+      "papers": 11
+    },
+    {
+      "name": "William K. Moses Jr.",
+      "papers": 10
+    },
+    {
+      "name": "Manish Kumar",
+      "papers": 10
+    },
+    {
+      "name": "Leszek Gąsieniec",
+      "papers": 10
+    },
+    {
+      "name": "Giovanni Viglietta",
+      "papers": 10
+    },
+    {
+      "name": "Lata Narayanan",
+      "papers": 10
+    },
+    {
+      "name": "Jaroslav Opatrny",
+      "papers": 10
+    },
+    {
+      "name": "Joshua J. Daymude",
+      "papers": 10
+    },
+    {
+      "name": "Fukuhito Ooshita",
+      "papers": 10
+    },
+    {
+      "name": "David Peleg",
+      "papers": 9
+    },
+    {
+      "name": "Alfredo Navarra",
+      "papers": 9
+    },
+    {
+      "name": "Stéphane Devismes",
+      "papers": 9
+    },
+    {
+      "name": "Xavier Défago",
+      "papers": 8
+    },
+    {
+      "name": "Robert Gmyr",
+      "papers": 8
+    },
+    {
+      "name": "Pascal Lafourcade",
+      "papers": 8
+    },
+    {
+      "name": "Hirotsugu Kakugawa",
+      "papers": 7
+    },
+    {
+      "name": "Toshimitsu Masuzawa",
+      "papers": 7
+    },
+    {
+      "name": "Stefan Dobrev",
+      "papers": 7
+    },
+    {
+      "name": "Adrian Kosowski",
+      "papers": 7
+    },
+    {
+      "name": "Yukiko Yamauchi",
+      "papers": 7
+    },
+    {
+      "name": "Sruti Gan Chaudhuri",
+      "papers": 7
+    },
+    {
+      "name": "Thim Strothmann",
+      "papers": 7
+    },
+    {
+      "name": "Sayaka Kamei",
+      "papers": 7
+    },
+    {
+      "name": "Prabhat Kumar Chand",
+      "papers": 6
+    },
+    {
+      "name": "Ralf Klasing",
+      "papers": 6
+    },
+    {
+      "name": "Franck Petit",
+      "papers": 6
+    },
+    {
+      "name": "Caterina Feletti",
+      "papers": 6
+    },
+    {
+      "name": "Irina Kostitsyna",
+      "papers": 6
+    },
+    {
+      "name": "Francesco Piselli",
+      "papers": 6
+    },
+    {
+      "name": "Sunil Shende",
+      "papers": 6
+    },
+    {
+      "name": "Ryan Killick",
+      "papers": 6
+    },
+    {
+      "name": "Masahiro Shibata",
+      "papers": 5
+    },
+    {
+      "name": "Pritam Goswami",
+      "papers": 5
+    },
+    {
+      "name": "Krishnendu Mukhopadhyaya",
+      "papers": 5
+    },
+    {
+      "name": "Russell Martin",
+      "papers": 5
+    },
+    {
+      "name": "Romain Cosson",
+      "papers": 5
+    },
+    {
+      "name": "Costas Busch",
+      "papers": 5
+    },
+    {
+      "name": "Zahra Derakhshandeh",
+      "papers": 5
+    },
+    {
+      "name": "Dana Randall",
+      "papers": 5
+    },
+    {
+      "name": "Archak Das",
+      "papers": 4
+    },
+    {
+      "name": "Kaustav Bose",
+      "papers": 4
+    },
+    {
+      "name": "Supantha Pandit",
+      "papers": 4
+    },
+    {
+      "name": "Ashish Saxena",
+      "papers": 4
+    },
+    {
+      "name": "Barun Gorain",
+      "papers": 4
+    },
+    {
+      "name": "Yann Disser",
+      "papers": 4
+    },
+    {
+      "name": "Dariusz R. Kowalski",
+      "papers": 4
+    },
+    {
+      "name": "Dominik Pająk",
+      "papers": 4
+    },
+    {
+      "name": "Laurent Massoulié",
+      "papers": 4
+    },
+    {
+      "name": "Sébastien Bouchard",
+      "papers": 4
+    },
+    {
+      "name": "Arnaud Labourel",
+      "papers": 4
+    },
+    {
+      "name": "Carlo Mereghetti",
+      "papers": 4
+    },
+    {
+      "name": "Beatrice Palano",
+      "papers": 4
+    },
+    {
+      "name": "Taisuke Izumi",
+      "papers": 4
+    },
+    {
+      "name": "H. Ramesh",
+      "papers": 4
+    },
+    {
+      "name": "Roger Wattenhofer",
+      "papers": 4
+    },
+    {
+      "name": "Giuseppe Antonio Di Luna",
+      "papers": 4
+    },
+    {
+      "name": "Jérémie Chalopin",
+      "papers": 4
+    },
+    {
+      "name": "Subhash Bhagat",
+      "papers": 4
+    },
+    {
+      "name": "Ramachandran Vaidyanathan",
+      "papers": 4
+    },
+    {
+      "name": "Jerry L. Trahan",
+      "papers": 4
+    },
+    {
+      "name": "Avisek Sharma",
+      "papers": 4
+    },
+    {
+      "name": "Bo Jiang",
+      "papers": 4
+    },
+    {
+      "name": "Anaïs Durand",
+      "papers": 4
+    },
+    {
+      "name": "Tanvir Kaur",
+      "papers": 3
+    },
+    {
+      "name": "Brati Mondal",
+      "papers": 3
+    },
+    {
+      "name": "Reuven Cohen",
+      "papers": 3
+    },
+    {
+      "name": "Vincent Villain",
+      "papers": 3
+    },
+    {
+      "name": "Ichiro Suzuki",
+      "papers": 3
+    },
+    {
+      "name": "Peter Widmayer",
+      "papers": 3
+    },
+    {
+      "name": "Peter Kling",
+      "papers": 3
+    },
+    {
+      "name": "Friedhelm Meyer auf der Heide",
+      "papers": 3
+    },
+    {
+      "name": "Yoshiaki Katayama",
+      "papers": 3
+    },
+    {
+      "name": "Huda Chuangpishit",
+      "papers": 3
+    },
+    {
+      "name": "Euripides Markou",
+      "papers": 3
+    },
+    {
+      "name": "Shay Kutten",
+      "papers": 3
+    },
+    {
+      "name": "Giuseppe A. Di Luna",
+      "papers": 3
+    },
+    {
+      "name": "Maria Gradinariu Potop-Butucaru",
+      "papers": 3
+    },
+    {
+      "name": "Suresh Rai",
+      "papers": 3
+    },
+    {
+      "name": "Sarah Cannon",
+      "papers": 3
+    },
+    {
+      "name": "Kristian Hinnenthal",
+      "papers": 3
+    },
+    {
+      "name": "Joseph L. Briones",
+      "papers": 3
+    },
+    {
+      "name": "Maria Kokkou",
+      "papers": 3
+    },
+    {
+      "name": "Othon Michail",
+      "papers": 3
+    },
+    {
+      "name": "André van Renssen",
+      "papers": 3
+    },
+    {
+      "name": "Naoki Kitamura",
+      "papers": 3
+    },
+    {
+      "name": "Jesse Lucier",
+      "papers": 3
+    },
+    {
+      "name": "Nikos Leonardos",
+      "papers": 3
+    },
+    {
+      "name": "Aris Pagourtzis",
+      "papers": 3
+    },
+    {
+      "name": "Ioannis Papaioannou",
+      "papers": 3
+    },
+    {
+      "name": "Qi Wei",
+      "papers": 3
+    },
+    {
+      "name": "Xuehou Tan",
+      "papers": 3
+    },
+    {
+      "name": "Michiko Inoue",
+      "papers": 3
+    },
+    {
+      "name": "John Augustine",
+      "papers": 2
+    },
+    {
+      "name": "Junya Nakamura",
+      "papers": 2
+    },
+    {
+      "name": "Rik Banerjee",
+      "papers": 2
+    },
+    {
+      "name": "Sumathi Sivasubramaniam",
+      "papers": 2
+    },
+    {
+      "name": "Bibhuti Das",
+      "papers": 2
+    },
+    {
+      "name": "Tomasz Radzik",
+      "papers": 2
+    },
+    {
+      "name": "Xiaohui Zhang",
+      "papers": 2
+    },
+    {
+      "name": "Sergio Rajsbaum",
+      "papers": 2
+    },
+    {
+      "name": "Dariusz Dereniowski",
+      "papers": 2
+    },
+    {
+      "name": "Przemysław Uznański",
+      "papers": 2
+    },
+    {
+      "name": "Shuji Kijima",
+      "papers": 2
+    },
+    {
+      "name": "Manash Kumar Kundu",
+      "papers": 2
+    },
+    {
+      "name": "Ranendu Adhikary",
+      "papers": 2
+    },
+    {
+      "name": "Jonas Harbig",
+      "papers": 2
+    },
+    {
+      "name": "Samia Souissi",
+      "papers": 2
+    },
+    {
+      "name": "Bastian Degener",
+      "papers": 2
+    },
+    {
+      "name": "Barbara Kempkes",
+      "papers": 2
+    },
+    {
+      "name": "Adam Heriban",
+      "papers": 2
+    },
+    {
+      "name": "Zohir Bouzid",
+      "papers": 2
+    },
+    {
+      "name": "Pavan Poudel",
+      "papers": 2
+    },
+    {
+      "name": "Evangelos Bampas",
+      "papers": 2
+    },
+    {
+      "name": "Thomas Gorry",
+      "papers": 2
+    },
+    {
+      "name": "Sebastian Brandt",
+      "papers": 2
+    },
+    {
+      "name": "Maxime Godon",
+      "papers": 2
+    },
+    {
+      "name": "Nikos Giachoudis",
+      "papers": 2
+    },
+    {
+      "name": "Rastislav Královič",
+      "papers": 2
+    },
+    {
+      "name": "Supratik Mukhopadhyay",
+      "papers": 2
+    },
+    {
+      "name": "Asaf Efrima",
+      "papers": 2
+    },
+    {
+      "name": "Saswata Jana",
+      "papers": 2
+    },
+    {
+      "name": "Apurba Das",
+      "papers": 2
+    },
+    {
+      "name": "Akitoshi Kawamura",
+      "papers": 2
+    },
+    {
+      "name": "Nicolas Nisse",
+      "papers": 2
+    },
+    {
+      "name": "Tishya Chhabra",
+      "papers": 2
+    },
+    {
+      "name": "Tom Peters",
+      "papers": 2
+    },
+    {
+      "name": "Shunhao Oh",
+      "papers": 2
+    },
+    {
+      "name": "Jamison W. Weber",
+      "papers": 2
+    },
+    {
+      "name": "Fabian Kuhn",
+      "papers": 2
+    },
+    {
+      "name": "David Liedtke",
+      "papers": 2
+    },
+    {
+      "name": "Paul G. Spirakis",
+      "papers": 2
+    },
+    {
+      "name": "Takashi Okumura",
+      "papers": 2
+    },
+    {
+      "name": "Fabian Frei",
+      "papers": 2
+    },
+    {
+      "name": "Subhajit Pramanick",
+      "papers": 2
+    },
+    {
+      "name": "Aisha Aljohani",
+      "papers": 2
+    },
+    {
+      "name": "Rusul J. Alsaedi",
+      "papers": 2
+    },
+    {
+      "name": "Joachim Gudmundsson",
+      "papers": 2
+    },
+    {
+      "name": "Moumita Mondal",
+      "papers": 2
+    },
+    {
+      "name": "George Karakostas",
+      "papers": 2
+    },
+    {
+      "name": "Somnath Kundu",
+      "papers": 2
+    },
+    {
+      "name": "Preeti Sharma",
+      "papers": 2
+    },
+    {
+      "name": "Caleb Jones",
+      "papers": 2
+    },
+    {
+      "name": "Manuel Lafond",
+      "papers": 2
+    },
+    {
+      "name": "Khaled Jawhar",
+      "papers": 2
+    },
+    {
+      "name": "Lijuan Wang",
+      "papers": 2
+    },
+    {
+      "name": "Yinfeng Xu",
+      "papers": 2
+    },
+    {
+      "name": "Yuan Liu",
+      "papers": 2
+    },
+    {
+      "name": "Hao Zhang",
+      "papers": 2
+    },
+    {
+      "name": "Jared Coleman",
+      "papers": 2
+    },
+    {
+      "name": "Oscar Morales-Ponce",
+      "papers": 2
+    },
+    {
+      "name": "Shota Nagahama",
+      "papers": 2
+    },
+    {
+      "name": "Ryota Eguchi",
+      "papers": 2
+    },
+    {
+      "name": "Raja Das",
+      "papers": 2
+    },
+    {
+      "name": "Shota Takahashi",
+      "papers": 2
+    },
+    {
+      "name": "Shoma Hiraoka",
+      "papers": 2
+    }
+  ],
+  "extra_authors": [],
+  "homepages": {},
+  "min_score": 8,
+  "last_run": null,
+  "seen": []
+}

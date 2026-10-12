@@ -1,0 +1,1755 @@
+{
+  "id": "leader-election-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Leader election by agents",
+  "origin": {
+    "ref": "Kshemkalyani2024AgentLE",
+    "year": 2024,
+    "note": "Leader election in the agent-based model, with MST as an application (DISC 2024)."
+  },
+  "summary": "$n$ agents in an anonymous graph must elect one leader; how fast, and with how little memory?",
+  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must elect exactly one leader: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Picture $n$ small agents dropped into a building with $n$ rooms, where the rooms carry no names and a agent can only talk to agents standing in the same room. The building is a graph: rooms are dots (*nodes*), corridors are lines (*edges*); there are $n$ nodes, $m$ edges, and at most $\\Delta$ corridors leave any room (the *maximum degree*). The doors of a room are numbered $1, 2, \\dots$ (these numbers are called *ports*), so a agent can say \"leave by door 3\", and every agent carries a distinct identifier (an ID number). Time runs in *rounds*: in one round every agent may talk to the agents in its room and then walk along one corridor. The task is to pick exactly one agent as *leader*: at the end the leader knows it is the leader and every other agent knows it is not, and we count the rounds and the bits of memory each agent needs. If all agents start in one room the task is easy (the smallest ID wins), so the interesting case is when they start spread out, one agent per room (a *dispersed* start), or in a few clusters.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Disperse, then simulate message passing by walking to neighbours",
+        "variant": "known-n-delta",
+        "ref": "Kshemkalyani2024AgentLE",
+        "idea": "This is the idea behind every problem in this family. In the classic *message-passing* model, computers sit still on the nodes and in each round send a message to every neighbour. Agents can pretend to be such computers, provided there is one agent per node and neighbouring agents can meet once per simulated round. Here the agents know $n$ and $\\Delta$.\n\n1. **Disperse.** Run a dispersion algorithm so that every node holds exactly one agent. Knowing $n$ tells the agents how long to wait before they can be sure dispersion is over.\n2. **Pad the IDs.** Each agent writes its ID in binary with exactly $b = O(\\log n)$ bits, adding leading zeros (knowing $n$ fixes $b$).\n3. **Meet every neighbour.** Split time into $b$ blocks of $2\\Delta$ rounds. In block $i$, a agent whose $i$-th bit is $1$ visits its neighbours one by one (go through door 1, come back, go through door 2, come back, ...); a agent whose $i$-th bit is $0$ stays at home.\n4. Two neighbouring agents have different IDs, so in some block one of them has bit $1$ and the other bit $0$: the first walks in while the second is at home, and they meet. A visitor recognises the resident as the agent whose current bit is $0$.\n5. **Simulate.** When two neighbours meet they hand over the messages the message-passing algorithm would send along their edge. So $b$ blocks simulate one round of message passing.\n6. Run any message-passing leader election this way, for example one that needs $O(D)$ rounds, where $D$ is the *diameter* (the largest distance between two nodes).",
+        "analysis": "A block lasts $2\\Delta$ rounds because a visit to a neighbour and back takes 2 rounds and there are at most $\\Delta$ neighbours. So one message-passing round costs $2\\Delta b = O(\\Delta\\log n)$ rounds, and a message-passing algorithm of $R$ rounds costs $O(\\Delta R\\log n)$ rounds, plus the time to disperse ($O(n\\log^2 n)$ rounds with the dispersion algorithm the paper uses [Sudo2024NearLinear]). With an $O(D)$-round election this gives $O(\\Delta D\\log n + n\\log^2 n)$ rounds. The catch is memory: each agent must store whatever a message-passing node stores, which can be large; [Kshemkalyani2026Leader] reach a bound of the same form, $O(n\\log^2 n + D\\Delta\\log n)$, with only $O(\\log n)$ bits per agent.",
+        "why_it_matters": "It turns decades of message-passing algorithms into agent algorithms at a cost of a factor $\\Delta\\log n$, and the bit-by-bit meeting schedule is reused by almost every later paper on computing with agents."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Walk every corridor and come home",
+        "variant": "no-knowledge",
+        "ref": "Kshemkalyani2024AgentLE",
+        "idea": "Without knowing $n$ or $\\Delta$, the agents cannot use fixed-length blocks, and a agent that starts alone in its room does not even know whether the others are also alone. The first algorithm for this setting works as follows (simplified here for a dispersed start).\n\n1. Each agent visits its neighbours once and returns. It stays a *candidate* only if its node has the smallest degree among its neighbours (number of corridors), with ties broken by ID; otherwise it gives up. At least one candidate survives.\n2. Each surviving candidate tells a neighbour where its home is, so that others do not mistake its empty home for an unvisited room.\n3. Each candidate then performs a depth-first walk that crosses every corridor of the building, carrying a tag (start round, ID).\n4. When two walks meet, the one with the smaller tag stops and its owner gives up.\n5. A candidate whose walk crosses every corridor and returns home declares itself leader.",
+        "analysis": "A depth-first walk crosses each corridor at most twice (once out, once back), so it ends within $O(m)$ rounds. The delicate part, which the paper proves, is that once one candidate declares itself leader no other can; this needs the home-markers of step 2 and care when walks pass each other. When the agents start in clusters the same paper first spreads them out with depth-first walks, and then needs $O(n\\log n)$ bits per agent. Later work brought the time down to $O(n)$ rounds with $O(\\log n)$ bits [Chand2026MDS], building on optimal dispersion [Kshemkalyani2025Almost].",
+        "why_it_matters": "It showed that leader election, and with it MST, MIS and dominating sets, can be solved with no knowledge of the graph at all, which is the setting all later papers aim for."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Why the agents need distinct identifiers",
+        "variant": "no-knowledge",
+        "idea": "Every setting in this catalogue gives the agents distinct IDs. Here is why. Take a ring of 6 nodes, one agent on each, and number the doors so that at every node door 1 leads clockwise and door 2 counter-clockwise. Suppose the 6 agents are identical (no IDs) and follow the same deterministic program. In round 1 they all see exactly the same thing, so they all do the same thing: all stay, or all walk clockwise, or all walk counter-clockwise. After the move each agent again sees exactly what every other agent sees. By the same reasoning round after round, all 6 agents are always in the same state. If one of them ever decides \"I am the leader\", all 6 decide it at the same moment.",
+        "analysis": "So no deterministic algorithm elects a leader among identical agents on this ring, no matter how many rounds it uses or how much memory the agents have. The argument is a standard symmetry argument, not a result of a particular paper in this catalogue. Distinct IDs break the symmetry; the algorithms above use them both to decide who wins and, through the bits of the IDs, to schedule meetings.",
+        "why_it_matters": "Symmetry is the basic obstacle to leader election, and it explains why identifiers (or randomness) are part of every model in which leaders are elected."
+      }
+    ]
+  },
+  "history": "The agent-based model asks what graph problems **agents** can solve on an anonymous network, with **rounds first and memory second** as the measures [Kshemkalyani2024AgentLE]. Leader election came first because it unlocks the rest (MST, BFS trees, gathering).",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "knowledge",
+    "initial",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of graph parameters",
+          "short": "no knowledge",
+          "definition": "Agents know no graph parameter ($n$, $m$, $\\Delta$, $D$)."
+        },
+        {
+          "id": "n-delta",
+          "level": 1,
+          "label": "$n$ and $\\Delta$ are known",
+          "short": "knows $n$, $\\Delta$",
+          "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
+        }
+      ],
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For leader election both levels are catalogued: without knowledge [Kshemkalyani2024AgentLE] [Chand2026MDS], and faster with $n$ and $\\Delta$ known [Kshemkalyani2026Leader]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "no-knowledge",
+      "title": "No knowledge",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "summary": "Without any knowledge of the graph, leader election takes $O(n)$ rounds with $O(\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kshemkalyani2024AgentLE",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(n\\log n)"
+        },
+        {
+          "ref": "Kshemkalyani2025NearLinear",
+          "role": "other",
+          "time": "O(n\\log^2 n)",
+          "memory": "O(\\log n)"
+        },
+        {
+          "ref": "Chand2026MDS",
+          "role": "best",
+          "time": "O(n)",
+          "memory": "O(\\log n)",
+          "note": "A by-product of the minimal dominating set algorithm, built on optimal dispersion [Kshemkalyani2025Almost]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound is stated in the papers."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "$\\Omega(\\log n)$ for distinct identifiers is folklore, not recorded here."
+        }
+      },
+      "open": [],
+      "notes": "Spanning trees: BFS and MST with $O(\\log n)$ bits from a dispersed start [Chand2025Trees].",
+      "status": "verified"
+    },
+    {
+      "id": "known-n-delta",
+      "title": "Knowing $n$ and $\\Delta$",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "knowledge": "n-delta"
+      },
+      "summary": "With $n$ and $\\Delta$ known, leader election takes $O(n\\log^2 n+D\\Delta\\log n)$ rounds with $O(\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kshemkalyani2026Leader",
+          "role": "best",
+          "time": "O(n\\log^2 n+D\\Delta\\log n)",
+          "memory": "O(\\log n)",
+          "note": "The bound with the $\\log n$ factor is the correct one (confirmed by the catalogue owner, a co-author); the abstract omits it."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Leader election by simulating message passing [Kshemkalyani2024AgentLE]: the agents, already dispersed one per node of a path, write their IDs in 2 bits. In block $i$ (of $2\\Delta = 4$ rounds) an agent whose $i$-th bit is 1 walks to each neighbour and back, one edge per round, while agents with bit 0 wait at home; every visit to a waiting neighbour (blue edge) carries the messages of one simulated round, here the smallest ID seen (\"min\"). Both simulated rounds are shown round by round; after $n-1 = 2$ of them every agent knows that agent 1 is the leader.",
+    "view": [
+      100,
+      50
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          14,
+          16
+        ],
+        "b": [
+          50,
+          32
+        ],
+        "c": [
+          86,
+          16
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: dispersed; IDs written in 2 bits",
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Sim. round 1, block 1: 2, 3 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                32
+              ],
+              [
+                86,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                16
+              ],
+              [
+                50,
+                32
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                16
+              ],
+              [
+                50,
+                32
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Sim. round 1, block 2: 1, 3 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 3",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Simulated round 1 done: mins exchanged"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Sim. round 2, block 1: 2, 3 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                32
+              ],
+              [
+                86,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                16
+              ],
+              [
+                50,
+                32
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                16
+              ],
+              [
+                50,
+                32
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Sim. round 2, block 2: 1, 3 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "c",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3",
+            "c": "muted"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              14,
+              10
+            ],
+            "s": "11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              26
+            ],
+            "s": "10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              10
+            ],
+            "s": "01",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              14,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              38.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              86,
+              22.5
+            ],
+            "s": "min 1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              16
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 1.0
+          }
+        ],
+        "label": "Final: after n−1 = 2 simulated rounds, 1 leads"
+      }
+    ]
+  }
+}

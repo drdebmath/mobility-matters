@@ -1,0 +1,4966 @@
+{
+  "Augustine2018Tradeoffs": {
+    "authors": [
+      "John Augustine",
+      "William K. Moses Jr."
+    ],
+    "title": "Dispersion of Mobile Robots: A Study of Memory-Time Trade-offs",
+    "venue": "ICDCN 2018",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154293",
+    "arxiv": "1707.05629",
+    "note": "Introduces the problem. All bounds are for $k = n$; agents know $n$ and $m$."
+  },
+  "Kshemkalyani2019Efficient": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Faizan Ali"
+    ],
+    "title": "Efficient Dispersion of Mobile Robots on Graphs",
+    "venue": "ICDCN 2019",
+    "year": 2019,
+    "doi": "10.1145/3288599.3288610",
+    "arxiv": "1805.12242",
+    "note": "First paper with $k \\le n$, with asynchronous algorithms, and with an explicit termination column; proves the $\\Omega(k)$ time lower bound."
+  },
+  "Kshemkalyani2019Fast": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Fast Dispersion of Mobile Robots on Arbitrary Graphs",
+    "venue": "ALGOSENSORS 2019 (LNCS 11931)",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-34405-4_2",
+    "arxiv": "1812.05352",
+    "note": "The paper states the time bound with a $\\log k$ factor; later papers restate it as $\\log \\ell$. The arXiv preprint 1812.05352 covers both the ALGOSENSORS 2019 paper on arbitrary graphs and the WALCOM 2020 paper on grids.",
+    "refcheck_ok": [
+      "duplicate arxiv"
+    ]
+  },
+  "Shintaku2020Knowledge": {
+    "authors": [
+      "Takahiro Shintaku",
+      "Yuichi Sudo",
+      "Hirotsugu Kakugawa",
+      "Toshimitsu Masuzawa"
+    ],
+    "title": "Efficient Dispersion of Mobile Agents without Global Knowledge",
+    "venue": "SSS 2020 (LNCS 12514)",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-64348-5_22",
+    "arxiv": "2008.09379"
+  },
+  "Kshemkalyani2021NearOptimal": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Gokarna Sharma"
+    ],
+    "title": "Near-Optimal Dispersion on Arbitrary Anonymous Graphs",
+    "venue": "OPODIS 2021 (LIPIcs 217)",
+    "year": 2021,
+    "doi": "10.4230/LIPIcs.OPODIS.2021.8",
+    "arxiv": "2106.03943",
+    "journal": "Journal of Computer and System Sciences 152:103656, 2025 (doi:10.1016/j.jcss.2025.103656)"
+  },
+  "Sudo2024NearLinear": {
+    "authors": [
+      "Yuichi Sudo",
+      "Masahiro Shibata",
+      "Junya Nakamura",
+      "Yonghwan Kim",
+      "Toshimitsu Masuzawa"
+    ],
+    "title": "Near-Linear Time Dispersion of Mobile Agents",
+    "venue": "DISC 2024 (LIPIcs 319)",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.DISC.2024.38",
+    "arxiv": "2310.04376",
+    "journal": "Distributed Computing 39(1), 2026 (doi:10.1007/s00446-025-00494-8)"
+  },
+  "Kshemkalyani2025Almost": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Debasish Pattanayak",
+      "Gokarna Sharma"
+    ],
+    "title": "Dispersion is (Almost) Optimal under (A)synchrony",
+    "venue": "SPAA 2025",
+    "year": 2025,
+    "doi": "10.1145/3694906.3743317",
+    "arxiv": "2503.16216"
+  },
+  "Pattanayak2025OptimalAsync": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Ajay D. Kshemkalyani",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Brief Announcement: Optimal Dispersion Under Asynchrony",
+    "venue": "DISC 2025, brief announcement (LIPIcs 356)",
+    "year": 2025,
+    "doi": "10.4230/LIPIcs.DISC.2025.63",
+    "arxiv": "2507.01298",
+    "journal": "Full version: Asynchronous Dispersion with Optimal Time Complexity, ICPP 2026 (doi:10.1145/3832810.3832921); brief announcement also at SPAA 2026 (doi:10.1145/3816782.3819188)"
+  },
+  "Kshemkalyani2020Global": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Dispersion of Mobile Robots in the Global Communication Model",
+    "venue": "ICDCN 2020",
+    "year": 2020,
+    "doi": "10.1145/3369740.3369775",
+    "arxiv": "1909.01957",
+    "note": "The DFS bound claimed here ($O(\\min(m,k\\Delta))$ time with $O(\\log(k+\\Delta))$ bits) is weakened in the journal version; cite [Kshemkalyani2022GlobalJ] for the DFS bounds."
+  },
+  "Kshemkalyani2022GlobalJ": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Dispersion of mobile robots using global communication",
+    "venue": "Journal of Parallel and Distributed Computing 161:100–117",
+    "year": 2022,
+    "doi": "10.1016/j.jpdc.2021.11.007",
+    "note": "Journal version of [Kshemkalyani2020Global]."
+  },
+  "Molla2019Randomness": {
+    "authors": [
+      "Anisur Rahaman Molla",
+      "William K. Moses Jr."
+    ],
+    "title": "Dispersion of Mobile Robots: The Power of Randomness",
+    "venue": "TAMC 2019 (LNCS 11436)",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-14812-6_30",
+    "arxiv": "1902.10489"
+  },
+  "Das2021MemoryOptimal": {
+    "authors": [
+      "Archak Das",
+      "Kaustav Bose",
+      "Buddhadeb Sau"
+    ],
+    "title": "Memory Optimal Dispersion by Anonymous Mobile Robots",
+    "venue": "CALDAM 2021",
+    "year": 2021,
+    "doi": "10.1007/978-3-030-67899-9_34",
+    "arxiv": "2008.00701",
+    "journal": "Discrete Applied Mathematics 340:171–182, 2023 (doi:10.1016/j.dam.2023.07.005)"
+  },
+  "Kshemkalyani2025AsyncTCS": {
+    "authors": [
+      "Ajay D. Kshemkalyani"
+    ],
+    "title": "Dispersion of mobile robots on graphs in the asynchronous model",
+    "venue": "Theoretical Computer Science 1044:115272",
+    "year": 2025,
+    "doi": "10.1016/j.tcs.2025.115272",
+    "note": "Journal treatment (submitted 2019) of the asynchronous algorithms of [Kshemkalyani2019Efficient]; no knowledge of $n, m, D, \\Delta, k$ needed."
+  },
+  "Kshemkalyani2020Grids": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Dispersion of Mobile Robots on Grids",
+    "venue": "WALCOM 2020 (LNCS 12049)",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-39881-1_16",
+    "arxiv": "1812.05352",
+    "note": "The arXiv version (shared with [Kshemkalyani2019Fast]) says the agents have no consistent compass; later papers describe this setting as an oriented grid. To be checked against the WALCOM text. The arXiv preprint 1812.05352 covers both the ALGOSENSORS 2019 paper on arbitrary graphs and the WALCOM 2020 paper on grids.",
+    "refcheck_ok": [
+      "duplicate arxiv"
+    ]
+  },
+  "Banerjee2024UnorientedGrids": {
+    "authors": [
+      "Rik Banerjee",
+      "Manish Kumar",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Optimizing Robot Dispersion on Unoriented Grids: With and Without Fault Tolerance",
+    "venue": "ALGOWIN 2024 (LNCS 15026)",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-74580-5_3",
+    "arxiv": "2405.02002"
+  },
+  "Banerjee2025OrientedGridsFT": {
+    "authors": [
+      "Rik Banerjee",
+      "Manish Kumar",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Optimal Fault-Tolerant Dispersion on Oriented Grids",
+    "venue": "ICDCN 2025",
+    "year": 2025,
+    "arxiv": "2410.17813",
+    "doi": "10.1145/3700838.3700842"
+  },
+  "Himani2025TriangularGrids": {
+    "authors": [
+      "Himani",
+      "Supantha Pandit"
+    ],
+    "title": "Optimal Dispersion in Triangular Grids: Achieving Efficiency Without Prior Knowledge",
+    "venue": "ICDCIT 2025 (LNCS 15507)",
+    "year": 2025,
+    "doi": "10.1007/978-3-031-81404-4_7"
+  },
+  "Italiano2022Directed": {
+    "authors": [
+      "Giuseppe F. Italiano",
+      "Debasish Pattanayak",
+      "Gokarna Sharma"
+    ],
+    "title": "Dispersion of Mobile Robots on Directed Anonymous Graphs",
+    "venue": "SIROCCO 2022 (LNCS 13298)",
+    "year": 2022,
+    "doi": "10.1007/978-3-031-09993-9_11",
+    "journal": "Journal of Parallel and Distributed Computing 204:105139, 2025 (doi:10.1016/j.jpdc.2025.105139), which adds the deficiency-based algorithm",
+    "note": "Journal version: Journal of Parallel and Distributed Computing 204:105139 (2025), doi:10.1016/j.jpdc.2025.105139, open access; it adds the deficiency-based algorithm and the lower bounds."
+  },
+  "Agarwalla2018DynamicRings": {
+    "authors": [
+      "Ankush Agarwalla",
+      "John Augustine",
+      "William K. Moses Jr.",
+      "Madhav Sankar K.",
+      "Arvind Krishna Sridhar"
+    ],
+    "title": "Deterministic Dispersion of Mobile Robots in Dynamic Rings",
+    "venue": "ICDCN 2018",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154294",
+    "arxiv": "1707.06391"
+  },
+  "Kshemkalyani2020Dynamic": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Efficient Dispersion of Mobile Robots on Dynamic Graphs",
+    "venue": "ICDCS 2020",
+    "year": 2020,
+    "doi": "10.1109/ICDCS47774.2020.00100",
+    "url": "https://www.cs.uic.edu/~ajayk/ext/ICDCS2020.pdf"
+  },
+  "Saxena2025PathConnected": {
+    "authors": [
+      "Ashish Saxena",
+      "Kaushik Mondal"
+    ],
+    "title": "Path Connected Dynamic Graphs with a Study of Efficient Dispersion",
+    "venue": "ICDCN 2025",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700864",
+    "arxiv": "2504.08474",
+    "journal": "Theoretical Computer Science 1050:115390, 2025 (doi:10.1016/j.tcs.2025.115390)"
+  },
+  "Saxena2025Balanced": {
+    "authors": [
+      "Ashish Saxena",
+      "Tanvir Kaur",
+      "Kaushik Mondal"
+    ],
+    "title": "Dispersion on Time Varying Graphs",
+    "venue": "ICDCN 2025",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700845",
+    "arxiv": "2410.04050",
+    "journal": "Balanced dispersion on time-varying dynamic graphs, Journal of Computer and System Sciences 161:103829, 2026 (doi:10.1016/j.jcss.2026.103829)"
+  },
+  "Mondal2025DkDDynamicRing": {
+    "authors": [
+      "Brati Mondal",
+      "Pritam Goswami",
+      "Buddhadeb Sau"
+    ],
+    "title": "Time Optimal Distance-k-Dispersion on Dynamic Ring",
+    "venue": "ICDCN 2025",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700843",
+    "arxiv": "2408.12220",
+    "note": "Distance-$k$-dispersion with $k = 1$ is dispersion."
+  },
+  "Mondal2025SimulatingChirality": {
+    "authors": [
+      "Brati Mondal",
+      "Pritam Goswami",
+      "Buddhadeb Sau"
+    ],
+    "title": "Simulating Chirality: Solving Distance-k-Dispersion on an 1-Interval Connected Ring",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2507.14723"
+  },
+  "Pattanayak2021Tolerating": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Gokarna Sharma",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Dispersion of Mobile Robots Tolerating Faults",
+    "venue": "ICDCN 2021 Adjunct (WDALFR workshop)",
+    "year": 2021,
+    "doi": "10.1145/3427477.3429464"
+  },
+  "Chand2023FaultTolerant": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Sumathi Sivasubramaniam"
+    ],
+    "title": "Fault-Tolerant Dispersion of Mobile Robots",
+    "venue": "CALDAM 2023 (LNCS 13779)",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-25211-2_3",
+    "arxiv": "2211.12451",
+    "journal": "Discrete Applied Mathematics 377:299–313, 2025 (doi:10.1016/j.dam.2025.06.068)"
+  },
+  "Pattanayak2023Spite": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Gokarna Sharma",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Dispersion of Mobile Robots in Spite of Faults",
+    "venue": "SSS 2023 (LNCS 14310)",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-44274-2_31"
+  },
+  "Molla2020WeakRing": {
+    "authors": [
+      "Anisur Rahaman Molla",
+      "Kaushik Mondal",
+      "William K. Moses Jr."
+    ],
+    "title": "Efficient Dispersion on an Anonymous Ring in the Presence of Weak Byzantine Robots",
+    "venue": "ALGOSENSORS 2020 (LNCS 12503)",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-62401-9_11",
+    "arxiv": "2004.11439",
+    "journal": "Optimal dispersion on an anonymous ring in the presence of weak Byzantine robots, Theoretical Computer Science 887:111–121, 2021 (doi:10.1016/j.tcs.2021.07.008)"
+  },
+  "Molla2021ByzantineGraphs": {
+    "authors": [
+      "Anisur Rahaman Molla",
+      "Kaushik Mondal",
+      "William K. Moses Jr."
+    ],
+    "title": "Byzantine Dispersion on Graphs",
+    "venue": "IPDPS 2021",
+    "year": 2021,
+    "doi": "10.1109/IPDPS49936.2021.00103",
+    "arxiv": "2102.07528"
+  },
+  "Moses2024Shepherd": {
+    "authors": [
+      "William K. Moses Jr.",
+      "Amanda Redlich"
+    ],
+    "title": "Dispersion, Capacitated Nodes, and the Power of a Trusted Shepherd",
+    "venue": "ICDCN 2024",
+    "year": 2024,
+    "doi": "10.1145/3631461.3632310",
+    "arxiv": "2311.01511"
+  },
+  "Gorain2022Silent": {
+    "authors": [
+      "Barun Gorain",
+      "Partha Sarathi Mandal",
+      "Kaushik Mondal",
+      "Supantha Pandit"
+    ],
+    "title": "Collaborative Dispersion by Silent Robots",
+    "venue": "SSS 2022 (LNCS 13751)",
+    "year": 2022,
+    "doi": "10.1007/978-3-031-21017-4_17",
+    "arxiv": "2202.05710",
+    "journal": "Journal of Parallel and Distributed Computing 188:104852, 2024 (doi:10.1016/j.jpdc.2024.104852)"
+  },
+  "Das2025SilentRing": {
+    "authors": [
+      "Bibhuti Das",
+      "Barun Gorain",
+      "Kaushik Mondal",
+      "Krishnendu Mukhopadhyaya",
+      "Supantha Pandit"
+    ],
+    "title": "Optimal Dispersion of Silent Robots in a Ring",
+    "venue": "SSS 2025 (LNCS)",
+    "year": 2025,
+    "doi": "10.1007/978-3-032-11127-2_15",
+    "arxiv": "2408.05491",
+    "journal": "Theoretical Computer Science 1084:116171, 2026 (doi:10.1016/j.tcs.2026.116171)"
+  },
+  "Budach1978Labyrinths": {
+    "authors": [
+      "Lothar Budach"
+    ],
+    "title": "Automata and labyrinths",
+    "venue": "Mathematische Nachrichten 86:195–282",
+    "year": 1978,
+    "doi": "10.1002/mana.19780860120",
+    "note": "Original not read; the statement used here is as cited by [Disser2019Pebbles]."
+  },
+  "Rollik1980Planar": {
+    "authors": [
+      "Hans-Anton Rollik"
+    ],
+    "title": "Automaten in planaren Graphen",
+    "venue": "Acta Informatica 13(3):287–298",
+    "year": 1980,
+    "doi": "10.1007/BF00288647",
+    "note": "Original not read; statements used here are as cited by [Disser2019Pebbles] and [Czyzowicz2012Periodic].",
+    "first_year": 1979
+  },
+  "Blum1978Compass": {
+    "authors": [
+      "Manuel Blum",
+      "Dexter Kozen"
+    ],
+    "title": "On the power of the compass (or, why mazes are easier to search than graphs)",
+    "venue": "FOCS 1978, pp. 132–142",
+    "year": 1978,
+    "doi": "10.1109/SFCS.1978.30",
+    "note": "Checked against the full text: two pebbles, or two cooperating automata, search every maze; no three automata search all finite cubic embedded graphs (Theorem 6.1)."
+  },
+  "Aleliunas1979Random": {
+    "authors": [
+      "Romas Aleliunas",
+      "Richard M. Karp",
+      "Richard J. Lipton",
+      "László Lovász",
+      "Charles Rackoff"
+    ],
+    "title": "Random walks, universal traversal sequences, and the complexity of maze problems",
+    "venue": "FOCS 1979, pp. 218–223",
+    "year": 1979,
+    "doi": "10.1109/SFCS.1979.34"
+  },
+  "Koucky2002Backtracking": {
+    "authors": [
+      "Michal Koucký"
+    ],
+    "title": "Universal traversal sequences with backtracking",
+    "venue": "Journal of Computer and System Sciences 65(4):717–726 (CCC 2001)",
+    "year": 2002,
+    "doi": "10.1016/S0022-0000(02)00023-5",
+    "first_year": 2001
+  },
+  "Reingold2008Undirected": {
+    "authors": [
+      "Omer Reingold"
+    ],
+    "title": "Undirected connectivity in log-space",
+    "venue": "Journal of the ACM 55(4), article 17 (STOC 2005)",
+    "year": 2008,
+    "doi": "10.1145/1391289.1391291",
+    "first_year": 2005
+  },
+  "Diks2004Tree": {
+    "authors": [
+      "Krzysztof Diks",
+      "Pierre Fraigniaud",
+      "Evangelos Kranakis",
+      "Andrzej Pelc"
+    ],
+    "title": "Tree exploration with little memory",
+    "venue": "SODA 2002, pp. 588–597",
+    "year": 2002,
+    "journal": "Journal of Algorithms 51(1):38–63, 2004",
+    "url": "https://people.scs.carleton.ca/~canccom/Publications/TreeExploration.pdf"
+  },
+  "Ambuhl2011Tree": {
+    "authors": [
+      "Christoph Ambühl",
+      "Leszek Gąsieniec",
+      "Andrzej Pelc",
+      "Tomasz Radzik",
+      "Xiaohui Zhang"
+    ],
+    "title": "Tree exploration with logarithmic memory",
+    "venue": "ACM Transactions on Algorithms 7(2), article 17 (SODA 2007)",
+    "year": 2011,
+    "doi": "10.1145/1921659.1921663",
+    "first_year": 2007
+  },
+  "Fraigniaud2005Automaton": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Guy Peer",
+      "Andrzej Pelc",
+      "David Peleg"
+    ],
+    "title": "Graph exploration by a finite automaton",
+    "venue": "Theoretical Computer Science 345(2–3):331–344 (MFCS 2004)",
+    "year": 2005,
+    "url": "https://pelc.uqo.ca/pelc/2005.html",
+    "first_year": 2004
+  },
+  "Fraigniaud2006Reduced": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Sergio Rajsbaum",
+      "Sébastien Tixeuil"
+    ],
+    "title": "The reduced automata technique for graph exploration space lower bounds",
+    "venue": "Theoretical Computer Science: Essays in Memory of Shimon Even, LNCS, pp. 1–26 (SIROCCO 2005)",
+    "year": 2006,
+    "doi": "10.1007/11685654_1",
+    "url": "https://hal.science/hal-00341655v1",
+    "first_year": 2005
+  },
+  "Dieudonne2012Tokens": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Andrzej Pelc"
+    ],
+    "title": "Deterministic network exploration by a single agent with Byzantine tokens",
+    "venue": "Information Processing Letters 112:467–470",
+    "year": 2012,
+    "url": "https://pelc.uqo.ca/pelc/2012.html"
+  },
+  "Cohen2008Label": {
+    "authors": [
+      "Reuven Cohen",
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Amos Korman",
+      "David Peleg"
+    ],
+    "title": "Label-guided graph exploration by a finite automaton",
+    "venue": "ACM Transactions on Algorithms 4(4) (ICALP 2005)",
+    "year": 2008,
+    "doi": "10.1145/1383369.1383373",
+    "first_year": 2005
+  },
+  "Disser2019Pebbles": {
+    "authors": [
+      "Yann Disser",
+      "Jan Hackfeld",
+      "Max Klimm"
+    ],
+    "title": "Tight bounds for undirected graph exploration with pebbles and multiple agents",
+    "venue": "Journal of the ACM 66(6) (pebble results first at SODA 2016, pp. 25–39)",
+    "year": 2019,
+    "doi": "10.1145/3356883",
+    "arxiv": "1805.03476",
+    "first_year": 2016
+  },
+  "Pattanayak2024Memoryless": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Andrzej Pelc"
+    ],
+    "title": "Graph exploration by a deterministic memoryless automaton with pebbles",
+    "venue": "Discrete Applied Mathematics 356:149–160",
+    "year": 2024,
+    "doi": "10.1016/j.dam.2024.05.024"
+  },
+  "Ilcinkas2008Ports": {
+    "authors": [
+      "David Ilcinkas"
+    ],
+    "title": "Setting port numbers for fast graph exploration",
+    "venue": "Theoretical Computer Science 401:236–242 (SIROCCO 2006)",
+    "year": 2008,
+    "doi": "10.1016/j.tcs.2008.03.035",
+    "first_year": 2006
+  },
+  "Czyzowicz2012Periodic": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Stefan Dobrev",
+      "Leszek Gąsieniec",
+      "David Ilcinkas",
+      "Jesper Jansson",
+      "Ralf Klasing",
+      "Ioannis Lignos",
+      "Russell Martin",
+      "Kunihiko Sadakane",
+      "Wing-Kin Sung"
+    ],
+    "title": "More efficient periodic traversal in anonymous undirected graphs",
+    "venue": "Theoretical Computer Science 444:60–76 (SIROCCO 2009)",
+    "year": 2012,
+    "doi": "10.1016/j.tcs.2012.01.035",
+    "arxiv": "0905.1737",
+    "first_year": 2009
+  },
+  "Kosowski2012Decomposition": {
+    "authors": [
+      "Adrian Kosowski",
+      "Alfredo Navarra"
+    ],
+    "title": "Graph decomposition for memoryless periodic exploration",
+    "venue": "Algorithmica 63(1–2):26–38 (MFCS 2009)",
+    "year": 2012,
+    "doi": "10.1007/s00453-011-9518-1",
+    "first_year": 2009
+  },
+  "Fraigniaud2004Digraphs": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas"
+    ],
+    "title": "Digraphs exploration with little memory",
+    "venue": "STACS 2004, pp. 246–257",
+    "year": 2004,
+    "doi": "10.1007/978-3-540-24749-4_22"
+  },
+  "Bender2002Pebble": {
+    "authors": [
+      "Michael A. Bender",
+      "Antonio Fernández",
+      "Dana Ron",
+      "Amit Sahai",
+      "Salil Vadhan"
+    ],
+    "title": "The power of a pebble: exploring and mapping directed graphs",
+    "venue": "Information and Computation 176(1):1–21 (STOC 1998)",
+    "year": 2002,
+    "note": "DOI from Crossref; bounds read in the journal manuscript. STOC 1998 version: doi 10.1145/276698.276759.",
+    "doi": "10.1006/inco.2001.3081",
+    "first_year": 1998
+  },
+  "Deng1999Exploring": {
+    "authors": [
+      "Xiaotie Deng",
+      "Christos H. Papadimitriou"
+    ],
+    "title": "Exploring an unknown graph",
+    "venue": "Journal of Graph Theory 32(3):265–297 (FOCS 1990)",
+    "year": 1999,
+    "doi": "10.1002/(SICI)1097-0118(199911)32:3<265::AID-JGT6>3.0.CO;2-8",
+    "first_year": 1990
+  },
+  "Albers2000Exploring": {
+    "authors": [
+      "Susanne Albers",
+      "Monika R. Henzinger"
+    ],
+    "title": "Exploring unknown environments",
+    "venue": "SIAM Journal on Computing 29(4):1164–1188",
+    "year": 2000,
+    "doi": "10.1137/S009753979732428X"
+  },
+  "Fleischer2005Exploring": {
+    "authors": [
+      "Rudolf Fleischer",
+      "Gerhard Trippen"
+    ],
+    "title": "Exploring an unknown graph efficiently",
+    "venue": "ESA 2005, pp. 11–22",
+    "year": 2005,
+    "doi": "10.1007/11561071_4"
+  },
+  "Ilcinkas2018Ring": {
+    "authors": [
+      "David Ilcinkas",
+      "Ahmed Mouhamadou Wade"
+    ],
+    "title": "Exploration of the T-interval-connected dynamic graphs: the case of the ring",
+    "venue": "Theory of Computing Systems 62(5):1144–1160 (SIROCCO 2013)",
+    "year": 2018,
+    "doi": "10.1007/s00224-017-9796-3",
+    "first_year": 2013
+  },
+  "Erlebach2021Temporal": {
+    "authors": [
+      "Thomas Erlebach",
+      "Michael Hoffmann",
+      "Frank Kammer"
+    ],
+    "title": "On temporal graph exploration",
+    "venue": "Journal of Computer and System Sciences 119:1–18 (ICALP 2015)",
+    "year": 2021,
+    "doi": "10.1016/j.jcss.2021.01.005",
+    "arxiv": "1504.07976",
+    "first_year": 2015
+  },
+  "Fraigniaud2006Collective": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "Leszek Gąsieniec",
+      "Dariusz R. Kowalski",
+      "Andrzej Pelc"
+    ],
+    "title": "Collective tree exploration",
+    "venue": "Networks 48(3):166–177 (LATIN 2004)",
+    "year": 2006,
+    "doi": "10.1002/net.20127",
+    "first_year": 2004
+  },
+  "Dynia2007Maps": {
+    "authors": [
+      "Mirosław Dynia",
+      "Jakub Łopuszański",
+      "Christian Schindelhauer"
+    ],
+    "title": "Why robots need maps",
+    "venue": "SIROCCO 2007, pp. 41–50",
+    "year": 2007,
+    "doi": "10.1007/978-3-540-72951-8_5"
+  },
+  "Higashikawa2014Online": {
+    "authors": [
+      "Yuya Higashikawa",
+      "Naoki Katoh",
+      "Stefan Langerman",
+      "Shin-ichi Tanigawa"
+    ],
+    "title": "Online graph exploration algorithms for cycles and trees by multiple searchers",
+    "venue": "Journal of Combinatorial Optimization 28(2):480–495",
+    "year": 2014,
+    "doi": "10.1007/s10878-012-9571-y"
+  },
+  "Dereniowski2015Fast": {
+    "authors": [
+      "Dariusz Dereniowski",
+      "Yann Disser",
+      "Adrian Kosowski",
+      "Dominik Pająk",
+      "Przemysław Uznański"
+    ],
+    "title": "Fast collaborative graph exploration",
+    "venue": "Information and Computation 243:37–49 (ICALP 2013)",
+    "year": 2015,
+    "doi": "10.1016/j.ic.2014.12.005",
+    "url": "https://inria.hal.science/hal-00802308",
+    "first_year": 2013
+  },
+  "Disser2020General": {
+    "authors": [
+      "Yann Disser",
+      "Frank Mousset",
+      "Andreas Noever",
+      "Nemanja Škorić",
+      "Angelika Steger"
+    ],
+    "title": "A general lower bound for collaborative tree exploration",
+    "venue": "Theoretical Computer Science 811:70–78 (SIROCCO 2017)",
+    "year": 2020,
+    "doi": "10.1016/j.tcs.2018.03.006",
+    "arxiv": "1610.01753",
+    "first_year": 2017
+  },
+  "Cosson2023BFDN": {
+    "authors": [
+      "Romain Cosson",
+      "Laurent Massoulié",
+      "Laurent Viennot"
+    ],
+    "title": "Efficient collaborative tree exploration with breadth-first depth-next",
+    "venue": "DISC 2023 (LIPIcs 281), paper 14",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.DISC.2023.14",
+    "arxiv": "2301.13307"
+  },
+  "Cosson2024Mining": {
+    "authors": [
+      "Romain Cosson"
+    ],
+    "title": "Breaking the k/log k barrier in collective tree exploration via tree-mining",
+    "venue": "SODA 2024, pp. 4264–4282",
+    "year": 2024,
+    "doi": "10.1137/1.9781611977912.148",
+    "arxiv": "2309.07011"
+  },
+  "Cosson2024Potential": {
+    "authors": [
+      "Romain Cosson",
+      "Laurent Massoulié"
+    ],
+    "title": "Collective tree exploration via potential function method",
+    "venue": "ITCS 2024 (LIPIcs), paper 35",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.ITCS.2024.35",
+    "arxiv": "2311.01354"
+  },
+  "Cosson2025Asynchronous": {
+    "authors": [
+      "Romain Cosson",
+      "Laurent Massoulié"
+    ],
+    "title": "Asynchronous collective tree exploration: a distributed algorithm, and a new lower bound",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2507.15658",
+    "note": "No peer-reviewed version found."
+  },
+  "Cosson2026Polylog": {
+    "authors": [
+      "Romain Cosson",
+      "Laurent Massoulié"
+    ],
+    "title": "Polylogarithmic collective tree exploration",
+    "venue": "arXiv preprint (September 2026)",
+    "year": 2026,
+    "arxiv": "2609.26789",
+    "note": "Preprint, not yet peer-reviewed; the paper carries an AI-assistance disclosure."
+  },
+  "Kshemkalyani2026Leader": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Debasish Pattanayak",
+      "Gokarna Sharma"
+    ],
+    "title": "Faster leader election via mobile agents and its applications",
+    "venue": "Theoretical Computer Science 1059:115578",
+    "year": 2026,
+    "doi": "10.1016/j.tcs.2025.115578"
+  },
+  "TaShma2014Deterministic": {
+    "authors": [
+      "Amnon Ta-Shma",
+      "Uri Zwick"
+    ],
+    "title": "Deterministic rendezvous, treasure hunts, and strongly universal exploration sequences",
+    "venue": "ACM Transactions on Algorithms 10(3), article 12 (SODA 2007)",
+    "year": 2014,
+    "first_year": 2007,
+    "doi": "10.1145/2601068"
+  },
+  "Xin2007Faster": {
+    "authors": [
+      "Qin Xin"
+    ],
+    "title": "Faster treasure hunt and better strongly universal exploration sequences",
+    "venue": "ISAAC 2007, pp. 549–560",
+    "year": 2007,
+    "doi": "10.1007/978-3-540-77120-3_48",
+    "arxiv": "1204.5442"
+  },
+  "Miller2015Tradeoffs": {
+    "authors": [
+      "Avery Miller",
+      "Andrzej Pelc"
+    ],
+    "title": "Tradeoffs between cost and information for rendezvous and treasure hunt",
+    "venue": "Journal of Parallel and Distributed Computing 83:159–167 (OPODIS 2014)",
+    "year": 2015,
+    "first_year": 2014,
+    "doi": "10.1016/j.jpdc.2015.06.004",
+    "arxiv": "1506.07952"
+  },
+  "Bouchard2023Almost": {
+    "authors": [
+      "Sébastien Bouchard",
+      "Yoann Dieudonné",
+      "Arnaud Labourel",
+      "Andrzej Pelc"
+    ],
+    "title": "Almost-optimal deterministic treasure hunt in unweighted graphs",
+    "venue": "ACM Transactions on Algorithms 19(3) (ICALP 2021)",
+    "year": 2023,
+    "first_year": 2021,
+    "doi": "10.1145/3588437",
+    "arxiv": "2010.14916"
+  },
+  "Gorain2022Pebble": {
+    "authors": [
+      "Barun Gorain",
+      "Kaushik Mondal",
+      "Himadri Nayak",
+      "Supantha Pandit"
+    ],
+    "title": "Pebble guided optimal treasure hunt in anonymous graphs",
+    "venue": "Theoretical Computer Science 922:61–80 (SIROCCO 2021)",
+    "year": 2022,
+    "first_year": 2021,
+    "doi": "10.1016/j.tcs.2022.04.011",
+    "arxiv": "2103.05933"
+  },
+  "Pattanayak2024Treasure": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Andrzej Pelc"
+    ],
+    "title": "Deterministic treasure hunt and rendezvous in arbitrary connected graphs",
+    "venue": "Information Processing Letters 185:106455",
+    "year": 2024,
+    "first_year": 2023,
+    "doi": "10.1016/j.ipl.2023.106455",
+    "arxiv": "2310.01136"
+  },
+  "Dessmark2006Deterministic": {
+    "authors": [
+      "Anders Dessmark",
+      "Pierre Fraigniaud",
+      "Dariusz R. Kowalski",
+      "Andrzej Pelc"
+    ],
+    "title": "Deterministic rendezvous in graphs",
+    "venue": "Algorithmica 46(1):69–96 (ESA 2003, without Kowalski)",
+    "year": 2006,
+    "first_year": 2003,
+    "doi": "10.1007/s00453-006-0074-2",
+    "url": "https://pelc.uqo.ca/pelc/2006.html"
+  },
+  "Kowalski2008Meet": {
+    "authors": [
+      "Dariusz R. Kowalski",
+      "Adam Malinowski"
+    ],
+    "title": "How to meet in anonymous network",
+    "venue": "Theoretical Computer Science 399(1–2):141–156 (SIROCCO 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2008.02.010",
+    "note": "Bounds cited as reported by [Pelc2019Survey]."
+  },
+  "Czyzowicz2012Forget": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Adrian Kosowski",
+      "Andrzej Pelc"
+    ],
+    "title": "How to meet when you forget: log-space rendezvous in arbitrary graphs",
+    "venue": "Distributed Computing 25(2):165–178 (PODC 2010)",
+    "year": 2012,
+    "first_year": 2010,
+    "doi": "10.1007/s00446-011-0141-9"
+  },
+  "Fraigniaud2013Delays": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "Andrzej Pelc"
+    ],
+    "title": "Delays induce an exponential memory gap for rendezvous in trees",
+    "venue": "ACM Transactions on Algorithms 9(2), article 17 (DISC 2008)",
+    "year": 2013,
+    "first_year": 2008,
+    "doi": "10.1145/2438645.2438649",
+    "arxiv": "1102.0467"
+  },
+  "DeMarco2006Asynchronous": {
+    "authors": [
+      "Gianluca De Marco",
+      "Luisa Gargano",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Andrzej Pelc",
+      "Ugo Vaccaro"
+    ],
+    "title": "Asynchronous deterministic rendezvous in graphs",
+    "venue": "Theoretical Computer Science 355(3):315–326 (MFCS 2005)",
+    "year": 2006,
+    "first_year": 2005,
+    "doi": "10.1016/j.tcs.2005.12.016"
+  },
+  "Czyzowicz2012Everywhere": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Andrzej Pelc",
+      "Arnaud Labourel"
+    ],
+    "title": "How to meet asynchronously (almost) everywhere",
+    "venue": "ACM Transactions on Algorithms 8(4), article 37 (SODA 2010)",
+    "year": 2012,
+    "first_year": 2010,
+    "doi": "10.1145/2344422.2344427"
+  },
+  "Dieudonne2015Polynomial": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Andrzej Pelc",
+      "Vincent Villain"
+    ],
+    "title": "How to meet asynchronously at polynomial cost",
+    "venue": "SIAM Journal on Computing 44(3):844–867 (PODC 2013)",
+    "year": 2015,
+    "first_year": 2013,
+    "doi": "10.1137/130931990"
+  },
+  "Guilbault2011Asynchronous": {
+    "authors": [
+      "Samuel Guilbault",
+      "Andrzej Pelc"
+    ],
+    "title": "Asynchronous rendezvous of anonymous agents in arbitrary graphs",
+    "venue": "OPODIS 2011, pp. 421–434",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-25873-2_29"
+  },
+  "Pelc2019Survey": {
+    "authors": [
+      "Andrzej Pelc"
+    ],
+    "title": "Deterministic rendezvous algorithms",
+    "venue": "Distributed Computing by Mobile Entities, LNCS 11340, pp. 423–454",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-11072-7_17",
+    "arxiv": "2303.10391"
+  },
+  "Suzuki1999Formation": {
+    "authors": [
+      "Ichiro Suzuki",
+      "Masafumi Yamashita"
+    ],
+    "title": "Distributed anonymous mobile robots: formation of geometric patterns",
+    "venue": "SIAM Journal on Computing 28(4):1347–1363",
+    "year": 1999,
+    "doi": "10.1137/S009753979628292X"
+  },
+  "Flocchini2008Arbitrary": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro",
+      "Peter Widmayer"
+    ],
+    "title": "Arbitrary pattern formation by asynchronous, anonymous, oblivious robots",
+    "venue": "Theoretical Computer Science 407(1–3):412–447",
+    "year": 2008,
+    "doi": "10.1016/j.tcs.2008.07.026"
+  },
+  "Dieudonne2010Leader": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Franck Petit",
+      "Vincent Villain"
+    ],
+    "title": "Leader election problem versus pattern formation problem",
+    "venue": "DISC 2010, pp. 267–281",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-15763-9_26",
+    "arxiv": "0902.2851"
+  },
+  "Fujinaga2015Pattern": {
+    "authors": [
+      "Nao Fujinaga",
+      "Yukiko Yamauchi",
+      "Hirotaka Ono",
+      "Shuji Kijima",
+      "Masafumi Yamashita"
+    ],
+    "title": "Pattern formation by oblivious asynchronous mobile robots",
+    "venue": "SIAM Journal on Computing 44(3):740–785 (DISC 2012)",
+    "year": 2015,
+    "first_year": 2012,
+    "doi": "10.1137/140958682"
+  },
+  "Bramas2016Probabilistic": {
+    "authors": [
+      "Quentin Bramas",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Probabilistic asynchronous arbitrary pattern formation",
+    "venue": "SSS 2016, pp. 88–93 (brief announcement at PODC 2016)",
+    "year": 2016,
+    "doi": "10.1007/978-3-319-49259-9_7",
+    "arxiv": "1508.03714"
+  },
+  "Bramas2018Four": {
+    "authors": [
+      "Quentin Bramas",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Arbitrary pattern formation with four robots",
+    "venue": "SSS 2018, pp. 333–348",
+    "year": 2018,
+    "doi": "10.1007/978-3-030-03232-6_22"
+  },
+  "Cicerone2019Asynchronous": {
+    "authors": [
+      "Serafino Cicerone",
+      "Gabriele Di Stefano",
+      "Alfredo Navarra"
+    ],
+    "title": "Asynchronous arbitrary pattern formation: the effects of a rigorous approach",
+    "venue": "Distributed Computing 32(2):91–132",
+    "year": 2019,
+    "first_year": 2018,
+    "doi": "10.1007/s00446-018-0325-7",
+    "arxiv": "1706.02474"
+  },
+  "Bose2021Opaque": {
+    "authors": [
+      "Kaustav Bose",
+      "Manash Kumar Kundu",
+      "Ranendu Adhikary",
+      "Buddhadeb Sau"
+    ],
+    "title": "Arbitrary pattern formation by asynchronous opaque robots with lights",
+    "venue": "Theoretical Computer Science 849:138–158 (SIROCCO 2019)",
+    "year": 2021,
+    "first_year": 2019,
+    "doi": "10.1016/j.tcs.2020.10.015",
+    "arxiv": "1902.04950"
+  },
+  "Hahn2024Large": {
+    "authors": [
+      "Christopher Hahn",
+      "Jonas Harbig",
+      "Peter Kling"
+    ],
+    "title": "Forming large patterns with local robots in the OBLOT model",
+    "venue": "SAND 2024 (LIPIcs 292), 14:1–14:20",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.SAND.2024.14",
+    "arxiv": "2404.02771"
+  },
+  "Defago2002Circle": {
+    "authors": [
+      "Xavier Défago",
+      "Akihiko Konagaya"
+    ],
+    "title": "Circle formation for oblivious anonymous mobile robots with no common sense of orientation",
+    "venue": "POMC 2002, pp. 97–104",
+    "year": 2002,
+    "doi": "10.1145/584490.584509"
+  },
+  "Defago2008NonUniform": {
+    "authors": [
+      "Xavier Défago",
+      "Samia Souissi"
+    ],
+    "title": "Non-uniform circle formation algorithm for oblivious mobile robots with convergence toward uniformity",
+    "venue": "Theoretical Computer Science 396(1–3):97–112",
+    "year": 2008,
+    "doi": "10.1016/j.tcs.2008.01.050"
+  },
+  "Dieudonne2008Circle": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Ouiddad Labbani-Igbida",
+      "Franck Petit"
+    ],
+    "title": "Circle formation of weak mobile robots",
+    "venue": "ACM Transactions on Autonomous and Adaptive Systems 3(4), article 16 (SSS 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1145/1452001.1452006",
+    "arxiv": "cs/0607060"
+  },
+  "Flocchini2017Uniform": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro",
+      "Giovanni Viglietta"
+    ],
+    "title": "Distributed computing by mobile robots: uniform circle formation",
+    "venue": "Distributed Computing 30(6):413–457 (OPODIS 2014)",
+    "year": 2017,
+    "first_year": 2014,
+    "doi": "10.1007/s00446-016-0291-x",
+    "arxiv": "1407.5917"
+  },
+  "Mamino2016Square": {
+    "authors": [
+      "Marcello Mamino",
+      "Giovanni Viglietta"
+    ],
+    "title": "Square formation by asynchronous oblivious robots",
+    "venue": "CCCG 2016",
+    "year": 2016,
+    "arxiv": "1605.06093",
+    "note": "Venue as cited by [Flocchini2017Uniform]; no DOI."
+  },
+  "Feletti2018Opaque": {
+    "authors": [
+      "Caterina Feletti",
+      "Carlo Mereghetti",
+      "Beatrice Palano"
+    ],
+    "title": "Uniform circle formation for swarms of opaque robots with lights",
+    "venue": "SSS 2018, pp. 317–332",
+    "year": 2018,
+    "doi": "10.1007/978-3-030-03232-6_21",
+    "note": "Abstract not read; result as reported by [Feletti2024Optimal]."
+  },
+  "Feletti2023Schedulers": {
+    "authors": [
+      "Caterina Feletti",
+      "Carlo Mereghetti",
+      "Beatrice Palano"
+    ],
+    "title": "Uniform circle formation for fully, semi-, and asynchronous opaque robots with lights",
+    "venue": "Applied Sciences 13(13):7991",
+    "year": 2023,
+    "doi": "10.3390/app13137991",
+    "first_year": 2022,
+    "note": "Conference version at ICTCS 2022 (CEUR Workshop Proceedings 3284, pp. 207–221)."
+  },
+  "Feletti2023Log": {
+    "authors": [
+      "Caterina Feletti",
+      "Carlo Mereghetti",
+      "Beatrice Palano"
+    ],
+    "title": "$O(\\log n)$-time uniform circle formation for asynchronous opaque luminous robots",
+    "venue": "OPODIS 2023 (LIPIcs 286), 5:1–5:21",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.OPODIS.2023.5"
+  },
+  "Pattanayak2024TimeColor": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Gokarna Sharma"
+    ],
+    "title": "Time-color tradeoff on uniform circle formation by asynchronous robots",
+    "venue": "IPDPS 2024, pp. 987–997",
+    "year": 2024,
+    "doi": "10.1109/IPDPS57955.2024.00092"
+  },
+  "Feletti2024Optimal": {
+    "authors": [
+      "Caterina Feletti",
+      "Debasish Pattanayak",
+      "Gokarna Sharma"
+    ],
+    "title": "Brief announcement: optimal uniform circle formation by asynchronous luminous robots",
+    "venue": "DISC 2024 (LIPIcs 319), 46:1–46:7; full version arXiv 2405.06617; journal version J. Parallel Distrib. Comput. 218:105338 (2026)",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.DISC.2024.46",
+    "arxiv": "2405.06617"
+  },
+  "Cohen2005Gravitational": {
+    "authors": [
+      "Reuven Cohen",
+      "David Peleg"
+    ],
+    "title": "Convergence properties of the gravitational algorithm in asynchronous robot systems",
+    "venue": "SIAM Journal on Computing 34(6):1516–1528 (ESA 2004)",
+    "year": 2005,
+    "first_year": 2004,
+    "doi": "10.1137/S0097539704446475"
+  },
+  "Ando1999Convergence": {
+    "authors": [
+      "Hideki Ando",
+      "Yoshinobu Oasa",
+      "Ichiro Suzuki",
+      "Masafumi Yamashita"
+    ],
+    "title": "Distributed memoryless point convergence algorithm for mobile robots with limited visibility",
+    "venue": "IEEE Transactions on Robotics and Automation 15(5):818–828",
+    "year": 1999,
+    "doi": "10.1109/70.795787"
+  },
+  "Katreniak2011Convergence": {
+    "authors": [
+      "Branislav Katreniak"
+    ],
+    "title": "Convergence with limited visibility by asynchronous mobile robots",
+    "venue": "SIROCCO 2011, pp. 125–137",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-22212-2_12",
+    "note": "Abstract seen only as a search snippet; the result is confirmed by [Kirkpatrick2024Separating]."
+  },
+  "Kirkpatrick2024Separating": {
+    "authors": [
+      "David Kirkpatrick",
+      "Irina Kostitsyna",
+      "Alfredo Navarra",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "On the power of bounded asynchrony: convergence by autonomous robots with limited visibility",
+    "venue": "Distributed Computing 37(3):279–308 (PODC 2021, as \"Separating bounded and unbounded asynchrony for autonomous robots: point convergence with limited visibility\")",
+    "year": 2024,
+    "first_year": 2021,
+    "doi": "10.1007/s00446-024-00463-7",
+    "arxiv": "2105.13042"
+  },
+  "CordLandwehr2011Convergence": {
+    "authors": [
+      "Andreas Cord-Landwehr",
+      "Bastian Degener",
+      "Matthias Fischer",
+      "Martina Hüllmann",
+      "Barbara Kempkes",
+      "Alexander Klaas",
+      "Peter Kling",
+      "Sven Kurras",
+      "Marcus Märtens",
+      "Friedhelm Meyer auf der Heide",
+      "Christoph Raupach",
+      "Kamil Swierkot",
+      "Daniel Warner",
+      "Christoph Weddemann",
+      "Daniel Wonisch"
+    ],
+    "title": "A new approach for analyzing convergence algorithms for mobile robots",
+    "venue": "ICALP 2011, pp. 650–661",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-22012-8_52"
+  },
+  "Izumi2012TwoRobots": {
+    "authors": [
+      "Taisuke Izumi",
+      "Samia Souissi",
+      "Yoshiaki Katayama",
+      "Nobuhiro Inuzuka",
+      "Xavier Défago",
+      "Koichi Wada",
+      "Masafumi Yamashita"
+    ],
+    "title": "The gathering problem for two oblivious robots with unreliable compasses",
+    "venue": "SIAM Journal on Computing 41(1):26–46",
+    "year": 2012,
+    "doi": "10.1137/100797916",
+    "arxiv": "1111.1492"
+  },
+  "Cieliebak2012Gathering": {
+    "authors": [
+      "Mark Cieliebak",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Distributed Computing by Mobile Robots: Gathering",
+    "venue": "SIAM Journal on Computing 41(4):829–879 (ICALP 2003)",
+    "year": 2012,
+    "first_year": 2003,
+    "doi": "10.1137/100796534"
+  },
+  "Prencipe2007Impossibility": {
+    "authors": [
+      "Giuseppe Prencipe"
+    ],
+    "title": "Impossibility of gathering by a set of autonomous mobile robots",
+    "venue": "Theoretical Computer Science 384(2–3):222–231 (SIROCCO 2005)",
+    "year": 2007,
+    "first_year": 2005,
+    "doi": "10.1016/j.tcs.2007.04.023",
+    "note": "The conference version (SIROCCO 2005) was read; the journal version was not."
+  },
+  "Flocchini2005Limited": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro",
+      "Peter Widmayer"
+    ],
+    "title": "Gathering of asynchronous robots with limited visibility",
+    "venue": "Theoretical Computer Science 337(1–3):147–168 (STACS 2001)",
+    "year": 2005,
+    "first_year": 2001,
+    "doi": "10.1016/j.tcs.2005.01.001"
+  },
+  "Das2016Lights": {
+    "authors": [
+      "Shantanu Das",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro",
+      "Masafumi Yamashita"
+    ],
+    "title": "Autonomous mobile robots with lights",
+    "venue": "Theoretical Computer Science 609:171–184 (ICDCS 2012)",
+    "year": 2016,
+    "first_year": 2012,
+    "doi": "10.1016/j.tcs.2015.09.018"
+  },
+  "Heriban2018Optimally": {
+    "authors": [
+      "Adam Heriban",
+      "Xavier Défago",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Optimally Gathering Two Robots",
+    "venue": "ICDCN 2018, pp. 1–10",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154323",
+    "arxiv": "1708.06183",
+    "first_year": 2017
+  },
+  "Viglietta2013Rendezvous": {
+    "authors": [
+      "Giovanni Viglietta"
+    ],
+    "title": "Rendezvous of Two Robots with Visible Bits",
+    "venue": "ALGOSENSORS 2013, pp. 291–306",
+    "year": 2013,
+    "doi": "10.1007/978-3-642-45346-5_21",
+    "arxiv": "1211.6039",
+    "first_year": 2012
+  },
+  "Flocchini2016Constant": {
+    "authors": [
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Giovanni Viglietta",
+      "Masafumi Yamashita"
+    ],
+    "title": "Rendezvous with constant memory",
+    "venue": "Theoretical Computer Science 621:57–72 (SIROCCO 2013)",
+    "year": 2016,
+    "first_year": 2013,
+    "doi": "10.1016/j.tcs.2016.01.025",
+    "arxiv": "1306.1956"
+  },
+  "Agmon2006Fault": {
+    "authors": [
+      "Noa Agmon",
+      "David Peleg"
+    ],
+    "title": "Fault-Tolerant Gathering Algorithms for Autonomous Mobile Robots",
+    "venue": "SIAM Journal on Computing 36(1):56–82",
+    "year": 2006,
+    "doi": "10.1137/050645221"
+  },
+  "Bouzid2013Crash": {
+    "authors": [
+      "Zohir Bouzid",
+      "Shantanu Das",
+      "Sebastien Tixeuil"
+    ],
+    "title": "Gathering of Mobile Robots Tolerating Multiple Crash Faults",
+    "venue": "ICDCS 2013, pp. 337–346",
+    "year": 2013,
+    "doi": "10.1109/ICDCS.2013.27",
+    "arxiv": "1207.0226"
+  },
+  "Bramas2015WaitFree": {
+    "authors": [
+      "Quentin Bramas",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Wait-Free Gathering Without Chirality",
+    "venue": "SIROCCO 2015, pp. 313–327",
+    "year": 2015,
+    "doi": "10.1007/978-3-319-25258-2_22"
+  },
+  "Pattanayak2019Crash": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Kaushik Mondal",
+      "H. Ramesh",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Gathering of mobile robots with weak multiplicity detection in presence of crash-faults",
+    "venue": "Journal of Parallel and Distributed Computing 123:145–155 (ICDCN 2017)",
+    "year": 2019,
+    "first_year": 2017,
+    "doi": "10.1016/j.jpdc.2018.09.015",
+    "arxiv": "1608.02432"
+  },
+  "Czyzowicz2009Fat": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Leszek Gąsieniec",
+      "Andrzej Pelc"
+    ],
+    "title": "Gathering few fat mobile robots in the plane",
+    "venue": "Theoretical Computer Science 410(6–7):481–499 (OPODIS 2006)",
+    "year": 2009,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2008.10.005"
+  },
+  "Agathangelou2013Fat": {
+    "authors": [
+      "Chrysovalandis Agathangelou",
+      "Chryssis Georgiou",
+      "Marios Mavronicolas"
+    ],
+    "title": "A distributed algorithm for gathering many fat mobile robots in the plane",
+    "venue": "PODC 2013, pp. 250–259",
+    "year": 2013,
+    "doi": "10.1145/2484239.2484266",
+    "arxiv": "1209.3904"
+  },
+  "Degener2011Tight": {
+    "authors": [
+      "Bastian Degener",
+      "Barbara Kempkes",
+      "Tobias Langner",
+      "Friedhelm Meyer auf der Heide",
+      "Peter Pietrzyk",
+      "Roger Wattenhofer"
+    ],
+    "title": "A tight runtime bound for synchronous gathering of autonomous robots with limited visibility",
+    "venue": "SPAA 2011, pp. 139–148",
+    "year": 2011,
+    "doi": "10.1145/1989493.1989515",
+    "note": "Abstract not fully read; the bound is as restated by [Castenow2022Unifying]."
+  },
+  "Castenow2022Unifying": {
+    "authors": [
+      "Jannik Castenow",
+      "Jonas Harbig",
+      "Daniel Jung",
+      "Peter Kling",
+      "Till Knollmann",
+      "Friedhelm Meyer auf der Heide"
+    ],
+    "title": "A unifying approach to efficient (near)-gathering of disoriented robots with limited visibility",
+    "venue": "OPODIS 2022 (LIPIcs 253), 15:1–15:25",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.OPODIS.2022.15",
+    "arxiv": "2206.07567"
+  },
+  "Poudel2021TimeOptimal": {
+    "authors": [
+      "Pavan Poudel",
+      "Gokarna Sharma"
+    ],
+    "title": "Time-Optimal Gathering under Limited Visibility with One-Axis Agreement",
+    "venue": "Information 12(11):448 (SSS 2017)",
+    "year": 2021,
+    "first_year": 2017,
+    "doi": "10.3390/info12110448"
+  },
+  "Flocchini2026Universal": {
+    "authors": [
+      "Paola Flocchini",
+      "Alfredo Navarra",
+      "Debasish Pattanayak",
+      "Francesco Piselli",
+      "Nicola Santoro"
+    ],
+    "title": "Universal pattern formation by oblivious robots under sequential schedulers",
+    "venue": "Distributed Computing (2026) (SIROCCO 2025)",
+    "year": 2026,
+    "first_year": 2025,
+    "doi": "10.1007/s00446-026-00504-3",
+    "arxiv": "2412.10733"
+  },
+  "Beck1964Linear": {
+    "authors": [
+      "Anatole Beck"
+    ],
+    "title": "On the linear search problem",
+    "venue": "Israel Journal of Mathematics 2(4):221–228",
+    "year": 1964,
+    "doi": "10.1007/BF02759737"
+  },
+  "BaezaYates1993Searching": {
+    "authors": [
+      "Ricardo A. Baeza-Yates",
+      "Joseph C. Culberson",
+      "Gregory J. E. Rawlins"
+    ],
+    "title": "Searching in the Plane",
+    "venue": "Information and Computation 106(2):234–252",
+    "year": 1993,
+    "doi": "10.1006/inco.1993.1054"
+  },
+  "Kao1996Randomized": {
+    "authors": [
+      "Ming-Yang Kao",
+      "John H. Reif",
+      "Stephen R. Tate"
+    ],
+    "title": "Searching in an Unknown Environment: An Optimal Randomized Algorithm for the Cow-Path Problem",
+    "venue": "Information and Computation 131(1):63–79 (SODA 1993)",
+    "year": 1996,
+    "first_year": 1993,
+    "doi": "10.1006/inco.1996.0092"
+  },
+  "Czyzowicz2019FaultyLine": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Lata Narayanan",
+      "Jaroslav Opatrny"
+    ],
+    "title": "Search on a Line with Faulty Robots",
+    "venue": "PODC 2016, pp. 405–414; journal: Distributed Computing 32(6):493–504 (2019)",
+    "year": 2016,
+    "doi": "10.1145/2933057.2933102"
+  },
+  "Kupavskii2018Lower": {
+    "authors": [
+      "Andrey Kupavskii",
+      "Emo Welzl"
+    ],
+    "title": "Lower bounds for searching robots, some faulty",
+    "venue": "PODC 2018",
+    "year": 2018,
+    "arxiv": "1707.05077",
+    "note": "Venue from the arXiv comment; DOI not checked."
+  },
+  "Czyzowicz2021Byzantine": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Sunil Shende"
+    ],
+    "title": "Search on a line by Byzantine robots",
+    "venue": "International Journal of Foundations of Computer Science 32 (2021) 369–387",
+    "year": 2021,
+    "first_year": 2016,
+    "arxiv": "1611.08209",
+    "note": "Journal details from the research notes; DOI not checked."
+  },
+  "Bampas2019Speeds": {
+    "authors": [
+      "Evangelos Bampas",
+      "Jurek Czyzowicz",
+      "Leszek Gąsieniec",
+      "David Ilcinkas",
+      "Ralf Klasing",
+      "Tomasz Kociumaka",
+      "Dominik Pająk"
+    ],
+    "title": "Linear Search by a Pair of Distinct-Speed Robots",
+    "venue": "Algorithmica 81(1):317–342 (SIROCCO 2016)",
+    "year": 2019,
+    "first_year": 2016,
+    "doi": "10.1007/s00453-018-0447-0"
+  },
+  "Czyzowicz2014Evacuating": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Leszek Gąsieniec",
+      "Thomas Gorry",
+      "Evangelos Kranakis",
+      "Russell Martin",
+      "Dominik Pajak"
+    ],
+    "title": "Evacuating Robots via Unknown Exit in a Disk",
+    "venue": "DISC 2014, pp. 122–136",
+    "year": 2014,
+    "doi": "10.1007/978-3-662-45174-8_9"
+  },
+  "Czyzowicz2020FaceToFace": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Evangelos Kranakis",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Birgit Vogtenhuber"
+    ],
+    "title": "Evacuating Robots from a Disk Using Face-to-Face Communication",
+    "venue": "Discrete Mathematics & Theoretical Computer Science 22(4) (CIAC 2015)",
+    "year": 2020,
+    "first_year": 2015,
+    "doi": "10.23638/DMTCS-22-4-4",
+    "arxiv": "1501.04985"
+  },
+  "Brandt2017Collaboration": {
+    "authors": [
+      "Sebastian Brandt",
+      "Felix Laufenberg",
+      "Yuezhou Lv",
+      "David Stolz",
+      "Roger Wattenhofer"
+    ],
+    "title": "Collaboration Without Communication: Evacuating Two Robots from a Disk",
+    "venue": "CIAC 2017, pp. 104–115",
+    "year": 2017,
+    "doi": "10.1007/978-3-319-57586-5_10"
+  },
+  "Disser2019Second": {
+    "authors": [
+      "Yann Disser",
+      "Sören Schmitt"
+    ],
+    "title": "Evacuating Two Robots from a Disk: A Second Cut",
+    "venue": "SIROCCO 2019, pp. 200–214",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-24922-9_14",
+    "arxiv": "1905.10592"
+  },
+  "Czyzowicz2017Faulty": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Maxime Godon",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Wojciech Rytter",
+      "Michał Włodarczyk"
+    ],
+    "title": "Evacuation from a Disc in the Presence of a Faulty Robot",
+    "venue": "SIROCCO 2017, pp. 158–173",
+    "year": 2017,
+    "doi": "10.1007/978-3-319-72050-0_10"
+  },
+  "Georgiou2022Asymmetric": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Nikos Giachoudis",
+      "Evangelos Kranakis"
+    ],
+    "title": "Evacuation from a Disk for Robots with Asymmetric Communication",
+    "venue": "ISAAC 2022 (LIPIcs 248), 19:1–19:16",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.ISAAC.2022.19"
+  },
+  "Chuangpishit2020Triangles": {
+    "authors": [
+      "Huda Chuangpishit",
+      "Saeed Mehrabi",
+      "Lata Narayanan",
+      "Jaroslav Opatrny"
+    ],
+    "title": "Evacuating equilateral triangles and squares in the face-to-face model",
+    "venue": "Computational Geometry 89:101624",
+    "year": 2020,
+    "doi": "10.1016/j.comgeo.2020.101624",
+    "arxiv": "1812.10162"
+  },
+  "Pattanayak2018TwoExits": {
+    "authors": [
+      "Debasish Pattanayak",
+      "H. Ramesh",
+      "Partha Sarathi Mandal",
+      "Stefan Schmid"
+    ],
+    "title": "Evacuating Two Robots from Two Unknown Exits on the Perimeter of a Disk with Wireless Communication",
+    "venue": "ICDCN 2018 (short paper)",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154313",
+    "arxiv": "1708.03792"
+  },
+  "Pattanayak2019Chauffeuring": {
+    "authors": [
+      "Debasish Pattanayak",
+      "H. Ramesh",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Chauffeuring a Crashed Robot from a Disk",
+    "venue": "ALGOSENSORS 2019, pp. 177–191",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-34405-4_10",
+    "arxiv": "1906.03024"
+  },
+  "Czyzowicz2018Priority": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Sunil Shende"
+    ],
+    "title": "Priority Evacuation from a Disk Using Mobile Robots",
+    "venue": "SIROCCO 2018, pp. 392–407",
+    "year": 2018,
+    "doi": "10.1007/978-3-030-01325-7_32",
+    "arxiv": "1805.03568"
+  },
+  "Dobrev2006Searching": {
+    "authors": [
+      "Stefan Dobrev",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Searching for a black hole in arbitrary networks: optimal mobile agents protocols",
+    "venue": "Distributed Computing 19(1) (PODC 2002)",
+    "year": 2006,
+    "first_year": 2002,
+    "doi": "10.1007/s00446-006-0154-y"
+  },
+  "Dobrev2007Ring": {
+    "authors": [
+      "Stefan Dobrev",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Mobile Search for a Black Hole in an Anonymous Ring",
+    "venue": "Algorithmica 48(1):67–90 (DISC 2001)",
+    "year": 2007,
+    "first_year": 2001,
+    "doi": "10.1007/s00453-006-1232-z"
+  },
+  "Dobrev2013Tokens": {
+    "authors": [
+      "Stefan Dobrev",
+      "Paola Flocchini",
+      "Rastislav Královič",
+      "Nicola Santoro"
+    ],
+    "title": "Exploring an unknown dangerous graph using tokens",
+    "venue": "Theoretical Computer Science 472:28–45",
+    "year": 2013,
+    "doi": "10.1016/j.tcs.2012.11.022"
+  },
+  "Flocchini2012PingPong": {
+    "authors": [
+      "Paola Flocchini",
+      "David Ilcinkas",
+      "Nicola Santoro"
+    ],
+    "title": "Ping Pong in Dangerous Graphs: Optimal Black Hole Search with Pebbles",
+    "venue": "Algorithmica 62(3–4):1006–1033 (DISC 2008)",
+    "year": 2012,
+    "first_year": 2008,
+    "doi": "10.1007/s00453-011-9496-3"
+  },
+  "Balamohan2016Tokens": {
+    "authors": [
+      "B. Balamohan",
+      "S. Dobrev",
+      "P. Flocchini",
+      "N. Santoro"
+    ],
+    "title": "Exploring an unknown dangerous graph with a constant number of tokens",
+    "venue": "Theoretical Computer Science 610:169–181 (SIROCCO 2012)",
+    "year": 2016,
+    "first_year": 2012,
+    "doi": "10.1016/j.tcs.2014.07.013"
+  },
+  "Czyzowicz2006Complexity": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Dariusz Kowalski",
+      "Euripides Markou",
+      "Andrzej Pelc"
+    ],
+    "title": "Complexity of Searching for a Black Hole",
+    "venue": "Fundamenta Informaticae 71(2–3):229–242",
+    "year": 2006,
+    "doi": "10.3233/FUN-2006-712-305"
+  },
+  "Klasing2007Hardness": {
+    "authors": [
+      "Ralf Klasing",
+      "Euripides Markou",
+      "Tomasz Radzik",
+      "Fabiano Sarracco"
+    ],
+    "title": "Hardness and approximation results for Black Hole Search in arbitrary networks",
+    "venue": "Theoretical Computer Science 384(2–3):201–221 (SIROCCO 2005)",
+    "year": 2007,
+    "first_year": 2005,
+    "doi": "10.1016/j.tcs.2007.04.024"
+  },
+  "DiLuna2025DynamicBHS": {
+    "authors": [
+      "Giuseppe Antonio Di Luna",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Locating a black hole in a dynamic ring",
+    "venue": "Journal of Parallel and Distributed Computing 196:104998 (ICDCS 2021)",
+    "year": 2025,
+    "first_year": 2021,
+    "doi": "10.1016/j.jpdc.2024.104998",
+    "arxiv": "2005.07453"
+  },
+  "Kaur2026Dynamic": {
+    "authors": [
+      "Tanvir Kaur",
+      "Ashish Saxena",
+      "Partha Sarathi Mandal",
+      "Kaushik Mondal"
+    ],
+    "title": "Black hole search in dynamic graphs",
+    "venue": "Theoretical Computer Science 1086:116237 (ICDCN 2025)",
+    "year": 2026,
+    "first_year": 2025,
+    "doi": "10.1016/j.tcs.2026.116237",
+    "arxiv": "2405.18367"
+  },
+  "DiLuna2025Byzantine": {
+    "authors": [
+      "Giuseppe Antonio Di Luna",
+      "Paola Flocchini",
+      "Debasish Pattanayak",
+      "Giuseppe Prencipe",
+      "Francesco Piselli",
+      "Nicola Santoro"
+    ],
+    "title": "Exploring Dangerous Graphs with Byzantine Companions",
+    "venue": "ICDCS 2025, pp. 352–361",
+    "year": 2025,
+    "doi": "10.1109/ICDCS63083.2025.00042"
+  },
+  "Dieudonne2016Anonymous": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Andrzej Pelc"
+    ],
+    "title": "Anonymous Meeting in Networks",
+    "venue": "Algorithmica 74(2):908–946 (SODA 2013)",
+    "year": 2016,
+    "first_year": 2013,
+    "doi": "10.1007/s00453-015-9982-0"
+  },
+  "Dieudonne2014Mischief": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Andrzej Pelc",
+      "David Peleg"
+    ],
+    "title": "Gathering Despite Mischief",
+    "venue": "ACM Transactions on Algorithms 11(1) (SODA 2012)",
+    "year": 2014,
+    "first_year": 2012,
+    "doi": "10.1145/2629656"
+  },
+  "Bouchard2016Byzantine": {
+    "authors": [
+      "Sébastien Bouchard",
+      "Yoann Dieudonné",
+      "Bertrand Ducourthial"
+    ],
+    "title": "Byzantine gathering in networks",
+    "venue": "Distributed Computing 29(6):435–457 (SIROCCO 2015)",
+    "year": 2016,
+    "first_year": 2015,
+    "doi": "10.1007/s00446-016-0276-9"
+  },
+  "Bouchard2022Polynomial": {
+    "authors": [
+      "Sébastien Bouchard",
+      "Yoann Dieudonné",
+      "Anissa Lamani"
+    ],
+    "title": "Byzantine gathering in polynomial time",
+    "venue": "Distributed Computing 35(3):235–263 (ICALP 2018)",
+    "year": 2022,
+    "first_year": 2018,
+    "doi": "10.1007/s00446-022-00419-9",
+    "arxiv": "1801.07656"
+  },
+  "Bouchard2023Chatter": {
+    "authors": [
+      "Sébastien Bouchard",
+      "Yoann Dieudonné",
+      "Andrzej Pelc"
+    ],
+    "title": "Want to Gather? No Need to Chatter!",
+    "venue": "SIAM Journal on Computing 52(2):358–411 (PODC 2020)",
+    "year": 2023,
+    "first_year": 2020,
+    "doi": "10.1137/20M1362899",
+    "arxiv": "1908.11402"
+  },
+  "Molla2023Fast": {
+    "authors": [
+      "Anisur Rahaman Molla",
+      "Kaushik Mondal",
+      "William K. Moses Jr."
+    ],
+    "title": "Fast Deterministic Gathering with Detection on Arbitrary Graphs: The Power of Many Robots",
+    "venue": "IPDPS 2023, pp. 47–57",
+    "year": 2023,
+    "doi": "10.1109/IPDPS54959.2023.00015"
+  },
+  "Klasing2008Ring": {
+    "authors": [
+      "Ralf Klasing",
+      "Euripides Markou",
+      "Andrzej Pelc"
+    ],
+    "title": "Gathering asynchronous oblivious mobile robots in a ring",
+    "venue": "Theoretical Computer Science 390(1):27–39 (ISAAC 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2007.09.032"
+  },
+  "Dudek1991Robotic": {
+    "authors": [
+      "G. Dudek",
+      "M. Jenkin",
+      "E. Milios",
+      "D. Wilkes"
+    ],
+    "title": "Robotic exploration as graph construction",
+    "venue": "IEEE Transactions on Robotics and Automation 7(6):859–865",
+    "year": 1991,
+    "doi": "10.1109/70.105395"
+  },
+  "Das2007Map": {
+    "authors": [
+      "Shantanu Das",
+      "Paola Flocchini",
+      "Shay Kutten",
+      "Amiya Nayak",
+      "Nicola Santoro"
+    ],
+    "title": "Map construction of unknown graphs by multiple agents",
+    "venue": "Theoretical Computer Science 385(1–3):34–48",
+    "year": 2007,
+    "doi": "10.1016/j.tcs.2007.05.011"
+  },
+  "Chalopin2010Map": {
+    "authors": [
+      "Jérémie Chalopin",
+      "Shantanu Das",
+      "Adrian Kosowski"
+    ],
+    "title": "Constructing a Map of an Anonymous Graph: Applications of Universal Sequences",
+    "venue": "OPODIS 2010, pp. 119–134",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-17653-1_10"
+  },
+  "Das2019Survey": {
+    "authors": [
+      "Shantanu Das"
+    ],
+    "title": "Graph Explorations with Mobile Agents",
+    "venue": "Distributed Computing by Mobile Entities, LNCS 11340, pp. 403–422",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-11072-7_16"
+  },
+  "Kshemkalyani2024AgentLE": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Brief Announcement: Agent-Based Leader Election, MST, and Beyond",
+    "venue": "DISC 2024 brief announcement (LIPIcs 319), 50:1–50:7",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.DISC.2024.50",
+    "arxiv": "2403.13716"
+  },
+  "Kshemkalyani2025NearLinear": {
+    "authors": [
+      "Ajay D. Kshemkalyani",
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Gokarna Sharma"
+    ],
+    "title": "Near-Linear Time Leader Election in Multiagent Networks",
+    "venue": "AAMAS 2025, pp. 1218–1226",
+    "year": 2025,
+    "doi": "10.65109/BKZJ3357"
+  },
+  "Chand2025Trees": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Manish Kumar",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Computing Tree Structures in Anonymous Graphs via Mobile Agents",
+    "venue": "SSS 2025, pp. 111–127",
+    "year": 2025,
+    "doi": "10.1007/978-3-032-11127-2_11",
+    "arxiv": "2506.19365"
+  },
+  "Pattanayak2024MIS": {
+    "authors": [
+      "Debasish Pattanayak",
+      "Subhash Bhagat",
+      "Sruti Gan Chaudhuri",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Maximal Independent Set via Mobile Agents",
+    "venue": "ICDCN 2024, pp. 74–83",
+    "year": 2024,
+    "doi": "10.1145/3631461.3631543"
+  },
+  "Kaur2026MIS": {
+    "authors": [
+      "Tanvir Kaur",
+      "Barun Gorain",
+      "Kaushik Mondal"
+    ],
+    "title": "Maximal Independent Set via Leader Election by Mobile Agents from Arbitrary Initial Configuration Without Global Knowledge",
+    "venue": "SN Computer Science 7, article 125",
+    "year": 2026,
+    "doi": "10.1007/s42979-026-04726-x",
+    "arxiv": "2410.19468",
+    "note": "Bounds are those of the arXiv version; whether the journal article is its final version was not checked."
+  },
+  "Chand2023Cover": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Anisur Rahaman Molla",
+      "Sumathi Sivasubramaniam"
+    ],
+    "title": "Run for Cover: Dominating Set via Mobile Agents",
+    "venue": "ALGOSENSORS 2023, pp. 133–150",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-48882-5_10",
+    "arxiv": "2309.02200"
+  },
+  "Chand2026MDS": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Improved Linear-Time Construction of Minimal Dominating Set via Mobile Agents",
+    "venue": "ICDCIT 2026, pp. 35–51",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-16632-6_3",
+    "arxiv": "2511.19880"
+  },
+  "DiLuna2020Dynamic": {
+    "authors": [
+      "Giuseppe A. Di Luna",
+      "Stefan Dobrev",
+      "Paola Flocchini",
+      "Nicola Santoro"
+    ],
+    "title": "Distributed exploration of dynamic rings",
+    "venue": "Distributed Computing 33(1):41–67 (ICDCS 2016)",
+    "year": 2020,
+    "first_year": 2016,
+    "doi": "10.1007/s00446-018-0339-1",
+    "arxiv": "1512.05306"
+  },
+  "Gotoh2021Dynamic": {
+    "authors": [
+      "Tsuyoshi Gotoh",
+      "Paola Flocchini",
+      "Toshimitsu Masuzawa",
+      "Nicola Santoro"
+    ],
+    "title": "Exploration of dynamic networks: Tight bounds on the number of agents",
+    "venue": "Journal of Computer and System Sciences 122:1–18 (OPODIS 2019)",
+    "year": 2021,
+    "first_year": 2019,
+    "doi": "10.1016/j.jcss.2021.04.003"
+  },
+  "Mandal2023Live": {
+    "authors": [
+      "Subhrangsu Mandal",
+      "Anisur Rahaman Molla",
+      "William K. Moses Jr."
+    ],
+    "title": "Efficient live exploration of a dynamic ring with mobile robots",
+    "venue": "Theoretical Computer Science 980:114201",
+    "year": 2023,
+    "doi": "10.1016/j.tcs.2023.114201",
+    "arxiv": "2001.04525"
+  },
+  "Das2022Landmark": {
+    "authors": [
+      "Archak Das",
+      "Kaustav Bose",
+      "Buddhadeb Sau"
+    ],
+    "title": "Exploring a dynamic ring without landmark",
+    "venue": "Theoretical Computer Science 929:191–205 (SSS 2021)",
+    "year": 2022,
+    "first_year": 2021,
+    "doi": "10.1016/j.tcs.2022.07.005",
+    "arxiv": "2107.02769"
+  },
+  "Saxena2026Highly": {
+    "authors": [
+      "Ashish Saxena",
+      "Kaushik Mondal"
+    ],
+    "title": "Exploration on highly dynamic graphs",
+    "venue": "Distributed Computing 39 (2026)",
+    "year": 2026,
+    "doi": "10.1007/s00446-026-00516-z",
+    "arxiv": "2601.13047"
+  },
+  "Dieudonne2009Scatter": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Franck Petit"
+    ],
+    "title": "Scatter of robots",
+    "venue": "Parallel Processing Letters 19(1):175–184",
+    "year": 2009,
+    "doi": "10.1142/S0129626409000146",
+    "arxiv": "cs/0701179"
+  },
+  "Clement2010Cost": {
+    "authors": [
+      "Julien Clement",
+      "Xavier Défago",
+      "Maria Gradinariu Potop-Butucaru",
+      "Taisuke Izumi",
+      "Stephane Messika"
+    ],
+    "title": "The cost of probabilistic agreement in oblivious robot networks",
+    "venue": "Information Processing Letters 110(11):431–438",
+    "year": 2010,
+    "doi": "10.1016/j.ipl.2010.04.006",
+    "arxiv": "0807.1753"
+  },
+  "Bramas2017RandomBit": {
+    "authors": [
+      "Quentin Bramas",
+      "Sébastien Tixeuil"
+    ],
+    "title": "The Random Bit Complexity of Mobile Robots Scattering",
+    "venue": "International Journal of Foundations of Computer Science 28(2):111–133 (ADHOC-NOW 2015)",
+    "year": 2017,
+    "first_year": 2015,
+    "doi": "10.1142/S0129054117500083"
+  },
+  "Izumi2018Connectivity": {
+    "authors": [
+      "Taisuke Izumi",
+      "Daichi Kaino",
+      "Maria Gradinariu Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "On time complexity for connectivity-preserving scattering of mobile robots",
+    "venue": "Theoretical Computer Science 738:42–52 (SSS 2010)",
+    "year": 2018,
+    "first_year": 2010,
+    "doi": "10.1016/j.tcs.2018.04.047"
+  },
+  "Dieudonne2013Geoleader": {
+    "authors": [
+      "Yoann Dieudonné",
+      "Florence Levé",
+      "Franck Petit",
+      "Vincent Villain"
+    ],
+    "title": "Deterministic geoleader election in disoriented anonymous systems",
+    "venue": "Theoretical Computer Science 506:43–54",
+    "year": 2013,
+    "doi": "10.1016/j.tcs.2013.07.033",
+    "arxiv": "1202.4486"
+  },
+  "Das2015Sequences": {
+    "authors": [
+      "Shantanu Das",
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Masafumi Yamashita"
+    ],
+    "title": "Forming sequences of geometric patterns with oblivious mobile robots",
+    "venue": "Distributed Computing 28(2):131–145 (PODC 2010)",
+    "year": 2015,
+    "first_year": 2010,
+    "doi": "10.1007/s00446-014-0220-9"
+  },
+  "Das2020Luminous": {
+    "authors": [
+      "Shantanu Das",
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Forming Sequences of Patterns With Luminous Robots",
+    "venue": "IEEE Access 8:90577–90597",
+    "year": 2020,
+    "doi": "10.1109/ACCESS.2020.2994052",
+    "first_year": 2014,
+    "note": "Conference version at FUN 2014."
+  },
+  "Feletti2026Dancing": {
+    "authors": [
+      "Caterina Feletti",
+      "Paola Flocchini",
+      "Debasish Pattanayak",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Universal Dancing by Luminous Robots Under Sequential Schedulers",
+    "venue": "SIROCCO 2026, pp. 292–312",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_16",
+    "arxiv": "2508.15484"
+  },
+  "Pagli2015Near": {
+    "authors": [
+      "Linda Pagli",
+      "Giuseppe Prencipe",
+      "Giovanni Viglietta"
+    ],
+    "title": "Getting close without touching: near-gathering for autonomous mobile robots",
+    "venue": "Distributed Computing 28(5):333–349 (SIROCCO 2012)",
+    "year": 2015,
+    "first_year": 2012,
+    "doi": "10.1007/s00446-015-0248-5",
+    "arxiv": "1505.07168"
+  },
+  "DiLuna2017Mutual": {
+    "authors": [
+      "Giuseppe A. Di Luna",
+      "Paola Flocchini",
+      "Sruti Gan Chaudhuri",
+      "Federico Poloni",
+      "Nicola Santoro",
+      "Giovanni Viglietta"
+    ],
+    "title": "Mutual visibility by luminous robots without collisions",
+    "venue": "Information and Computation 254:392–418",
+    "year": 2017,
+    "doi": "10.1016/j.ic.2016.09.005",
+    "arxiv": "1503.04347"
+  },
+  "Sharma2015Optimal": {
+    "authors": [
+      "Gokarna Sharma",
+      "Costas Busch",
+      "Supratik Mukhopadhyay"
+    ],
+    "title": "Mutual Visibility with an Optimal Number of Colors",
+    "venue": "ALGOSENSORS 2015, pp. 196–210",
+    "year": 2015,
+    "doi": "10.1007/978-3-319-28472-9_15"
+  },
+  "Vaidyanathan2015Log": {
+    "authors": [
+      "Ramachandran Vaidyanathan",
+      "Costas Busch",
+      "Jerry L. Trahan",
+      "Gokarna Sharma",
+      "Suresh Rai"
+    ],
+    "title": "Logarithmic-Time Complete Visibility for Robots with Lights",
+    "venue": "IPDPS 2015, pp. 375–384",
+    "year": 2015,
+    "doi": "10.1109/IPDPS.2015.52"
+  },
+  "Sharma2021Constant": {
+    "authors": [
+      "Gokarna Sharma",
+      "Ramachandran Vaidyanathan",
+      "Jerry L. Trahan"
+    ],
+    "title": "Constant-Time Complete Visibility for Robots with Lights: The Asynchronous Case",
+    "venue": "Algorithms 14(2):56",
+    "year": 2021,
+    "doi": "10.3390/a14020056",
+    "first_year": 2017
+  },
+  "Sharma2018Fat": {
+    "authors": [
+      "Gokarna Sharma",
+      "Rusul Alsaedi",
+      "Costas Busch",
+      "Supratik Mukhopadhyay"
+    ],
+    "title": "The Complete Visibility Problem for Fat Robots with Lights",
+    "venue": "ICDCN 2018",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154319"
+  },
+  "Bhagat2024Fat": {
+    "authors": [
+      "Subhash Bhagat",
+      "Paulomi Dey",
+      "Rajarshi Ray"
+    ],
+    "title": "Collision-Free Linear Time Mutual Visibility for Asynchronous Fat Robots",
+    "venue": "ICDCN 2024, pp. 84–93",
+    "year": 2024,
+    "doi": "10.1145/3631461.3631544"
+  },
+  "Efrima2009Partition": {
+    "authors": [
+      "Asaf Efrima",
+      "David Peleg"
+    ],
+    "title": "Distributed algorithms for partitioning a swarm of autonomous mobile robots",
+    "venue": "Theoretical Computer Science 410(14):1355–1368 (SIROCCO 2007)",
+    "year": 2009,
+    "first_year": 2007,
+    "doi": "10.1016/j.tcs.2008.04.042"
+  },
+  "Bhagat2021kCircle": {
+    "authors": [
+      "Subhash Bhagat",
+      "Bibhuti Das",
+      "Abhinav Chakraborty",
+      "Krishnendu Mukhopadhyaya"
+    ],
+    "title": "k-Circle Formation and k-epf by Asynchronous Robots",
+    "venue": "Algorithms 14(2):62",
+    "year": 2021,
+    "doi": "10.3390/a14020062"
+  },
+  "Liu2018Team": {
+    "authors": [
+      "Zhiqiang Liu",
+      "Yukiko Yamauchi",
+      "Shuji Kijima",
+      "Masafumi Yamashita"
+    ],
+    "title": "Team assembling problem for asynchronous heterogeneous mobile robots",
+    "venue": "Theoretical Computer Science 721:27–41",
+    "year": 2018,
+    "doi": "10.1016/j.tcs.2018.01.009"
+  },
+  "Seike2023Separation": {
+    "authors": [
+      "Hirokazu Seike",
+      "Yukiko Yamauchi"
+    ],
+    "title": "Separation of Unconscious Colored Robots",
+    "venue": "SSS 2023, pp. 328–343",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-44274-2_24",
+    "note": "Abstract not read; results as summarised by [Flocchini2025Separation]."
+  },
+  "Flocchini2025Separation": {
+    "authors": [
+      "Paola Flocchini",
+      "Debasish Pattanayak",
+      "Francesco Piselli",
+      "Nicola Santoro",
+      "Yukiko Yamauchi"
+    ],
+    "title": "Asynchronous Separation of Unconscious Colored Robots",
+    "venue": "CANDAR Workshops 2024, pp. 183–189; journal: International Journal of Networking and Computing 15(2), 2025",
+    "year": 2024,
+    "doi": "10.1109/CANDARW64572.2024.00037"
+  },
+  "Pyati2026Separation": {
+    "authors": [
+      "Prajyot Pyati",
+      "Navjot Kaur",
+      "Saswata Jana",
+      "Adri Bhattacharya",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Separation of Unconscious Robots with Obstructed Visibility",
+    "venue": "ICDCIT 2026, pp. 68–84",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-16632-6_5"
+  },
+  "Bouzid2011Homonyms": {
+    "authors": [
+      "Zohir Bouzid",
+      "Anissa Lamani"
+    ],
+    "title": "Robot Networks with Homonyms: The Case of Patterns Formation",
+    "venue": "SSS 2011, pp. 92–107",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-24550-3_9",
+    "arxiv": "1105.5817"
+  },
+  "Asahiro2025MAS": {
+    "authors": [
+      "Yuichi Asahiro",
+      "Masafumi Yamashita"
+    ],
+    "title": "Minimum algorithm sizes for the gathering and related problems of autonomous mobile robots",
+    "venue": "Theoretical Computer Science 1051:115397 (SSS 2023)",
+    "year": 2025,
+    "first_year": 2023,
+    "doi": "10.1016/j.tcs.2025.115397",
+    "arxiv": "2304.02212"
+  },
+  "Devismes2026Homonymous": {
+    "authors": [
+      "Stéphane Devismes",
+      "Yoann Dieudonné",
+      "Arnaud Labourel"
+    ],
+    "title": "Can Like Attract Like? A Study of Homonymous Gathering in Networks",
+    "venue": "STOC 2026, pp. 933–942",
+    "year": 2026,
+    "doi": "10.1145/3798129.3800807",
+    "arxiv": "2510.25451"
+  },
+  "Delporte2013Homonyms": {
+    "authors": [
+      "Carole Delporte-Gallet",
+      "Hugues Fauconnier",
+      "Rachid Guerraoui",
+      "Anne-Marie Kermarrec",
+      "Eric Ruppert",
+      "Hung Tran-The"
+    ],
+    "title": "Byzantine agreement with homonyms",
+    "venue": "Distributed Computing 26(5–6):321–340 (PODC 2011)",
+    "year": 2013,
+    "first_year": 2011,
+    "doi": "10.1007/s00446-013-0190-3",
+    "note": "Metadata from Crossref; conference version PODC 2011, pp. 21–30, doi:10.1145/1993806.1993810. Not read; cited as the origin of the homonymous model, as reported by [Bouzid2011Homonyms]."
+  },
+  "Chand2026Triangle": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Apurba Das",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Agent-Based Triangle Counting: Unlocking Truss Decomposition, Triangle Centrality, and Local Clustering Coefficient",
+    "venue": "IEEE Transactions on Networking (2026)",
+    "year": 2026,
+    "doi": "10.1109/TON.2026.3734259",
+    "arxiv": "2402.03653",
+    "note": "Bounds are not in the abstract; not recorded here."
+  },
+  "Chand2025Butterfly": {
+    "authors": [
+      "Prabhat Kumar Chand",
+      "Apurba Das",
+      "Anisur Rahaman Molla"
+    ],
+    "title": "Brief Announcement: Distributed Butterfly Analysis using Mobile Agents",
+    "venue": "SPAA 2025 brief announcement, pp. 623–627",
+    "year": 2025,
+    "doi": "10.1145/3694906.3743334",
+    "arxiv": "2506.17721"
+  },
+  "Derakhshandeh2014Amoebot": {
+    "authors": [
+      "Zahra Derakhshandeh",
+      "Shlomi Dolev",
+      "Robert Gmyr",
+      "Andréa W. Richa",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "Amoebot - a new model for programmable matter",
+    "venue": "SPAA 2014 brief announcement, pp. 220–222",
+    "year": 2014,
+    "doi": "10.1145/2612669.2612712"
+  },
+  "Daymude2023Canonical": {
+    "authors": [
+      "Joshua J. Daymude",
+      "Andréa W. Richa",
+      "Christian Scheideler"
+    ],
+    "title": "The canonical amoebot model: algorithms and concurrency control",
+    "venue": "Distributed Computing 36:159–192 (DISC 2021)",
+    "year": 2023,
+    "first_year": 2021,
+    "doi": "10.1007/s00446-023-00443-3",
+    "arxiv": "2105.02420"
+  },
+  "Derakhshandeh2015Leader": {
+    "authors": [
+      "Zahra Derakhshandeh",
+      "Robert Gmyr",
+      "Thim Strothmann",
+      "Rida Bazzi",
+      "Andréa W. Richa",
+      "Christian Scheideler"
+    ],
+    "title": "Leader Election and Shape Formation with Self-organizing Programmable Matter",
+    "venue": "DNA 21 (2015), pp. 117–132",
+    "year": 2015,
+    "doi": "10.1007/978-3-319-21999-8_8",
+    "arxiv": "1503.07991"
+  },
+  "Daymude2017Improved": {
+    "authors": [
+      "Joshua J. Daymude",
+      "Robert Gmyr",
+      "Andréa W. Richa",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "Improved Leader Election for Self-organizing Programmable Matter",
+    "venue": "ALGOSENSORS 2017, pp. 127–140",
+    "year": 2017,
+    "doi": "10.1007/978-3-319-72751-6_10",
+    "arxiv": "1701.03616"
+  },
+  "Emek2019Deterministic": {
+    "authors": [
+      "Yuval Emek",
+      "Shay Kutten",
+      "Ron Lavi",
+      "William K. Moses Jr."
+    ],
+    "title": "Deterministic Leader Election in Programmable Matter",
+    "venue": "ICALP 2019 (LIPIcs 132), 140",
+    "year": 2019,
+    "doi": "10.4230/LIPIcs.ICALP.2019.140",
+    "arxiv": "1905.00580"
+  },
+  "Dufoulon2021Efficient": {
+    "authors": [
+      "Fabien Dufoulon",
+      "Shay Kutten",
+      "William K. Moses Jr."
+    ],
+    "title": "Efficient Deterministic Leader Election for Programmable Matter",
+    "venue": "PODC 2021, pp. 103–113",
+    "year": 2021,
+    "doi": "10.1145/3465084.3467900",
+    "arxiv": "2106.01108"
+  },
+  "DAngelo2020Silent": {
+    "authors": [
+      "Gianlorenzo D'Angelo",
+      "Mattia D'Emidio",
+      "Shantanu Das",
+      "Alfredo Navarra",
+      "Giuseppe Prencipe"
+    ],
+    "title": "Asynchronous Silent Programmable Matter Achieves Leader Election and Compaction",
+    "venue": "IEEE Access 8:207619–207634 (AAMAS 2020)",
+    "year": 2020,
+    "doi": "10.1109/ACCESS.2020.3038174"
+  },
+  "Derakhshandeh2016Universal": {
+    "authors": [
+      "Zahra Derakhshandeh",
+      "Robert Gmyr",
+      "Andrea W. Richa",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "Universal Shape Formation for Programmable Matter",
+    "venue": "SPAA 2016, pp. 289–299",
+    "year": 2016,
+    "doi": "10.1145/2935764.2935784"
+  },
+  "DiLuna2020Shape": {
+    "authors": [
+      "Giuseppe A. Di Luna",
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Giovanni Viglietta",
+      "Yukiko Yamauchi"
+    ],
+    "title": "Shape formation by programmable particles",
+    "venue": "Distributed Computing 33:69–101 (OPODIS 2017)",
+    "year": 2020,
+    "first_year": 2017,
+    "doi": "10.1007/s00446-019-00350-6",
+    "arxiv": "1705.03538"
+  },
+  "Derakhshandeh2017Coating": {
+    "authors": [
+      "Zahra Derakhshandeh",
+      "Robert Gmyr",
+      "Andréa W. Richa",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "Universal coating for programmable matter",
+    "venue": "Theoretical Computer Science 671:56–68",
+    "year": 2017,
+    "doi": "10.1016/j.tcs.2016.02.039",
+    "arxiv": "1601.01008"
+  },
+  "Daymude2018Coating": {
+    "authors": [
+      "Joshua J. Daymude",
+      "Zahra Derakhshandeh",
+      "Robert Gmyr",
+      "Alexandra Porter",
+      "Andréa W. Richa",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "On the runtime of universal coating for programmable matter",
+    "venue": "Natural Computing 17:81–96 (DNA 22, 2016)",
+    "year": 2018,
+    "first_year": 2016,
+    "doi": "10.1007/s11047-017-9658-6",
+    "arxiv": "1606.03642"
+  },
+  "Cannon2016Compression": {
+    "authors": [
+      "Sarah Cannon",
+      "Joshua J. Daymude",
+      "Dana Randall",
+      "Andréa W. Richa"
+    ],
+    "title": "A Markov Chain Algorithm for Compression in Self-Organizing Particle Systems",
+    "venue": "PODC 2016, pp. 279–288",
+    "year": 2016,
+    "doi": "10.1145/2933057.2933107",
+    "arxiv": "1603.07991"
+  },
+  "Daymude2020Hull": {
+    "authors": [
+      "Joshua J. Daymude",
+      "Robert Gmyr",
+      "Kristian Hinnenthal",
+      "Irina Kostitsyna",
+      "Christian Scheideler",
+      "Andréa W. Richa"
+    ],
+    "title": "Convex Hull Formation for Programmable Matter",
+    "venue": "ICDCN 2020, 2:1–2:10",
+    "year": 2020,
+    "doi": "10.1145/3369740.3372916",
+    "arxiv": "1805.06149"
+  },
+  "Czyzowicz2011Patrolling": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Leszek Gąsieniec",
+      "Adrian Kosowski",
+      "Evangelos Kranakis"
+    ],
+    "title": "Boundary Patrolling by Mobile Agents with Distinct Maximal Speeds",
+    "venue": "ESA 2011, pp. 701–712",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-23719-5_59"
+  },
+  "Kawamura2015Fence": {
+    "authors": [
+      "Akitoshi Kawamura",
+      "Yusuke Kobayashi"
+    ],
+    "title": "Fence patrolling by mobile agents with distinct speeds",
+    "venue": "Distributed Computing 28:147–154 (ISAAC 2012)",
+    "year": 2015,
+    "first_year": 2012,
+    "doi": "10.1007/s00446-014-0226-3",
+    "arxiv": "1407.8194"
+  },
+  "Kawamura2020Simple": {
+    "authors": [
+      "Akitoshi Kawamura",
+      "Makoto Soejima"
+    ],
+    "title": "Simple strategies versus optimal schedules in multi-agent patrolling",
+    "venue": "Theoretical Computer Science 839:195–206",
+    "year": 2020,
+    "doi": "10.1016/j.tcs.2020.07.037",
+    "arxiv": "1411.6853"
+  },
+  "Czyzowicz2017Patrolmen": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Leszek Gasieniec",
+      "Adrian Kosowski",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Najmeh Taleb"
+    ],
+    "title": "When Patrolmen Become Corrupted: Monitoring a Graph Using Faulty Mobile Robots",
+    "venue": "Algorithmica 79(3):925–940 (ISAAC 2015)",
+    "year": 2017,
+    "first_year": 2015,
+    "doi": "10.1007/s00453-016-0233-9"
+  },
+  "Barriere2002Capture": {
+    "authors": [
+      "Lali Barrière",
+      "Paola Flocchini",
+      "Pierre Fraigniaud",
+      "Nicola Santoro"
+    ],
+    "title": "Capture of an intruder by mobile agents",
+    "venue": "SPAA 2002, pp. 200–209",
+    "year": 2002,
+    "doi": "10.1145/564870.564906"
+  },
+  "Flocchini2008Hypercubes": {
+    "authors": [
+      "Paola Flocchini",
+      "Miao Jun Huang",
+      "Flaminia L. Luccio"
+    ],
+    "title": "Decontamination of hypercubes by mobile agents",
+    "venue": "Networks 52(3):167–178 (IPDPS 2005)",
+    "year": 2008,
+    "first_year": 2005,
+    "doi": "10.1002/net.20240"
+  },
+  "Ilcinkas2009Monotonicity": {
+    "authors": [
+      "David Ilcinkas",
+      "Nicolas Nisse",
+      "David Soguet"
+    ],
+    "title": "The cost of monotonicity in distributed graph searching",
+    "venue": "Distributed Computing 22(2):117–127 (OPODIS 2007)",
+    "year": 2009,
+    "first_year": 2007,
+    "doi": "10.1007/s00446-009-0089-1"
+  },
+  "Gervasi2004Flocking": {
+    "authors": [
+      "Vincenzo Gervasi",
+      "Giuseppe Prencipe"
+    ],
+    "title": "Coordination without communication: the case of the flocking problem",
+    "venue": "Discrete Applied Mathematics 144(3):324–344",
+    "year": 2004,
+    "doi": "10.1016/j.dam.2003.11.010"
+  },
+  "Flocchini2008Deployment": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Self-deployment of mobile sensors on a ring",
+    "venue": "Theoretical Computer Science 402(1):67–80 (ALGOSENSORS 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2008.03.006"
+  },
+  "Cohen2008Spreading": {
+    "authors": [
+      "Reuven Cohen",
+      "David Peleg"
+    ],
+    "title": "Local spreading algorithms for autonomous robot systems",
+    "venue": "Theoretical Computer Science 399(1–2):71–82 (SIROCCO 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2008.02.007"
+  },
+  "Flocchini2013Ring": {
+    "authors": [
+      "Paola Flocchini",
+      "David Ilcinkas",
+      "Andrzej Pelc",
+      "Nicola Santoro"
+    ],
+    "title": "Computing Without Communicating: Ring Exploration by Asynchronous Oblivious Robots",
+    "venue": "Algorithmica 65(3):562–583 (OPODIS 2007)",
+    "year": 2013,
+    "first_year": 2007,
+    "doi": "10.1007/s00453-011-9611-5"
+  },
+  "Lamani2010Ring": {
+    "authors": [
+      "Anissa Lamani",
+      "Maria Gradinariu Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Optimal Deterministic Ring Exploration with Oblivious Asynchronous Robots",
+    "venue": "SIROCCO 2010",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-13284-1_15",
+    "arxiv": "0910.0832"
+  },
+  "Devismes2012Grid": {
+    "authors": [
+      "Stéphane Devismes",
+      "Anissa Lamani",
+      "Franck Petit",
+      "Pascal Raymond",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Optimal Grid Exploration by Asynchronous Oblivious Robots",
+    "venue": "SSS 2012, pp. 64–76; journal: The Computer Journal 64(1):132–154",
+    "year": 2012,
+    "doi": "10.1007/978-3-642-33536-5_7",
+    "arxiv": "1105.2461"
+  },
+  "Shannon1951Maze": {
+    "authors": [
+      "Claude E. Shannon"
+    ],
+    "title": "Presentation of a maze-solving machine",
+    "venue": "Transactions of the 8th Conference on Cybernetics (Macy Conference), pp. 173–180",
+    "year": 1951,
+    "url": "https://www.technologyreview.com/2019/08/21/133555/of-mice-men-and-computers/",
+    "note": "No DOI; citation details as given by [Disser2019Pebbles]. The link is a popular account of the machine (Theseus, first prototype 1950), not the paper."
+  },
+  "Navarra2023Line": {
+    "authors": [
+      "Alfredo Navarra",
+      "Francesco Piselli"
+    ],
+    "title": "Asynchronous Silent Programmable Matter: Line Formation",
+    "venue": "SSS 2023, LNCS, pp. 598–612",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-44274-2_44",
+    "arxiv": "2307.16731",
+    "note": "Brief announcement at DISC 2023 (LIPIcs 281, 45:1)."
+  },
+  "Navarra2025Scattering": {
+    "authors": [
+      "Alfredo Navarra",
+      "Francesco Piselli",
+      "Giuseppe Prencipe"
+    ],
+    "title": "Line formation and scattering in silent programmable matter",
+    "venue": "Journal of Parallel and Distributed Computing 204:105129",
+    "year": 2025,
+    "doi": "10.1016/j.jpdc.2025.105129"
+  },
+  "Navarra2023Coating": {
+    "authors": [
+      "Alfredo Navarra",
+      "Francesco Piselli"
+    ],
+    "title": "Silent Programmable Matter: Coating",
+    "venue": "OPODIS 2023, LIPIcs 286, 25:1",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.OPODIS.2023.25"
+  },
+  "Gastineau2019Leader": {
+    "authors": [
+      "Nicolas Gastineau",
+      "Wahabou Abdou",
+      "Nader Mbarek",
+      "Olivier Togni"
+    ],
+    "title": "Distributed Leader Election and Computation of Local Identifiers for Programmable Matter",
+    "venue": "ALGOSENSORS 2018, LNCS",
+    "year": 2019,
+    "first_year": 2018,
+    "doi": "10.1007/978-3-030-14094-6_11",
+    "arxiv": "1807.10461"
+  },
+  "Bazzi2019Stationary": {
+    "authors": [
+      "Rida A. Bazzi",
+      "Joseph L. Briones"
+    ],
+    "title": "Stationary and Deterministic Leader Election in Self-organizing Particle Systems",
+    "venue": "SSS 2019, LNCS, pp. 22–37",
+    "year": 2019,
+    "first_year": 2018,
+    "doi": "10.1007/978-3-030-34992-9_3",
+    "note": "Brief announcement at SSS 2018."
+  },
+  "Briones2023Asynchronous": {
+    "authors": [
+      "Joseph L. Briones",
+      "Tishya Chhabra",
+      "Joshua J. Daymude",
+      "Andréa W. Richa"
+    ],
+    "title": "Invited Paper: Asynchronous Deterministic Leader Election in Three-Dimensional Programmable Matter",
+    "venue": "ICDCN 2023, pp. 38–47",
+    "year": 2023,
+    "doi": "10.1145/3571306.3571389",
+    "arxiv": "2205.15412"
+  },
+  "Chalopin2026Stationary": {
+    "authors": [
+      "Jérémie Chalopin",
+      "Shantanu Das",
+      "Maria Kokkou"
+    ],
+    "title": "Deterministic leader election for stationary programmable matter with common direction",
+    "venue": "Theoretical Computer Science 1080:116045",
+    "year": 2026,
+    "first_year": 2024,
+    "doi": "10.1016/j.tcs.2026.116045",
+    "arxiv": "2402.10582",
+    "note": "Conference version at SIROCCO 2024, LNCS, pp. 174–191, doi:10.1007/978-3-031-60603-8_10."
+  },
+  "Chalopin2025SelfStab": {
+    "authors": [
+      "Jérémie Chalopin",
+      "Shantanu Das",
+      "Maria Kokkou"
+    ],
+    "title": "Deterministic self-stabilising leader election for programmable matter with constant memory",
+    "venue": "Distributed Computing",
+    "year": 2025,
+    "doi": "10.1007/s00446-025-00493-9",
+    "arxiv": "2408.08775"
+  },
+  "Chalopin2026Holes": {
+    "authors": [
+      "Jérémie Chalopin",
+      "Shantanu Das",
+      "Maria Kokkou"
+    ],
+    "title": "Silent Self-stabilising Leader Election in Programmable Matter Systems with Holes",
+    "venue": "SIROCCO 2026, LNCS, pp. 151–171",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_9",
+    "arxiv": "2507.20201"
+  },
+  "DiLuna2020MobileRAM": {
+    "authors": [
+      "Giuseppe Antonio Di Luna",
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Giovanni Viglietta",
+      "Yukiko Yamauchi"
+    ],
+    "title": "Mobile RAM and Shape Formation by Programmable Particles",
+    "venue": "Euro-Par 2020, LNCS, pp. 343–358",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-57675-2_22",
+    "arxiv": "2002.03384"
+  },
+  "Kostitsyna2023Fast": {
+    "authors": [
+      "Irina Kostitsyna",
+      "Tom Peters",
+      "Bettina Speckmann"
+    ],
+    "title": "Fast Reconfiguration for Programmable Matter",
+    "venue": "DISC 2023, LIPIcs 281, 27",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.DISC.2023.27",
+    "arxiv": "2202.11663"
+  },
+  "Padalkin2025Joint": {
+    "authors": [
+      "Andreas Padalkin",
+      "Manish Kumar",
+      "Christian Scheideler"
+    ],
+    "title": "Reconfiguration and locomotion with joint movements in the amoebot model",
+    "venue": "Autonomous Robots 49",
+    "year": 2025,
+    "doi": "10.1007/s10514-025-10204-9",
+    "arxiv": "2305.06146"
+  },
+  "Cannon2019Separation": {
+    "authors": [
+      "Sarah Cannon",
+      "Joshua J. Daymude",
+      "Cem Gökmen",
+      "Dana Randall",
+      "Andréa W. Richa"
+    ],
+    "title": "A Local Stochastic Algorithm for Separation in Heterogeneous Self-Organizing Particle Systems",
+    "venue": "APPROX/RANDOM 2019, LIPIcs 145, 54:1–54:22",
+    "year": 2019,
+    "doi": "10.4230/LIPIcs.APPROX-RANDOM.2019.54",
+    "arxiv": "1805.04599"
+  },
+  "Kedia2022Alignment": {
+    "authors": [
+      "Hridesh Kedia",
+      "Shunhao Oh",
+      "Dana Randall"
+    ],
+    "title": "Local Stochastic Algorithms for Alignment in Self-Organizing Particle Systems",
+    "venue": "APPROX/RANDOM 2022, LIPIcs 245, 14",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.APPROX/RANDOM.2022.14",
+    "arxiv": "2207.07956"
+  },
+  "AndresArroyo2018Bridging": {
+    "authors": [
+      "Marta Andrés Arroyo",
+      "Sarah Cannon",
+      "Joshua J. Daymude",
+      "Dana Randall",
+      "Andréa W. Richa"
+    ],
+    "title": "A stochastic approach to shortcut bridging in programmable matter",
+    "venue": "Natural Computing 17:723–741",
+    "year": 2018,
+    "doi": "10.1007/s11047-018-9714-x",
+    "arxiv": "1709.02425"
+  },
+  "Oh2024Bridge": {
+    "authors": [
+      "Shunhao Oh",
+      "Joseph L. Briones",
+      "Jacob Calvert",
+      "Noah Egan",
+      "Dana Randall",
+      "Andréa W. Richa"
+    ],
+    "title": "Single Bridge Formation in Self-Organizing Particle Systems",
+    "venue": "DISC 2024, LIPIcs 319, 34",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.DISC.2024.34",
+    "arxiv": "2408.10830"
+  },
+  "Daymude2021Energy": {
+    "authors": [
+      "Joshua J. Daymude",
+      "Andréa W. Richa",
+      "Jamison W. Weber"
+    ],
+    "title": "Bio-Inspired Energy Distribution for Programmable Matter",
+    "venue": "ICDCN 2021, pp. 86–95",
+    "year": 2021,
+    "doi": "10.1145/3427796.3427835",
+    "arxiv": "2007.04377"
+  },
+  "Weber2023Energy": {
+    "authors": [
+      "Jamison W. Weber",
+      "Tishya Chhabra",
+      "Andréa W. Richa",
+      "Joshua J. Daymude"
+    ],
+    "title": "Energy-Constrained Programmable Matter Under Unfair Adversaries",
+    "venue": "OPODIS 2023, LIPIcs 286, 7:1–7:21",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.OPODIS.2023.7",
+    "arxiv": "2309.04898"
+  },
+  "Gmyr2020Tile": {
+    "authors": [
+      "Robert Gmyr",
+      "Kristian Hinnenthal",
+      "Irina Kostitsyna",
+      "Fabian Kuhn",
+      "Dorian Rudolph",
+      "Christian Scheideler",
+      "Thim Strothmann"
+    ],
+    "title": "Forming tile shapes with simple robots",
+    "venue": "Natural Computing 19:375–390",
+    "year": 2020,
+    "first_year": 2017,
+    "doi": "10.1007/s11047-019-09774-2",
+    "note": "Conference version at DNA 24 (2018), doi:10.1007/978-3-030-00030-1_8; first presented at EuroCG 2017 (non-archival), which the timeline counts as first appearance."
+  },
+  "Hinnenthal2024Shape3D": {
+    "authors": [
+      "Kristian Hinnenthal",
+      "David Liedtke",
+      "Christian Scheideler"
+    ],
+    "title": "Efficient Shape Formation by 3D Hybrid Programmable Matter: An Algorithm for Low Diameter Intermediate Structures",
+    "venue": "SAND 2024, LIPIcs 292, 15",
+    "year": 2024,
+    "doi": "10.4230/LIPIcs.SAND.2024.15",
+    "arxiv": "2401.17734"
+  },
+  "Kostitsyna2024Coating3D": {
+    "authors": [
+      "Irina Kostitsyna",
+      "David Liedtke",
+      "Christian Scheideler"
+    ],
+    "title": "Universal Coating by 3D Hybrid Programmable Matter",
+    "venue": "SIROCCO 2024, LNCS, pp. 384–401",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-60603-8_21",
+    "arxiv": "2303.16180"
+  },
+  "Michail2019Transformation": {
+    "authors": [
+      "Othon Michail",
+      "George Skretas",
+      "Paul G. Spirakis"
+    ],
+    "title": "On the transformation capability of feasible mechanisms for programmable matter",
+    "venue": "Journal of Computer and System Sciences 102:18–39",
+    "year": 2019,
+    "doi": "10.1016/j.jcss.2018.12.001",
+    "arxiv": "1703.04381"
+  },
+  "Almethen2020Pushing": {
+    "authors": [
+      "Abdullah Almethen",
+      "Othon Michail",
+      "Igor Potapov"
+    ],
+    "title": "Pushing lines helps: Efficient universal centralised transformations for programmable matter",
+    "venue": "Theoretical Computer Science 830–831:43–59",
+    "year": 2020,
+    "first_year": 2019,
+    "doi": "10.1016/j.tcs.2020.04.026",
+    "arxiv": "1904.12777",
+    "note": "Conference version at ALGOSENSORS 2019."
+  },
+  "Akitaya2021Musketeers": {
+    "authors": [
+      "Hugo A. Akitaya",
+      "Esther M. Arkin",
+      "Mirela Damian",
+      "Erik D. Demaine",
+      "Vida Dujmović",
+      "Robin Flatland",
+      "Matias Korman",
+      "Belen Palop",
+      "Irene Parada",
+      "André van Renssen",
+      "Vera Sacristán"
+    ],
+    "title": "Universal Reconfiguration of Facet-Connected Modular Robots by Pivots: The O(1) Musketeers",
+    "venue": "Algorithmica 83:1316–1351",
+    "year": 2021,
+    "doi": "10.1007/s00453-020-00784-6"
+  },
+  "Fraigniaud2005Space": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Sergio Rajsbaum",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Space Lower Bounds for Graph Exploration via Reduced Automata",
+    "venue": "SIROCCO 2005, LNCS 3499, pp. 140–154",
+    "year": 2005,
+    "doi": "10.1007/11429647_13"
+  },
+  "Gasieniec2008Periodic": {
+    "authors": [
+      "Leszek Gąsieniec",
+      "Ralf Klasing",
+      "Russell Martin",
+      "Alfredo Navarra",
+      "Xiaohui Zhang"
+    ],
+    "title": "Fast periodic graph exploration with constant memory",
+    "venue": "Journal of Computer and System Sciences 74(5)",
+    "year": 2008,
+    "first_year": 2007,
+    "doi": "10.1016/j.jcss.2007.09.004",
+    "note": "Conference version at SIROCCO 2007."
+  },
+  "Okumura2017Rendezvous": {
+    "authors": [
+      "Takashi Okumura",
+      "Koichi Wada",
+      "Yoshiaki Katayama"
+    ],
+    "title": "Brief Announcement: Optimal Asynchronous Rendezvous for Mobile Robots with Lights",
+    "venue": "SSS 2017 (brief announcement), LNCS, pp. 484–488",
+    "year": 2017,
+    "doi": "10.1007/978-3-319-69084-1_36",
+    "arxiv": "1707.04449"
+  },
+  "Okumura2023External": {
+    "authors": [
+      "Takashi Okumura",
+      "Koichi Wada",
+      "Xavier Défago"
+    ],
+    "title": "Optimal L-algorithms for rendezvous of asynchronous mobile robots with external-lights",
+    "venue": "Theoretical Computer Science 979:114198",
+    "year": 2023,
+    "first_year": 2018,
+    "doi": "10.1016/j.tcs.2023.114198",
+    "arxiv": "1804.01368",
+    "note": "Conference version at OPODIS 2018, LIPIcs 125, 24:1–24:16, doi:10.4230/LIPIcs.OPODIS.2018.24."
+  },
+  "Terai2023Gathering": {
+    "authors": [
+      "Satoshi Terai",
+      "Koichi Wada",
+      "Yoshiaki Katayama"
+    ],
+    "title": "Gathering problems for autonomous mobile robots with lights",
+    "venue": "Theoretical Computer Science 941:241–261",
+    "year": 2023,
+    "first_year": 2018,
+    "doi": "10.1016/j.tcs.2022.11.018",
+    "arxiv": "1811.12068"
+  },
+  "Nakai2021Asynchronous": {
+    "authors": [
+      "Rikuo Nakai",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "Asynchronous Gathering Algorithms for Autonomous Mobile Robots with Lights",
+    "venue": "SSS 2021, LNCS, pp. 410–424",
+    "year": 2021,
+    "doi": "10.1007/978-3-030-91081-5_27",
+    "arxiv": "2109.12289"
+  },
+  "Defago2023ModelChecking": {
+    "authors": [
+      "Xavier Défago",
+      "Adam Heriban",
+      "Sébastien Tixeuil",
+      "Koichi Wada"
+    ],
+    "title": "Using model checking to formally verify rendezvous algorithms for robots with lights in Euclidean space",
+    "venue": "Robotics and Autonomous Systems 163:104378",
+    "year": 2023,
+    "first_year": 2019,
+    "doi": "10.1016/j.robot.2023.104378",
+    "arxiv": "1907.09871",
+    "note": "Conference version at SRDS 2020, doi:10.1109/SRDS51746.2020.00019."
+  },
+  "Flocchini2019Synchronous": {
+    "authors": [
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Koichi Wada"
+    ],
+    "title": "On Memory, Communication, and Synchronous Schedulers When Moving and Computing",
+    "venue": "OPODIS 2019, LIPIcs 153, 25:1–25:17",
+    "year": 2019,
+    "doi": "10.4230/LIPIcs.OPODIS.2019.25"
+  },
+  "Flocchini2023Asynchrony": {
+    "authors": [
+      "Paola Flocchini",
+      "Nicola Santoro",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "On Asynchrony, Memory, and Communication: Separations and Landscapes",
+    "venue": "OPODIS 2023, LIPIcs 286, 28:1–28:23",
+    "year": 2023,
+    "doi": "10.4230/LIPIcs.OPODIS.2023.28",
+    "arxiv": "2311.03328"
+  },
+  "Otaka2026TwoState": {
+    "authors": [
+      "Kohei Otaka",
+      "Fabian Frei",
+      "Koichi Wada"
+    ],
+    "title": "Gathering semi-synchronously scheduled two-state robots",
+    "venue": "Theoretical Computer Science 1068:115776",
+    "year": 2026,
+    "first_year": 2024,
+    "doi": "10.1016/j.tcs.2026.115776",
+    "arxiv": "2408.09999",
+    "note": "Conference version at SSS 2024, doi:10.1007/978-3-031-74498-3_15."
+  },
+  "Bramas2023Indulgent": {
+    "authors": [
+      "Quentin Bramas",
+      "Anissa Lamani",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Stand up indulgent gathering",
+    "venue": "Theoretical Computer Science 939:63–77",
+    "year": 2023,
+    "doi": "10.1016/j.tcs.2022.10.015",
+    "arxiv": "2302.03466"
+  },
+  "Kitamura2025TwoRobot": {
+    "authors": [
+      "Naoki Kitamura",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "Two-Robot Computational Landscape: A Complete Characterization of Model Power in Minimal Mobile Robot Systems",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2512.22770",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Masuzawa2026Disorientation": {
+    "authors": [
+      "Toshimitsu Masuzawa",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "Rendezvous under Variable Disorientation: The Algorithmic Power of Fixed Unit Distance",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2610.09713",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Pramanick2025Mobility": {
+    "authors": [
+      "Subhajit Pramanick",
+      "Saswata Jana",
+      "Partha Sarathi Mandal",
+      "Gokarna Sharma"
+    ],
+    "title": "Asynchronous Gathering of Opaque Robots with Mobility Faults",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2509.10711",
+    "note": "Preprint, not peer reviewed."
+  },
+  "DiLuna2014Robots": {
+    "authors": [
+      "Giuseppe Antonio Di Luna",
+      "Paola Flocchini",
+      "Sruti Gan Chaudhuri",
+      "Nicola Santoro",
+      "Giovanni Viglietta"
+    ],
+    "title": "Robots with Lights: Overcoming Obstructed Visibility Without Colliding",
+    "venue": "SSS 2014, LNCS 8756, pp. 150–164",
+    "year": 2014,
+    "doi": "10.1007/978-3-319-11764-5_11",
+    "arxiv": "1405.2430"
+  },
+  "Sharma2016Complete": {
+    "authors": [
+      "Gokarna Sharma",
+      "Ramachandran Vaidyanathan",
+      "Jerry L. Trahan",
+      "Costas Busch",
+      "Suresh Rai"
+    ],
+    "title": "Complete Visibility for Robots with Lights in O(1) Time",
+    "venue": "SSS 2016, LNCS 10083, pp. 327–345",
+    "year": 2016,
+    "doi": "10.1007/978-3-319-49259-9_26"
+  },
+  "Sharma2017Logarithmic": {
+    "authors": [
+      "Gokarna Sharma",
+      "Ramachandran Vaidyanathan",
+      "Jerry L. Trahan",
+      "Costas Busch",
+      "Suresh Rai"
+    ],
+    "title": "O(log N)-Time Complete Visibility for Asynchronous Robots with Lights",
+    "venue": "IPDPS 2017, pp. 513–522",
+    "year": 2017,
+    "doi": "10.1109/IPDPS.2017.51"
+  },
+  "Aljohani2018Faults": {
+    "authors": [
+      "Aisha Aljohani",
+      "Gokarna Sharma"
+    ],
+    "title": "Complete Visibility for Mobile Robots with Lights Tolerating Faults",
+    "venue": "International Journal of Networking and Computing 8(1):32–52",
+    "year": 2018,
+    "first_year": 2017,
+    "doi": "10.15803/ijnc.8.1_32"
+  },
+  "Poudel2021FaultTolerant": {
+    "authors": [
+      "Pavan Poudel",
+      "Aisha Aljohani",
+      "Gokarna Sharma"
+    ],
+    "title": "Fault-tolerant complete visibility for asynchronous robots with lights under one-axis agreement",
+    "venue": "Theoretical Computer Science 850:116–134",
+    "year": 2021,
+    "first_year": 2018,
+    "doi": "10.1016/j.tcs.2020.10.033"
+  },
+  "Bose2020Fat": {
+    "authors": [
+      "Kaustav Bose",
+      "Ranendu Adhikary",
+      "Manash Kumar Kundu",
+      "Buddhadeb Sau"
+    ],
+    "title": "Arbitrary Pattern Formation by Opaque Fat Robots with Lights",
+    "venue": "CALDAM 2020, LNCS 12016, pp. 347–359",
+    "year": 2020,
+    "first_year": 2019,
+    "doi": "10.1007/978-3-030-39219-2_28",
+    "arxiv": "1910.02706"
+  },
+  "Alsaedi2022Fat": {
+    "authors": [
+      "Rusul J. Alsaedi",
+      "Joachim Gudmundsson",
+      "André van Renssen"
+    ],
+    "title": "The Mutual Visibility Problem for Fat Robots",
+    "venue": "WADS 2023, LNCS 14079, pp. 15–28",
+    "year": 2023,
+    "arxiv": "2206.14423",
+    "note": "arXiv version 3 (2026) is titled \"The Mutual Visibility Problem for Fat Robots with Lights\".",
+    "first_year": 2022,
+    "doi": "10.1007/978-3-031-38906-1_2"
+  },
+  "Alsaedi2025Pattern": {
+    "authors": [
+      "Rusul J. Alsaedi",
+      "Joachim Gudmundsson",
+      "André van Renssen"
+    ],
+    "title": "Pattern formation for fat robots with lights",
+    "venue": "Computational Geometry 128:102161",
+    "year": 2025,
+    "first_year": 2023,
+    "doi": "10.1016/j.comgeo.2024.102161",
+    "arxiv": "2306.14440"
+  },
+  "Buchin2022Energy": {
+    "authors": [
+      "Kevin Buchin",
+      "Paola Flocchini",
+      "Irina Kostitsyna",
+      "Tom Peters",
+      "Nicola Santoro",
+      "Koichi Wada"
+    ],
+    "title": "On the Computational Power of Energy-Constrained Mobile Robots: Algorithms and Cross-Model Analysis",
+    "venue": "SIROCCO 2022, LNCS 13298, pp. 42–61",
+    "year": 2022,
+    "doi": "10.1007/978-3-031-09993-9_3",
+    "arxiv": "2203.06546",
+    "note": "Journal version: Information and Computation 303:105280 (2025), doi:10.1016/j.ic.2025.105280."
+  },
+  "Naito2025Beyond": {
+    "authors": [
+      "Shota Naito",
+      "Tsukasa Ninomiya",
+      "Koichi Wada"
+    ],
+    "title": "Beyond Pairwise Comparisons: Unveiling Structural Landscape of Mobile Robot Models",
+    "venue": "SSS 2025, LNCS, pp. 408–424",
+    "year": 2025,
+    "doi": "10.1007/978-3-032-11127-2_31",
+    "arxiv": "2508.19805"
+  },
+  "Das2024Visibility": {
+    "authors": [
+      "Archak Das",
+      "Satakshi Ghosh",
+      "Avisek Sharma",
+      "Pritam Goswami",
+      "Buddhadeb Sau"
+    ],
+    "title": "The Computational Landscape of Autonomous Mobile Robots: The Visibility Perspective",
+    "venue": "ICDCIT 2024, LNCS, pp. 85–100",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-50583-6_6",
+    "arxiv": "2303.03031"
+  },
+  "Feletti2025Transparency": {
+    "authors": [
+      "Caterina Feletti",
+      "Lucia Mambretti",
+      "Carlo Mereghetti",
+      "Beatrice Palano"
+    ],
+    "title": "Computational power of autonomous robots: Transparency vs. opaqueness",
+    "venue": "Theoretical Computer Science 1036:115153",
+    "year": 2025,
+    "first_year": 2024,
+    "doi": "10.1016/j.tcs.2025.115153",
+    "arxiv": "2401.16893"
+  },
+  "Nakajima2024Simulations": {
+    "authors": [
+      "Keita Nakajima",
+      "Kaito Takase",
+      "Koichi Wada"
+    ],
+    "title": "Efficient Self-stabilizing Simulations of Energy-Restricted Mobile Robots by Asynchronous Luminous Mobile Robots",
+    "venue": "SSS 2024, LNCS, pp. 141–155",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-74498-3_10",
+    "arxiv": "2403.05542"
+  },
+  "Sharma2025Discrete": {
+    "authors": [
+      "Avisek Sharma",
+      "Pritam Goswami",
+      "Buddhadeb Sau"
+    ],
+    "title": "Computational Power of Mobile Robots: Discrete Version",
+    "venue": "ICDCN 2025, pp. 231–238",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700870",
+    "arxiv": "2407.05678"
+  },
+  "Das2021FiniteMemory": {
+    "authors": [
+      "Archak Das",
+      "Avisek Sharma",
+      "Buddhadeb Sau"
+    ],
+    "title": "Power of Finite Memory and Finite Communication Robots under Asynchronous Scheduler",
+    "venue": "arXiv preprint",
+    "year": 2021,
+    "arxiv": "2104.12202",
+    "note": "Preprint, not peer reviewed."
+  },
+  "GanChaudhuri2015Leader": {
+    "authors": [
+      "Sruti Gan Chaudhuri",
+      "Krishnendu Mukhopadhyaya"
+    ],
+    "title": "Leader election and gathering for asynchronous fat robots without common chirality",
+    "venue": "Journal of Discrete Algorithms 33:171–192",
+    "year": 2015,
+    "first_year": 2012,
+    "doi": "10.1016/j.jda.2015.04.001",
+    "arxiv": "1208.4484"
+  },
+  "GanChaudhuri2010Transparent": {
+    "authors": [
+      "Sruti Gan Chaudhuri",
+      "Krishnendu Mukhopadhyaya"
+    ],
+    "title": "Gathering Asynchronous Transparent Fat Robots",
+    "venue": "ICDCIT 2010, LNCS 5966, pp. 170–175",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-11659-9_17"
+  },
+  "Mondal2017Uniform": {
+    "authors": [
+      "Moumita Mondal",
+      "Sruti Gan Chaudhuri"
+    ],
+    "title": "Uniform Circle Formation by Transparent Fat Robots",
+    "venue": "arXiv preprint",
+    "year": 2017,
+    "arxiv": "1710.09423",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Mondal2020Uniform": {
+    "authors": [
+      "Moumita Mondal",
+      "Sruti Gan Chaudhuri",
+      "Ayan Dutta",
+      "Krishnendu Mukhopadhyaya",
+      "Punyasha Chatterjee"
+    ],
+    "title": "Uniform Circle Formation By Oblivious Swarm Robots",
+    "venue": "arXiv preprint",
+    "year": 2020,
+    "arxiv": "2012.07113",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Lamprou2020Fast": {
+    "authors": [
+      "Ioannis Lamprou",
+      "Russell Martin",
+      "Sven Schewe"
+    ],
+    "title": "Fast two-robot disk evacuation with wireless communication",
+    "venue": "Theoretical Computer Science 846:38–60",
+    "year": 2020,
+    "first_year": 2016,
+    "doi": "10.1016/j.tcs.2020.09.019",
+    "arxiv": "1604.04217",
+    "note": "Conference version at DISC 2016, doi:10.1007/978-3-662-53426-7_1."
+  },
+  "Czyzowicz2018GodSaveQueen": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Sunil Shende"
+    ],
+    "title": "God Save the Queen",
+    "venue": "FUN 2018, LIPIcs 100, 16:1–16:20",
+    "year": 2018,
+    "doi": "10.4230/LIPIcs.FUN.2018.16",
+    "arxiv": "1804.06011",
+    "note": "Journal version: Theoretical Computer Science 806:595–616 (2020), doi:10.1016/j.tcs.2019.09.026."
+  },
+  "Georgiou2025WeightedDisk": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Xin Wang"
+    ],
+    "title": "Weighted group search on the disk & improved lower bounds for priority evacuation",
+    "venue": "Journal of Computer and System Sciences 154:103678",
+    "year": 2025,
+    "first_year": 2024,
+    "doi": "10.1016/j.jcss.2025.103678",
+    "arxiv": "2406.19490",
+    "note": "Conference version at IWOCA 2024, doi:10.1007/978-3-031-63021-7_3."
+  },
+  "Georgiou2019SearchFetch": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "George Karakostas",
+      "Evangelos Kranakis"
+    ],
+    "title": "Search-and-Fetch with 2 Robots on a Disk: Wireless and Face-to-Face Communication Models",
+    "venue": "Discrete Mathematics & Theoretical Computer Science 21(3)",
+    "year": 2019,
+    "first_year": 2017,
+    "doi": "10.23638/DMTCS-21-3-20",
+    "arxiv": "1611.10208",
+    "note": "Conference version at ICORES 2017, doi:10.5220/0006091600150026."
+  },
+  "Georgiou2023Lp": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Sean Leizerovich",
+      "Jesse Lucier",
+      "Somnath Kundu"
+    ],
+    "title": "Evacuating from $\\ell_p$ unit disks in the wireless model",
+    "venue": "Theoretical Computer Science 944:113675",
+    "year": 2023,
+    "first_year": 2021,
+    "doi": "10.1016/j.tcs.2022.12.025",
+    "arxiv": "2108.02367",
+    "note": "Conference version at ALGOSENSORS 2021, doi:10.1007/978-3-030-89240-1_6."
+  },
+  "Czyzowicz2016MultipleExits": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Stefan Dobrev",
+      "Konstantinos Georgiou",
+      "Evangelos Kranakis",
+      "Fraser MacQuarrie"
+    ],
+    "title": "Evacuating two robots from multiple unknown exits in a circle",
+    "venue": "ICDCN 2016",
+    "year": 2016,
+    "doi": "10.1145/2833312.2833318",
+    "note": "Journal version: Theoretical Computer Science 709:20–30 (2018), doi:10.1016/j.tcs.2016.11.019."
+  },
+  "Chuangpishit2019Average": {
+    "authors": [
+      "Huda Chuangpishit",
+      "Konstantinos Georgiou",
+      "Preeti Sharma"
+    ],
+    "title": "Average Case - Worst Case Tradeoffs for Evacuating 2 Robots from the Disk in the Face-to-Face Model",
+    "venue": "ALGOSENSORS 2018, LNCS",
+    "year": 2019,
+    "first_year": 2018,
+    "doi": "10.1007/978-3-030-14094-6_5",
+    "arxiv": "1807.08640"
+  },
+  "Leonardos2023Symmetric": {
+    "authors": [
+      "Nikos Leonardos",
+      "Aris Pagourtzis",
+      "Ioannis Papaioannou"
+    ],
+    "title": "Byzantine fault tolerant symmetric-persistent circle evacuation",
+    "venue": "Theoretical Computer Science 956:113839",
+    "year": 2023,
+    "first_year": 2021,
+    "doi": "10.1016/j.tcs.2023.113839",
+    "note": "Conference version at ALGOSENSORS 2021, doi:10.1007/978-3-030-89240-1_8."
+  },
+  "Behrouz2025Byzantine": {
+    "authors": [
+      "Pourandokht Behrouz",
+      "Orestis Konstantinidis",
+      "Nikos Leonardos",
+      "Aris Pagourtzis",
+      "Ioannis Papaioannou",
+      "Marianna Spyrakou"
+    ],
+    "title": "Byzantine fault-tolerant protocols for (n,f)-evacuation from a circle",
+    "venue": "Theoretical Computer Science 1038:115185",
+    "year": 2025,
+    "first_year": 2023,
+    "doi": "10.1016/j.tcs.2025.115185",
+    "note": "Conference version at ALGOWIN 2023, doi:10.1007/978-3-031-48882-5_7."
+  },
+  "Georgiou2021Treasure": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "George Karakostas",
+      "Evangelos Kranakis"
+    ],
+    "title": "Treasure evacuation with one robot on a disk",
+    "venue": "Theoretical Computer Science 852:18–28",
+    "year": 2021,
+    "first_year": 2016,
+    "doi": "10.1016/j.tcs.2020.11.008",
+    "note": "Conference version at ALGOSENSORS 2016, doi:10.1007/978-3-319-53058-1_6."
+  },
+  "Kaminski2026Circles": {
+    "authors": [
+      "Bogumil Kaminski",
+      "Pawel Pralat",
+      "Maria Sadza"
+    ],
+    "title": "Going in Circles: Collaborative Multi-Robot Treasure Hunting",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2608.12115",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Chrobak2015GroupSearch": {
+    "authors": [
+      "Marek Chrobak",
+      "Leszek Gąsieniec",
+      "Thomas Gorry",
+      "Russell Martin"
+    ],
+    "title": "Group Search on the Line",
+    "venue": "SOFSEM 2015, LNCS, pp. 164–176",
+    "year": 2015,
+    "doi": "10.1007/978-3-662-46078-8_14"
+  },
+  "Czyzowicz2021GroupEvacuation": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Denis Pankratov",
+      "Sunil Shende"
+    ],
+    "title": "Group Evacuation on a Line by Agents with Different Communication Abilities",
+    "venue": "ISAAC 2021, LIPIcs 212, 57:1–57:24",
+    "year": 2021,
+    "doi": "10.4230/LIPIcs.ISAAC.2021.57",
+    "arxiv": "2109.12676"
+  },
+  "Czyzowicz2021NearMajority": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Grzegorz Stachowiak"
+    ],
+    "title": "Search and evacuation with a near majority of faulty agents",
+    "venue": "SIAM Conference on Applied and Computational Discrete Algorithms (ACDA 2021)",
+    "year": 2021,
+    "doi": "10.1137/1.9781611976830.20",
+    "arxiv": "2605.08355"
+  },
+  "Brandt2020Rays": {
+    "authors": [
+      "Sebastian Brandt",
+      "Klaus-Tycho Foerster",
+      "Benjamin Richner",
+      "Roger Wattenhofer"
+    ],
+    "title": "Wireless evacuation on m rays with k searchers",
+    "venue": "Theoretical Computer Science 811:56–69",
+    "year": 2020,
+    "first_year": 2017,
+    "doi": "10.1016/j.tcs.2018.10.032",
+    "note": "Conference version at SIROCCO 2017."
+  },
+  "Czyzowicz2015Wireless": {
+    "authors": [
+      "J. Czyzowicz",
+      "E. Kranakis",
+      "D. Krizanc",
+      "L. Narayanan",
+      "J. Opatrny",
+      "S. Shende"
+    ],
+    "title": "Wireless Autonomous Robot Evacuation from Equilateral Triangles and Squares",
+    "venue": "ADHOC-NOW 2015, LNCS, pp. 181–194",
+    "year": 2015,
+    "doi": "10.1007/978-3-319-19662-6_13"
+  },
+  "Georgiou2026Triangle": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Woojin Jang"
+    ],
+    "title": "Triangle evacuation of 2 agents in the wireless model & the power of choosing a starting point",
+    "venue": "Journal of Computer and System Sciences 155:103695",
+    "year": 2026,
+    "first_year": 2022,
+    "doi": "10.1016/j.jcss.2025.103695",
+    "arxiv": "2209.08544",
+    "note": "Conference version at ALGOWIN 2022."
+  },
+  "Bagheri2019Triangles": {
+    "authors": [
+      "Iman Bagheri",
+      "Lata Narayanan",
+      "Jaroslav Opatrny"
+    ],
+    "title": "Evacuation of Equilateral Triangles by Mobile Agents of Limited Communication Range",
+    "venue": "ALGOSENSORS 2019, LNCS, pp. 3–22",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-34405-4_1",
+    "arxiv": "1908.07315"
+  },
+  "Georgiou2025Polygons": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Caleb Jones",
+      "Jesse Lucier"
+    ],
+    "title": "Multi-agent Search-Type Problems on Polygons",
+    "venue": "SOFSEM 2025, LNCS, pp. 314–332",
+    "year": 2025,
+    "doi": "10.1007/978-3-031-82670-2_23",
+    "arxiv": "2406.19495"
+  },
+  "Devillez2021Tree": {
+    "authors": [
+      "Henri Devillez",
+      "Béni Egressy",
+      "Robin Fritsch",
+      "Roger Wattenhofer"
+    ],
+    "title": "Two-Agent Tree Evacuation",
+    "venue": "SIROCCO 2021, LNCS, pp. 204–221",
+    "year": 2021,
+    "doi": "10.1007/978-3-030-79527-6_12"
+  },
+  "Acharjee2019Shoreline": {
+    "authors": [
+      "Sumi Acharjee",
+      "Konstantinos Georgiou",
+      "Somnath Kundu",
+      "Akshaya Srinivasan"
+    ],
+    "title": "Lower Bounds for Shoreline Searching With 2 or More Robots",
+    "venue": "OPODIS 2019, LIPIcs 153, 26:1–26:11",
+    "year": 2020,
+    "first_year": 2019,
+    "doi": "10.4230/LIPIcs.OPODIS.2019.26",
+    "arxiv": "2001.04311"
+  },
+  "Wei2016Competitive": {
+    "authors": [
+      "Qi WEI",
+      "Xuehou TAN",
+      "Bo JIANG"
+    ],
+    "title": "Competitive Strategies for Evacuating from an Unknown Affected Area",
+    "venue": "IEICE Transactions on Information and Systems E99.D(10):2585–2590",
+    "year": 2016,
+    "doi": "10.1587/transinf.2016edp7118"
+  },
+  "Sun2020Byzantine": {
+    "authors": [
+      "Xiaoming Sun",
+      "Yuan Sun",
+      "Jialin Zhang"
+    ],
+    "title": "Better Upper Bounds for Searching on a Line with Byzantine Robots",
+    "venue": "Complexity and Approximation, LNCS 12000, pp. 151–171",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-41672-0_9"
+  },
+  "Czyzowicz2019Energy": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Manuel Lafond",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Sunil Shende"
+    ],
+    "title": "Energy Consumption of Group Search on a Line",
+    "venue": "ICALP 2019, LIPIcs 132, 137:1–137:15",
+    "year": 2019,
+    "doi": "10.4230/LIPIcs.ICALP.2019.137",
+    "arxiv": "1904.09714"
+  },
+  "Georgiou2024Disoriented": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Nikos Giachoudis",
+      "Evangelos Kranakis"
+    ],
+    "title": "Overcoming probabilistic faults in disoriented linear search",
+    "venue": "Theoretical Computer Science 1014:114761",
+    "year": 2024,
+    "first_year": 2023,
+    "doi": "10.1016/j.tcs.2024.114761",
+    "arxiv": "2303.15608"
+  },
+  "Jawhar2025Asymmetric": {
+    "authors": [
+      "Khaled Jawhar",
+      "Evangelos Kranakis"
+    ],
+    "title": "Bike-assisted evacuation of robots on a line with asymmetric S/R communication",
+    "venue": "Theoretical Computer Science 1053:115438",
+    "year": 2025,
+    "first_year": 2024,
+    "doi": "10.1016/j.tcs.2025.115438",
+    "arxiv": "2307.15808"
+  },
+  "Czyzowicz2019GroupSearch": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Kostantinos Georgiou",
+      "Evangelos Kranakis"
+    ],
+    "title": "Group Search and Evacuation",
+    "venue": "Lecture Notes in Computer Science Distributed Computing by Mobile Entities, 335-370",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-11072-7_14"
+  },
+  "Kranakis2024Survey": {
+    "authors": [
+      "Evangelos Kranakis"
+    ],
+    "title": "Invited Paper: A Survey of the Impact of Knowledge on the Competitive Ratio in Linear Search",
+    "venue": "Stabilization, Safety, and Security of Distributed Systems, pp. 23-38",
+    "year": 2024,
+    "doi": "10.1007/978-3-031-74498-3_2"
+  },
+  "Georgiou2023OptimalCircle": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Evangelos Kranakis",
+      "Nikos Leonardos",
+      "Aris Pagourtzis",
+      "Ioannis Papaioannou"
+    ],
+    "title": "Optimal circle search despite the presence of faulty robots",
+    "venue": "Information Processing Letters 182, 106391",
+    "year": 2023,
+    "first_year": 2019,
+    "doi": "10.1016/j.ipl.2023.106391"
+  },
+  "Georgiou2023WeightedLine": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Jesse Lucier"
+    ],
+    "title": "Weighted group search on a line & implications to the priority evacuation problem",
+    "venue": "Theoretical Computer Science 939, 1-17",
+    "year": 2023,
+    "first_year": 2020,
+    "doi": "10.1016/j.tcs.2022.10.013"
+  },
+  "Czyzowicz2021TimeEnergy": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Konstantinos Georgiou",
+      "Ryan Killick",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Manuel Lafond",
+      "Lata Narayanan",
+      "Jaroslav Opatrny",
+      "Sunil Shende"
+    ],
+    "title": "Time-energy tradeoffs for evacuation by two robots in the wireless model",
+    "venue": "Theoretical Computer Science 852, 61-72",
+    "year": 2021,
+    "first_year": 2019,
+    "doi": "10.1016/j.tcs.2020.11.014",
+    "arxiv": "1905.06783"
+  },
+  "Jawhar2021Bike": {
+    "authors": [
+      "Khaled Jawhar",
+      "Evangelos Kranakis"
+    ],
+    "title": "Bike Assisted Evacuation on a Line",
+    "venue": "Lecture Notes in Computer Science SOFSEM 2021: Theory and Practice of Computer Science, 104-118",
+    "year": 2021,
+    "doi": "10.1007/978-3-030-67731-2_8"
+  },
+  "Pattanayak2020Collaborative": {
+    "authors": [
+      "Debasish Pattanayak",
+      "H. Ramesh",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Collaborative Evacuation of Mobile Robots",
+    "venue": "Proceedings of the 21st International Conference on Distributed Computing and Networking, 1-1",
+    "year": 2020,
+    "doi": "10.1145/3369740.3373806"
+  },
+  "Borowiecki2025Discrete": {
+    "authors": [
+      "Piotr Borowiecki",
+      "Shantanu Das",
+      "Dariusz Dereniowski",
+      "Łukasz Kuszner"
+    ],
+    "title": "Discrete evacuation in graphs with multiple exits",
+    "venue": "Theoretical Computer Science 1035, pp. 115141",
+    "year": 2025,
+    "first_year": 2016,
+    "doi": "10.1016/j.tcs.2025.115141"
+  },
+  "Liu2022Square": {
+    "authors": [
+      "Luan Liu",
+      "Qi Wei",
+      "Yan Zhang",
+      "Jie Sun",
+      "Wenxin Zhang"
+    ],
+    "title": "Online Algorithm for Evacuating Crashed Faulty Robots from A Square",
+    "venue": "2022 IEEE 8th International Conference on Computer and Communications (ICCC), 2276-2280",
+    "year": 2022,
+    "doi": "10.1109/iccc56324.2022.10065611"
+  },
+  "Czyzowicz2019Plane": {
+    "authors": [
+      "Jurek Czyzowicz",
+      "Maxime Godon",
+      "Evangelos Kranakis",
+      "Arnaud Labourel"
+    ],
+    "title": "Group search of the plane with faulty robots",
+    "venue": "Theoretical Computer Science 792, pp. 69-84",
+    "year": 2019,
+    "doi": "10.1016/j.tcs.2018.09.029"
+  },
+  "Wei2014Convex": {
+    "authors": [
+      "Qi Wei",
+      "Xuehou Tan",
+      "Bo Jiang",
+      "Lijuan Wang"
+    ],
+    "title": "On-Line Strategies for Evacuating from a Convex Region in the Plane",
+    "venue": "Combinatorial Optimization and Applications, pp. 74-85",
+    "year": 2014,
+    "doi": "10.1007/978-3-319-12691-3_7",
+    "refcheck_ok": [
+      "duplicate title"
+    ],
+    "note": "Different authors from [Li2017Convex], which has a similar title."
+  },
+  "Li2017Convex": {
+    "authors": [
+      "Songhua Li",
+      "Yinfeng Xu"
+    ],
+    "title": "Online Strategies for Evacuating from a Convex Region in the Plane",
+    "venue": "Frontiers in Algorithmics, pp. 151-162",
+    "year": 2017,
+    "doi": "10.1007/978-3-319-59605-1_14",
+    "refcheck_ok": [
+      "duplicate title"
+    ],
+    "note": "Different authors from [Wei2014Convex], which has a similar title."
+  },
+  "Liu2015Groups": {
+    "authors": [
+      "Yuan Liu",
+      "Bo Jiang",
+      "Hao Zhang"
+    ],
+    "title": "Online Strategies for Evacuating from a Convex Region by Groups in the Plane",
+    "venue": "2015 Ninth International Conference on Frontier of Computer Science and Technology, pp. 178-183",
+    "year": 2015,
+    "doi": "10.1109/fcst.2015.70"
+  },
+  "Wei2016Affected": {
+    "authors": [
+      "Qi Wei",
+      "Xuehou Tan",
+      "Bo Jiang",
+      "Lijuan Wang"
+    ],
+    "title": "Evacuating from an Unknown Affected Area",
+    "venue": "International Journal of Pattern Recognition and Artificial Intelligence 30, pp. 1659022",
+    "year": 2016,
+    "doi": "10.1142/s0218001416590229"
+  },
+  "Xu2013Groups": {
+    "authors": [
+      "Yinfeng Xu",
+      "Lan Qin"
+    ],
+    "title": "Strategies of Groups Evacuation from a Convex Region in the Plane",
+    "venue": "Frontiers in Algorithmics and Algorithmic Aspects in Information and Management, pp. 250-260",
+    "year": 2013,
+    "doi": "10.1007/978-3-642-38756-2_26"
+  },
+  "Jiang2015Groups": {
+    "authors": [
+      "Bo Jiang",
+      "Yuan Liu",
+      "Hao Zhang",
+      "Xuehou Tan"
+    ],
+    "title": "An On-Line Strategy of Groups Evacuation from a Convex Region in the Plane",
+    "venue": "Mathematical Problems in Data Science, pp. 189-199",
+    "year": 2015,
+    "doi": "10.1007/978-3-319-25127-1_11"
+  },
+  "Fekete2010Rectilinear": {
+    "authors": [
+      "Sándor Fekete",
+      "Chris Gray",
+      "Alexander Kröller"
+    ],
+    "title": "Evacuation of Rectilinear Polygons",
+    "venue": "Combinatorial Optimization and Applications, pp. 21-30",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-17458-2_3",
+    "arxiv": "1008.4420"
+  },
+  "Dobrev2020Shoreline": {
+    "authors": [
+      "Stefan Dobrev",
+      "Rastislav Královič",
+      "Dana Pardubská"
+    ],
+    "title": "Improved Lower Bounds for Shoreline Search",
+    "venue": "Structural Information and Communication Complexity, pp. 80-90",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-54921-3_5"
+  },
+  "Conley2025Inspection": {
+    "authors": [
+      "James Conley",
+      "Konstantinos Georgiou"
+    ],
+    "title": "Multi-agent Disk Inspection",
+    "venue": "Lecture Notes in Computer Science Structural Information and Communication Complexity, 262-280",
+    "year": 2025,
+    "first_year": 2024,
+    "doi": "10.1007/978-3-031-91736-3_16",
+    "arxiv": "2411.15391"
+  },
+  "Georgiou2026Fermat": {
+    "authors": [
+      "Konstantinos Georgiou"
+    ],
+    "title": "Optimal Average Disk-Inspection via Fermat’s Principle",
+    "venue": "LIPIcs, Volume 364, STACS 2026 44:1",
+    "year": 2026,
+    "first_year": 2025,
+    "doi": "10.4230/LIPIcs.STACS.2026.44",
+    "arxiv": "2509.06334"
+  },
+  "Coleman2023Delivery": {
+    "authors": [
+      "Jared Coleman",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Oscar Morales-Ponce"
+    ],
+    "title": "Delivery to Safety with Two Cooperating Robots",
+    "venue": "Lecture Notes in Computer Science SOFSEM 2023: Theory and Practice of Computer Science, 359-371",
+    "year": 2023,
+    "first_year": 2022,
+    "doi": "10.1007/978-3-031-23101-8_24",
+    "arxiv": "2210.04080"
+  },
+  "Georgiou2025Spirals": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Caleb Jones",
+      "Matthew Madej"
+    ],
+    "title": "Spirals and Beyond: Competitive Plane Search with Multi-Speed Agents",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2508.10793",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Coleman2026Plane": {
+    "authors": [
+      "Jared Coleman",
+      "Evangelos Kranakis",
+      "Danny Krizanc",
+      "Oscar Morales-Ponce"
+    ],
+    "title": "Search and Rescue on the Plane",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2608.12039",
+    "note": "Preprint, not peer reviewed."
+  },
+  "Chuangpishit2020MultiObjective": {
+    "authors": [
+      "Huda Chuangpishit",
+      "Konstantinos Georgiou",
+      "Preeti Sharma"
+    ],
+    "title": "A Multi-Objective Optimization Problem on Evacuating 2 Robots from the Disk in the Face-to-Face Model; Trade-Offs between Worst-Case and Average-Case Analysis",
+    "venue": "Information 11, 506",
+    "year": 2020,
+    "first_year": 2018,
+    "doi": "10.3390/info11110506"
+  },
+  "Flocchini1998Direction": {
+    "authors": [
+      "Paola Flocchini",
+      "Bernard Mans",
+      "Nicola Santoro"
+    ],
+    "title": "Sense of direction: Definitions, properties, and classes",
+    "venue": "Networks 32(3):165–180",
+    "year": 1998,
+    "doi": "10.1002/(SICI)1097-0037(199810)32:3<165::AID-NET1>3.0.CO;2-I",
+    "note": "Metadata from Crossref. Not read; cited by [Dobrev2006Searching] as the source of the formal definition of sense of direction, which is used in the black hole search knowledge axis."
+  },
+  "Fraigniaud2006Oracle": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Andrzej Pelc"
+    ],
+    "title": "Oracle size: a new measure of difficulty for communication tasks",
+    "venue": "PODC 2006, pp. 179–187",
+    "year": 2006,
+    "doi": "10.1145/1146381.1146410",
+    "note": "Metadata from Crossref. Not read; cited by [Cohen2008Label] among works on short information supplied in advance (the advice paradigm)."
+  },
+  "Fraigniaud2008Advice": {
+    "authors": [
+      "Pierre Fraigniaud",
+      "David Ilcinkas",
+      "Andrzej Pelc"
+    ],
+    "title": "Tree exploration with advice",
+    "venue": "Information and Computation 206(11):1276–1287 (MFCS 2006, as \"Tree Exploration with an Oracle\")",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.ic.2008.07.005",
+    "note": "Metadata from Crossref (MFCS 2006 version: doi 10.1007/11821069_2). Not read; cited by [Miller2015Tradeoffs] as earlier work on advice for mobile agents."
+  },
+  "Bhagat2022Meet": {
+    "authors": [
+      "Subhash Bhagat",
+      "Andrzej Pelc"
+    ],
+    "title": "How to Meet at a Node of Any Connected Graph",
+    "venue": "DISC 2022, LIPIcs 246, 11:1–11:16",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.DISC.2022.11",
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.DISC.2022.11",
+    "note": "Metadata from DataCite. Abstract, introduction and model read (open access). First synchronous rendezvous algorithm for locally finite, possibly infinite graphs; used for the rendezvous graph-size axis."
+  },
+  "Blin2008Chasing": {
+    "authors": [
+      "Lélia Blin",
+      "Pierre Fraigniaud",
+      "Nicolas Nisse",
+      "Sandrine Vial"
+    ],
+    "title": "Distributed chasing of network intruders",
+    "venue": "Theoretical Computer Science 399(1–2):12–37 (SIROCCO 2006)",
+    "year": 2008,
+    "first_year": 2006,
+    "doi": "10.1016/j.tcs.2008.02.004",
+    "note": "Metadata from Crossref (SIROCCO 2006 version: doi 10.1007/11780823_7). Not read; its result (one searcher above optimum, non-monotone, unknown graphs) is as reported by [Ilcinkas2009Monotonicity]."
+  },
+  "Michail2016Temporal": {
+    "authors": [
+      "Othon Michail",
+      "Paul G. Spirakis"
+    ],
+    "title": "Traveling salesman problems in temporal graphs",
+    "venue": "Theoretical Computer Science 634:1–23",
+    "year": 2016,
+    "doi": "10.1016/j.tcs.2016.04.006",
+    "note": "Metadata from Crossref; conference version not checked. Not read; credited by [Erlebach2021Temporal] with introducing temporal graph exploration (TEXP) with the schedule known in advance."
+  },
+  "Kuhn2010Dynamic": {
+    "authors": [
+      "Fabian Kuhn",
+      "Nancy Lynch",
+      "Rotem Oshman"
+    ],
+    "title": "Distributed computation in dynamic networks",
+    "venue": "STOC 2010, pp. 513–522",
+    "year": 2010,
+    "doi": "10.1145/1806689.1806760",
+    "url": "https://people.csail.mit.edu/rotem/dynamicgraphs.pdf",
+    "note": "Introduces T-interval connectivity (T = 1: connected in every round); token-circulation impossibility in 1-interval connected graphs. Metadata from Crossref; abstract and introduction read in the authors' full version (papers/Kuhn2010Dynamic.pdf)."
+  },
+  "Casteigts2012TVG": {
+    "authors": [
+      "Arnaud Casteigts",
+      "Paola Flocchini",
+      "Walter Quattrociocchi",
+      "Nicola Santoro"
+    ],
+    "title": "Time-varying graphs and dynamic networks",
+    "venue": "International Journal of Parallel, Emergent and Distributed Systems 27(5):387–408 (ADHOC-NOW 2011)",
+    "year": 2012,
+    "first_year": 2011,
+    "doi": "10.1080/17445760.2012.668546",
+    "arxiv": "1012.0009",
+    "note": "Unified TVG framework and hierarchy of classes (Class 5 recurrent connectivity, Class 9 always connected, Class 10 T-interval connectivity). Metadata from Crossref; introduction and Section 5 read in the arXiv version."
+  },
+  "Pelc2018Crash": {
+    "authors": [
+      "Andrzej Pelc"
+    ],
+    "title": "Deterministic gathering with crash faults",
+    "venue": "Networks 72(2):182–199",
+    "year": 2018,
+    "first_year": 2017,
+    "doi": "10.1002/net.21810",
+    "arxiv": "1704.08880",
+    "note": "Gathering with motion and total crash faults; impossibility under full asynchrony (3-node clique argument), solved with fixed speeds. Metadata from Crossref; abstract and introduction read in the arXiv version."
+  },
+  "Bellman1963Optimal": {
+    "authors": [
+      "Richard Bellman"
+    ],
+    "title": "An Optimal Search",
+    "venue": "SIAM Review 5(3):274",
+    "year": 1963,
+    "doi": "10.1137/1005070",
+    "note": "Problem statement posing linear search. Metadata from Crossref; not read, cited as reported by Czyzowicz2021Byzantine and Brandt2020Rays."
+  },
+  "Toffoli1991Programmable": {
+    "authors": [
+      "Tommaso Toffoli",
+      "Norman Margolus"
+    ],
+    "title": "Programmable matter: Concepts and realization",
+    "venue": "Physica D: Nonlinear Phenomena 47(1–2):263–272",
+    "year": 1991,
+    "doi": "10.1016/0167-2789(91)90296-L",
+    "note": "Coined the term programmable matter. Metadata from Crossref; not read, cited as reported by DiLuna2020Shape, Emek2019Deterministic and Dufoulon2021Efficient."
+  },
+  "Dumitrescu2004Metamorphic": {
+    "authors": [
+      "Adrian Dumitrescu",
+      "Ichiro Suzuki",
+      "Masafumi Yamashita"
+    ],
+    "title": "Motion Planning for Metamorphic Systems: Feasibility, Decidability, and Distributed Reconfiguration",
+    "venue": "IEEE Transactions on Robotics and Automation 20(3):409–418",
+    "year": 2004,
+    "doi": "10.1109/TRA.2004.824936",
+    "note": "Metamorphic systems with rotation and sliding moves; cited by Michail2019Transformation as the closest prior work. Metadata from Crossref; not read."
+  },
+  "Flocchini1999Hard": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro",
+      "Peter Widmayer"
+    ],
+    "title": "Hard Tasks for Weak Robots: The Role of Common Knowledge in Pattern Formation by Autonomous Mobile Robots",
+    "venue": "ISAAC 1999, LNCS 1741, pp. 93–102",
+    "year": 1999,
+    "doi": "10.1007/3-540-46632-0_10",
+    "note": "Checked against the full text: introduces the asynchronous (CORDA) model and studies pattern formation without common handedness."
+  },
+  "Flocchini2012Book": {
+    "authors": [
+      "Paola Flocchini",
+      "Giuseppe Prencipe",
+      "Nicola Santoro"
+    ],
+    "title": "Distributed Computing by Oblivious Mobile Robots",
+    "venue": "Synthesis Lectures on Distributed Computing Theory, Morgan & Claypool",
+    "year": 2012,
+    "doi": "10.2200/S00440ED1V01Y201208DCT010",
+    "note": "Metadata from Crossref. Only the abstract was read (via Semantic Scholar); used for the 'minimal capabilities' framing of the field."
+  },
+  "Peleg2005Swarms": {
+    "authors": [
+      "David Peleg"
+    ],
+    "title": "Distributed Coordination Algorithms for Mobile Robot Swarms: New Directions and Challenges",
+    "venue": "IWDC 2005, LNCS 3741, pp. 1–12",
+    "year": 2005,
+    "doi": "10.1007/11603771_1",
+    "note": "Checked against the full text: suggests \"colors, flags or visible indicator lights\" and $O(1)$ bits of stable memory for robots."
+  },
+  "Efrima2007Models": {
+    "authors": [
+      "Asaf Efrima",
+      "David Peleg"
+    ],
+    "title": "Distributed Models and Algorithms for Mobile Robot Systems",
+    "venue": "SOFSEM 2007, LNCS 4362, pp. 70–87",
+    "year": 2007,
+    "doi": "10.1007/978-3-540-69507-3_5",
+    "note": "Metadata from Crossref. Not read; cited with [Peleg2005Swarms] for the lights suggestion, as reported by [Das2016Lights]."
+  },
+  "Defago2006Fault": {
+    "authors": [
+      "Xavier Défago",
+      "Maria Gradinariu",
+      "Stéphane Messika",
+      "Philippe Raipin-Parvédy"
+    ],
+    "title": "Fault-Tolerant and Self-stabilizing Mobile Robots Gathering",
+    "venue": "DISC 2006, LNCS, pp. 46–60",
+    "year": 2006,
+    "doi": "10.1007/11864219_4",
+    "note": "Metadata from Crossref. Abstract read (Semantic Scholar): deterministic and probabilistic gathering under crash and Byzantine faults and bounded schedulers."
+  },
+  "Yamauchi2014Randomized": {
+    "authors": [
+      "Yukiko Yamauchi",
+      "Masafumi Yamashita"
+    ],
+    "title": "Randomized Pattern Formation Algorithm for Asynchronous Oblivious Mobile Robots",
+    "venue": "DISC 2014, LNCS, pp. 137–151",
+    "year": 2014,
+    "doi": "10.1007/978-3-662-45174-8_10",
+    "note": "Metadata from Crossref. Not read; result as reported by [Bramas2016Probabilistic]."
+  },
+  "Bandettini2011Survey": {
+    "authors": [
+      "Alberto Bandettini",
+      "Fabio Luporini",
+      "Giovanni Viglietta"
+    ],
+    "title": "A Survey on Open Problems for Mobile Robots",
+    "venue": "arXiv preprint",
+    "year": 2011,
+    "arxiv": "1111.2259",
+    "url": "https://arxiv.org/abs/1111.2259",
+    "note": "Metadata from arXiv. Read (Sections 1–2): survey of the CORDA/ATOM models, multiplicity detection, limited visibility and fat robots. Preprint, not peer reviewed."
+  },
+  "Ooshita2022Ring": {
+    "authors": [
+      "Fukuhito Ooshita",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Ring exploration with myopic luminous robots",
+    "venue": "Information and Computation 285:104702 (SSS 2018, LNCS, pp. 301–316)",
+    "year": 2022,
+    "first_year": 2018,
+    "doi": "10.1016/j.ic.2021.104702",
+    "arxiv": "1805.03965",
+    "note": "Metadata from Crossref (journal and SSS 2018 version, doi 10.1007/978-3-030-03232-6_20). Checked against the full text of the arXiv version (May 2018): model, Table 1, Theorems 3–18 and conclusion."
+  },
+  "Nagahama2023Ring": {
+    "authors": [
+      "Shota Nagahama",
+      "Fukuhito Ooshita",
+      "Michiko Inoue"
+    ],
+    "title": "Ring exploration of myopic luminous robots with visibility more than one",
+    "venue": "Information and Computation 292:105036 (SSS 2019, LNCS, pp. 256–271)",
+    "year": 2023,
+    "first_year": 2019,
+    "doi": "10.1016/j.ic.2023.105036",
+    "note": "Metadata from Crossref (SSS 2019 version: doi 10.1007/978-3-030-34992-9_20). Not read: no open copy found (ScienceDirect refused automated access; the IPSJ technical report AL-173 is members-only). Results as reported in Table 1 of [Ooshita2024Crash] and in the introduction of [Nagahama2022Grid]."
+  },
+  "Nagahama2022Grid": {
+    "authors": [
+      "Shota Nagahama",
+      "Fukuhito Ooshita",
+      "Michiko Inoue"
+    ],
+    "title": "Terminating grid exploration with myopic luminous robots",
+    "venue": "International Journal of Networking and Computing 12(1):73–102 (APDCM 2021, IPDPS Workshops, pp. 586–595)",
+    "year": 2022,
+    "first_year": 2021,
+    "doi": "10.15803/ijnc.12.1_73",
+    "note": "Metadata from Crossref (workshop version doi 10.1109/IPDPSW52791.2021.00092). Checked against the full journal text: model, Table 1, Theorem 1 and the algorithm statements of Section 4."
+  },
+  "Bramas2023Chirality": {
+    "authors": [
+      "Quentin Bramas",
+      "Pascal Lafourcade",
+      "Stéphane Devismes"
+    ],
+    "title": "Optimal exclusive perpetual grid exploration by luminous myopic opaque robots with common chirality",
+    "venue": "Theoretical Computer Science 977:114162 (ICDCN 2021, pp. 76–85)",
+    "year": 2023,
+    "first_year": 2021,
+    "doi": "10.1016/j.tcs.2023.114162",
+    "url": "https://hal.science/hal-04206069",
+    "note": "Metadata from Crossref (ICDCN 2021 version doi 10.1145/3427796.3427834). Checked against the accepted manuscript on HAL: abstract, contribution, Table 1, model."
+  },
+  "Rauch2021Chirality": {
+    "authors": [
+      "Arthur Rauch",
+      "Quentin Bramas",
+      "Stéphane Devismes",
+      "Pascal Lafourcade",
+      "Anissa Lamani"
+    ],
+    "title": "Optimal exclusive perpetual grid exploration by luminous myopic robots without common chirality",
+    "venue": "NETYS 2021, LNCS, pp. 95–110",
+    "year": 2021,
+    "doi": "10.1007/978-3-030-91014-3_7",
+    "url": "https://inria.hal.science/hal-03547159",
+    "note": "Metadata from Crossref. Not read (the HAL record has no file); results as reported in Table 1 of [Darwich2023Torus] and in the related work of [Bramas2026AsyncGrid]."
+  },
+  "Darwich2023Torus": {
+    "authors": [
+      "Omar Darwich",
+      "Ahmet-Sefa Ulucan",
+      "Quentin Bramas",
+      "Anissa Lamani",
+      "Anaïs Durand",
+      "Pascal Lafourcade"
+    ],
+    "title": "Perpetual torus exploration by myopic luminous robots",
+    "venue": "Theoretical Computer Science 976:114143 (SSS 2022, LNCS, pp. 164–177)",
+    "year": 2023,
+    "first_year": 2022,
+    "doi": "10.1016/j.tcs.2023.114143",
+    "url": "https://uca.hal.science/hal-04323448",
+    "note": "Metadata from Crossref (SSS 2022 version doi 10.1007/978-3-031-21017-4_11, which covers only common chirality). Checked against the accepted manuscript on HAL: contribution, Tables 1–2, model."
+  },
+  "Bramas2026AsyncGrid": {
+    "authors": [
+      "Quentin Bramas",
+      "Stéphane Devismes",
+      "Anaïs Durand",
+      "Pascal Lafourcade",
+      "Anissa Lamani"
+    ],
+    "title": "Optimal asynchronous perpetual finite grid exploration",
+    "venue": "Theoretical Computer Science 1082:116072 (SSS 2024, LNCS, pp. 89–105, as “Optimal Asynchronous Perpetual Grid Exploration”)",
+    "year": 2026,
+    "first_year": 2024,
+    "doi": "10.1016/j.tcs.2026.116072",
+    "url": "https://uca.hal.science/hal-04620468",
+    "note": "Metadata from Crossref (SSS 2024 version doi 10.1007/978-3-031-74498-3_6). Checked against the SSS 2024 version on HAL: abstract, Table 1, model, Theorems 2–3, conclusion; the journal version was not read."
+  },
+  "Ooshita2024Crash": {
+    "authors": [
+      "Fukuhito Ooshita",
+      "Naoki Kitamura",
+      "Ryota Eguchi",
+      "Michiko Inoue",
+      "Hirotsugu Kakugawa",
+      "Sayaka Kamei",
+      "Masahiro Shibata",
+      "Yuichi Sudo"
+    ],
+    "title": "Crash-tolerant perpetual exploration with myopic luminous robots on rings",
+    "venue": "OPODIS 2024 (LIPIcs 324), 12:1–12:16",
+    "year": 2025,
+    "first_year": 2024,
+    "doi": "10.4230/LIPIcs.OPODIS.2024.12",
+    "note": "Metadata from DataCite. Checked against the full text (open access): abstract, contribution and Table 1."
+  },
+  "Ooshita2025Colors": {
+    "authors": [
+      "Fukuhito Ooshita",
+      "Hirotsugu Kakugawa",
+      "Sayaka Kamei",
+      "Masahiro Shibata"
+    ],
+    "title": "Crash-tolerant perpetual exploration of myopic luminous robots with fewer colors on rings",
+    "venue": "CANDAR Workshops 2025, pp. 166–172",
+    "year": 2025,
+    "doi": "10.1109/CANDARW68385.2025.00036",
+    "note": "Metadata from Crossref. A copy is in papers/; abstract and Table I read, proofs not checked."
+  },
+  "Datta2013Local": {
+    "authors": [
+      "Ajoy K. Datta",
+      "Anissa Lamani",
+      "Lawrence L. Larmore",
+      "Franck Petit"
+    ],
+    "title": "Ring exploration by oblivious agents with local vision",
+    "venue": "ICDCS 2013, pp. 347–356",
+    "year": 2013,
+    "doi": "10.1109/ICDCS.2013.55",
+    "arxiv": "1205.5003",
+    "note": "Metadata from Crossref. Checked against the arXiv version (“Ring Exploration with Oblivious Myopic Robots”, May 2012, which treats $\\varphi = 1, 2, 3$): contribution, Theorems 3.1–3.2, Corollary 3.2 and the synchronous algorithms of Section 3.2. The $\\varphi = 2, 3$ results also appeared as an SSS 2013 brief announcement (doi 10.1007/978-3-319-03089-0_31), not read."
+  },
+  "Kamei2025Rings": {
+    "authors": [
+      "Sayaka Kamei",
+      "Anissa Lamani",
+      "Fukuhito Ooshita",
+      "Sébastien Tixeuil",
+      "Koichi Wada"
+    ],
+    "title": "Gathering on rings for myopic asynchronous robots with lights",
+    "venue": "Theory of Computing Systems 69(1):8 (OPODIS 2019, LIPIcs 153, 27:1–27:17)",
+    "year": 2025,
+    "first_year": 2019,
+    "doi": "10.1007/s00224-024-10199-3",
+    "note": "Metadata from Crossref and DataCite (OPODIS version doi 10.4230/LIPIcs.OPODIS.2019.27). OPODIS version in papers/; abstract read."
+  },
+  "Bramas2026StandUp": {
+    "authors": [
+      "Quentin Bramas",
+      "Hirotsugu Kakugawa",
+      "Sayaka Kamei",
+      "Anissa Lamani",
+      "Fukuhito Ooshita",
+      "Masahiro Shibata",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Stand-up indulgent gathering on lines for myopic luminous robots",
+    "venue": "The Computer Journal 69(7):1122–1132",
+    "year": 2026,
+    "doi": "10.1093/comjnl/bxag015",
+    "arxiv": "2312.12698",
+    "note": "Metadata from Crossref. arXiv version in papers/; abstract read."
+  },
+  "Bramas2025TradeOff": {
+    "authors": [
+      "Quentin Bramas",
+      "Hirotsugu Kakugawa",
+      "Sayaka Kamei",
+      "Anissa Lamani",
+      "Fukuhito Ooshita",
+      "Masahiro Shibata",
+      "Sébastien Tixeuil"
+    ],
+    "title": "A visibility vs. memory trade-off for stand-up indulgent gathering on lines",
+    "venue": "SIROCCO 2025, LNCS, pp. 159–175",
+    "year": 2025,
+    "doi": "10.1007/978-3-031-91736-3_10",
+    "note": "Metadata from Crossref. A copy is in papers/; abstract read."
+  },
+  "Hideg2020Filling": {
+    "authors": [
+      "Attila Hideg",
+      "Tamás Lukovszki"
+    ],
+    "title": "Asynchronous filling by myopic luminous robots",
+    "venue": "ALGOSENSORS 2020, LNCS, pp. 108–123",
+    "year": 2020,
+    "doi": "10.1007/978-3-030-62401-9_8",
+    "arxiv": "1909.06895",
+    "note": "Metadata from Crossref. arXiv version in papers/; abstract read."
+  },
+  "Pramanick2023MIS": {
+    "authors": [
+      "Subhajit Pramanick",
+      "Sai Vamshi Samala",
+      "Debasish Pattanayak",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Distributed algorithms for filling MIS vertices of an arbitrary graph by myopic luminous robots",
+    "venue": "Theoretical Computer Science 978:114187 (ICDCIT 2023, LNCS, pp. 3–19, as “Filling MIS Vertices of a Graph by Myopic Luminous Robots”)",
+    "year": 2023,
+    "doi": "10.1016/j.tcs.2023.114187",
+    "arxiv": "2107.04885",
+    "note": "Metadata from Crossref (ICDCIT version doi 10.1007/978-3-031-24848-1_1). arXiv version in papers/; abstract read."
+  },
+  "Kamei2024MIS": {
+    "authors": [
+      "Sayaka Kamei",
+      "Sébastien Tixeuil"
+    ],
+    "title": "An asynchronous maximum independent set algorithm by myopic luminous robots on grids",
+    "venue": "The Computer Journal 67(1):57–77 (advance access 2022)",
+    "year": 2024,
+    "doi": "10.1093/comjnl/bxac158",
+    "arxiv": "2012.03399",
+    "note": "Metadata from Crossref. arXiv version in papers/; abstract read."
+  },
+  "Das2025MISGrid": {
+    "authors": [
+      "Raja Das",
+      "Avisek Sharma",
+      "Buddhadeb Sau"
+    ],
+    "title": "Maximum independent set formation on a finite grid by myopic robots",
+    "venue": "Theoretical Computer Science 1031:115077 (Intelligent Computing 2023, LNNS, pp. 1247–1267)",
+    "year": 2025,
+    "first_year": 2023,
+    "doi": "10.1016/j.tcs.2025.115077",
+    "arxiv": "2207.13403",
+    "note": "Metadata from Crossref (conference version doi 10.1007/978-3-031-37963-5_86). arXiv version in papers/; abstract read."
+  },
+  "Bramas2021Infinite": {
+    "authors": [
+      "Quentin Bramas",
+      "Stéphane Devismes",
+      "Pascal Lafourcade"
+    ],
+    "title": "Infinite grid exploration by disoriented robots",
+    "venue": "NETYS 2020, LNCS, pp. 129–145 (brief announcement at SIROCCO 2019, pp. 340–344)",
+    "year": 2021,
+    "first_year": 2019,
+    "doi": "10.1007/978-3-030-67087-0_9",
+    "arxiv": "1905.09271",
+    "note": "Metadata from Crossref (SIROCCO brief announcement doi 10.1007/978-3-030-24922-9_25). arXiv version in papers/; abstract read. A journal follow-up without chirality is Discrete Applied Mathematics 375:193–214 (2025), doi 10.1016/j.dam.2025.05.031, not read."
+  },
+  "Bramas2020Poleless": {
+    "authors": [
+      "Quentin Bramas",
+      "Pascal Lafourcade",
+      "Stéphane Devismes"
+    ],
+    "title": "Finding water on Poleless using melomaniac myopic chameleon robots",
+    "venue": "FUN 2021 (LIPIcs 157), 6:1–6:19",
+    "year": 2021,
+    "doi": "10.4230/LIPIcs.FUN.2021.6",
+    "note": "Metadata from DataCite (FUN 2020 was held in 2021; the key keeps the file name in papers/). Abstract read."
+  },
+  "Bramas2022Beedroids": {
+    "authors": [
+      "Quentin Bramas",
+      "Stéphane Devismes",
+      "Anaïs Durand",
+      "Pascal Lafourcade",
+      "Anissa Lamani"
+    ],
+    "title": "Beedroids: how luminous autonomous swarms of UAVs can save the world?",
+    "venue": "FUN 2022 (LIPIcs 226), 7:1–7:21",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.FUN.2022.7",
+    "note": "Metadata from DataCite. A copy is in papers/; abstract read."
+  },
+  "Bramas2026Grey": {
+    "authors": [
+      "Quentin Bramas",
+      "Stéphane Devismes",
+      "Anaïs Durand",
+      "Pascal Lafourcade",
+      "Anissa Lamani"
+    ],
+    "title": "77 shades of grey",
+    "venue": "Preprint, HAL hal-05504522",
+    "year": 2026,
+    "url": "https://uca.hal.science/hal-05504522",
+    "note": "Metadata from the HAL record; not peer reviewed as far as found. A copy is in papers/; abstract read."
+  },
+  "Das2025Triangular": {
+    "authors": [
+      "Raja Das",
+      "Pritam Goswami",
+      "Brati Mondal",
+      "Buddhadeb Sau"
+    ],
+    "title": "Rectangle enclosed triangular grid exploration with myopic luminous robots",
+    "venue": "ICDCN 2025, pp. 249–253",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700841",
+    "note": "Metadata from Crossref. Not read (title and venue only)."
+  },
+  "Bockenhauer2023Inports": {
+    "authors": [
+      "Hans-Joachim Böckenhauer",
+      "Fabian Frei",
+      "Walter Unger",
+      "David Wehner"
+    ],
+    "title": "Zero-Memory Graph Exploration with Unknown Inports",
+    "venue": "SIROCCO 2023, LNCS 13892, pp. 246–261",
+    "year": 2023,
+    "doi": "10.1007/978-3-031-32733-9_11",
+    "arxiv": "2301.13860",
+    "note": "Metadata from Crossref and arXiv. Checked against the full text (arXiv v1): model (Section 1.2), Theorems 1–9, 11 and the conclusion. Colour counts in this paper exclude the initial colour."
+  },
+  "Takahashi2025Recolorable": {
+    "authors": [
+      "Shota Takahashi",
+      "Haruki Kanaya",
+      "Shoma Hiraoka",
+      "Ryota Eguchi",
+      "Yuichi Sudo"
+    ],
+    "title": "Recolorable Graph Exploration by an Oblivious Agent with Fewer Colors",
+    "venue": "OPODIS 2025 (LIPIcs 361), 32:1–32:15",
+    "year": 2026,
+    "first_year": 2025,
+    "doi": "10.4230/LIPIcs.OPODIS.2025.32",
+    "arxiv": "2505.02789",
+    "note": "Metadata from DataCite and arXiv. Checked against the full text of arXiv v2 (September 2026): model (Section 2), Theorems 1–3, Note 1 and the conclusion. The LIPIcs abstract states the six-colour and φ-free five-colour results; the triangle-free five-colour result and Note 1 are in arXiv v2."
+  },
+  "Hiraoka2026Block": {
+    "authors": [
+      "Shoma Hiraoka",
+      "Shunsuke Imori",
+      "Shota Takahashi",
+      "Yuichi Sudo"
+    ],
+    "title": "Color Complexity of Recolorable Graph Exploration: Upper and Lower Bounds via Block Structure",
+    "venue": "arXiv preprint 2609.14356",
+    "year": 2026,
+    "arxiv": "2609.14356",
+    "url": "https://arxiv.org/abs/2609.14356",
+    "note": "Metadata from arXiv. Not peer reviewed. Checked against the full text (v1): model (Section 2), Theorems 3, 6, 11, 13, Lemma 4 and Table 1. The four-colour lower bound is computer-assisted (SAT certificate checked with DRAT)."
+  },
+  "Menc2017Rotor": {
+    "authors": [
+      "Artur Menc",
+      "Dominik Pająk",
+      "Przemysław Uznański"
+    ],
+    "title": "Time and space optimality of rotor-router graph exploration",
+    "venue": "Information Processing Letters 127:17–20",
+    "year": 2017,
+    "doi": "10.1016/j.ipl.2017.06.010",
+    "arxiv": "1502.05545",
+    "note": "Metadata from Crossref. Checked against the full text (arXiv v3): Observation 1.1, Theorems 2.2 and 2.3."
+  },
+  "Yanovski2003Ant": {
+    "authors": [
+      "Vladimir Yanovski",
+      "Israel A. Wagner",
+      "Alfred M. Bruckstein"
+    ],
+    "title": "A distributed ant algorithm for efficiently patrolling a network",
+    "venue": "Algorithmica 37(3):165–186",
+    "year": 2003,
+    "doi": "10.1007/s00453-003-1030-9",
+    "note": "Metadata from Crossref. Full text not read (no open copy found); bounds taken from the abstract and from [Menc2017Rotor]."
+  },
+  "Bampas2009LockIn": {
+    "authors": [
+      "Evangelos Bampas",
+      "Leszek Gąsieniec",
+      "Nicolas Hanusse",
+      "David Ilcinkas",
+      "Ralf Klasing",
+      "Adrian Kosowski"
+    ],
+    "title": "Euler Tour Lock-In Problem in the Rotor-Router Model",
+    "venue": "DISC 2009, LNCS, pp. 423–435",
+    "year": 2009,
+    "doi": "10.1007/978-3-642-04355-0_44",
+    "url": "https://hal.science/hal-00402749",
+    "note": "Metadata from Crossref. Full text not read (HAL unavailable when checked); the authors' DISC 2009 slides and the HAL abstract were read."
+  },
+  "Priezzhev1996Eulerian": {
+    "authors": [
+      "V. B. Priezzhev",
+      "Deepak Dhar",
+      "Abhishek Dhar",
+      "Supriya Krishnamurthy"
+    ],
+    "title": "Eulerian Walkers as a Model of Self-Organized Criticality",
+    "venue": "Physical Review Letters 77(25):5079–5082",
+    "year": 1996,
+    "doi": "10.1103/PhysRevLett.77.5079",
+    "note": "Metadata from Crossref. Not read; cited as the origin of the rotor-router by [Takahashi2025Recolorable] and [Hiraoka2026Block]."
+  },
+  "Bojko2022Dual": {
+    "authors": [
+      "Dominik Bojko",
+      "Karol Gotfryd",
+      "Dariusz R. Kowalski",
+      "Dominik Pająk"
+    ],
+    "title": "Tree Exploration in Dual-Memory Model",
+    "venue": "MFCS 2022 (LIPIcs 241), 22:1–22:16",
+    "year": 2022,
+    "doi": "10.4230/LIPIcs.MFCS.2022.22",
+    "arxiv": "2112.13449",
+    "note": "Metadata from DataCite and arXiv. Abstract and introduction read."
+  },
+  "Inoue2022Oblivious": {
+    "authors": [
+      "Taichi Inoue",
+      "Naoki Kitamura",
+      "Taisuke Izumi",
+      "Toshimitsu Masuzawa"
+    ],
+    "title": "Computational Power of a Single Oblivious Mobile Agent in Two-Edge-Connected Graphs",
+    "venue": "OPODIS 2022 (LIPIcs 253), 11:1–11:18",
+    "year": 2023,
+    "first_year": 2022,
+    "doi": "10.4230/LIPIcs.OPODIS.2022.11",
+    "note": "Metadata from DataCite. Abstract read."
+  },
+  "Shimoyama2022Cactus": {
+    "authors": [
+      "Kohei Shimoyama",
+      "Yuichi Sudo",
+      "Hirotsugu Kakugawa",
+      "Toshimitsu Masuzawa"
+    ],
+    "title": "One Bit Agent Memory is Enough for Snap-Stabilizing Perpetual Exploration of Cactus Graphs with Distinguishable Cycles",
+    "venue": "SSS 2022 (invited paper), LNCS 13751, pp. 19–34",
+    "year": 2022,
+    "doi": "10.1007/978-3-031-21017-4_2",
+    "note": "Metadata from Crossref. Not read; only the title and the description in [Hiraoka2026Block]."
+  },
+  "Sudo2026SelfStabilizing": {
+    "authors": [
+      "Yuichi Sudo",
+      "Fukuhito Ooshita",
+      "Sayaka Kamei"
+    ],
+    "title": "Self-stabilizing graph exploration by a single agent",
+    "venue": "Theoretical Computer Science 1082:116085",
+    "year": 2026,
+    "first_year": 2020,
+    "doi": "10.1016/j.tcs.2026.116085",
+    "arxiv": "2010.08929",
+    "note": "Metadata from Crossref and arXiv (first version 2020; brief announcement at DISC 2024). Not read; the arXiv abstracts of different versions state different bounds."
+  },
+  "Sudo2015Whiteboards": {
+    "authors": [
+      "Yuichi Sudo",
+      "Daisuke Baba",
+      "Junya Nakamura",
+      "Fukuhito Ooshita",
+      "Hirotsugu Kakugawa",
+      "Toshimitsu Masuzawa"
+    ],
+    "title": "A Single Agent Exploration in Unknown Undirected Graphs with Whiteboards",
+    "venue": "IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences E98.A(10):2117–2128",
+    "year": 2015,
+    "doi": "10.1587/transfun.E98.A.2117",
+    "note": "Metadata from Crossref. Not read; described in [Takahashi2025Recolorable]."
+  },
+  "Zhang2012Ratio": {
+    "authors": [
+      "Meng Zhang",
+      "Yi Zhang",
+      "Jijun Tang"
+    ],
+    "title": "Label-Guided Graph Exploration with Adjustable Ratio of Labels",
+    "venue": "arXiv preprint 1204.2955",
+    "year": 2012,
+    "arxiv": "1204.2955",
+    "url": "https://arxiv.org/abs/1204.2955",
+    "note": "Metadata from arXiv. Abstract read."
+  }
+}

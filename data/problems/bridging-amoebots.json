@@ -1,0 +1,2540 @@
+{
+  "id": "bridging-amoebots",
+  "model": "programmable-matter",
+  "name": "Bridging",
+  "origin": {
+    "ref": "AndresArroyo2018Bridging",
+    "year": 2017,
+    "note": "arXiv 2017; Natural Computing 2018."
+  },
+  "derived_from": {
+    "problem": "compression-amoebots",
+    "kind": "generalisation of",
+    "relation": "Bridging adds terrain: the compression chain is biased to stay on land and to shorten a path across a gap [AndresArroyo2018Bridging]."
+  },
+  "summary": "Particles moving between two sites must build a bridge across a gap that balances path length against bridge cost.",
+  "statement": "Particles occupy a path between two fixed sites across a gap in the terrain. They run a local Markov chain that rewards neighbours and penalises particles over the gap. The system should form a shortcut bridge whose length and cost are balanced, with high probability in the stationary distribution.",
+  "primer": {
+    "intro": "Army ants build living bridges out of their own bodies to cut a corner across a gap: a longer bridge saves walking but takes more ants out of work. Here particles on the triangular grid form a connected group joining two fixed sites, and some nodes are marked as *gap* (over the hole) and others as *land*; a particle can tell which kind of node it is on. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. One randomly chosen particle acts at a time, with constant memory and no compass. The group should settle into a bridge that balances a short path between the two sites against few particles hanging over the gap, measured by a weighted perimeter where boundary edges over the gap cost more.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "The compression rule, with the gap made expensive",
+        "variant": "stochastic",
+        "ref": "AndresArroyo2018Bridging",
+        "idea": "There are two biases: $\\lambda > 1$ rewards a short perimeter (many neighbours), and a second bias, written $\\gamma$ in [AndresArroyo2018Bridging], rewards a short perimeter over the gap.\\n\\n1. A randomly chosen particle picks a random empty neighbouring node.\\n2. It checks locally that the move neither splits the group nor encloses a hole.\\n3. It works out, from its neighbourhood, how the move changes the perimeter and the part of the perimeter that lies over the gap.\\n4. It moves with a probability that is larger when both get shorter (certainly, when the move improves both).",
+        "analysis": "For $\\lambda > 2+\\sqrt2 \\approx 3.41$ and $\\gamma > 1$, the weighted perimeter is within a constant factor of its minimum with all but exponentially small probability [AndresArroyo2018Bridging]. For a V-shaped gap the bridge settles at a position that depends on the angle of the V, as observed in real ant bridges. The threshold $2+\\sqrt2$ is the same as for compression, and for the same counting reason; for small biases the paper gives no guarantee.",
+        "why_it_matters": "It showed that the compression rule is a flexible tool: changing the weights of boundary edges changes the shape the swarm settles into."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Why only one bridge forms",
+        "variant": "stochastic",
+        "ref": "Oh2024Bridge",
+        "idea": "Fire ants searching for food across water start several bridges but end with only one. [Oh2024Bridge] model this with particles that prefer to move in one direction (towards the food) and prefer having neighbours, with one bias for each preference.\\n\\n1. Particles move at random, but a step towards the food is more likely than a step away.\\n2. A step that gains neighbours is more likely than one that loses them.\\n3. Nothing else: no particle knows how many bridges exist.",
+        "analysis": "When both biases are large, a single bridge forms almost certainly [Oh2024Bridge]. Intuitively, two bridges have more boundary than one bridge made of the same particles, and the neighbour bias makes long boundaries unlikely. The proof follows which nodes are occupied rather than which particle is where, which simplifies the analysis.",
+        "why_it_matters": "It shows that a striking collective decision, choosing one bridge, can arise from two simple preferences without coordination."
+      }
+    ]
+  },
+  "history": "Bridging was inspired by army ants, whose bridges depend on the gap angle [AndresArroyo2018Bridging]; the later question was whether a **single** bridge forms [Oh2024Bridge].",
+  "variants": [
+    {
+      "id": "stochastic",
+      "title": "Markov chain, sequential",
+      "standard": true,
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "sequential",
+        "algorithm": "randomized"
+      },
+      "summary": "A local stochastic rule builds near-optimal shortcut bridges; for large biases a single bridge forms.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "AndresArroyo2018Bridging",
+          "role": "best",
+          "time": "\\text{eventually}",
+          "note": "Introductory and current best for shortcut bridging; the trade-off depends on the gap angle."
+        },
+        {
+          "ref": "Oh2024Bridge",
+          "role": "other",
+          "time": "\\text{eventually}",
+          "note": "A single bridge almost certainly forms for large biases; occupancy-chain technique."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Mixing time not bounded."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "orientation",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "figure": {
+    "caption": "Shortcut bridging by the Markov chain of [AndresArroyo2018Bridging]: particles join two fixed sites (black squares) along the land (shaded); the nodes under the land are over the gap (red outline). One particle at a time (outlined) expands into a free neighbouring node and contracts forward with a probability that rewards a short perimeter ($\\lambda$) and penalises perimeter over the gap ($\\gamma$), otherwise it contracts back; moves that would disconnect the particles from the sites, or create a hole, are refused. Shown is a run of accepted moves: the bridge shortcuts the corner but keeps few particles over the gap.",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 9,
+    "origin": [
+      32,
+      12
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            4.21
+          ],
+          [
+            99.0,
+            4.21
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            12.0
+          ],
+          [
+            99.0,
+            12.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            19.79
+          ],
+          [
+            99.0,
+            19.79
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            27.59
+          ],
+          [
+            99.0,
+            27.59
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            35.38
+          ],
+          [
+            99.0,
+            35.38
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            43.18
+          ],
+          [
+            99.0,
+            43.18
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            50.97
+          ],
+          [
+            99.0,
+            50.97
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            51.84
+          ],
+          [
+            2.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            36.25
+          ],
+          [
+            11.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            20.66
+          ],
+          [
+            20.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            5.07
+          ],
+          [
+            29.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            7.65,
+            1.0
+          ],
+          [
+            38.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            16.65,
+            1.0
+          ],
+          [
+            47.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            25.65,
+            1.0
+          ],
+          [
+            56.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            34.65,
+            1.0
+          ],
+          [
+            65.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            43.65,
+            1.0
+          ],
+          [
+            74.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            52.65,
+            1.0
+          ],
+          [
+            83.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            61.65,
+            1.0
+          ],
+          [
+            92.83,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            70.65,
+            1.0
+          ],
+          [
+            99.0,
+            50.11
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            79.65,
+            1.0
+          ],
+          [
+            99.0,
+            34.52
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            88.65,
+            1.0
+          ],
+          [
+            99.0,
+            18.93
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            97.65,
+            1.0
+          ],
+          [
+            99.0,
+            3.34
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            3.34
+          ],
+          [
+            2.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.93
+          ],
+          [
+            11.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            34.52
+          ],
+          [
+            20.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            50.11
+          ],
+          [
+            29.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            7.17,
+            55.0
+          ],
+          [
+            38.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            16.17,
+            55.0
+          ],
+          [
+            47.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            25.17,
+            55.0
+          ],
+          [
+            56.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            34.17,
+            55.0
+          ],
+          [
+            65.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            43.17,
+            55.0
+          ],
+          [
+            74.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            52.17,
+            55.0
+          ],
+          [
+            83.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            61.17,
+            55.0
+          ],
+          [
+            92.35,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            70.17,
+            55.0
+          ],
+          [
+            99.0,
+            5.07
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            79.17,
+            55.0
+          ],
+          [
+            99.0,
+            20.66
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            88.17,
+            55.0
+          ],
+          [
+            99.0,
+            36.25
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            97.17,
+            55.0
+          ],
+          [
+            99.0,
+            51.84
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            32.0,
+            22.39
+          ],
+          [
+            27.5,
+            24.99
+          ],
+          [
+            23.0,
+            22.39
+          ],
+          [
+            23.0,
+            17.19
+          ],
+          [
+            27.5,
+            14.59
+          ],
+          [
+            32.0,
+            17.19
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            36.5,
+            30.19
+          ],
+          [
+            32.0,
+            32.79
+          ],
+          [
+            27.5,
+            30.19
+          ],
+          [
+            27.5,
+            24.99
+          ],
+          [
+            32.0,
+            22.39
+          ],
+          [
+            36.5,
+            24.99
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            41.0,
+            37.98
+          ],
+          [
+            36.5,
+            40.58
+          ],
+          [
+            32.0,
+            37.98
+          ],
+          [
+            32.0,
+            32.78
+          ],
+          [
+            36.5,
+            30.18
+          ],
+          [
+            41.0,
+            32.78
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            45.5,
+            45.78
+          ],
+          [
+            41.0,
+            48.38
+          ],
+          [
+            36.5,
+            45.78
+          ],
+          [
+            36.5,
+            40.58
+          ],
+          [
+            41.0,
+            37.98
+          ],
+          [
+            45.5,
+            40.58
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            50.0,
+            53.57
+          ],
+          [
+            45.5,
+            56.17
+          ],
+          [
+            41.0,
+            53.57
+          ],
+          [
+            41.0,
+            48.37
+          ],
+          [
+            45.5,
+            45.77
+          ],
+          [
+            50.0,
+            48.37
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            41.0,
+            22.39
+          ],
+          [
+            36.5,
+            24.99
+          ],
+          [
+            32.0,
+            22.39
+          ],
+          [
+            32.0,
+            17.19
+          ],
+          [
+            36.5,
+            14.59
+          ],
+          [
+            41.0,
+            17.19
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            45.5,
+            30.19
+          ],
+          [
+            41.0,
+            32.79
+          ],
+          [
+            36.5,
+            30.19
+          ],
+          [
+            36.5,
+            24.99
+          ],
+          [
+            41.0,
+            22.39
+          ],
+          [
+            45.5,
+            24.99
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            50.0,
+            37.98
+          ],
+          [
+            45.5,
+            40.58
+          ],
+          [
+            41.0,
+            37.98
+          ],
+          [
+            41.0,
+            32.78
+          ],
+          [
+            45.5,
+            30.18
+          ],
+          [
+            50.0,
+            32.78
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            54.5,
+            45.78
+          ],
+          [
+            50.0,
+            48.38
+          ],
+          [
+            45.5,
+            45.78
+          ],
+          [
+            45.5,
+            40.58
+          ],
+          [
+            50.0,
+            37.98
+          ],
+          [
+            54.5,
+            40.58
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            59.0,
+            53.57
+          ],
+          [
+            54.5,
+            56.17
+          ],
+          [
+            50.0,
+            53.57
+          ],
+          [
+            50.0,
+            48.37
+          ],
+          [
+            54.5,
+            45.77
+          ],
+          [
+            59.0,
+            48.37
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            59.0,
+            37.98
+          ],
+          [
+            54.5,
+            40.58
+          ],
+          [
+            50.0,
+            37.98
+          ],
+          [
+            50.0,
+            32.78
+          ],
+          [
+            54.5,
+            30.18
+          ],
+          [
+            59.0,
+            32.78
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            63.5,
+            45.78
+          ],
+          [
+            59.0,
+            48.38
+          ],
+          [
+            54.5,
+            45.78
+          ],
+          [
+            54.5,
+            40.58
+          ],
+          [
+            59.0,
+            37.98
+          ],
+          [
+            63.5,
+            40.58
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            63.5,
+            30.19
+          ],
+          [
+            59.0,
+            32.79
+          ],
+          [
+            54.5,
+            30.19
+          ],
+          [
+            54.5,
+            24.99
+          ],
+          [
+            59.0,
+            22.39
+          ],
+          [
+            63.5,
+            24.99
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            68.0,
+            37.98
+          ],
+          [
+            63.5,
+            40.58
+          ],
+          [
+            59.0,
+            37.98
+          ],
+          [
+            59.0,
+            32.78
+          ],
+          [
+            63.5,
+            30.18
+          ],
+          [
+            68.0,
+            32.78
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            68.0,
+            22.39
+          ],
+          [
+            63.5,
+            24.99
+          ],
+          [
+            59.0,
+            22.39
+          ],
+          [
+            59.0,
+            17.19
+          ],
+          [
+            63.5,
+            14.59
+          ],
+          [
+            68.0,
+            17.19
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            72.5,
+            30.19
+          ],
+          [
+            68.0,
+            32.79
+          ],
+          [
+            63.5,
+            30.19
+          ],
+          [
+            63.5,
+            24.99
+          ],
+          [
+            68.0,
+            22.39
+          ],
+          [
+            72.5,
+            24.99
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            77.0,
+            22.39
+          ],
+          [
+            72.5,
+            24.99
+          ],
+          [
+            68.0,
+            22.39
+          ],
+          [
+            68.0,
+            17.19
+          ],
+          [
+            72.5,
+            14.59
+          ],
+          [
+            77.0,
+            17.19
+          ]
+        ],
+        "c": "line",
+        "fill": "soft",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            54.14,
+            29.98
+          ],
+          [
+            50.0,
+            32.37
+          ],
+          [
+            45.86,
+            29.98
+          ],
+          [
+            45.86,
+            25.2
+          ],
+          [
+            50.0,
+            22.81
+          ],
+          [
+            54.14,
+            25.2
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            58.64,
+            22.18
+          ],
+          [
+            54.5,
+            24.57
+          ],
+          [
+            50.36,
+            22.18
+          ],
+          [
+            50.36,
+            17.4
+          ],
+          [
+            54.5,
+            15.01
+          ],
+          [
+            58.64,
+            17.4
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            49.64,
+            22.18
+          ],
+          [
+            45.5,
+            24.57
+          ],
+          [
+            41.36,
+            22.18
+          ],
+          [
+            41.36,
+            17.4
+          ],
+          [
+            45.5,
+            15.01
+          ],
+          [
+            49.64,
+            17.4
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            54.14,
+            14.39
+          ],
+          [
+            50.0,
+            16.78
+          ],
+          [
+            45.86,
+            14.39
+          ],
+          [
+            45.86,
+            9.61
+          ],
+          [
+            50.0,
+            7.22
+          ],
+          [
+            54.14,
+            9.61
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            63.14,
+            14.39
+          ],
+          [
+            59.0,
+            16.78
+          ],
+          [
+            54.86,
+            14.39
+          ],
+          [
+            54.86,
+            9.61
+          ],
+          [
+            59.0,
+            7.22
+          ],
+          [
+            63.14,
+            9.61
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "poly",
+        "p": [
+          [
+            45.14,
+            14.39
+          ],
+          [
+            41.0,
+            16.78
+          ],
+          [
+            36.86,
+            14.39
+          ],
+          [
+            36.86,
+            9.61
+          ],
+          [
+            41.0,
+            7.22
+          ],
+          [
+            45.14,
+            9.61
+          ]
+        ],
+        "c": "gap",
+        "fill": "none",
+        "w": 0.3
+      },
+      {
+        "t": "rect",
+        "p": [
+          68.0,
+          12.0
+        ],
+        "wd": 5.5,
+        "ht": 5.5,
+        "c": "fg",
+        "fill": "fg"
+      },
+      {
+        "t": "rect",
+        "p": [
+          32.0,
+          12.0
+        ],
+        "wd": 5.5,
+        "ht": 5.5,
+        "c": "fg",
+        "fill": "fg"
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: particles follow the land",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ]
+      },
+      {
+        "label": "Particles shift towards a shortcut",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "qlat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              45.5,
+              35.38
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.59
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.0,
+              27.59
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              45.5,
+              19.79
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "qlat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.59
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              54.5,
+              19.79
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              4
+            ],
+            "qlat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              43.18
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              45.5,
+              35.38
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              3
+            ],
+            "qlat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              45.5,
+              35.38
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.0,
+              27.59
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              3
+            ],
+            "qlat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              54.5,
+              35.38
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.59
+            ],
+            "r": 4.140000000000001,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "label": "Final: a shortcut bridge over the gap",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              0,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              1,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              2,
+              2
+            ],
+            "c": "accent"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "accent"
+          }
+        ]
+      }
+    ]
+  }
+}

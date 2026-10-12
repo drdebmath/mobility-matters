@@ -1,0 +1,174 @@
+{
+  "id": "programmable-matter",
+  "name": "Programmable matter",
+  "summary": "Many tiny particles with constant memory occupy nodes of the triangular lattice, move by expanding and contracting, and must self-organise into a shape or elect a leader.",
+  "focus": "The first question was **what constant-memory, anonymous particles can do at all** (leader election, shapes, coating); then **rounds**, with matching lower bounds where possible, and how weak a scheduler and how little orientation the algorithms can tolerate.",
+  "description": "In the **amoebot model** [Derakhshandeh2014Amoebot] each particle occupies one node of the infinite triangular lattice (contracted) or two adjacent nodes (expanded). A particle moves by expanding into an empty neighbouring node and contracting into one of its two nodes. Particles are anonymous, have constant memory, and communicate only with neighbours; in the founding announcement each particle is a finite-state machine that reads and writes one flag per incident edge, and a pair of neighbours may combine an expansion and a contraction into a *handover* [Derakhshandeh2014Amoebot]. An adversarial scheduler activates particles; time is measured in **asynchronous rounds**: intervals of time in which every particle is activated at least once (the epochs of the other models; they need not be the shortest such intervals, and a bound holds for every division of the execution into consecutive rounds). The canonical amoebot model separates the core model from families of assumption variants, including concurrency [Daymude2023Canonical].\n\n**How the axes work.** As in the other models, level 0 assumes nothing and higher levels are stronger assumptions.",
+  "story": [
+    {
+      "heading": "Matter that computes",
+      "body": "Toffoli and Margolus coined *programmable matter* for matter that changes its physical properties under program control [Toffoli1991Programmable] (as reported by [DiLuna2020Shape], [Emek2019Deterministic] and [Derakhshandeh2014Amoebot]). Derakhshandeh et al. proposed the amoebot model in a brief announcement at SPAA 2014: particles on the triangular lattice that \"have constant memory (in particular, they have no identifiers)\", \"act asynchronously and make their decision based on local information\", and move by expanding and contracting, \"which resembles the behavior of amoeba\" [Derakhshandeh2014Amoebot]. The founding papers fixed many details at once: common chirality, one particle active at a time, random bits, constant memory and a structure that stays connected [Derakhshandeh2014Amoebot] [Derakhshandeh2015Leader]; the announcement already named compass, initialisation and fault tolerance as dimensions along which the model could vary [Derakhshandeh2014Amoebot]. Most axes of this model are the history of removing those defaults one by one."
+    },
+    {
+      "heading": "Removing the defaults",
+      "body": "Di Luna et al. listed the defaults behind the early shape-formation results (chirality, a sequential schedule and, \"more important, randomization\") and asked: \"What can be done deterministically? Is chirality necessary? ... What happens if the scheduler is not sequential?\" [DiLuna2020Shape]. Their answers, and the leader-election papers that followed [Emek2019Deterministic] [Dufoulon2021Efficient] [Chalopin2026Stationary], gave the axes *orientation*, *scheduler*, *randomness* and *initial shape*. Chalopin, Das and Kokkou observe that every deterministic two-dimensional leader-election algorithm uses at least two extra assumptions from a short menu: randomness, simply connected shape, chirality, movement, a sequential scheduler [Chalopin2026Stationary]. Daymude, Richa and Scheideler then wrote the hierarchy down as the canonical amoebot model, with variants for orientation, memory, concurrency and fairness, because without it \"precise systematic comparison of results under the amoebot model is difficult\" [Daymude2023Canonical]."
+    },
+    {
+      "heading": "Weaker particles, looser structures",
+      "body": "Two axes push below the original model. SILBOT particles keep no memory beyond being contracted or expanded, send no messages and act asynchronously with non-atomic actions, so a step depends only on what a particle sees within two hops [DAngelo2020Silent]; this is the *oblivious* memory level and the *weak* scheduler. The *connectivity* axis records that the requirement that the structure stays connected at every moment is a convention of the literature rather than of the model: Dufoulon, Kutten and Moses Jr. disconnected and reconnected the structure on purpose to elect a leader faster [Dufoulon2021Efficient]."
+    },
+    {
+      "heading": "Other mechanisms",
+      "body": "Not every problem in this model is about amoebots. Problem-specific axes cover modules on the square grid that rotate or slide under central control [Michail2019Transformation], the hybrid model in which one finite-state agent moves passive tiles in two or three dimensions [Gmyr2020Tile] [Hinnenthal2024Shape3D], and, for leader election, whether particles may move at all [Chalopin2026Stationary]. These axes apply to a single problem each. They are kept on the problem so that the model's own axes stay shared across problems."
+    }
+  ],
+  "axes": [
+    {
+      "id": "orientation",
+      "name": "Orientation",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no common orientation and no chirality",
+          "short": "no orientation",
+          "definition": "Each particle labels its six incident directions in its own clockwise or counter-clockwise order, starting anywhere."
+        },
+        {
+          "id": "chirality",
+          "level": 1,
+          "label": "common chirality",
+          "short": "chirality",
+          "definition": "All particles agree on clockwise order, not on a common direction."
+        },
+        {
+          "id": "direction",
+          "level": 1,
+          "label": "a common direction, no chirality",
+          "short": "common direction",
+          "definition": "All particles agree on one lattice direction, not on handedness. Chalopin, Das and Kokkou call this a *common direction* [Chalopin2026Stationary], but the same words mean agreement on all six directions in other papers [Chalopin2026Holes] [Navarra2023Line]."
+        },
+        {
+          "id": "full",
+          "level": 2,
+          "label": "full common orientation (compass)",
+          "short": "common compass",
+          "definition": "All particles agree on all six directions."
+        }
+      ],
+      "origin": "In the geometric amoebot model of Derakhshandeh et al., each particle labels its six ports clockwise from an arbitrary edge, so all particles share chirality but not a direction [Derakhshandeh2015Leader]; the 2014 announcement numbers the edges counter-clockwise and calls this the \"no-compass model where particles only share their sense of orientation\", as opposed to a full-compass model [Derakhshandeh2014Amoebot]. Di Luna et al. asked whether chirality is necessary and showed that it is \"computationally irrelevant for shape formation\" from simply connected configurations [DiLuna2020Shape]. Emek et al. elected a leader with no orientation at all, using a procedure by which the particles reach common chirality [Emek2019Deterministic]. Chalopin, Das and Kokkou replaced chirality by agreement on one lattice direction and found that the difficulties are different: a unique stationary leader can then be elected, but explicit termination is impossible [Chalopin2026Stationary]. The canonical amoebot model lists all four levels: assorted, common chirality, common direction, and common direction and chirality [Daymude2023Canonical]."
+    },
+    {
+      "id": "scheduler",
+      "name": "Scheduler",
+      "values": [
+        {
+          "id": "weak",
+          "level": 0,
+          "label": "weak: non-atomic activations, an action may interleave with others",
+          "short": "weak scheduler",
+          "definition": "An activation's look, compute and move need not be atomic; concurrent activations may interfere. The scheduler of Bazzi and Briones is described as weak sequential, as non-atomic, and as fair asynchronous by different later papers [Briones2023Asynchronous] [Dufoulon2021Efficient] [Chalopin2026Stationary]."
+        },
+        {
+          "id": "strong",
+          "level": 1,
+          "label": "strong: atomic activations under a fair adversary",
+          "short": "strong scheduler",
+          "definition": "Each activation is executed atomically; the adversary chooses the order, fairly."
+        },
+        {
+          "id": "sequential",
+          "level": 2,
+          "label": "sequential: one particle active at a time",
+          "short": "sequential",
+          "definition": "At most one particle is active at any time."
+        }
+      ],
+      "origin": "The early amoebot papers assumed \"the standard asynchronous computation model, i.e., only one particle can be active at a time\" [Derakhshandeh2015Leader]; in the 2014 announcement, from the set of enabled actions \"a single action is arbitrarily chosen and executed\" [Derakhshandeh2014Amoebot]. Di Luna et al. dropped this for a strong scheduler that activates many particles but executes each activation atomically [DiLuna2020Shape]. Dufoulon, Kutten and Moses Jr. use *strong* for atomic activations and *weaker* for non-atomic ones, under which, they report, deterministic election of a unique leader becomes impossible in some cases (attributed by them to Bazzi and Briones and to Di Luna et al.) [Dufoulon2021Efficient] [Bazzi2019Stationary]. Daymude, Richa and Scheideler observed that \"much of the existing literature implicitly assumes amoebot actions are isolated and reliable, reducing analysis to the sequential setting\", whereas \"real programmable matter systems are concurrent\"; their canonical model orders the concurrency variants from asynchronous through synchronous and k-isolated to sequential [Daymude2023Canonical]. The fully asynchronous SILBOT model sits at the weak end: all operations are \"non-atomic\", with possible delays between sensing, computing and acting, so an action may be based on an obsolete observation [DAngelo2020Silent]."
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "values": [
+        {
+          "id": "oblivious",
+          "level": 0,
+          "label": "oblivious, silent particles (SILBOT)",
+          "short": "oblivious",
+          "definition": "No persistent state and no messages; a particle decides from its view only."
+        },
+        {
+          "id": "constant",
+          "level": 1,
+          "label": "constant memory and local communication",
+          "short": "constant memory",
+          "definition": "Each particle has $O(1)$ bits of persistent memory and reads or writes neighbours' memory."
+        }
+      ],
+      "origin": "Constant memory is part of the amoebot model from its start: each particle runs a fixed finite program and reads and writes memory shared with its neighbours [Derakhshandeh2015Leader]; in the 2014 announcement the state set and the flag alphabet on each edge are finite [Derakhshandeh2014Amoebot]. D'Angelo et al. introduced SILBOT at AAMAS 2020, in which particles are \"asynchronous, without any direct means of communication (silent) and without memory of past events (oblivious)\", to find \"the minimal settings for PM under which it is possible to accomplish basic global tasks\" [DAngelo2020Silent] (as described by [Navarra2023Line]). Each SILBOT particle is \"an automaton with two states, CONTRACTED or EXPANDED (they do not have any other form of persistent memory)\" [DAngelo2020Silent]. In exchange, particles see two hops instead of one, because \"without communication, 1-hop visibility is not enough for a particle to decide whether it is a LEADER or not\" [DAngelo2020Silent]. The canonical amoebot model lists oblivious, constant, finite and unbounded memory as its memory variants [Daymude2023Canonical]. Oblivious particles have since solved leader election, line formation, coating and self-stabilising election with holes [DAngelo2020Silent] [Navarra2023Line] [Navarra2023Coating] [Chalopin2026Holes]."
+    },
+    {
+      "id": "algorithm",
+      "name": "Randomness",
+      "values": [
+        {
+          "id": "deterministic",
+          "level": 0,
+          "label": "deterministic",
+          "short": "deterministic",
+          "definition": "No random choices."
+        },
+        {
+          "id": "randomized",
+          "level": 1,
+          "label": "randomized",
+          "short": "randomized",
+          "definition": "Particles flip fair coins; guarantees hold with high probability or in expectation."
+        }
+      ],
+      "origin": "The first leader-election algorithm for amoebots used random bits to break symmetry [Derakhshandeh2015Leader], and Di Luna et al. listed randomization as the \"more important\" of the assumptions behind the early shape-formation results [DiLuna2020Shape]. Deterministic algorithms then became a goal of their own: for a simply connected start up to $k$ leaders are elected in a $k$-symmetric configuration [DiLuna2020Shape], and Emek et al. gave the first deterministic election of a unique leader using movement [Emek2019Deterministic]. A second use of randomness is the stochastic approach of Cannon, Daymude, Randall and Richa, who design a Markov chain whose stationary distribution favours the desired configurations and turn it into a local asynchronous algorithm [Cannon2016Compression]. The design is motivated by statistical physics, and the approach has been applied to separation, alignment and bridging [Cannon2019Separation] [Kedia2022Alignment] [AndresArroyo2018Bridging]."
+    },
+    {
+      "id": "shape",
+      "name": "Initial shape",
+      "values": [
+        {
+          "id": "holes",
+          "level": 0,
+          "label": "connected, holes allowed",
+          "short": "holes allowed",
+          "definition": "The initial set of occupied nodes induces a connected subgraph; it may enclose empty regions."
+        },
+        {
+          "id": "simply-connected",
+          "level": 1,
+          "label": "simply connected (no holes)",
+          "short": "no holes",
+          "definition": "The initial configuration is connected and encloses no empty node. Also called *contractible* [Briones2023Asynchronous] or *hole-free* [Gastineau2019Leader]."
+        }
+      ],
+      "origin": "The first leader-election algorithm for amoebots worked on every boundary of the structure, outer and inner, and its running time depends on the longest boundary [Derakhshandeh2015Leader] (as summarised by [Dufoulon2021Efficient]). Several early deterministic algorithms assumed the initial configuration has no holes: Di Luna et al. start from any simply connected configuration [DiLuna2020Shape] and Gastineau et al. assume chirality and no holes [Gastineau2019Leader]. Dufoulon, Kutten and Moses Jr. summarise that early deterministic algorithms that did not use movement relied on \"assumptions on the initial shape ... (intuitively, that it had no 'holes')\" [Dufoulon2021Efficient]. Emek et al. removed the assumption by letting particles move [Emek2019Deterministic], and Chalopin, Das and Kokkou extended self-stabilising election from simply connected systems to systems with holes [Chalopin2026Holes]."
+    },
+    {
+      "id": "connectivity",
+      "name": "Connectivity during execution",
+      "values": [
+        {
+          "id": "connected",
+          "level": 0,
+          "label": "the system must stay connected",
+          "short": "stays connected",
+          "definition": "At every time the occupied nodes induce a connected subgraph."
+        },
+        {
+          "id": "may-disconnect",
+          "level": 1,
+          "label": "the system may disconnect temporarily",
+          "short": "may disconnect",
+          "definition": "Connectivity is required only initially and at the end."
+        }
+      ],
+      "origin": "The founding papers required the particles to stay connected at all times, \"to prevent the particles from drifting apart in an uncontrolled manner like in fluids and because in our case particles communicate only via bonds\" [Derakhshandeh2015Leader]. Emek et al. still followed \"the common practice\" that the shape is connected at all times [Emek2019Deterministic]. Dufoulon, Kutten and Moses Jr. observed that the model itself does not require this, and gave a leader-election algorithm that disconnects and later reconnects, gaining a large speed-up in time [Dufoulon2021Efficient]. In SILBOT, line formation also passes through disconnected configurations and proves that connectivity is recovered [Navarra2023Line]. In centralised transformations the same distinction separates transformations that may break connectivity from those that may not [Michail2019Transformation]."
+    }
+  ]
+}

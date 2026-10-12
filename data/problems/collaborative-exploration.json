@@ -1,0 +1,4139 @@
+{
+  "id": "collaborative-exploration",
+  "model": "mobile-agents-on-graphs",
+  "name": "Collaborative exploration",
+  "origin": {
+    "ref": "Fraigniaud2006Collective",
+    "year": 2004,
+    "note": "Collective tree exploration was posed at LATIN 2004 (journal version 2006)."
+  },
+  "summary": "$k$ agents start together at the root of an unknown graph and must visit all its nodes; how much faster than one agent can a team be?",
+  "statement": "A team of $k$ distinguishable agents starts at a node $s$ (the root) of an unknown connected graph with $n$ nodes; $D$ is the largest distance from $s$. In synchronous rounds every agent traverses at most one edge. When an agent reaches a node it sees the incident edges. The team must **visit every node** (some papers also require all agents to return to $s$; the bounds coincide asymptotically).\n\n**Time** is the number of rounds (in the asynchronous model: the total number of moves). The offline optimum is $\\Theta(n/k + D)$, so an algorithm that explores every tree in $\\mathrm{CR}(k)\\cdot(n/k+D)$ rounds is called $\\mathrm{CR}(k)$-competitive; a single depth-first search is $O(k)$-competitive. **Memory** is bits per agent; most of this literature lets it be unbounded.\n\nUnless a variant says otherwise, nodes are **labelled** (an agent recognises a node it has seen), which is the standard assumption of collective tree exploration; on trees it does not matter for lower bounds [Disser2020General]. With anonymous nodes and $k = n$, the problem is solved by rooted dispersion.",
+  "primer": {
+    "intro": "Imagine $k$ rescue robots entering a cave system through one entrance; they want every chamber checked as soon as possible. The cave is a tree (a graph without cycles: dots joined by lines, with exactly one route between any two dots) with $n$ nodes, rooted at the entrance $s$; $D$ is the depth, the largest distance from $s$. All $k$ agents start at $s$; time passes in **rounds**, and in each round every agent may walk along one edge. Nodes can be recognised, an agent at a node sees the edges leaving it, and in the basic version all agents share one map (**global communication**). The team must visit every node; the time is the number of rounds, and an algorithm is judged by how close it gets to the best possible time of about $n/k + D$ rounds.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Breadth-First Depth-Next",
+        "variant": "tree-global",
+        "ref": "Cosson2023BFDN",
+        "idea": "The algorithm BFDN of [Cosson2023BFDN]. Call an edge **dangling** if it is seen but not yet walked.\n1. When an agent is at the root, give it an **anchor**: a known node with a dangling edge, preferring nodes closest to the root and, among those, the ones with the fewest agents already anchored there.\n2. The agent walks along the known map to its anchor.\n3. From there it does a depth-first search: if a dangling edge leaves its node and no other agent has chosen it this round, it takes it; otherwise it steps one edge back towards the root.\n4. Back at the root it gets a new anchor. The team stops when all agents are at the root and no dangling edge is left.",
+        "analysis": "Each agent mostly does what a single explorer does (walk down unexplored edges, back up when stuck), and the anchors spread the team over the shallowest unfinished parts of the tree. [Cosson2023BFDN] prove a time of $\\tfrac{2n}{k} + D^2(\\min\\{\\log\\Delta,\\log k\\}+2)$ rounds, where $\\Delta$ is the maximum degree; the $2n/k$ term is what $k$ agents need just to walk every edge twice. The best known algorithm today takes $\\tfrac{2n}{k} + O(D\\log^2 k)$ rounds [Cosson2026Polylog].",
+        "why_it_matters": "Its analysis through a simple game against an adversary opened the line of work that brought the overhead from roughly a factor $k/\\log k$ down to polylogarithmic in $k$."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Even with a map: n/k + D",
+        "variant": "tree-global",
+        "ref": "Cosson2023BFDN",
+        "idea": "Suppose the agents knew the whole tree in advance. Two things still take time.\n1. Some agent must reach the deepest node, which is $D$ edges from the root: at least $D$ rounds.\n2. Each of the $n-1$ nodes other than the root must be entered for the first time by some agent, and in one round $k$ agents enter at most $k$ nodes: at least $(n-1)/k$ rounds.",
+        "analysis": "So no algorithm beats about $\\max\\{n/k, D\\}$, which is at least half of $n/k + D$. With the map this is also achievable up to a factor 2: cut a depth-first tour of the tree (length $2(n-1)$) into $k$ pieces of length $2(n-1)/k$ and send one agent to each piece, for $2(n/k + D)$ rounds in total, as recalled in [Cosson2023BFDN]. An online algorithm (one that discovers the tree as it goes) that is always within a factor $\\mathrm{CR}(k)$ of $n/k + D$ is called $\\mathrm{CR}(k)$-competitive; a single depth-first search by one agent is $O(k)$-competitive.",
+        "why_it_matters": "This simple yardstick is what every result on collaborative exploration is measured against."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "An adversary that grows the tree",
+        "variant": "tree-global",
+        "ref": "Disser2020General",
+        "idea": "Without a map, the tree is revealed only where agents stand, so one can imagine an **adversary** (an opponent who builds the worst input) drawing the tree during the run. When the agents reach a node, the adversary decides how many children it has. Whatever way the agents split up, the adversary can make the long branches continue where few agents went and end the branches that received many agents. The full proof that this costs a factor $\\Omega(\\log k/\\log\\log k)$ is longer [Disser2020General].",
+        "analysis": "Every deterministic algorithm takes $\\Omega\\big(\\tfrac{\\log k}{\\log\\log k}(\\tfrac nk + D)\\big)$ rounds on some tree, even with global communication and unlimited memory [Disser2020General]; it was first shown by [Dynia2007Maps] for $k < \\sqrt n$. The best algorithm is $O(\\log^2 k)$-competitive [Cosson2026Polylog], so the remaining gap is between $\\log k/\\log\\log k$ and $\\log^2 k$.",
+        "why_it_matters": "It refuted the hope of a constant competitive ratio and shows that not knowing where the work is costs something no amount of communication can repair."
+      }
+    ]
+  },
+  "history": "Collaborative exploration asked a different question from the single-agent line: not how little memory, but **how much faster** $k$ agents can be than one. Fraigniaud, Gąsieniec, Kowalski and Pelc measured an algorithm by its competitive ratio against the offline optimum $\\Theta(n/k + D)$ and showed that communication matters: without it, $k$ agents gain nothing [Fraigniaud2006Collective]. The following twenty years were spent narrowing the ratio from $O(k/\\log k)$ towards the $\\Omega(\\log k/\\log\\log k)$ lower bound [Dynia2007Maps] [Disser2020General] [Cosson2024Potential], and on what very large teams can do [Dereniowski2015Fast].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds until every node is visited (asynchronous: total moves)"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "initial"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "node-ids",
+    "algorithm",
+    "communication",
+    "node-memory",
+    "timing",
+    "team",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "team",
+      "name": "Team size",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number $k$ of agents",
+          "short": "any $k$",
+          "definition": "Any number $k\\ge 2$ of agents."
+        },
+        {
+          "id": "k-eq-n",
+          "level": 1,
+          "label": "$k = n$ agents",
+          "short": "$k = n$",
+          "definition": "Exactly $k=n$ agents."
+        },
+        {
+          "id": "large",
+          "level": 1,
+          "label": "large teams, $k \\ge D\\,n^{1+\\varepsilon}$",
+          "short": "$k \\ge Dn^{1+\\varepsilon}$",
+          "definition": "$k\\ge D\\,n^{1+\\varepsilon}$ agents for a constant $\\varepsilon>0$ (written $k=Dn^\\gamma$, $\\gamma>1$)."
+        }
+      ],
+      "origin": "Fraigniaud, Gąsieniec, Kowalski and Pelc posed collective tree exploration for any number $k$ of agents and measured algorithms by their competitive ratio against the offline optimum [Fraigniaud2006Collective]. Two team sizes then turned out to have sharper answers than arbitrary $k$. For large teams, Dereniowski, Disser, Kosowski, Pająk and Uznański explore in $O(D)$ rounds with $k=Dn^{1+\\varepsilon}$ agents, a constant competitive ratio, and Disser, Mousset, Noever, Steger and Škorić showed that $k=Dn^{1+o(1)}$ agents do not suffice for that, so the threshold is essentially tight [Dereniowski2015Fast] [Disser2020General]. For $k=n$, Disser et al. gave a simple algorithm taking $D^2$ rounds on every tree and showed that trees of arbitrarily large height need $\\Omega(D^2)$ rounds [Disser2020General]. This team size matters beyond exploration because, as Augustine and Moses Jr. observed when they introduced dispersion, \"any solution to a problem of dispersion acts as a solution to $n$ robot exploration under the same conditions\" [Augustine2018Tradeoffs]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "tree-global",
+      "title": "Trees, complete communication",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "global",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "summary": "Collective tree exploration as posed by Fraigniaud, Gąsieniec, Kowalski and Pelc: the competitive ratio is now between $\\Omega(\\log k/\\log\\log k)$ and $O(\\log^2 k)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega\\big(\\tfrac{\\log k}{\\log\\log k}\\,(\\tfrac nk + D)\\big)",
+          "ref": "Disser2020General",
+          "bottleneck": "online tree revelation",
+          "preconditions": [
+            "deterministic",
+            "holds with global communication and unbounded memory",
+            "for $k \\le n\\log^\\kappa n$; first shown by [Dynia2007Maps] for $k<\\sqrt n$",
+            "the hard instances are trees"
+          ],
+          "note": "Before that, a ratio of at least $2-1/k$ for deterministic and randomized algorithms when $k<\\sqrt n$ [Fraigniaud2006Collective], as cited by [Dereniowski2015Fast]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2006Collective",
+          "role": "introductory",
+          "time": "O(D + n/\\log k)",
+          "note": "Works already with write-read communication at nodes; $O(k/\\log k)$-competitive. The analysis is tight on a tree of [Higashikawa2014Online]."
+        },
+        {
+          "ref": "Cosson2023BFDN",
+          "role": "other",
+          "time": "\\tfrac{2n}{k}+D^2(\\min\\{\\log\\Delta,\\log k\\}+2)",
+          "note": "Breadth-first depth-next; optimal when $D=o(\\sqrt n)$."
+        },
+        {
+          "ref": "Cosson2024Mining",
+          "role": "other",
+          "time": "\\tfrac{2n}{k}+O(k^{\\log_2 k-1}D)",
+          "note": "First ratio below $k/\\log k$: $O(k/\\exp(\\sqrt{\\ln 2\\ln k}))$."
+        },
+        {
+          "ref": "Cosson2024Potential",
+          "role": "other",
+          "time": "\\tfrac{2n}{k}+O(kD)",
+          "note": "First polynomial improvement: $O(\\sqrt k)$-competitive by using $\\sqrt k$ of the agents. Current best among peer-reviewed results."
+        },
+        {
+          "ref": "Cosson2026Polylog",
+          "role": "best",
+          "time": "\\tfrac{2n}{k}+O(D\\log^2 k)",
+          "note": "$O(\\log^2 k)$-competitive. A September 2026 preprint, not yet peer-reviewed."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "$O(\\log^2 k)$ versus $\\Omega(\\log k/\\log\\log k)$ competitive: about a $\\log k\\log\\log k$ factor (upper bound from a preprint; the peer-reviewed gap is $O(\\sqrt k)$ versus the same lower bound)."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Determine the competitive ratio of synchronous collective tree exploration: between $\\Omega(\\log k/\\log\\log k)$ and $O(\\log^2 k)$.",
+        "Do randomized algorithms help? A randomized lower bound of $\\Omega(\\sqrt{\\log k}/\\log\\log k)$ is attributed to Ortolf and Schindelhauer (SPAA 2012), not checked here. Cosson and Massoulié conjecture they do not [Cosson2025Asynchronous]."
+      ],
+      "notes": "Fraigniaud et al. conjectured that a constant ratio is possible; [Dynia2007Maps] refuted it. Greedy algorithms cannot beat $\\Omega(k/\\log k)$ [Higashikawa2014Online], which is why progress needed new ideas: tree-mining games [Cosson2024Mining] and potential functions [Cosson2024Potential].",
+      "status": "verified"
+    },
+    {
+      "id": "tree-whiteboards",
+      "title": "Trees, communication by whiteboards only",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "node-memory": "whiteboard",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "summary": "Agents talk only by writing at the node they occupy; the original algorithm still gives $O(k/\\log k)$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Fraigniaud2006Collective",
+          "role": "best",
+          "time": "O(D + n/\\log k)",
+          "note": "Introductory and current best in this model."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(k/\\log k)$ versus the inherited $\\Omega(\\log k/\\log\\log k)$ competitive ratio."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Is there a separation between write-read and complete communication? [Cosson2025Asynchronous] conjecture that centralised communication helps."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tree-silent",
+      "title": "Trees, no communication",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "summary": "Without any communication, $k$ agents are no faster than one.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(k)\\cdot\\text{optimal}",
+          "ref": "Fraigniaud2006Collective",
+          "bottleneck": "no information sharing",
+          "preconditions": [
+            "each agent knows only what it explored itself",
+            "some trees"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2006Collective",
+          "role": "best",
+          "time": "O(k)\\cdot\\text{optimal}",
+          "note": "The baseline that the lower bound matches: one agent explores the whole tree by depth-first search, in $2(n-1)$ moves, while the others wait; this is within a factor $O(k)$ of the optimum $\\Theta(n/k+D)$ [Fraigniaud2006Collective]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Tight: a single depth-first search is $O(k)$-competitive, and without communication no algorithm is better by more than a constant [Fraigniaud2006Collective]."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tree-async-global",
+      "title": "Trees, asynchronous, complete communication",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "global",
+        "topology": "tree"
+      },
+      "summary": "An adversary chooses which agent moves; the cost is the total number of moves, and the optimal regret is $\\Theta(\\log^2 k)$ per unit of depth.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\log^2 k)\\cdot(n+kD)",
+          "ref": "Cosson2025Asynchronous",
+          "bottleneck": "adversarial activation",
+          "preconditions": [
+            "asynchronous: the adversary picks the agent that moves",
+            "centralised or distributed",
+            "from a layered-graph-traversal lower bound"
+          ],
+          "note": "Equivalently, any $\\mathrm{CR}(k)(n+kD)$-move algorithm has $\\mathrm{CR}(k)=\\Omega(\\log^2 k)$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cosson2023BFDN",
+          "role": "introductory",
+          "time": "2n+kD^2(\\log k+2)",
+          "note": "Proposition 6: adversarial break-downs, the setting later formalised as asynchronous exploration; stated as an average of $2n/k+D^2(\\log k+2)$ moves per agent."
+        },
+        {
+          "ref": "Cosson2024Potential",
+          "role": "other",
+          "time": "2n+O(k^2D)"
+        },
+        {
+          "ref": "Cosson2026Polylog",
+          "role": "best",
+          "time": "2n+O(kD\\log^2 k)",
+          "note": "Order-optimal regret. Preprint (2026)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Regret $O(\\log^2 k)$ matches $\\Omega(\\log^2 k)$; both bounds are from preprints."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [],
+      "notes": "The asynchronous model was introduced by [Cosson2024Mining]. Both matching bounds are from preprints.",
+      "status": "verified"
+    },
+    {
+      "id": "tree-async-whiteboards",
+      "title": "Trees, asynchronous, whiteboards only",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "node-memory": "whiteboard",
+        "topology": "tree"
+      },
+      "summary": "The fully distributed asynchronous setting: the first competitive algorithm appeared in 2025.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cosson2025Asynchronous",
+          "role": "best",
+          "time": "2n+O(k^2 2^k D)",
+          "note": "Introductory and current best; a variant is $O(k/\\log k)$-competitive. Previous distributed algorithms, including that of [Fraigniaud2006Collective], fail here."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(k/\\log k)$ versus the inherited $\\Omega(\\log^2 k)$ competitive ratio."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Is there a distributed asynchronous algorithm with polylogarithmic competitive ratio?"
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tree-n-agents",
+      "title": "Trees with $k = n$ agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "global",
+        "timing": "sync",
+        "team": "k-eq-n",
+        "topology": "tree"
+      },
+      "summary": "With as many agents as nodes, $D^2$ rounds suffice, and some trees need $D^2/3$; this is the bound dispersion inherits.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "D^2/3",
+          "ref": "Disser2020General",
+          "bottleneck": "online tree revelation",
+          "preconditions": [
+            "deterministic, global communication",
+            "**existential in $D$**: the hard tree has height $D=\\lceil\\sqrt{\\log n}\\rceil$ (Theorem 2.5)",
+            "not shown for larger heights"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(D)",
+          "ref": "Disser2020General",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the root must reach the deepest node"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Disser2020General",
+          "role": "best",
+          "time": "D^2",
+          "note": "Introductory and current best: phase-wise breadth-first search, $D$ phases of $D$ rounds."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$D^2$ is matched only for trees of height about $\\sqrt{\\log n}$; for other heights the gap is a factor $D$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "For $k=n$ and trees of height $D$ well above $\\sqrt{\\log n}$ (e.g. $D=\\sqrt n$), is $\\Omega(D^2)$ still necessary?"
+      ],
+      "notes": "Dispersion papers cite this bound as \"$\\Omega(D^2)$ for $n$ agents on trees\" [Augustine2018Tradeoffs] [Kshemkalyani2022GlobalJ]; the theorem is existential in $D$, see the overview *From exploration to dispersion*.",
+      "status": "verified"
+    },
+    {
+      "id": "graphs-global",
+      "title": "Arbitrary graphs, complete communication",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "global",
+        "timing": "sync"
+      },
+      "summary": "On graphs with cycles it is not even known whether any algorithm beats depth-first search by more than a constant.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cosson2023BFDN",
+          "role": "best",
+          "time": "\\tfrac{2n}{k}+D^2(\\min\\{\\log\\Delta,\\log k\\}+2)",
+          "assumes": [
+            "agents know their distance to the root"
+          ],
+          "note": "Proposition 7; $n$ counts edges here."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No $o(k)$-competitive algorithm is known without extra knowledge; lower bounds are inherited from trees."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Is there an $o(k)$-competitive collaborative exploration algorithm for arbitrary graphs? (Stated as open in [Cosson2026Polylog].)"
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "large-global",
+      "title": "Large teams, complete communication",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "global",
+        "timing": "sync",
+        "team": "large"
+      },
+      "summary": "With $k = Dn^{\\gamma}$ agents ($\\gamma>1$), exploration takes $D(1+\\tfrac1{\\gamma-1}+o(1))$ rounds, almost the trivial $D$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "D(1+\\tfrac1{\\gamma}-o(1))",
+          "ref": "Dereniowski2015Fast",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k=Dn^\\gamma$ agents",
+            "$D=n^{o(1)}$",
+            "trees"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dereniowski2015Fast",
+          "role": "best",
+          "time": "D(1+\\tfrac{1}{\\gamma-1}+o(1))",
+          "assumes": [
+            "$n$ known"
+          ],
+          "note": "Introductory and current best; trees and general graphs."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(D)$; the constants differ."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [
+        "Which team size is necessary and sufficient for $O(D)$-round exploration of graphs of larger diameter? (Stated in [Dereniowski2015Fast].)"
+      ],
+      "notes": "For $k\\le Dn^{1+\\varepsilon}$, some trees need $D/(5\\varepsilon)$ rounds [Disser2020General], so the team size of [Dereniowski2015Fast] is essentially needed for a constant ratio.",
+      "status": "verified"
+    },
+    {
+      "id": "large-local",
+      "title": "Large teams, local communication",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "communication": "local",
+        "timing": "sync",
+        "team": "large"
+      },
+      "summary": "If agents only talk when they meet, large teams still explore in $O(D)$ rounds, and the price of locality is visible in the constant.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "D(1+\\tfrac2c-o(1))",
+          "ref": "Dereniowski2015Fast",
+          "bottleneck": "locality of communication",
+          "preconditions": [
+            "$k=Dn^\\gamma$ agents",
+            "$D=n^{o(1)}$",
+            "separates local from global communication"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dereniowski2015Fast",
+          "role": "best",
+          "time": "D(1+\\tfrac{2}{\\gamma-1}+o(1))",
+          "note": "Introductory and current best; $O(D)$ also when $n$ and $D$ are unknown."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(D)$; the constants differ."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is not bounded in this line of work."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "anonymous-n-agents",
+      "title": "Anonymous graphs with $k = n$ agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "communication": "local",
+        "timing": "sync",
+        "team": "k-eq-n"
+      },
+      "summary": "Nodes cannot be recognised and agents only talk when co-located: $n$ agents explore by dispersing, in $O(n)$ rounds with $O(\\log n)$ bits each.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Kshemkalyani2019Efficient",
+          "bottleneck": "distance",
+          "preconditions": [
+            "a path with all agents on one endpoint"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Augustine2018Tradeoffs",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "knows $n$ and $m$"
+          ],
+          "note": "Rooted dispersion; Augustine and Moses Jr. observe that any dispersion algorithm with $k=n$ solves $n$-agent exploration under the same conditions."
+        },
+        {
+          "ref": "Kshemkalyani2025Almost",
+          "role": "best",
+          "time": "O(n)",
+          "memory": "O(\\log n)",
+          "note": "Rooted dispersion in $O(k)$ rounds with $O(\\log(k+\\Delta))$ bits; exploration follows by the observation above (our inference, not stated in the paper)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ in the worst case over graphs."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Dispersion needs $\\Omega(\\log n)$ bits [Augustine2018Tradeoffs], but exploration need not disperse; no memory lower bound for exploration alone is recorded."
+        }
+      },
+      "open": [
+        "Can $n$ agents explore an anonymous tree in $o(n)$ rounds, e.g. $O(D^2)$, with local communication? With labelled nodes and global communication $D^2$ suffices [Disser2020General]."
+      ],
+      "notes": "See the overview *From exploration to dispersion*.",
+      "status": "verified"
+    },
+    {
+      "id": "anonymous-small-team",
+      "title": "Anonymous graphs, a team of constant-memory agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "summary": "$\\Theta(\\log\\log n)$ agents with constant memory are necessary and sufficient to explore any anonymous graph.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log\\log n)\\ \\text{agents}",
+          "ref": "Disser2019Pebbles",
+          "bottleneck": "trap graphs",
+          "preconditions": [
+            "each agent has $O((\\log n)^{1-\\varepsilon})$ bits",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Disser2019Pebbles",
+          "role": "best",
+          "time": "n^{O(1)}",
+          "memory": "O(1)\\ \\text{bits each},\\ O(\\log\\log n)\\ \\text{agents}",
+          "assumes": [
+            "$n$ unknown"
+          ],
+          "note": "Introductory and current best. One agent walks, the others act as pebbles."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial; exponent not tracked."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log\\log n)$ agents with $O(1)$ bits."
+        }
+      },
+      "open": [],
+      "notes": "Here the question is not speed but the size of a team of finite automata; it mirrors the single-agent pebble variant.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Collective tree exploration [Fraigniaud2006Collective], here by Breadth-First Depth-Next [Cosson2023BFDN]: $k = 3$ agents start at the root $s$ of an unknown tree and share one map. An agent at the root is sent to the shallowest node with an unexplored edge; from there it walks down unexplored edges that no other agent takes in that round, and steps back towards the root when there is none. One frame per round; the time is compared with the offline optimum $\\Theta(n/k + D)$.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "r": [
+          50,
+          44
+        ],
+        "a": [
+          24,
+          31
+        ],
+        "b": [
+          50,
+          31
+        ],
+        "c": [
+          76,
+          31
+        ],
+        "a1": [
+          12,
+          18
+        ],
+        "a2": [
+          30,
+          18
+        ],
+        "b1": [
+          50,
+          18
+        ],
+        "c1": [
+          68,
+          18
+        ],
+        "c2": [
+          86,
+          18
+        ],
+        "a21": [
+          24,
+          5
+        ],
+        "a22": [
+          36,
+          5
+        ],
+        "c11": [
+          62,
+          5
+        ],
+        "c21": [
+          86,
+          5
+        ]
+      },
+      "edges": [
+        [
+          "r",
+          "a"
+        ],
+        [
+          "r",
+          "b"
+        ],
+        [
+          "r",
+          "c"
+        ],
+        [
+          "a",
+          "a1"
+        ],
+        [
+          "a",
+          "a2"
+        ],
+        [
+          "b",
+          "b1"
+        ],
+        [
+          "c",
+          "c1"
+        ],
+        [
+          "c",
+          "c2"
+        ],
+        [
+          "a2",
+          "a21"
+        ],
+        [
+          "a2",
+          "a22"
+        ],
+        [
+          "c1",
+          "c11"
+        ],
+        [
+          "c2",
+          "c21"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "r",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "r",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          }
+        ],
+        "label": "Start: k = 3 agents at the root s of an unknown tree"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                47.7,
+                42.8
+              ],
+              [
+                26.3,
+                32.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                41.4
+              ],
+              [
+                50.0,
+                33.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.3,
+                42.8
+              ],
+              [
+                73.7,
+                32.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ],
+        "label": "Each agent takes a different unexplored edge"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a1",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "b1",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "c1",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                22.2,
+                29.1
+              ],
+              [
+                13.8,
+                19.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                28.4
+              ],
+              [
+                50.0,
+                20.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                74.6,
+                28.8
+              ],
+              [
+                69.4,
+                20.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "c11",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                13.8,
+                19.9
+              ],
+              [
+                22.2,
+                29.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                20.6
+              ],
+              [
+                50.0,
+                28.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                66.9,
+                15.6
+              ],
+              [
+                63.1,
+                7.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ],
+        "label": "No unexplored edge here: step back towards s"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a2",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "r",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "c1",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                25.1,
+                28.6
+              ],
+              [
+                28.9,
+                20.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50.0,
+                33.6
+              ],
+              [
+                50.0,
+                41.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                63.1,
+                7.4
+              ],
+              [
+                66.9,
+                15.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a21",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                28.9,
+                15.6
+              ],
+              [
+                25.1,
+                7.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.3,
+                42.8
+              ],
+              [
+                73.7,
+                32.2
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                69.4,
+                20.2
+              ],
+              [
+                74.6,
+                28.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ],
+        "label": "Back at s, agent 2 is sent to the shallowest unfinished node"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a2",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                86,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                25.1,
+                7.4
+              ],
+              [
+                28.9,
+                15.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                77.6,
+                28.9
+              ],
+              [
+                84.4,
+                20.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                73.7,
+                32.2
+              ],
+              [
+                52.3,
+                42.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a22",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "c21",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                86,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                36,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                18
+              ],
+              [
+                86,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                31.1,
+                15.6
+              ],
+              [
+                34.9,
+                7.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.0,
+                15.4
+              ],
+              [
+                86.0,
+                7.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ],
+        "label": "Depth next: explore below the anchor, then go back up"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a2",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                86,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                36,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                18
+              ],
+              [
+                86,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                34.9,
+                7.4
+              ],
+              [
+                31.1,
+                15.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                86.0,
+                7.6
+              ],
+              [
+                86.0,
+                15.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                86,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                36,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                18
+              ],
+              [
+                86,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                28.9,
+                20.4
+              ],
+              [
+                25.1,
+                28.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                84.4,
+                20.1
+              ],
+              [
+                77.6,
+                28.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "r",
+            "k": "agent",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "at": "r",
+            "k": "agent",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "at": "r",
+            "k": "agent",
+            "l": "3"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                24,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                50,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                44
+              ],
+              [
+                76,
+                31
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                12,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                24,
+                31
+              ],
+              [
+                30,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50,
+                31
+              ],
+              [
+                50,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                68,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                76,
+                31
+              ],
+              [
+                86,
+                18
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                24,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30,
+                18
+              ],
+              [
+                36,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                18
+              ],
+              [
+                62,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                18
+              ],
+              [
+                86,
+                5
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              44
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              76,
+              31
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              18
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              36,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              62,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              5
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              43
+            ],
+            "s": "s"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                26.3,
+                32.2
+              ],
+              [
+                47.7,
+                42.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                73.7,
+                32.2
+              ],
+              [
+                52.3,
+                42.8
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8,
+            "arrow": true
+          }
+        ],
+        "label": "Final: every node visited, all agents back at s after 10 rounds"
+      }
+    ]
+  }
+}

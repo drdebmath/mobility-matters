@@ -1,0 +1,2574 @@
+{
+  "id": "bfs-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "BFS tree by agents",
+  "origin": {
+    "ref": "Chand2025Trees",
+    "year": 2025,
+    "note": "BFS without root knowledge in the agent-based model (SSS 2025)."
+  },
+  "summary": "$n$ agents in an anonymous graph must build a breadth-first spanning tree, without being told the root.",
+  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must build a BFS tree from a root they choose, each agent knowing its parent and children: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Imagine $n$ agents, one in each room of a building, who want a map for emergencies: one room is the exit, and every other agent should know which neighbouring room is one step closer to the exit along a shortest route. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors), maximum degree $\\Delta$ and *diameter* $D$ (the largest distance between two nodes); rooms have no names, and the doors of a room are numbered (*ports*). A *breadth-first search (BFS) tree* with root $s$ gives every other node $v$ a *parent*: a neighbour of $v$ that is one step closer to $s$, so following parents gives a shortest path to $s$. In the basic version the agents start one per node, have distinct IDs, know nothing about the graph, and must choose the root themselves; they move in synchronous *rounds* (talk to agents in the same room, then walk at most one corridor), and at the end every agent knows its parent and its children. We count rounds and bits of memory per agent. As for all problems in this family, agents can imitate message-passing algorithms by walking to neighbours, the method explained under leader election by agents.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Grow the tree layer by layer from a known root",
+        "variant": "dispersed",
+        "ref": "Chand2025Trees",
+        "idea": "Suppose the agent on the root $s$ is already known and the agents know $\\Delta$. Time is cut into phases of $2\\Delta$ rounds.\n\n1. In phase 0 the root agent has depth 0.\n2. In phase $d$, every agent of depth $d$ visits its neighbours one by one and comes back; all other agents stay at home.\n3. A agent that has no depth yet and receives such a visit takes depth $d+1$ and records the visitor as its parent (if several visitors arrive, it picks the smallest ID). The parent records its new child.\n4. Repeat with phase $d+1$ until no agent gets a new depth.",
+        "analysis": "A agent gets depth $d$ exactly when its distance to $s$ is $d$, so the parents form a BFS tree. During phase $d$ only depth-$d$ agents move, so the agents they visit are at home. Each phase lasts $2\\Delta$ rounds and there are at most $D$ phases with new nodes, so the tree is built in $O(D\\Delta)$ rounds; [Chand2025Trees] cite this bound for a known root. Without a known root they first build an MST to get a root and the values $m$ and $\\Delta$, which gives $O(\\min(D\\Delta, m\\log n) + n\\log n + \\Delta\\log^2 n)$ rounds with $O(\\log n)$ bits.",
+        "why_it_matters": "It is the agent version of the textbook BFS, and it shows why knowing $\\Delta$ matters: it fixes how long a phase must last."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "A BFS tree contains an elected leader",
+        "variant": "dispersed",
+        "idea": "When a BFS tree has been built, the agent on the root knows it has no parent, and every other agent knows it has one. So \"I am the root\" is exactly a leader election: one agent knows it is the leader and all others know they are not.",
+        "analysis": "Hence building a BFS tree without a known root is at least as hard as leader election, and any lower bound for leader election also holds for BFS. This is why the best known algorithm spends $O(n\\log n + \\Delta\\log^2 n)$ rounds electing a leader (via an MST) before the BFS itself [Chand2025Trees]. The catalogue records no lower bound for either problem, so the time this preliminary step really needs is open.",
+        "why_it_matters": "It explains why leader election is the first building block in this family: trees, MIS and counting all need a agent that starts things off."
+      }
+    ]
+  },
+  "history": "BFS trees are the next building block after leader election; the question is **rounds then memory** without knowledge of the root or of graph parameters [Chand2025Trees].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "knowledge",
+    "initial",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of graph parameters",
+          "short": "no knowledge",
+          "definition": "Agents know no graph parameter ($n$, $m$, $\\Delta$, $D$)."
+        },
+        {
+          "id": "n-delta",
+          "level": 1,
+          "label": "$n$ and $\\Delta$ are known",
+          "short": "knows $n$, $\\Delta$",
+          "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
+        }
+      ],
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For BFS trees the catalogued algorithm uses no graph parameter, only $L$ [Chand2025Trees]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "dispersed",
+      "title": "Dispersed start, root unknown",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "knowledge": "none"
+      },
+      "summary": "A BFS tree in $O(\\min(D\\Delta, m\\log n)+n\\log n+\\Delta\\log^2 n)$ rounds with $O(\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chand2025Trees",
+          "role": "best",
+          "time": "O(\\min(D\\Delta,m\\log n)+n\\log n+\\Delta\\log^2 n)",
+          "memory": "O(\\log n)",
+          "note": "Introductory and current best without knowledge of the root; $O(D\\Delta)$ was known with a known root."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified",
+      "standard": true
+    }
+  ],
+  "figure": {
+    "caption": "BFS tree, grown layer by layer [Chand2025Trees]: the agents are dispersed and the root (agent 1, chosen by leader election, not shown) has depth 0. In phase $d$ (of $2\\Delta = 6$ rounds) every agent of depth $d$ walks to each neighbour and back, one edge per round, while all others wait; a waiting agent without a depth that is visited takes depth $d+1$ and the visitor as its parent (thick edges). The tree is complete when a phase gives no new depth.",
+    "view": [
+      100,
+      46
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          12,
+          22
+        ],
+        "a": [
+          40,
+          36
+        ],
+        "b": [
+          40,
+          8
+        ],
+        "c": [
+          70,
+          36
+        ],
+        "d": [
+          70,
+          8
+        ]
+      },
+      "edges": [
+        [
+          "s",
+          "a"
+        ],
+        [
+          "s",
+          "b"
+        ],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "a",
+          "c"
+        ],
+        [
+          "b",
+          "d"
+        ],
+        [
+          "c",
+          "d"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: dispersed; root 1 has depth 0",
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ],
+        "label": "Phase 0: depth-0 agent 1 visits"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "s",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "s",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ],
+        "label": "Phase 1: depth-1 agents 4, 2 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "b",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ],
+        "label": "Phase 2: depth-2 agents 5, 3 visit"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "s",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "d",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                40,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                36
+              ],
+              [
+                70,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40,
+                8
+              ],
+              [
+                70,
+                8
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "text",
+            "p": [
+              16.5,
+              26.5
+            ],
+            "s": "d=0",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              40.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              44.5,
+              12.5
+            ],
+            "s": "d=1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              40.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              74.5,
+              12.5
+            ],
+            "s": "d=2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              12,
+              22
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ],
+        "label": "Final: no new depth; BFS tree from root 1"
+      }
+    ]
+  }
+}

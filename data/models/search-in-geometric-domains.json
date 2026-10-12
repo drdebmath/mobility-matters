@@ -1,0 +1,125 @@
+{
+  "id": "search-in-geometric-domains",
+  "name": "Search in geometric domains",
+  "summary": "Robots with unit speed move continuously in a known domain (a line, rays, a disk, a polygon) to find a target or an exit whose position is unknown.",
+  "focus": "The measure is **worst-case time**: for search on unbounded domains, the competitive ratio (time divided by the distance to the target); for evacuation of a bounded domain, the time until the last robot reaches the exit. The questions are exact constants, the price of weaker communication, and the price of faults.",
+  "description": "Robots start together (at the origin of a line or rays, or at the centre of a disk or polygon) and move with at most unit speed. A target (or exit) lies at an unknown point; a robot recognises it only when it reaches it. Robots know the domain. In **search** the task ends when the first robot reaches the target; in **evacuation** it ends when the last robot reaches the exit. Robots exchange information either only when they meet (**face-to-face**) or instantly at any distance (**wireless**); some models allow one-way communication.\n\n**How the axes work.** As in the other models, level 0 assumes nothing and higher levels are stronger assumptions.",
+  "story": [
+    {
+      "heading": "From the cow path to evacuation",
+      "body": "Bellman posed the linear search problem in 1963 and Beck studied it in 1964, with the target placed according to a known probability distribution [Bellman1963Optimal] [Beck1964Linear] (as reported by [Czyzowicz2021Byzantine]). Baeza-Yates, Culberson and Rawlins recast it as searching an unbounded domain where each probe costs \"proportional to the distance of the next probe position relative to our current position\": doubling the turning point (their *linear spiral search*) finds a point at distance $d$ within $9d$ steps, and no algorithm does better up to lower-order terms [BaezaYates1993Searching]. Kao, Reif and Tate call it the *cow-path problem* [Kao1996Randomized]. Group search sends several robots, and evacuation, posed for a disk by Czyzowicz et al. at DISC 2014, ends only when the last robot reaches the exit [Czyzowicz2014Evacuating]. Their trade-off is between \"spreading sufficiently the robots so that they can find the exit point fast in parallel\" and \"not to spread them too far\" [Czyzowicz2014Evacuating]. Czyzowicz, Georgiou and Kranakis survey this line of work [Czyzowicz2019GroupSearch]."
+    },
+    {
+      "heading": "Communication",
+      "body": "Once several robots search, what they can tell each other changes the answer. The first evacuation paper already compared robots that talk only when they meet with robots that broadcast at any distance, and showed \"a clear separation between the local and the wireless communication models\" [Czyzowicz2014Evacuating]. Later work considered asymmetric senders and receivers, whose evacuation time on the disk lies strictly between the two [Czyzowicz2021GroupEvacuation] [Georgiou2022Asymmetric]. Communication is therefore the first axis of the model."
+    },
+    {
+      "heading": "Unreliable and unequal robots",
+      "body": "Two further axes describe how the robots differ from the ideal. Faults: Czyzowicz et al. introduced crash-faulty searchers that fail to report the target [Czyzowicz2019FaultyLine] (as reported by [Kupavskii2018Lower]) and studied Byzantine searchers that may also lie [Czyzowicz2021Byzantine]. Since a lower bound for crash faults is also a lower bound for Byzantine faults, the two form a scale [Kupavskii2018Lower]. Speeds: patrolling [Czyzowicz2011Patrolling] and two-robot search on the line [Chrobak2015GroupSearch] [Bampas2019Speeds] gave the robots different maximum speeds, and it turned out that a slow robot can help or be useless depending on the speed ratio [Bampas2019Speeds]."
+    },
+    {
+      "heading": "Randomness and the problem axes",
+      "body": "Randomness is the fourth axis: Kao, Reif and Tate showed that a randomized cow, whose expected distance is compared with the distance to a goal fixed in advance, does \"almost twice as good as is possible with a deterministic algorithm\" [Kao1996Randomized]. Everything else differs from problem to problem and is kept on the problems as their own axes: the domain (line, $m$ rays, disk, polygons, a fence), the number of robots, what counts as success (first arrival, last arrival, the queen's arrival, fetching a treasure), and how many exits there are."
+    }
+  ],
+  "axes": [
+    {
+      "id": "communication",
+      "name": "Communication",
+      "values": [
+        {
+          "id": "f2f",
+          "level": 0,
+          "label": "face-to-face: robots exchange information only when they meet",
+          "short": "face-to-face",
+          "definition": "**Face-to-face**: two robots exchange information only when they are at the same point at the same time."
+        },
+        {
+          "id": "sr",
+          "level": 1,
+          "label": "asymmetric: senders and receivers",
+          "short": "sender/receiver",
+          "definition": "**Sender/receiver**: one robot can only transmit and the other only receive, instantly at any distance."
+        },
+        {
+          "id": "wireless",
+          "level": 2,
+          "label": "wireless: instant communication at any distance",
+          "short": "wireless",
+          "definition": "**Wireless**: every robot can send messages to every other robot instantly at any distance."
+        }
+      ],
+      "origin": "Czyzowicz et al. defined evacuation from the disk in two communication models, \"non-wireless (or local)\", where robots exchange information only at the same point at the same moment, and wireless, where a broadcast \"is instantly acquired by other robots, independently of their current positions\" [Czyzowicz2014Evacuating]. Their bounds for two and three robots, and for large $k$, showed \"a clear separation between the local and the wireless communication models\" [Czyzowicz2014Evacuating]. The earliest paper in this atlas with mixed abilities is by Czyzowicz et al.: senders transmit wirelessly but receive only face-to-face, and receivers do the opposite; such robots could be cheaper to build, or could be fully wireless robots whose sender or receiver module has failed [Czyzowicz2021GroupEvacuation]. For two robots on the disk, Georgiou, Giachoudis and Kranakis showed that the sender/receiver evacuation time lies strictly between the face-to-face and wireless times [Georgiou2022Asymmetric]. Not every setting separates the levels: for two robots of very different speeds on the line, \"wireless communication offers no advantage over communication by meeting\" [Bampas2019Speeds]."
+    },
+    {
+      "id": "faults",
+      "name": "Faults",
+      "values": [
+        {
+          "id": "byzantine",
+          "level": 0,
+          "label": "up to $f$ Byzantine robots (may lie or stay silent)",
+          "short": "Byzantine",
+          "definition": "Up to $f$ robots may lie: stay silent when they find the target, or claim to have found it where it is not."
+        },
+        {
+          "id": "crash",
+          "level": 1,
+          "label": "up to $f$ crash-faulty robots (fail to report the target)",
+          "short": "crash faults",
+          "definition": "Up to $f$ robots may fail to detect or to report the target when they pass over it."
+        },
+        {
+          "id": "none",
+          "level": 2,
+          "label": "no faults",
+          "short": "no faults",
+          "definition": "Every robot detects and reports the target."
+        }
+      ],
+      "origin": "Fault-tolerant group search began on the line in 2016. Czyzowicz, Kranakis, Krizanc, Narayanan and Opatrny introduced crash-type faults, robots that \"fail to report the target although visiting its location\" [Czyzowicz2019FaultyLine] (as described by [Kupavskii2018Lower]). At ISAAC 2016 Czyzowicz et al. studied Byzantine robots, which \"can fail to report the target even after reaching it, or ... make malicious claims about having found the target\", so that search ends only when the reliable robots have \"sufficient verification\" [Czyzowicz2021Byzantine]. Because a lower bound for crash faults is also a lower bound for Byzantine faults, the two levels form a scale [Kupavskii2018Lower]. Unreliable robots had appeared a year earlier in patrolling: at ISAAC 2015 Czyzowicz et al. studied patrollers that \"fail to comply with their patrolling duties\", so that only visits by reliable robots count [Czyzowicz2017Patrolmen]. The faults were later carried over to evacuation from the disk [Czyzowicz2017Faulty]. Georgiou, Giachoudis and Kranakis note that \"fault tolerant group search has been considered less extensively mainly due to the complexity of the resulting optimization problem\" [Georgiou2022Asymmetric]."
+    },
+    {
+      "id": "speeds",
+      "name": "Speeds",
+      "values": [
+        {
+          "id": "distinct",
+          "level": 0,
+          "label": "robots may have different maximum speeds",
+          "short": "distinct speeds",
+          "definition": "Each robot $i$ has its own maximum speed $v_i$, known to all."
+        },
+        {
+          "id": "equal",
+          "level": 1,
+          "label": "all robots have the same unit speed",
+          "short": "equal speeds",
+          "definition": "All robots move at most at unit speed."
+        }
+      ],
+      "origin": "In the classical problems all searchers move at unit speed [BaezaYates1993Searching] [Czyzowicz2014Evacuating]. Czyzowicz, Gąsieniec, Kosowski and Kranakis studied patrolling of a segment and a circle by agents with distinct maximum speeds at ESA 2011 and conjectured that simple partition strategies are optimal [Czyzowicz2011Patrolling]. The conjecture was later disproved [Kawamura2015Fence] (as summarised by [Kawamura2020Simple]). For search, Chrobak et al. solved two-robot evacuation on the line when the slower robot has at least a third of the faster one's speed [Chrobak2015GroupSearch], and Bampas et al. covered every speed ratio [Bampas2019Speeds]. Czyzowicz et al. motivate such variants by noting that \"it is quite natural to consider collaborative tasks in which the participant robots have different capabilities\" [Czyzowicz2018Priority]; disk evacuation with two speeds followed [Lamprou2020Fast]."
+    },
+    {
+      "id": "algorithm",
+      "name": "Randomness",
+      "values": [
+        {
+          "id": "deterministic",
+          "level": 0,
+          "label": "deterministic",
+          "short": "deterministic",
+          "definition": "Trajectories are fixed functions of the information received."
+        },
+        {
+          "id": "randomized",
+          "level": 1,
+          "label": "randomized",
+          "short": "randomized",
+          "definition": "Trajectories may depend on random choices; the measure is the expected competitive ratio against an oblivious adversary."
+        }
+      ],
+      "origin": "Bellman and Beck posed linear search with a target drawn from a known distribution and the expected time as the measure [Bellman1963Optimal] [Beck1964Linear] (as reported by [Czyzowicz2021Byzantine]). In the competitive formulation the target is adversarial, and every deterministic strategy has ratio at least 9 (Theorem 2.1 of [BaezaYates1993Searching]). Kao, Reif and Tate gave the first randomized algorithm for the cow-path problem on several paths, SmartCow, which picks a random permutation of the paths and a random initial distance; for every goal at distance $d$ fixed in advance its expected distance is at most $c\\,d + O(1)$, with $c \\approx 4.5911$ on the line, and they proved this optimal on the line [Kao1996Randomized]. They note that Gal had given many of these results earlier in a game-theoretic setting [Kao1996Randomized]. Randomization thus improves the ratio on the line by about half, which is why the catalogue keeps it as an axis. Most of the group-search and evacuation literature in this atlas is deterministic."
+    }
+  ]
+}

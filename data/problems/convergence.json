@@ -1,0 +1,1463 @@
+{
+  "id": "convergence",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Convergence",
+  "origin": {
+    "ref": "Suzuki1999Formation",
+    "year": 1999,
+    "note": "Suzuki and Yamashita gave algorithms for converging to a point and for reaching a point; Ando et al. treated limited visibility the same year [Ando1999Convergence]."
+  },
+  "related": [
+    {
+      "problem": "gathering",
+      "relation": "Every gathering algorithm solves convergence, but not conversely: two oblivious robots in SSYNC cannot gather, while \"two oblivious robots can converge to a point with a naive algorithm\" [Izumi2012TwoRobots]. In ASYNC the centre-of-gravity algorithm converges for any $n$ [Cohen2005Gravitational], whereas gathering needs extra assumptions such as multiplicity detection."
+    },
+    {
+      "problem": "near-gathering",
+      "relation": "Near-gathering is also a relaxation of gathering: robots must get close (within visibility of each other) without ever colliding [Pagli2015Near], while convergence lets them approach a point only in the limit."
+    }
+  ],
+  "summary": "Robots must get arbitrarily close to a common point; they need not ever meet.",
+  "statement": "$n$ robots start at arbitrary points. For every $\\varepsilon > 0$ there must be a time after which all robots stay within distance $\\varepsilon$ of each other (equivalently, of a common limit point). Robots never need to coincide.",
+  "primer": {
+    "intro": "Think of a flock that must squeeze ever closer together, without ever needing to land on one spot. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), and each has its own private coordinate system; in the basic version the scheduler is ASYNC (each phase may take any finite time, so a robot may act on an outdated snapshot) and every robot sees all others. The robots must converge: for every distance $\\varepsilon > 0$, there must come a time after which all robots stay within $\\varepsilon$ of each other. Unlike gathering, they never have to meet exactly.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Go to the centre of gravity",
+        "variant": "async",
+        "ref": "Cohen2005Gravitational",
+        "idea": "1. Look at the positions of all robots.\n2. Compute their **centre of gravity**: the average of all positions (add up the $x$-coordinates and divide by $n$, and the same for $y$).\n3. Move towards it.",
+        "analysis": "The centre of gravity does not depend on the coordinate system, so robots with different private coordinates aim at the same point. In FSYNC with moves that reach their destination, all robots compute the same point and meet in one round. In ASYNC the snapshots are outdated, but each destination is an average of positions that were already inside the region spanned by the robots, so the region spanned by the robots and their destinations never grows; Cohen and Peleg prove that it actually shrinks to a point [Cohen2005Gravitational]. A later analysis shows that $O(n)$ rounds halve the diameter, improving $O(n^2)$ [CordLandwehr2011Convergence]; the catalogue has not checked which scheduler that analysis assumes.",
+        "why_it_matters": "It is the simplest convergence rule, and the never-growing region is reused as a building block, for example to split robots into groups [Efrima2009Partition]."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Short sight: go to the centre of what you see, but keep your neighbours",
+        "variant": "limited-ssync",
+        "ref": "Ando1999Convergence",
+        "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**).\n\n1. Compute the **smallest enclosing circle** of the robots you see, and head for its centre.\n2. Do not go farther than a fixed maximum step.\n3. For every robot you see, stay inside the disc of radius $V/2$ around the midpoint between you and it.",
+        "analysis": "If two robots that see each other both obey rule 3, both end in the same disc of radius $V/2$, so they are still within $V$ and still see each other (Lemma 2 of [Ando1999Convergence]). Groups therefore never split, the region spanned by each group never grows, and Ando, Oasa, Suzuki and Yamashita prove that each connected group converges to a point in SSYNC with rigid moves (Theorem 1). The argument uses that a whole cycle happens at once; in ASYNC a robot may move on outdated information and break a visibility link. The catalogue records limited-visibility convergence as solved for every bounded amount of asynchrony and open for full ASYNC [Kirkpatrick2024Separating].",
+        "why_it_matters": "Its \"stay within $V/2$ of the midpoint\" trick for keeping neighbours is reused by many limited-visibility algorithms, including Go-To-the-Center gathering [Castenow2022Unifying]."
+      }
+    ]
+  },
+  "history": "Convergence was introduced alongside gathering as its relaxation [Suzuki1999Formation]. The first questions were **which simple rules converge** under each scheduler (centre of gravity in ASYNC [Cohen2005Gravitational], limited visibility in SSYNC [Ando1999Convergence]); then the **rate** of convergence [CordLandwehr2011Convergence], and how much asynchrony is compatible with limited visibility [Kirkpatrick2024Separating].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "async",
+      "title": "ASYNC, unlimited visibility",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "Moving to the centre of gravity makes oblivious robots converge in ASYNC, for any $n$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cohen2005Gravitational",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best for ASYNC; also tolerates crash faults (the exact bound on $f$ was not checked)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "See the notes for convergence-time results."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Convergence time of the centre-of-gravity algorithm: [CordLandwehr2011Convergence] show that $O(n)$ rounds halve the diameter of the convex hull, improving $O(n^2)$, against a known $\\Omega(n)$. **Unverified:** the scheduler of that analysis.",
+      "status": "verified"
+    },
+    {
+      "id": "limited-ssync",
+      "title": "Limited visibility, SSYNC, rigid moves",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "body": "point",
+        "movement": "rigid"
+      },
+      "summary": "With limited visibility, semi-synchronous oblivious robots whose moves reach their computed destination converge within each connected component of the visibility graph.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Ando1999Convergence",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "each connected component of the initial visibility graph converges to its own point",
+            "each move reaches its computed destination, at most a small constant away",
+            "$V$ known (the algorithm keeps visible robots within distance $V$)"
+          ],
+          "note": "Introductory and current best (Theorem 1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed here."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Ando1999Convergence]. The formal model (assumptions A1–A6) has point robots that do not obstruct each other, phases of \"negligibly small\" duration, so that a robot observes others only when they are stationary (an SSYNC scheduler, although the paper calls the robots asynchronous), every robot active infinitely often, and exact sensing and motion. There is no common coordinate system. A robot moves towards the centre of the smallest enclosing circle of the robots it sees, but no farther than keeps every visible robot within distance $V$ (Lemma 2: mutually visible robots stay mutually visible). Whether the same algorithm works with non-rigid moves is not addressed in the paper.",
+      "status": "verified"
+    },
+    {
+      "id": "limited-async",
+      "title": "Limited visibility, asynchronous",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "With limited visibility, convergence is solved for every bounded asynchrony (k-ASYNC) but open for full ASYNC.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Katreniak2011Convergence",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "1-ASYNC"
+          ],
+          "note": "Also solves unlimited-visibility ASYNC convergence without multiplicity detection."
+        },
+        {
+          "ref": "Kirkpatrick2024Separating",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "k-ASYNC for any fixed bound on the asynchrony"
+          ],
+          "note": "Also shows that cohesive convergence is impossible in ASYNC for hull-diminishing or coherent algorithms when perception has errors."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Full ASYNC is open."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Is point convergence with limited visibility solvable in full ASYNC, without perception or motion errors? [Kirkpatrick2024Separating]",
+        "Is there a problem that separates k-ASYNC from SSYNC? [Kirkpatrick2024Separating]"
+      ],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Convergence: robots at arbitrary points must, for every $\\varepsilon > 0$, eventually stay within distance $\\varepsilon$ of each other; they approach a common limit point but need never meet [Suzuki1999Formation]. Shown: the centre-of-gravity rule of [Cohen2005Gravitational] in SSYNC rounds; ringed robots are activated and move towards the centre of gravity (star) of all robots, some stopping early.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: ringed robots move towards the centre of gravity",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              10,
+              44
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              10
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              50,
+              50
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              64,
+              20
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              90,
+              46
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              84,
+              8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                10,
+                44
+              ],
+              [
+                24,
+                10
+              ],
+              [
+                84,
+                8
+              ],
+              [
+                90,
+                46
+              ],
+              [
+                50,
+                50
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              53.7,
+              29.7
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              10,
+              44
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                10,
+                44
+              ],
+              [
+                53.7,
+                29.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              84,
+              8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                84,
+                8
+              ],
+              [
+                53.7,
+                29.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              31.8,
+              36.8
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              10
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              50,
+              50
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              64,
+              20
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              90,
+              46
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              71.9,
+              16.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                24,
+                10
+              ],
+              [
+                71.9,
+                16.7
+              ],
+              [
+                90,
+                46
+              ],
+              [
+                50,
+                50
+              ],
+              [
+                31.8,
+                36.8
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              55.3,
+              29.9
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                55.3,
+                29.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              31.8,
+              36.8
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              24,
+              10
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              50,
+              50
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              64,
+              20
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              72.6,
+              38.0
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              71.9,
+              16.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                24,
+                10
+              ],
+              [
+                71.9,
+                16.7
+              ],
+              [
+                72.6,
+                38.0
+              ],
+              [
+                50,
+                50
+              ],
+              [
+                31.8,
+                36.8
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              52.4,
+              28.6
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              24,
+              10
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                24,
+                10
+              ],
+              [
+                52.4,
+                28.6
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50,
+              50
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                50,
+                50
+              ],
+              [
+                52.4,
+                28.6
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "SSYNC rounds; moves may stop early",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              31.8,
+              36.8
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              38.2,
+              19.3
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              51.0,
+              41.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              64,
+              20
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              72.6,
+              38.0
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              71.9,
+              16.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                31.8,
+                36.8
+              ],
+              [
+                38.2,
+                19.3
+              ],
+              [
+                71.9,
+                16.7
+              ],
+              [
+                72.6,
+                38.0
+              ],
+              [
+                51.0,
+                41.4
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              54.9,
+              28.7
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              20
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                64,
+                20
+              ],
+              [
+                54.9,
+                28.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              31.8,
+              36.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                31.8,
+                36.8
+              ],
+              [
+                54.9,
+                28.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              41.1,
+              33.6
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              38.2,
+              19.3
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              51.0,
+              41.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              59.5,
+              24.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              72.6,
+              38.0
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              71.9,
+              16.7
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38.2,
+                19.3
+              ],
+              [
+                71.9,
+                16.7
+              ],
+              [
+                72.6,
+                38.0
+              ],
+              [
+                51.0,
+                41.4
+              ],
+              [
+                41.1,
+                33.6
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              55.7,
+              28.9
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              71.9,
+              16.7
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                71.9,
+                16.7
+              ],
+              [
+                55.7,
+                28.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              72.6,
+              38.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                72.6,
+                38.0
+              ],
+              [
+                55.7,
+                28.9
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              41.1,
+              33.6
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              38.2,
+              19.3
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              51.0,
+              41.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              59.5,
+              24.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              65.9,
+              34.3
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              63.8,
+              22.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38.2,
+                19.3
+              ],
+              [
+                63.8,
+                22.8
+              ],
+              [
+                65.9,
+                34.3
+              ],
+              [
+                51.0,
+                41.4
+              ],
+              [
+                41.1,
+                33.6
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              53.2,
+              29.3
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              51.0,
+              41.4
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                51.0,
+                41.4
+              ],
+              [
+                53.2,
+                29.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              41.1,
+              33.6
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              38.2,
+              19.3
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              52.1,
+              35.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              59.5,
+              24.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              65.9,
+              34.3
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              63.8,
+              22.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                38.2,
+                19.3
+              ],
+              [
+                63.8,
+                22.8
+              ],
+              [
+                65.9,
+                34.3
+              ],
+              [
+                52.1,
+                35.4
+              ],
+              [
+                41.1,
+                33.6
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              53.4,
+              28.3
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              19.3
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.2,
+                19.3
+              ],
+              [
+                53.4,
+                28.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              24.3
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.5,
+                24.3
+              ],
+              [
+                53.4,
+                28.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              41.1,
+              33.6
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              44.3,
+              22.9
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              52.1,
+              35.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              56.4,
+              26.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              65.9,
+              34.3
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              63.8,
+              22.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                41.1,
+                33.6
+              ],
+              [
+                44.3,
+                22.9
+              ],
+              [
+                63.8,
+                22.8
+              ],
+              [
+                65.9,
+                34.3
+              ],
+              [
+                52.1,
+                35.4
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              53.9,
+              29.2
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.1,
+              33.6
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.1,
+                33.6
+              ],
+              [
+                53.9,
+                29.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              65.9,
+              34.3
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.9,
+                34.3
+              ],
+              [
+                53.9,
+                29.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              47.5,
+              31.4
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              44.3,
+              22.9
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              52.1,
+              35.4
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              56.4,
+              26.3
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              59.9,
+              31.8
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              63.8,
+              22.8
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                44.3,
+                22.9
+              ],
+              [
+                63.8,
+                22.8
+              ],
+              [
+                59.9,
+                31.8
+              ],
+              [
+                52.1,
+                35.4
+              ],
+              [
+                47.5,
+                31.4
+              ]
+            ],
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "star",
+            "p": [
+              54.0,
+              28.4
+            ],
+            "r": 1.6,
+            "c": "accent"
+          },
+          {
+            "t": "circle",
+            "p": [
+              63.8,
+              22.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                63.8,
+                22.8
+              ],
+              [
+                54.0,
+                28.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              52.1,
+              35.4
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.1,
+                35.4
+              ],
+              [
+                54.0,
+                28.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "After 9 rounds: the hull keeps shrinking",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              47.5,
+              31.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              44.3,
+              22.9
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              53.0,
+              31.9
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              56.4,
+              26.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              59.9,
+              31.8
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              59.9,
+              25.0
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                44.3,
+                22.9
+              ],
+              [
+                59.9,
+                25.0
+              ],
+              [
+                59.9,
+                31.8
+              ],
+              [
+                53.0,
+                31.9
+              ],
+              [
+                47.5,
+                31.4
+              ]
+            ],
+            "c": "tight",
+            "dash": true
+          }
+        ]
+      }
+    ]
+  }
+}

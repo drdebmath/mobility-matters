@@ -1,0 +1,1029 @@
+{
+  "id": "uniform-circle-formation",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Uniform circle formation",
+  "origin": {
+    "ref": "Dieudonne2008Circle",
+    "year": 2006,
+    "note": "The first deterministic solution (SSS 2006); circle formation with convergence towards uniformity predates it [Defago2002Circle]."
+  },
+  "derived_from": {
+    "problem": "pattern-formation",
+    "kind": "special case of",
+    "relation": "Uniform circle formation is \"an important special case of the geometric pattern formation problem\" [Feletti2024Optimal]: the target is the regular $n$-gon. It is also the special case of circle formation with equal spacing; circle formation is \"its precursor\" [Feletti2024Optimal]."
+  },
+  "related": [
+    {
+      "problem": "circle-formation",
+      "relation": "A uniform circle is a circle, so every uniform-circle algorithm forms a circle."
+    }
+  ],
+  "summary": "Robots must form a regular $n$-gon: a circle with equal spacing.",
+  "statement": "$n$ robots start at distinct points and must reach the vertices of a regular $n$-gon (in any position and size) and stay there. **Time** is in epochs (ASYNC) or rounds; **colours** count light colours in the luminous model.",
+  "primer": {
+    "intro": "Picture guards who must stand evenly spaced around a circular fence that nobody has built: the circle and the spacing must come from the guards themselves. There are $n$ robots, points at distinct places in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), share no sense of direction or handedness, and the **scheduler** (an adversary) is ASYNC: each phase may take any finite time. Moves are **non-rigid**: a robot may be stopped after a minimum distance $\\delta$. The robots must reach the corners of a **regular $n$-gon** (all sides and angles equal), of any size and position, and stay there.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Fix the smallest enclosing circle, reach it, then let symmetric robots move as one",
+        "variant": "async",
+        "ref": "Flocchini2017Uniform",
+        "idea": "1. Compute the **smallest enclosing circle** (SEC) of all robots; every robot computes the same circle. All moves are chosen so that this circle does not change.\n2. Robots inside the circle move out to it, as in circle formation.\n3. With all robots on the circle, group them into **analogy classes**: two robots are analogous if some symmetry of the whole configuration maps one to the other.\n4. The scheduler could make analogous robots act identically anyway, so the algorithm makes each class always move together, deliberately and symmetrically.\n5. The robots compute the corners of a regular $n$-gon on the circle and move to them class by class. Special configurations that are already close to regular (pre-regular, biangular) get their own procedure.",
+        "analysis": "The overall plan is simple; the difficulty is that asynchronous robots act on outdated snapshots, so the analogy classes and targets that one robot sees may already be stale. Flocchini, Prencipe, Santoro and Viglietta show that oblivious, disoriented robots with non-rigid moves form a regular $n$-gon in ASYNC from every start at distinct points, for every $n$ [Flocchini2017Uniform]; the case $n = 4$ is solved in [Mamino2016Square]. Time is not analysed; for opaque robots with lights, $O(1)$ epochs and $O(1)$ colours suffice [Feletti2024Optimal].",
+        "why_it_matters": "It closed a long-standing question and showed that, for pattern formation, asynchrony, chirality and rigid moves do not add computational power."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Two robots on the same point can never be separated",
+        "variant": "async",
+        "ref": "Flocchini2017Uniform",
+        "idea": "Suppose two robots start at the same point. They see exactly the same positions. The adversary gives them identical coordinate systems and the scheduler always wakes them together. Identical robots with identical snapshots and identical coordinates compute the same destination, so they move together and are still on one point after every round. A regular $n$-gon has $n$ distinct corners, so it is never formed.",
+        "analysis": "This is why the problem asks for distinct starting points; Flocchini et al. note that with two robots on one point the problem is \\\"easily seen to be unsolvable\\\" [Flocchini2017Uniform]. The same trap is the reason careful algorithms never let two robots meet while they move.",
+        "why_it_matters": "It is the simplest example of a symmetry that oblivious deterministic robots can never break."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Why only the point and the regular polygon can be formed from every start",
+        "variant": "async",
+        "ref": "Suzuki1999Formation",
+        "idea": "Start the robots on a regular $n$-gon. Give every robot a coordinate system whose $x$-axis points to the centre, all with the same unit. All robots see the same snapshot; if the scheduler wakes all of them together, they all make the same move up to rotation, so the configuration stays a regular $n$-gon (or collapses to its centre). So from this start the only formable patterns are the regular $n$-gon and the single point.",
+        "analysis": "Suzuki and Yamashita showed that the patterns formable from a start depend on its symmetricity, its amount of rotational symmetry [Suzuki1999Formation]; the regular $n$-gon has the most. Hence the point (gathering) and the regular $n$-gon (uniform circle) are the only patterns that might be formable from every start, and both are [Flocchini2017Uniform].",
+        "why_it_matters": "It explains why the uniform circle is singled out among all patterns: it is one of only two universally formable ones."
+      }
+    ]
+  },
+  "history": "Uniform circle formation was first asked as **solvability**: can disoriented oblivious robots form a regular polygon? It was solved for SSYNC [Dieudonne2008Circle] and then for ASYNC without chirality or rigidity [Flocchini2017Uniform] [Mamino2016Square]. Only after feasibility was settled did the community turn to **time and colours** for luminous opaque robots [Feletti2023Schedulers] [Pattanayak2024TimeColor], reaching $O(1)$ epochs with $O(1)$ colours [Feletti2024Optimal].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "async",
+      "title": "ASYNC, oblivious, disoriented",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "Oblivious, disoriented, non-rigid robots form a regular $n$-gon from any configuration of distinct points, for every $n$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2017Uniform",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "if two robots start at the same point"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2017Uniform",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ne 4$"
+          ],
+          "note": "Introductory for ASYNC and current best. The case $n = 4$ (square formation) is solved by [Mamino2016Square]."
+        },
+        {
+          "ref": "Mamino2016Square",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n = 4$"
+          ],
+          "note": "Completes the picture: synchrony, chirality and rigidity are computationally irrelevant for pattern formation."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No time analysis of oblivious ASYNC uniform circle formation is recorded."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Can oblivious robots without lights form a uniform circle in $O(1)$ epochs, with rigid or non-rigid moves? [Feletti2024Optimal]"
+      ],
+      "notes": "Uniform circle and point are the only patterns formable from every initial configuration [Flocchini2017Uniform].",
+      "status": "verified"
+    },
+    {
+      "id": "ssync",
+      "title": "SSYNC, oblivious",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "scheduler": "ssync",
+        "body": "point"
+      },
+      "summary": "The first deterministic uniform circle formation, for $n \\ge 5$ semi-synchronous robots.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Dieudonne2008Circle",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$"
+          ],
+          "note": "Concentric circles; first deterministic solution."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Dieudonné and Petit later solved $n \\ne 4$ and $n = 4$ in SSYNC (SIROCCO 2007, ISAAC 2008; not yet in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "opaque-lights",
+      "title": "Opaque robots with lights, ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "With lights, opaque robots form a uniform circle in $O(1)$ epochs with $O(1)$ colours, which is optimal in both.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(1)",
+          "ref": "Feletti2024Optimal",
+          "bottleneck": "trivial",
+          "preconditions": [
+            "trivial: at least one epoch"
+          ]
+        },
+        {
+          "measure": "colours",
+          "bound": "\\Omega(1)",
+          "ref": "Feletti2024Optimal",
+          "bottleneck": "trivial",
+          "preconditions": [
+            "trivial: at least one colour"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Feletti2023Schedulers",
+          "role": "introductory",
+          "time": "O(n)",
+          "colours": "O(1)",
+          "note": "First ASYNC result for opaque luminous robots (ICTCS 2022; journal 2023); $O(1)$ time in FSYNC and SSYNC."
+        },
+        {
+          "ref": "Feletti2023Log",
+          "role": "other",
+          "time": "O(\\log n)",
+          "colours": "O(1)"
+        },
+        {
+          "ref": "Pattanayak2024TimeColor",
+          "role": "other",
+          "time": "O(x)",
+          "colours": "O(n^{1/2^x})",
+          "note": "A time–colour trade-off for $x \\in [1, O(\\log\\log n)]$: $O(1)$ time with $O(\\sqrt n)$ colours, or $O(\\log\\log n)$ time with $O(1)$ colours. Abstract only."
+        },
+        {
+          "ref": "Feletti2024Optimal",
+          "role": "best",
+          "time": "O(1)",
+          "colours": "O(1)",
+          "note": "Asymptotically optimal in time and colours."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(1)$ epochs."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$ colours; the exact minimum is open."
+        }
+      },
+      "open": [
+        "What is the exact minimum number of colours for $O(1)$-epoch uniform circle formation in ASYNC? [Feletti2024Optimal]",
+        "Uniform circle formation with non-rigid moves in the luminous opaque model [Feletti2024Optimal]."
+      ],
+      "notes": "Robots are punctiform, disoriented and do not know $n$; collisions are avoided. The only lower bounds are trivial. Checked against the full texts of [Feletti2023Log] and [Feletti2024Optimal].",
+      "status": "verified"
+    },
+    {
+      "id": "opaque-lights-fsync",
+      "title": "Opaque robots with lights, FSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "movement": "rigid",
+        "scheduler": "fsync",
+        "body": "point"
+      },
+      "summary": "In FSYNC, opaque luminous robots form a uniform circle in 3 cycles with $O(1)$ colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Feletti2018Opaque",
+          "role": "introductory",
+          "time": "O(1)",
+          "colours": "O(1)",
+          "note": "First paper on the opaque luminous model; as described by [Feletti2024Optimal]."
+        },
+        {
+          "ref": "Feletti2023Schedulers",
+          "role": "best",
+          "time": "3",
+          "colours": "O(1)",
+          "note": "Three cycles."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Constant."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$."
+        }
+      },
+      "open": [],
+      "notes": "In SSYNC the same paper takes $O(1)$ rounds. The ICTCS 2022 version was read in full.",
+      "status": "verified"
+    },
+    {
+      "id": "fat-ssync",
+      "title": "Transparent fat robots, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "body": "fat",
+        "opacity": "transparent",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "frames": "one-axis"
+      },
+      "summary": "Transparent fat robots that agree on one axis form a regular $n$-gon of given side in SSYNC.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Mondal2017Uniform",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n$ and the side length are known",
+            "only the direction of the $y$ axis is shared, without chirality"
+          ],
+          "note": "Introductory and current best (Theorem 1). A preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "The paper assumes agreement on one axis without chirality, which is the catalogue's one-axis value. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "fat-async-limited",
+      "title": "Opaque fat robots, ASYNC, limited visibility, compass",
+      "assumptions": {
+        "faults": "none",
+        "body": "fat",
+        "movement": "rigid",
+        "frames": "compass"
+      },
+      "summary": "Opaque fat robots with limited visibility and a common coordinate system form a uniform circle of given centre and radius in ASYNC.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Mondal2020Uniform",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "common origin and axes",
+            "the circle's centre and radius are given"
+          ],
+          "note": "Introductory and current best (Theorem 1). A preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Uniform circle formation: $n$ oblivious robots at distinct points must occupy the vertices of a regular $n$-gon, of any position and size, and stay there [Flocchini2017Uniform]. Shown in SSYNC rounds (ringed robots are activated), simplified from [Flocchini2017Uniform]: the smallest enclosing circle (dashed) never changes; robots inside move out to it, then robots on it move to the vertices of a regular hexagon inscribed in it (hollow).",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: inner robots move out to the fixed circle",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              50.0,
+              52.0
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              29.2,
+              16.0
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              70.8,
+              16.0
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              57.1,
+              35.1
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              36.0,
+              28.5
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              52.7,
+              20.5
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              57.1,
+              35.1
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                57.1,
+                35.1
+              ],
+              [
+                67.0,
+                45.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              52.7,
+              20.5
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                52.7,
+                20.5
+              ],
+              [
+                58.2,
+                5.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              50.0,
+              52.0
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              29.2,
+              16.0
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              70.8,
+              16.0
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              67.0,
+              45.0
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              36.0,
+              28.5
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              55.5,
+              13.0
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              36.0,
+              28.5
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36.0,
+                28.5
+              ],
+              [
+                26.0,
+                28.8
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              55.5,
+              13.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                55.5,
+                13.0
+              ],
+              [
+                58.2,
+                5.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "All on the circle: move to hexagon vertices",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              50.0,
+              52.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              29.2,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              70.8,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              67.0,
+              45.0
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              26.0,
+              28.8
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              58.2,
+              5.4
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.8,
+              40.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              52.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.2,
+              40.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.2,
+              16.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              4.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.8,
+              16.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              67.0,
+              45.0
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                67.0,
+                45.0
+              ],
+              [
+                70.8,
+                40.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              50.0,
+              52.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              29.2,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              70.8,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              70.8,
+              40.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              26.0,
+              28.8
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              58.2,
+              5.4
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.8,
+              40.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              52.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.2,
+              40.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.2,
+              16.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              4.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.8,
+              16.0
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              26.0,
+              28.8
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.8
+              ],
+              [
+                29.2,
+                40.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.2,
+              5.4
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.2,
+                5.4
+              ],
+              [
+                50.0,
+                4.0
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: a regular hexagon",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              50.0,
+              52.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              29.2,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              70.8,
+              16.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              70.8,
+              40.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              29.2,
+              40.0
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              50.0,
+              4.0
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50,
+              28
+            ],
+            "r": 24,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                70.8,
+                40.0
+              ],
+              [
+                50.0,
+                52.0
+              ],
+              [
+                29.2,
+                40.0
+              ],
+              [
+                29.2,
+                16.0
+              ],
+              [
+                50.0,
+                4.0
+              ],
+              [
+                70.8,
+                16.0
+              ]
+            ],
+            "c": "tight",
+            "dash": true
+          }
+        ]
+      }
+    ]
+  }
+}

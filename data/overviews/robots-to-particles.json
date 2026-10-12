@@ -1,0 +1,44 @@
+{
+  "id": "robots-to-particles",
+  "title": "From robots to particles",
+  "summary": "Programmable matter re-asks the questions of robots in the plane on a lattice, with particles that touch, remember a little and stay connected; SILBOT takes memory and messages away again, and the stochastic approach replaces algorithms by a biased local rule.",
+  "problems": [
+    "shape-formation-amoebots",
+    "leader-election-amoebots",
+    "coating-amoebots",
+    "scattering-amoebots",
+    "compression-amoebots",
+    "separation-amoebots",
+    "alignment-amoebots",
+    "bridging-amoebots",
+    "pattern-formation",
+    "leader-election-plane"
+  ],
+  "status": "verified",
+  "sections": [
+    {
+      "heading": "Programmable matter and the amoebot model",
+      "body": "Programmable matter, a term that Di Luna et al. trace to Toffoli and Margolus, is matter that can change its physical properties \"in a programmable fashion, based upon user input or autonomous sensing\", usually imagined as many small, locally interacting computational particles; the intended uses include smart materials, autonomous monitoring and repair, and minimally invasive surgery [DiLuna2020Shape]. Navarra and Piselli add that ideas that were \"mostly theoretical\" in the early 1990s have become realistic as nano-technology advanced [Navarra2023Line].\n\nThe amoebot model, introduced at SPAA 2014 [Derakhshandeh2014Amoebot], is \"motivated by micro- and nano-scale robotic systems with strictly limited computational and locomotive capabilities\" [Daymude2023Canonical]. Particles occupy nodes of the triangular lattice, have constant memory, and move by expanding into an empty neighbouring node and contracting again, like an amoeba [Emek2019Deterministic]. The system must stay connected, \"to prevent the particles from drifting apart in an uncontrolled manner like in fluids and because in our case particles communicate only via bonds\" [Derakhshandeh2015Leader]. As results accumulated, the model's assumptions diverged; Daymude, Richa and Scheideler proposed the canonical amoebot model to separate core features from assumption variants and to treat concurrency explicitly, since much earlier work \"implicitly assumes amoebot actions are isolated and reliable\" [Daymude2023Canonical]."
+    },
+    {
+      "heading": "Shape formation is pattern formation on a lattice",
+      "body": "Di Luna, Flocchini, Santoro, Viglietta and Yamauchi say it directly: shape formation is the problem \"called pattern formation in swarm robotics\", and it has been \"intensively studied\" for autonomous mobile robots [DiLuna2020Shape]. Derakhshandeh et al. posed shape formation together with leader election, because \"most shape formation algorithms depend on some seed element\", and asked whether shape formation can be solved when leader election cannot [Derakhshandeh2015Leader]. With chirality, a sequential scheduler and randomization, any shape made of a constant number of triangles can be formed from a well-initialised start [Derakhshandeh2016Universal].\n\nThe deterministic answer echoes Suzuki and Yamashita. Di Luna et al. characterise the shapes that can be formed from any simply connected start: as in the plane, feasibility depends on the symmetry of the start; chirality turns out to be \"computationally irrelevant\"; randomization lets any shape be formed once there are enough particles; and $O(n^2)$ moves suffice for $n$ particles, which is optimal [DiLuna2020Shape]. The comparison with the plane is the one in [Flocchini2017Uniform]: there the symmetricity of the start decides which patterns are formable."
+    },
+    {
+      "heading": "Leader election with touching neighbours",
+      "body": "Leader election is the primitive behind most amoebot algorithms: a unique leader \"breaks symmetry and coordinates the remaining amoebots\", and Emek et al. set the goal of an algorithm that \"requires as few assumptions as possible\" [Emek2019Deterministic]. Dufoulon, Kutten and Moses recount the history: early deterministic algorithms assumed that the system has no holes, or elected up to six leaders; using movement removed the restriction on the shape but cost at least quadratic time [Dufoulon2021Efficient]. Emek et al. elect a unique leader deterministically without chirality, and the particles also agree on a chirality [Emek2019Deterministic]; with chirality and a strong scheduler, Dufoulon et al. do it in linear time, as fast as the randomized algorithms [Dufoulon2021Efficient] [Daymude2017Improved].\n\nThe contrast with robots in the plane is instructive. Robots that only see can elect a leader only from configurations that are not symmetric [Dieudonne2013Geoleader]. Particles have constant memory, read their neighbours and stay connected, and these powers break symmetries that positions alone cannot. Particles that do not move form a separate line of work: with chirality on hole-free systems [Gastineau2019Leader], with holes but up to six leaders [Bazzi2019Stationary], under an asynchronous adversary [Briones2023Asynchronous], and self-stabilising [Chalopin2025SelfStab]."
+    },
+    {
+      "heading": "SILBOT: particles that behave like oblivious robots",
+      "body": "SILBOT takes the extra powers away. Navarra and Piselli describe it as \"one of the weakest models\" for programmable matter: it \"includes concurrency and eliminates direct communication among particles as well as local and shared memory\", and in exchange particles see two hops instead of one [Navarra2023Line]. Its aim, introduced by D'Angelo et al. [DAngelo2020Silent], is the minimal setting in which basic tasks remain solvable, which is the question Suzuki and Yamashita asked of robots.\n\nThe limits of oblivious robots return. In SILBOT up to three leaders are elected on hole-free configurations [DAngelo2020Silent]. A line cannot be formed with chirality alone; with a full common orientation it takes $O(n^2)$ moves for $n$ particles, which is optimal [Navarra2023Line]. With chirality, particles coat a convex object with one layer in $O(n^2)$ rounds [Navarra2023Coating], and particles can scatter so that no two are neighbours [Navarra2025Scattering], a lattice counterpart of scattering in the plane [Dieudonne2009Scatter]."
+    },
+    {
+      "heading": "Bias instead of algorithms",
+      "body": "A second approach drops coordination altogether. Cannon, Daymude, Randall and Richa define an energy function whose minima are the desired configurations, design a Markov chain whose stationary distribution favours them, and make each transition probability computable from a particle's neighbourhood, so that the chain becomes a local, asynchronous algorithm; being a Markov chain, it is \"inherently robust and oblivious\" [Cannon2016Compression]. The motivation is natural systems such as fire ants forming rafts, where each individual \"can take cues from its immediate neighbors\" without seeing the group [Cannon2016Compression]. For compression, a bias $\\lambda > 2+\\sqrt2$ towards having more neighbours makes the system compress, while $\\lambda < 2.17$ makes it expand [Cannon2016Compression].\n\nThe same recipe was extended one ingredient at a time. With two colours and a second bias, one algorithm separates or integrates the colour classes, a behaviour seen in bacteria, social insects and human groups [Cannon2019Separation]. With orientations, particles align or do not for every number $q \\ge 2$ of orientations, a variant of the Potts model [Kedia2022Alignment]. With terrain, particles build shortcut bridges across a gap, inspired by army ants that balance \"the benefit of increased foraging trail efficiency\" against the cost of the workers in the bridge [AndresArroyo2018Bridging]. For fire-ant bridges, Oh et al. show that a single bridge forms for large biases, and argue that this \"follows from a statistical inevitability, and not from the sophistication of the individuals\" [Oh2024Bridge]."
+    },
+    {
+      "heading": "Open questions",
+      "body": "The stochastic results describe the stationary distribution, not when it is reached: no catalogued paper bounds the mixing time, and for compression the behaviour for $2.17 \\le \\lambda \\le 2+\\sqrt2$ is not determined [Cannon2016Compression]. For SILBOT, Navarra and Piselli ask whether one common direction suffices for line formation, whether 1-hop visibility suffices, and which other shapes can be formed [Navarra2023Line]; coating without chirality is open [Navarra2023Coating]. For leader election, linear-time deterministic election without chirality, and under schedulers weaker than the strong one, are open [Dufoulon2021Efficient]."
+    }
+  ]
+}

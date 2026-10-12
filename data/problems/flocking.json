@@ -1,0 +1,2449 @@
+{
+  "id": "flocking",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Flocking",
+  "origin": {
+    "ref": "Gervasi2004Flocking",
+    "year": 2004,
+    "note": "Coordination without communication: the flocking problem."
+  },
+  "summary": "Robots must move together as a group, following a leader while roughly keeping a formation.",
+  "statement": "Robots follow a designated leader whose path is not known in advance, while keeping (approximately) a given formation and avoiding collisions.",
+  "primer": {
+    "intro": "Think of a flock of birds following a leader whose route nobody knows in advance, keeping roughly the same shape and never bumping into each other. In the flocking problem, robots in the plane must follow a designated leader robot along an unpredictable path while keeping approximately a given formation (for example, a V shape) and avoiding collisions. The robots are oblivious (they forget everything after each move) and silent: they coordinate only by looking at each other's positions. The catalogue records only the first formal treatment [Gervasi2004Flocking] and has not checked its exact assumptions, so this page describes the problem and the simplest reasoning about it.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Keep your slot relative to the leader",
+        "variant": "basic",
+        "idea": "A standard approach, assuming the followers can recognise the leader and know the target formation:\n1. Look at all robots and find the leader.\n2. Place the target formation with the leader at its tip, oriented, say, along the leader's last observed direction of motion.\n3. Choose the free slot of the formation that is closest to you (with a fixed tie-break rule).\n4. Move towards that slot, but never closer to another robot than a safety distance.",
+        "analysis": "Each follower chases a target that moves with the leader, so if followers are fast enough they stay within a bounded distance of their slots. The details that make this hard are exactly those the model hides: an oblivious follower cannot remember the leader's past direction, and slot assignment must not change from look to look. We do not attribute this sketch to [Gervasi2004Flocking], whose method we have not read.",
+        "why_it_matters": "Reducing a moving formation to \"chase your slot\" is the basic design idea of leader-follower formation control."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Followers must be faster than the leader",
+        "variant": "basic",
+        "idea": "Suppose followers can move no faster than the leader. Let the leader run at full speed in a straight line. A follower that is a distance $\\delta > 0$ behind its slot moves at most as fast as the slot moves, so the gap never shrinks.",
+        "analysis": "So exact formation keeping is impossible in general with equal top speeds; a follower can only stay within the error it started with. This simple observation, our own and not taken from a paper, is why flocking asks for approximate formations or gives followers extra speed.",
+        "why_it_matters": "It explains why \"approximately\" in the problem statement is not a detail but a necessity."
+      }
+    ]
+  },
+  "history": "Flocking was posed as a **coordination problem without communication** for oblivious robots [Gervasi2004Flocking]; the questions were feasibility and, later, fault tolerance and self-stabilisation.",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "basic",
+      "title": "Oblivious robots following a leader",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "The first formal treatment of flocking by oblivious robots that communicate only by observing each other.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Gervasi2004Flocking",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory; the exact assumptions and guarantees were not read in the paper."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Self-stabilising and crash-tolerant flocking followed (SSS 2007, OPODIS 2008; not yet in the bibliography).",
+      "status": "draft"
+    }
+  ],
+  "figure": {
+    "caption": "Flocking: the robots follow a leader (L) whose path is not known in advance, keeping approximately a given formation and avoiding collisions [Gervasi2004Flocking]. The animation shows the basic slot-chasing idea (not the method of [Gervasi2004Flocking]): in each round the leader moves; each follower places the V formation behind the leader's last observed heading, takes the nearest free slot (dashed circles) and moves towards it at a speed higher than the leader's.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              26.0,
+              28.0
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              10,
+              30
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              16,
+              18
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              8,
+              44
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              4,
+              10
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              18.0,
+              34.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              18.0,
+              22.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              10.0,
+              40.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              10.0,
+              16.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                10,
+                30
+              ],
+              [
+                18.0,
+                34.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                16,
+                18
+              ],
+              [
+                18.0,
+                22.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                8,
+                44
+              ],
+              [
+                10.0,
+                40.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                4,
+                10
+              ],
+              [
+                10.0,
+                16.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ],
+        "label": "Start: followers scattered behind the leader L"
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              31.2,
+              30.54
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              17.16,
+              33.58
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              18.0,
+              22.0
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              10.0,
+              40.0
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              9.66,
+              15.66
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              21.38,
+              32.42
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              26.65,
+              21.64
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              11.56,
+              34.3
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.09,
+              12.73
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                17.16,
+                33.58
+              ],
+              [
+                21.38,
+                32.42
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                18.0,
+                22.0
+              ],
+              [
+                26.65,
+                21.64
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                10.0,
+                40.0
+              ],
+              [
+                11.56,
+                34.3
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                9.66,
+                15.66
+              ],
+              [
+                22.09,
+                12.73
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ],
+        "label": "Each round: L moves; followers chase their V slots"
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              36.4,
+              32.73
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              21.38,
+              32.42
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              25.99,
+              21.67
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              11.56,
+              34.3
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              17.44,
+              13.83
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              26.7,
+              35.15
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              31.36,
+              24.1
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.99,
+              37.57
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              26.32,
+              15.46
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                21.38,
+                32.42
+              ],
+              [
+                26.7,
+                35.15
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                25.99,
+                21.67
+              ],
+              [
+                31.36,
+                24.1
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                11.56,
+                34.3
+              ],
+              [
+                16.99,
+                37.57
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                17.44,
+                13.83
+              ],
+              [
+                26.32,
+                15.46
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              41.6,
+              34.28
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              26.7,
+              35.15
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.36,
+              24.1
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              16.99,
+              37.57
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              25.31,
+              15.27
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              32.22,
+              37.75
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.65,
+              26.25
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.84,
+              41.22
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.69,
+              18.22
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                26.7,
+                35.15
+              ],
+              [
+                32.22,
+                37.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.36,
+                24.1
+              ],
+              [
+                35.65,
+                26.25
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                16.99,
+                37.57
+              ],
+              [
+                22.84,
+                41.22
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                25.31,
+                15.27
+              ],
+              [
+                29.69,
+                18.22
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              46.8,
+              34.97
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              32.22,
+              37.75
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              35.65,
+              26.25
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              22.84,
+              41.22
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.69,
+              18.22
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.08,
+              39.87
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.66,
+              27.97
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              29.36,
+              44.76
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              32.52,
+              20.97
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                32.22,
+                37.75
+              ],
+              [
+                38.08,
+                39.87
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                35.65,
+                26.25
+              ],
+              [
+                39.66,
+                27.97
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                22.84,
+                41.22
+              ],
+              [
+                29.36,
+                44.76
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                29.69,
+                18.22
+              ],
+              [
+                32.52,
+                20.97
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              52.0,
+              34.71
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              38.08,
+              39.87
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              39.66,
+              27.97
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              29.36,
+              44.76
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              32.52,
+              20.97
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.31,
+              41.11
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              43.71,
+              29.12
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              36.62,
+              47.5
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.42,
+              23.53
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.08,
+                39.87
+              ],
+              [
+                44.31,
+                41.11
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                39.66,
+                27.97
+              ],
+              [
+                43.71,
+                29.12
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                29.36,
+                44.76
+              ],
+              [
+                36.62,
+                47.5
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                32.52,
+                20.97
+              ],
+              [
+                35.42,
+                23.53
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              57.2,
+              33.54
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              44.31,
+              41.11
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              43.71,
+              29.12
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              36.62,
+              47.5
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              35.42,
+              23.53
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.72,
+              41.16
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              48.07,
+              29.45
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.24,
+              48.77
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.95,
+              25.36
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                44.31,
+                41.11
+              ],
+              [
+                50.72,
+                41.16
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.71,
+                29.12
+              ],
+              [
+                48.07,
+                29.45
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36.62,
+                47.5
+              ],
+              [
+                44.24,
+                48.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                35.42,
+                23.53
+              ],
+              [
+                38.95,
+                25.36
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              62.4,
+              31.61
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              50.72,
+              41.16
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              48.07,
+              29.45
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              44.24,
+              48.77
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              38.95,
+              25.36
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              56.99,
+              40.02
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              52.81,
+              28.77
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              51.58,
+              48.43
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              43.22,
+              25.93
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.72,
+                41.16
+              ],
+              [
+                56.99,
+                40.02
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                48.07,
+                29.45
+              ],
+              [
+                52.81,
+                28.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                44.24,
+                48.77
+              ],
+              [
+                51.58,
+                48.43
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                38.95,
+                25.36
+              ],
+              [
+                43.22,
+                25.93
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              67.6,
+              29.19
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              56.99,
+              40.02
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              52.81,
+              28.77
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              51.58,
+              48.43
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              43.22,
+              25.93
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ],
+              [
+                67.6,
+                29.19
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              62.88,
+              38.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              57.81,
+              27.13
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.17,
+              46.82
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              48.03,
+              25.07
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                56.99,
+                40.02
+              ],
+              [
+                62.88,
+                38.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                52.81,
+                28.77
+              ],
+              [
+                57.81,
+                27.13
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                51.58,
+                48.43
+              ],
+              [
+                58.17,
+                46.82
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                43.22,
+                25.93
+              ],
+              [
+                48.03,
+                25.07
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              72.8,
+              26.6
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              62.88,
+              38.0
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              57.81,
+              27.13
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              58.17,
+              46.82
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              48.03,
+              25.07
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ],
+              [
+                67.6,
+                29.19
+              ],
+              [
+                72.8,
+                26.6
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              68.31,
+              35.53
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              62.97,
+              24.79
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              63.81,
+              44.47
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              53.13,
+              22.98
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.88,
+                38.0
+              ],
+              [
+                68.31,
+                35.53
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                57.81,
+                27.13
+              ],
+              [
+                62.97,
+                24.79
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                58.17,
+                46.82
+              ],
+              [
+                63.81,
+                44.47
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                48.03,
+                25.07
+              ],
+              [
+                53.13,
+                22.98
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              78.0,
+              24.21
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              68.31,
+              35.53
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              62.97,
+              24.79
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              63.81,
+              44.47
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              53.13,
+              22.98
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ],
+              [
+                67.6,
+                29.19
+              ],
+              [
+                72.8,
+                26.6
+              ],
+              [
+                78.0,
+                24.21
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              73.24,
+              33.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              68.22,
+              22.1
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              68.48,
+              41.8
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.45,
+              20.0
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.31,
+                35.53
+              ],
+              [
+                73.24,
+                33.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.97,
+                24.79
+              ],
+              [
+                68.22,
+                22.1
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                63.81,
+                44.47
+              ],
+              [
+                68.48,
+                41.8
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                53.13,
+                22.98
+              ],
+              [
+                58.45,
+                20.0
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              83.2,
+              22.33
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              73.24,
+              33.0
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              68.22,
+              22.1
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              68.48,
+              41.8
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              58.45,
+              20.0
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ],
+              [
+                67.6,
+                29.19
+              ],
+              [
+                72.8,
+                26.6
+              ],
+              [
+                78.0,
+                24.21
+              ],
+              [
+                83.2,
+                22.33
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              77.71,
+              30.69
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              73.64,
+              19.4
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              72.22,
+              39.05
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.08,
+              16.47
+            ],
+            "r": 1.6,
+            "c": "muted",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                73.24,
+                33.0
+              ],
+              [
+                77.71,
+                30.69
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.22,
+                22.1
+              ],
+              [
+                73.64,
+                19.4
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68.48,
+                41.8
+              ],
+              [
+                72.22,
+                39.05
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                58.45,
+                20.0
+              ],
+              [
+                64.08,
+                16.47
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.35
+          }
+        ]
+      },
+      {
+        "label": "Final: L stops; the followers hold the V",
+        "ents": [
+          {
+            "id": "L",
+            "p": [
+              83.2,
+              22.33
+            ],
+            "c": "near",
+            "l": "L",
+            "r": 2.4
+          },
+          {
+            "id": "0",
+            "p": [
+              77.71,
+              30.69
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              73.64,
+              19.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              72.22,
+              39.05
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              64.08,
+              16.47
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.0,
+                28.0
+              ],
+              [
+                31.2,
+                30.54
+              ],
+              [
+                36.4,
+                32.73
+              ],
+              [
+                41.6,
+                34.28
+              ],
+              [
+                46.8,
+                34.97
+              ],
+              [
+                52.0,
+                34.71
+              ],
+              [
+                57.2,
+                33.54
+              ],
+              [
+                62.4,
+                31.61
+              ],
+              [
+                67.6,
+                29.19
+              ],
+              [
+                72.8,
+                26.6
+              ],
+              [
+                78.0,
+                24.21
+              ],
+              [
+                83.2,
+                22.33
+              ]
+            ],
+            "c": "muted",
+            "w": 0.6
+          },
+          {
+            "t": "poly",
+            "p": [
+              [
+                72.22,
+                39.05
+              ],
+              [
+                77.71,
+                30.69
+              ],
+              [
+                83.2,
+                22.33
+              ],
+              [
+                73.64,
+                19.4
+              ],
+              [
+                64.08,
+                16.47
+              ]
+            ],
+            "c": "tight",
+            "dash": true,
+            "w": 0.4
+          }
+        ]
+      }
+    ]
+  }
+}

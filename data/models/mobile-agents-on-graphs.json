@@ -1,0 +1,373 @@
+{
+  "id": "mobile-agents-on-graphs",
+  "name": "Mobile agents on graphs",
+  "summary": "Memory-bounded agents move along the edges of a port-labelled graph, by default with anonymous nodes; what they can see, remember, say and rely on is fixed by its assumption axes.",
+  "focus": "Once a task is known to be solvable, the community has mostly asked for it to be **fast**: first the number of rounds (or epochs, or edge traversals), then the **memory per agent** in bits. Problems with hostile nodes or agents, such as black hole search, ask instead for the **smallest number of agents** that still succeeds.",
+  "description": "The graph $G=(V,E)$ has $n$ nodes, $m$ edges, maximum degree $\\Delta$ and diameter $D$. Nodes are **anonymous** (no identifiers) and, unless assumed otherwise, have **no memory** (no whiteboards). Edges are **port-labelled**: the edges incident to a node $v$ carry distinct labels $1,\\dots,\\deg(v)$, and the two endpoints of an edge label it independently. An agent at $v$ sees $\\deg(v)$ and, after arriving through an edge, the port through which it entered.\n\nThere are $k$ agents. Each has a bounded amount of **memory** (persistent across rounds, measured in bits) and runs the same algorithm. In every step an agent (i) exchanges information with whatever agents its communication model allows, (ii) computes, and (iii) either stays or moves through one port. Agents moving in opposite directions along the same edge do not see each other.\n\nAgents know **nothing** about $n$, $m$, $k$, $\\Delta$ or $D$ unless a result says so.\n\n**How the axes work.** Every axis is a scale of assumptions. Level 0 is *no assumption*: the environment may be as hostile as the axis allows (a changing, directed graph; asynchronous, anonymous, Byzantine agents that cannot talk). Each higher level adds one assumption. A problem variant is a point on all axes at once, and the catalogue arranges variants as a tree whose root assumes nothing and whose edges each add assumptions. The *standard setting* of the literature (static undirected graph, $k \\le n$, synchronous rounds, local communication, unique identifiers, no faults) sits several steps below the root.\n\nThe two standard cost measures are the number of rounds until the problem is solved (time) and the number of bits of memory per agent (memory).",
+  "story": [
+    {
+      "heading": "Agents that move through a network",
+      "body": "The model asks what a team of computing entities can achieve when the only way to act on a network is to walk along its edges. Pelc names the two motivating systems: autonomous robots that start in different places of a terrain or a labyrinth, and software agents, \"mobile pieces of software that navigate in a computer network in order to perform maintenance of its components or to collect data distributed in nodes of the network\" [Pelc2019Survey]. Since an algorithm depends only on what the entities perceive, remember and how they move, the same model serves both, and there is no central monitor, so the questions belong to distributed computing [Pelc2019Survey]. Later problems kept this double reading: dispersion was motivated by self-driving electric cars looking for free charging stations with \"car-to-car interactions\" only [Augustine2018Tradeoffs], and black hole search by host attacks on mobile code, a site that destroys incoming agents without a trace [DiLuna2025DynamicBHS]. Each axis of the model fixes one thing that the agents may or may not rely on: the network (dynamics, direction, topology, node identifiers, node memory), the team (count, identifiers, randomness, faults, communication), time, and the start."
+    },
+    {
+      "heading": "Every axis is a freedom of the adversary",
+      "body": "Level 0 on each axis is what the adversary controls when nothing is assumed. In the deterministic scenario \"the initial positions of the agents are chosen by an adversary which models the worst-case situation\" [Pelc2019Survey]; under asynchrony the adversary also chooses when and how fast each move happens [Pelc2019Survey]; in a dynamic network it chooses the edges of every round after seeing the states of the nodes [Kuhn2010Dynamic]; and with Byzantine agents it controls part of the team [Dieudonne2014Mischief]. The remaining axes govern **symmetry**. Two identical agents that run the same deterministic algorithm in an oriented ring and start at the same time keep their distance forever [Pelc2019Survey]: anonymous agents, anonymous nodes, no coins and an adversarial start leave the adversary free to keep the configuration symmetric. Each higher level removes one of these freedoms (labels, node names, coins, a common start, a stable or undirected graph, synchronous rounds, honest agents) and makes the problem easier. This is why results move along the scale: an algorithm proved against a stronger adversary holds against a weaker one, and an impossibility for a weaker adversary holds for a stronger one, as the inclusion hierarchy of time-varying graph classes already makes explicit for dynamics [Casteigts2012TVG]."
+    },
+    {
+      "heading": "How the axes interact",
+      "body": "The axes are independent as assumptions but not in their effect. **Identifiers and the start.** Anonymity matters only when the rest of the instance is symmetric: on a line with an odd number of nodes two identical agents meet at the centre, and from asymmetric positions they can still break symmetry [Pelc2019Survey]; from a rooted start, where agents share their position, only labels or coins can decide which agent settles first, which is how Molla and Moses Jr. use randomness in dispersion [Molla2019Randomness]. **Faults and identifiers.** The two Byzantine levels differ only in whether a faulty agent may forge its label; with known $n$ this is the difference between one good agent sufficing and needing $f+1$, but with unknown $n$ both need $f+2$ [Dieudonne2014Mischief] [Bouchard2016Byzantine]. **Faults and timing.** Under full asynchrony a waiting agent cannot tell a slow agent from a crashed one, so gathering with crash faults is impossible; Pelc restores it by fixing each agent's speed [Pelc2018Crash]. **Dynamics and timing.** In temporal graphs \"the distributed computation is by definition synchronous\" [DiLuna2025DynamicBHS], so dynamic settings in the atlas are synchronous. **Communication and the graph.** Global communication does not tell two agents on neighbouring nodes which edge joins them, so edges must still be traversed [Kshemkalyani2020Global]. **Node memory and node identifiers.** A whiteboard or a pebble lets an agent recognise a node it has seen, the service that node labels would give [Bender2002Pebble] [Fraigniaud2004Digraphs]; without either, settled agents play that role in dispersion [Kshemkalyani2019Efficient]. **Direction and exploration.** An undirected graph can be explored by depth-first search in fewer than $2|V|$ steps, while some directed graphs need $\\Theta(|V|^2)$ [Erlebach2021Temporal], because backtracking along an edge is no longer available [Italiano2022Directed]."
+    },
+    {
+      "heading": "Why the standard setting is where it is",
+      "body": "The setting most papers start from is a static, undirected, connected graph with anonymous nodes and locally labelled ports, synchronous rounds, deterministic fault-free agents with distinct labels, communication between co-located agents only, and no node memory. Each choice has a stated reason. Undirected edges capture movement in both directions along a link, and connectivity is necessary for agents in different components to meet at all [Pelc2019Survey]. Anonymous nodes are assumed because labels may be withheld for privacy or security, may be unreadable by weak sensors, and because readable labels would reduce rendezvous to exploration; port numbers stay, because without them an agent may never reach all neighbours of a node of degree at least 3 [Pelc2019Survey]. Distinct agent labels are the cheapest deterministic way to break symmetry [Pelc2019Survey] [Dessmark2006Deterministic]; determinism is kept because probabilistic approaches \"typically fail to provide absolute guarantees\" [Devismes2026Homonymous]. Local communication matches the physical picture of agents that meet [Augustine2018Tradeoffs]. Synchronous rounds let agents use waiting as a tool [Pelc2019Survey]. The research programme then removes these assumptions one at a time: asynchrony [DeMarco2006Asynchronous] [Kshemkalyani2019Efficient], dynamic graphs [DiLuna2020Dynamic] [Agarwalla2018DynamicRings], directed graphs [Italiano2022Directed], Byzantine agents [Dieudonne2014Mischief] [Molla2021ByzantineGraphs], silent agents [Gorain2022Silent], and repeated labels [Devismes2026Homonymous]. The level-0 corner of the model, where none of the assumptions hold, is where most open questions sit."
+    }
+  ],
+  "axes": [
+    {
+      "id": "dynamics",
+      "name": "Graph dynamics",
+      "values": [
+        {
+          "id": "temporal",
+          "level": 0,
+          "label": "time-varying graph, only temporally connected",
+          "short": "any dynamics",
+          "description": "Edges come and go; the union over time is connected but the graph may be disconnected in every single round.",
+          "definition": "A **temporal graph** is a sequence $\\mathcal G=(G_t)_{t\\ge 0}$ with $G_t=(V,E_t)$ on a fixed node set. It is *temporally connected* if for all $u,v\\in V$ and every time $t$ there is a journey (a path whose edges appear at non-decreasing times $\\ge t$) from $u$ to $v$. No $G_t$ need be connected."
+        },
+        {
+          "id": "1-interval",
+          "level": 1,
+          "label": "dynamic graph, connected in every round (1-interval connected)",
+          "short": "connected every round",
+          "description": "An adversary removes or adds edges every round subject to the graph staying connected in every round.",
+          "definition": "$\\mathcal G=(G_t)_{t\\ge0}$ is **1-interval connected** if every snapshot $G_t=(V,E_t)$ is connected. More generally it is $T$-interval connected if for every $t$ the graph $\\bigl(V,\\bigcap_{i=t}^{t+T-1}E_i\\bigr)$ is connected."
+        },
+        {
+          "id": "static",
+          "level": 2,
+          "label": "static graph",
+          "short": "static graph",
+          "definition": "$G_t=G$ for all $t$: the edge set never changes."
+        }
+      ],
+      "origin": "Graphs that change all the time entered distributed computing as models of mobile, wireless and peer-to-peer networks. Kuhn, Lynch and Oshman introduced $T$-interval connectivity in a worst-case model where an adversary picks the edges of each round; \"for $T = 1$ this means that the graph is connected in every round, but changes arbitrarily between rounds\" [Kuhn2010Dynamic]. Casteigts, Flocchini, Quattrociocchi and Santoro unified the many models of time-varying graphs into a hierarchy of classes: the always-connected class, used earlier by O'Dell and Wattenhofer (as reported there), and recurrent connectivity, in which journeys exist from every time onward, which is level 0 here [Casteigts2012TVG]. They put the reason for the scale in one sentence: in these systems \"changes are not anomalies but rather integral part of the nature of the system\" [Casteigts2012TVG]. Kuhn et al. show the adversary's strength with a token that must keep moving: in a 1-interval connected graph the adversary can keep it between two nodes forever [Kuhn2010Dynamic], which is in effect a single agent that cannot explore. Mobile agents entered the setting with live exploration of 1-interval connected rings [DiLuna2020Dynamic] and dispersion in dynamic rings [Agarwalla2018DynamicRings]; offline exploration of temporal graphs is the centralised counterpart [Erlebach2021Temporal]."
+    },
+    {
+      "id": "direction",
+      "name": "Edge direction",
+      "values": [
+        {
+          "id": "directed",
+          "level": 0,
+          "label": "directed (strongly connected)",
+          "short": "directed",
+          "description": "Edges can be traversed in one direction only; an agent cannot backtrack. Strong connectivity is assumed, otherwise most tasks are unsolvable.",
+          "definition": "$G=(V,A)$ with $A\\subseteq V\\times V$; an agent at $u$ may move along $(u,v)\\in A$ only, never back along it unless $(v,u)\\in A$. $G$ is strongly connected."
+        },
+        {
+          "id": "undirected",
+          "level": 1,
+          "label": "undirected",
+          "short": "undirected",
+          "definition": "$G=(V,E)$ with $E\\subseteq\\binom V2$; every edge can be traversed in both directions."
+        }
+      ],
+      "origin": "Most of the mobile-agent literature uses undirected graphs because this \"captures the ability of the agents to move in both directions along each link\" [Pelc2019Survey]. Directed graphs come from the exploration literature. The earliest paper in the atlas on exploring an unknown directed graph is Deng and Papadimitriou's [Deng1999Exploring], continued by Albers and Henzinger [Albers2000Exploring]. Bender, Fernández, Ron, Sahai and Vadhan asked what a robot needs to map an unlabelled strongly connected digraph, and showed that one pebble suffices when a bound on $n$ is known [Bender2002Pebble]; Fraigniaud and Ilcinkas studied how little memory digraph exploration needs [Fraigniaud2004Digraphs]. Direction removes backtracking: a static undirected graph is explored by depth-first search in fewer than $2|V|$ steps, while some static directed graphs need $\\Theta(|V|^2)$ steps [Erlebach2021Temporal]. Italiano, Pattanayak and Sharma posed dispersion on directed anonymous graphs because \"the existing approaches for undirected graphs rely substantially on visiting a graph edge in both directions\", and showed that without strong connectivity dispersion may be unsolvable [Italiano2022Directed]."
+    },
+    {
+      "id": "count",
+      "name": "Number of agents",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number of agents, possibly $k > n$",
+          "short": "any $k$",
+          "definition": "The number of agents $k\\ge1$ is arbitrary; $k>n$ is allowed."
+        },
+        {
+          "id": "k-le-n",
+          "level": 1,
+          "label": "$k \\le n$",
+          "short": "$k \\le n$",
+          "definition": "The number of agents satisfies $1\\le k\\le n$."
+        }
+      ],
+      "origin": "Most tasks in this model are posed for a team of any size: gathering an unknown team of anonymous agents [Dieudonne2016Anonymous], black hole search, where the size of the team is the main measure [Dobrev2006Searching], and collective exploration by $k$ agents [Fraigniaud2006Collective]. The cap $k \\le n$ comes from dispersion, where every agent needs a node of its own. Augustine and Moses Jr. posed dispersion with $k = n$, motivated by electric cars that should not queue at one charging station [Augustine2018Tradeoffs], and Kshemkalyani and Ali relaxed it to $k \\le n$ [Kshemkalyani2019Efficient]. Molla and Moses Jr. extended dispersion to any $k$, asking for at most $\\lceil k/n \\rceil$ agents per node [Molla2019Randomness]. The extension is not free: with $k > n$ Byzantine dispersion is impossible deterministically whenever $\\lceil k/n \\rceil > \\lceil (k-f)/n \\rceil$ [Molla2021ByzantineGraphs]. The axis thus separates tasks where the team must fit into the graph from tasks where the team size is unconstrained."
+    },
+    {
+      "id": "ids",
+      "name": "Identifiers",
+      "values": [
+        {
+          "id": "anonymous",
+          "level": 0,
+          "label": "anonymous: all agents are identical",
+          "short": "anonymous",
+          "definition": "All agents run the same deterministic algorithm on the same input; no agent has a label. Formally the label function is constant: $\\mathrm{id}(a)=\\mathrm{id}(b)$ for all agents $a,b$."
+        },
+        {
+          "id": "homonymous",
+          "level": 1,
+          "label": "homonymous: agents carry labels, but several may share a label",
+          "short": "homonymous",
+          "description": "Between anonymous and eponymous: labels exist but need not be distinct.",
+          "definition": "Each agent $a$ has a label $\\mathrm{id}(a)\\in\\mathcal L$ known to itself (and revealed on meeting), but the labelling need not be injective: $1\\le|\\{\\mathrm{id}(a)\\}|\\le k$. With $|\\mathcal L|$ distinct labels, $|\\mathcal L|=1$ is the anonymous case and $|\\mathcal L|=k$ the eponymous one [Delporte2013Homonyms]."
+        },
+        {
+          "id": "unique",
+          "level": 2,
+          "label": "distinct identifiers (eponymous): agents have pairwise distinct identifiers",
+          "short": "distinct IDs (eponymous)",
+          "definition": "**Distinct identifiers** (eponymous agents): the label function $\\mathrm{id}:\\{1,\\dots,k\\}\\to\\{1,\\dots,L\\}$ is injective; usually $L=k^{O(1)}$, so a label takes $O(\\log k)$ bits."
+        }
+      ],
+      "origin": "Pelc's survey names anonymous versus labelled agents as one of the two main pairs of assumptions in rendezvous, and gives the reason: two identical agents running the same deterministic algorithm in an oriented ring, starting together, keep the same distance forever [Pelc2019Survey]. Distinct labels break this symmetry: in the work of Dessmark, Fraigniaud, Kowalski and Pelc each agent knows only its own label and uses it as a parameter of the common algorithm, and rendezvous becomes feasible in every graph at cost polynomial in $n$, the delay and $\\log\\lambda$, $\\lambda$ the smaller label; without labels it fails already on two nodes joined by an edge, since both agents always stay or always move together [Dessmark2006Deterministic]. Without labels the only asymmetry comes from the graph and the starting positions; Dieudonné and Pelc characterised the configurations of anonymous agents that can be gathered [Dieudonne2016Anonymous]. Homonyms, several agents sharing a label, come from Byzantine agreement with homonyms [Delporte2013Homonyms] and were taken to robots in the plane [Bouzid2011Homonyms]. In graphs, Devismes, Dieudonné and Labourel motivate them by the cost of \"generating and maintaining globally unique labels\" and by privacy, and ask how many distinct labels gathering really needs [Devismes2026Homonymous]."
+    },
+    {
+      "id": "algorithm",
+      "name": "Randomness",
+      "values": [
+        {
+          "id": "deterministic",
+          "level": 0,
+          "label": "deterministic",
+          "short": "deterministic",
+          "definition": "The next state and move of an agent are a function of its current state and what it observes."
+        },
+        {
+          "id": "randomized",
+          "level": 1,
+          "label": "randomized (agents have private coins)",
+          "short": "private coins",
+          "definition": "Each agent additionally has access to independent fair coin flips; guarantees hold with probability 1, in expectation, or with high probability, as stated per result."
+        }
+      ],
+      "origin": "Pelc counts determinism versus randomisation among the two assumptions that most shape the methods for rendezvous: a deterministic algorithm faces adversarial starting positions and is judged by its worst-case cost, while randomised algorithms often use random walks and are judged by expected cost [Pelc2019Survey]. The random-walk view of graph traversal goes back to Aleliunas et al., who connected random walks with universal traversal sequences [Aleliunas1979Random]. In this model randomness serves mainly to break symmetry: Molla and Moses Jr. let co-located anonymous agents elect a local leader by coin flips, so that dispersion needs $O(\\log\\Delta)$ bits per agent instead of the $\\Omega(\\log n)$ bits of deterministic algorithms [Molla2019Randomness]. Deterministic algorithms are level 0 because they promise a bound for every execution; Devismes, Dieudonné and Labourel note that probabilistic approaches \"typically fail to provide absolute guarantees in terms of complexity and/or accuracy\" [Devismes2026Homonymous]. Hence a deterministic algorithm also counts in the randomized setting, and a lower bound against randomized algorithms holds for deterministic ones."
+    },
+    {
+      "id": "faults",
+      "name": "Faults",
+      "values": [
+        {
+          "id": "strong-byzantine",
+          "level": 0,
+          "label": "up to $f$ strong Byzantine agents (arbitrary behaviour, can fake identifiers)",
+          "short": "any faults",
+          "definition": "Up to $f$ agents behave arbitrarily (adversarially) and may **forge** identifiers, i.e. report any label in $\\mathcal L$."
+        },
+        {
+          "id": "weak-byzantine",
+          "level": 1,
+          "label": "up to $f$ weak Byzantine agents (arbitrary behaviour, cannot fake identifiers)",
+          "short": "at most weak Byzantine faults",
+          "definition": "Up to $f$ agents behave arbitrarily but always report their own true identifier."
+        },
+        {
+          "id": "crash",
+          "level": 2,
+          "label": "up to $f$ agents may crash (stop forever)",
+          "short": "at most crash faults",
+          "definition": "Up to $f$ agents may stop forever at an adversarially chosen time; a crashed agent stays at its node (or vanishes, as stated per result) and never acts again."
+        },
+        {
+          "id": "none",
+          "level": 3,
+          "label": "no faults",
+          "short": "no faults",
+          "definition": "All agents follow the algorithm forever."
+        }
+      ],
+      "origin": "The first faults studied for mobile agents sat in the network: Dobrev, Flocchini, Prencipe and Santoro introduced the black hole, a node that destroys every agent that enters it, in rings and then in arbitrary networks [Dobrev2007Ring] [Dobrev2006Searching]; it models a host that trashes incoming code or crashes without notice [DiLuna2025DynamicBHS]. Faults in the agents, which this axis records, came later. Dieudonné, Pelc and Peleg started the study of gathering with Byzantine agents and defined the two levels used here: a strongly Byzantine agent \"can choose an arbitrary port when it moves and it can convey arbitrary information to other agents, while a weakly Byzantine agent can do the same, except changing its label\" [Dieudonne2014Mischief]. The distinction is about identity and it changes the answer: with known $n$ a single good agent gathers despite $f$ weakly Byzantine agents, but $f+1$ good agents are needed against strongly Byzantine ones, even in a ring of known size, while with unknown $n$ both cases need $f+2$ [Dieudonne2014Mischief]; Dieudonné, Pelc and Peleg left the strongly Byzantine upper bounds at $2f+1$ (known $n$) and $4f+2$ (unknown $n$), and Bouchard, Dieudonné and Ducourthial closed them [Bouchard2016Byzantine] [Pelc2019Survey]. Crash faults are the mildest level; Pelc showed that with fully asynchronous agents gathering with crashes is impossible, since a waiting agent cannot tell a slow agent from a crashed one, and solved it when each agent has a fixed speed [Pelc2018Crash]. Dispersion adopted both Byzantine levels [Molla2021ByzantineGraphs] and crash faults [Chand2023FaultTolerant]."
+    },
+    {
+      "id": "communication",
+      "name": "Communication",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "none (silent agents; only see how many agents are co-located)",
+          "short": "no communication",
+          "definition": "Agents exchange no messages; an agent at $v$ observes only the number of agents at $v$ (and, where stated, whether that number changed)."
+        },
+        {
+          "id": "local",
+          "level": 1,
+          "label": "local (co-located agents communicate)",
+          "short": "local communication",
+          "definition": "Agents at the same node at the same time can read each other's entire memory (face-to-face communication). Agents crossing on an edge do not meet."
+        },
+        {
+          "id": "h-hop",
+          "level": 2,
+          "label": "$h$-hop (agents within $h$ hops communicate)",
+          "short": "$h$-hop communication",
+          "definition": "For a fixed $h \\ge 1$, stated with each result: at every round an agent at $v$ can read the memory of every agent at a node $u$ with $\\mathrm{dist}(v,u) \\le h$ (in the current snapshot $G_t$ for a dynamic graph), in addition to the co-located agents. $h = 1$ is **1-hop communication** (agents at neighbouring nodes communicate); local communication is the case $h = 0$, and global communication the case $h \\ge D$. Reading another agent's memory does not tell an agent which port leads to it.",
+          "description": "Agents talk to agents up to $h$ hops away; 1-hop communication is $h = 1$. Between local ($h=0$) and global ($h \\ge D$) communication."
+        },
+        {
+          "id": "global",
+          "level": 3,
+          "label": "global (any agent can read any other agent's state)",
+          "short": "global communication",
+          "definition": "At every round every agent can read the memory of every other agent, wherever it is."
+        }
+      ],
+      "origin": "Communication between co-located agents is the classical assumption of rendezvous and gathering, where agents that meet \"can exchange all information they currently have\" [Pelc2019Survey]. Augustine and Moses Jr. kept it for dispersion, assuming robots \"can only communicate with other robots present on their own node\", in line with their picture of cars that interact only car to car [Augustine2018Tradeoffs]. Di Luna, Dobrev, Flocchini and Santoro list the forms used in exploration: face-to-face, wireless (agents on different nodes), and whiteboards [DiLuna2020Dynamic]. Kshemkalyani, Molla and Sharma introduced global communication to dispersion to measure \"how much global communication helps\", and observed that it does not tell two agents on neighbouring nodes which edge joins them, so the graph must still be walked [Kshemkalyani2020Global]. For collective tree exploration Fraigniaud, Gąsieniec, Kowalski and Pelc showed that without communication $k$ agents gain nothing over one [Fraigniaud2006Collective]. Between the two, Italiano, Pattanayak and Sharma studied a **1-hop model**, in which \"a robot may also communicate with robots positioned on its 1-hop neighbors\", and used it to disperse on directed graphs in $O(kD)$ rounds by broadcasting and gathering information along the graph [Italiano2022Directed]. Saxena, Kaur and Mondal generalised it to **ℓ-hop communication** ($h$-hop here), \"a spectrum between f-2-f ($l = 0$) and global communication ($l = D$)\", and showed that for balanced dispersion on 1-bounded 1-interval connected graphs agents need 1-hop visibility and 1-hop communication [Saxena2025Balanced]; the axis writes $h$ for their $\\ell$, which the atlas uses for occupied nodes. At level 0, Gorain, Mandal, Mondal and Pandit asked whether talking is needed at all, and dispersed agents that only learn whether they are alone and whether the number of agents at their node changed [Gorain2022Silent]."
+    },
+    {
+      "id": "timing",
+      "name": "Timing",
+      "values": [
+        {
+          "id": "async",
+          "level": 0,
+          "label": "asynchronous",
+          "short": "asynchronous",
+          "description": "Each agent's steps take finite but unbounded time; time is counted in epochs, intervals in which every agent completes at least one step (not necessarily the shortest ones).",
+          "definition": "Each agent's Communicate–Compute–Move steps take finite but unbounded, adversarially chosen time. Time is measured in epochs. An **epoch** is an interval of time in which every agent completes at least one full Communicate–Compute–Move step; it need not be the shortest such interval. Time is counted by dividing the execution into consecutive epochs, and a bound of $X$ epochs holds for every such division."
+        },
+        {
+          "id": "sync",
+          "level": 1,
+          "label": "synchronous rounds",
+          "short": "synchronous",
+          "definition": "Time proceeds in rounds $t=1,2,\\dots$; in every round every agent communicates, computes and moves (at most one edge) simultaneously."
+        }
+      ],
+      "origin": "Pelc names synchronous versus asynchronous movement as the second main pair of assumptions for rendezvous: synchronous agents can alternate measured periods of activity and waiting, \"a powerful tool\", while asynchronous agents move at speeds the adversary varies, so algorithms must force trajectories to overlap [Pelc2019Survey]. The asynchronous model for agents in graphs was introduced by De Marco, Gargano, Kranakis, Krizanc, Pelc and Vaccaro for rendezvous; since a meeting at a node cannot be guaranteed even in the two-node graph, agents may also meet inside an edge [DeMarco2006Asynchronous] (as described in [Pelc2019Survey]). Black hole search was posed for asynchronous agents with whiteboards [Dobrev2006Searching], while dispersion started synchronous and Kshemkalyani and Ali gave its first asynchronous algorithms [Kshemkalyani2019Efficient]. Intermediate schedulers exist: Di Luna et al. brought the semi-synchronous model, \"common in the context of mobile agents in continuous spaces\", to agents in graphs [DiLuna2020Dynamic]. Asynchrony interacts with other axes: it makes gathering with crash faults impossible [Pelc2018Crash], and dynamic graphs are synchronous by definition [DiLuna2025DynamicBHS]."
+    },
+    {
+      "id": "node-memory",
+      "name": "Node memory",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no whiteboards",
+          "short": "no whiteboards",
+          "definition": "Nodes have no storage: no information can be left at a node except by an agent staying there."
+        },
+        {
+          "id": "whiteboard",
+          "level": 1,
+          "label": "whiteboards at nodes",
+          "short": "whiteboards",
+          "definition": "Each node $v$ has a whiteboard of bounded size that agents at $v$ can read and write, with mutual exclusion."
+        }
+      ],
+      "origin": "Whiteboards are the shared memory of the mobile-agent model: each node keeps a little storage that visiting agents read and write in mutual exclusion, \"where the agents communicate by writing on and reading from whiteboards present in each node\" [DiLuna2020Dynamic]. They are the standard tool in black hole search, posed for asynchronous agents with whiteboards [Dobrev2006Searching], and in map construction, where identical agents with whiteboards build a map exactly when symmetry can be broken [Das2007Map]. Their purpose is marking: an agent that can leave information at a node can recognise it later, which is what node labels would otherwise provide [Bender2002Pebble]. The cheaper markers are pebbles or tokens, and black hole search showed that whiteboards can be replaced by them [Dobrev2013Tokens] [Flocchini2012PingPong]; for digraphs, whiteboards of $O(\\log\\Delta_{out})$ bits let an agent with constant memory explore [Fraigniaud2004Digraphs]. Pelc counts the ability to see marks among the assumptions that most change methods, since it \"significantly facilitates\" rendezvous [Pelc2019Survey]. Level 0 has no node memory, as in dispersion, where settled agents serve as markers instead [Kshemkalyani2019Efficient]."
+    },
+    {
+      "id": "node-ids",
+      "name": "Node identifiers",
+      "values": [
+        {
+          "id": "anonymous",
+          "level": 0,
+          "label": "anonymous nodes",
+          "short": "anonymous nodes",
+          "definition": "Nodes have no identifiers; an agent at $v$ sees only $\\deg(v)$ and the port numbers $1,\\dots,\\deg(v)$, which are assigned locally and independently at each endpoint of an edge."
+        },
+        {
+          "id": "labelled",
+          "level": 1,
+          "label": "labelled nodes (an agent can recognise a node it has visited)",
+          "short": "labelled nodes",
+          "description": "Every node carries a distinct identifier that agents can read. Most of the collaborative-exploration literature works in this setting.",
+          "definition": "Each node $v$ carries a distinct identifier that agents at $v$ can read; hence an agent can recognise a node it has visited."
+        }
+      ],
+      "origin": "Anonymous nodes with locally labelled ports are the standard network of this model, and Pelc gives the reasons. Practically, nodes may withhold their labels \"for privacy or security reasons\", or the agents' sensors may be too weak to read them; methodologically, readable labels would let agents meet at the smallest label, reducing rendezvous to exploration [Pelc2019Survey]. Port numbers are kept because without them an agent may be unable to visit all neighbours of a node of degree at least 3, and because reading a port needs far less than reading a name [Pelc2019Survey]. The same convention underlies memory-bounded exploration, where a finite automaton explores a graph \"whose nodes are unlabeled and whose edge ports are locally labeled\" [Fraigniaud2005Automaton]. Labelled nodes belong to the online-exploration tradition, in which the agent recognises nodes and builds a map [Deng1999Exploring] [Albers2000Exploring], and to collective exploration, where nodes are typically labelled [Augustine2018Tradeoffs] [Fraigniaud2006Collective]. With labelled nodes many symmetry questions disappear, which is why the axis separates navigation from symmetry breaking."
+    },
+    {
+      "id": "topology",
+      "name": "Topology",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "arbitrary connected graph",
+          "short": "any topology",
+          "definition": "$G$ is any connected graph in the class allowed by the other axes."
+        },
+        {
+          "id": "ring",
+          "level": 1,
+          "label": "ring or path",
+          "short": "ring",
+          "description": "A cycle (every node has degree two) or a path; results for the two are usually stated together.",
+          "definition": "$G$ is a cycle $C_n$ (every node of degree 2), or a path when stated."
+        },
+        {
+          "id": "tree",
+          "level": 1,
+          "label": "tree",
+          "short": "tree",
+          "definition": "$G$ is connected and acyclic: $|E|=n-1$."
+        },
+        {
+          "id": "grid",
+          "level": 1,
+          "label": "grid",
+          "short": "grid",
+          "description": "A $\\sqrt{n}\\times\\sqrt{n}$ anonymous grid; whether ports are globally consistent (oriented) is stated per result.",
+          "definition": "$G$ is a $\\sqrt n\\times\\sqrt n$ grid graph; whether ports are globally consistent (oriented) is stated per result."
+        },
+        {
+          "id": "complete",
+          "level": 1,
+          "label": "complete graph",
+          "short": "complete graph",
+          "definition": "$G=K_n$: every pair of nodes is adjacent."
+        },
+        {
+          "id": "hypercube",
+          "level": 1,
+          "label": "hypercube",
+          "short": "hypercube",
+          "definition": "$G=Q_j$: nodes are the $n=2^j$ binary strings of length $j$, adjacent when they differ in one bit."
+        },
+        {
+          "id": "bipartite",
+          "level": 1,
+          "label": "bipartite",
+          "short": "bipartite",
+          "definition": "$V = V_1 \\cup V_2$ with $V_1 \\cap V_2 = \\emptyset$ and every edge joining $V_1$ to $V_2$; trees are a special case."
+        }
+      ],
+      "origin": "Special topologies enter for two reasons: they are the simplest graphs with a given feature, and they are networks that are used. Trees can be explored with termination by a single agent and have a central node or edge that acts as a focal point, so rendezvous was first solved there; rings are \"the simplest class\" of graphs with cycles [Pelc2019Survey] [Dessmark2006Deterministic]. The oriented ring is also the most symmetric instance, where identical agents cannot meet [Pelc2019Survey]. The ring, oriented or not, was the first topology for black hole search [Dobrev2007Ring], and the oriented ring was the first for live exploration of dynamic graphs [DiLuna2020Dynamic] and, as reported by [Molla2021ByzantineGraphs], for Byzantine dispersion. Grids model discretised space: the infinite grid is a tool for rendezvous in the plane [Pelc2019Survey], and dispersion on grids is studied for its own sake [Kshemkalyani2020Grids]. Hypercubes are interconnection networks on which decontamination was solved before unknown graphs [Flocchini2008Hypercubes]; the complete graph $K_3$ is the witness in Pelc's crash impossibility [Pelc2018Crash]; bipartite graphs appear with butterfly counting by agents [Chand2025Butterfly]. Level 0 is an arbitrary connected graph, unknown to the agents."
+    },
+    {
+      "id": "initial",
+      "name": "Initial configuration",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "arbitrary (agents on any $\\ell \\le k$ nodes)",
+          "short": "any start",
+          "definition": "Agents start at arbitrary nodes; $\\ell\\le k$ nodes are initially occupied, possibly with several agents each."
+        },
+        {
+          "id": "rooted",
+          "level": 1,
+          "label": "rooted (all agents on one node)",
+          "short": "rooted start",
+          "definition": "All $k$ agents start at the same node ($\\ell=1$). Also called *co-located* (black hole search: all agents at the *home base*) or a *rooted graph* [Molla2019Randomness]."
+        },
+        {
+          "id": "dispersed",
+          "level": 1,
+          "label": "dispersed or scattered (one agent per occupied node)",
+          "short": "dispersed start",
+          "definition": "Every initially occupied node holds exactly one agent ($\\ell=k$). Also called a *scattered* start, notably in black hole search.",
+          "description": "Each agent starts alone at its own node. Black hole search papers call this a scattered start."
+        }
+      ],
+      "origin": "The starting configuration is the adversary's last choice. Rooted starts come from exploration, where the team leaves a common home: collective tree exploration places all $k$ agents at the root [Fraigniaud2006Collective], black hole search starts from a safe home base [Dobrev2006Searching], and Molla and Moses Jr. call this a rooted graph [Molla2019Randomness]. Dispersed starts come from rendezvous and gathering, where agents start at distinct nodes [Pelc2019Survey] [Dieudonne2016Anonymous], and from black hole search with scattered agents [DiLuna2025DynamicBHS]. A dispersed configuration is also the output of dispersion, so tasks computed by agents after dispersing, such as leader election, start from it [Kshemkalyani2026Leader] [Sudo2024NearLinear]. Dispersion itself was posed from arbitrary configurations, robots \"placed in an n node graph arbitrarily\" [Augustine2018Tradeoffs], and rooted dispersion became a separate variant [Molla2019Randomness]. The two special starts expose different symmetries: co-located agents are indistinguishable by position, so labels or coins must decide who moves [Molla2019Randomness]; scattered agents have distinct positions that may still look alike in a symmetric graph [Pelc2019Survey]."
+    }
+  ]
+}

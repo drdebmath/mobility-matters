@@ -1,0 +1,6606 @@
+{
+  "id": "ring-deployment",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Uniform deployment on a ring",
+  "origin": {
+    "ref": "Flocchini2008Deployment",
+    "year": 2006,
+    "note": "Self-deployment of mobile sensors on a ring (ALGOSENSORS 2006)."
+  },
+  "related": [
+    {
+      "problem": "scattering",
+      "relation": "Both spread robots out; scattering only needs distinct positions, deployment needs equal spacing."
+    }
+  ],
+  "summary": "Robots on a circle must spread out to equal spacing.",
+  "statement": "$n$ robots on a circle (or a ring of length $L$) must reach positions at equal distance $d=L/n$ from their neighbours and stop. Spreading on a segment is the one-dimensional analogue.",
+  "primer": {
+    "intro": "Picture $n$ guards spread at random along a circular wall who must spread out so that every two neighbours are the same distance apart. In uniform deployment, $n$ robots sit at distinct points of a circle of length $L$ and must reach positions where every gap between consecutive robots is exactly $d = L/n$, and then stop. In the basic version robots are oblivious (they forget everything after each move), asynchronous (an adversary decides when each robot looks and moves, and a robot may see others in mid-move), and agree on which way is clockwise (an *oriented* ring).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Close the gap in front of you, only clockwise",
+        "variant": "oriented",
+        "ref": "Flocchini2008Deployment",
+        "idea": "Robots know $d$. Each time a robot is activated:\n1. Look clockwise and measure the distance to the next robot.\n2. If that distance is at most $d$, do nothing.\n3. If it is more than $d$, move clockwise until you are exactly $d$ behind that robot.",
+        "analysis": "All gaps add up to $L = nd$, so if some gap is smaller than $d$, another is larger. Robots only move clockwise, so the robot in front never comes closer; a robot whose gap is at least $d$ therefore never again has a gap below $d$, and the number of such robots never decreases. [Flocchini2008Deployment] prove that this protocol (Uniform Known) reaches exact deployment in finite time, even with limited visibility $2d$; when $d$ is unknown, a \"go to the half\" rule reaches every gap within any $\\varepsilon$ of $d$. No running-time bound is recorded in the catalogue.",
+        "why_it_matters": "It shows that a shared sense of direction plus one number ($d$) turns an impossible task into a three-line rule."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Two mirror-image teams that always overshoot",
+        "variant": "oriented",
+        "ref": "Flocchini2008Deployment",
+        "idea": "Without a shared clockwise direction exact deployment is impossible, even with full memory and SSYNC activation. Take $n = 4$: black robots at two opposite points, white robots at two opposite points, the white pair rotated by a small angle from the uniform position. Black robots think clockwise is one way, white robots think it is the other, so each black robot sees exactly what each white robot sees, in mirror image. The adversary then plays:\n1. If moving only the blacks would not finish the job, move only the blacks (the picture keeps the same two-team shape).\n2. If moving only the blacks would finish, then by the mirror image moving only the whites would also finish; so move both. Each team closes the same gap, together they overshoot, and again the picture has the same shape.\n3. Alternate between starting with the blacks and the whites, so every robot moves infinitely often.",
+        "analysis": "Every round leaves the robots in two rotated half-teams, never equally spaced, so the algorithm never finishes [Flocchini2008Deployment]. The argument works for every even $n$ with two interleaved regular $n/2$-gons. It is why the catalogued variant assumes an oriented ring.",
+        "why_it_matters": "It is a model example of an adversary that exploits mirror symmetry and the freedom to choose who moves."
+      }
+    ]
+  },
+  "history": "Self-deployment asked **under which assumptions robots can spread uniformly** around a ring [Flocchini2008Deployment] or along a segment [Cohen2008Spreading]: orientation and knowledge of the target distance turned out to be the deciding factors.",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "oriented",
+      "title": "Oriented ring, asynchronous, oblivious",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "On an oriented ring oblivious asynchronous robots deploy exactly if they know $d$, and within any $\\varepsilon$ if they do not.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2008Deployment",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "exact deployment without orientation, even semi-synchronous"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2008Deployment",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$d$ known for exact deployment"
+          ],
+          "note": "Introductory and current best; $\\varepsilon$-approximate deployment without knowing $d$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Is knowledge of $d$ necessary for exact deployment on an oriented ring? Which capabilities allow asynchronous exact deployment on unoriented rings? [Flocchini2008Deployment]"
+      ],
+      "notes": "The chirality value stands for an oriented ring. Spreading on a segment: [Cohen2008Spreading].",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Uniform deployment on a ring: robots on a circle of length $L$ must reach positions at distance exactly $d = L/n$ from their neighbours and stop [Flocchini2008Deployment]. The animation runs their rule for an oriented ring with known $d$: an activated robot whose clockwise gap (red) exceeds $d$ moves clockwise along the ring until it is exactly $d$ behind the next robot; here the asynchronous adversary activates one robot at a time.",
+    "view": [
+      100,
+      56
+    ],
+    "static": [
+      {
+        "t": "circle",
+        "p": [
+          50,
+          28
+        ],
+        "r": 22,
+        "c": "line",
+        "w": 1.0
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: oriented ring, $n = 6$, robots know $d = L/6$",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.18,
+              49.67
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              30.06,
+              18.7
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              69.05,
+              17.0
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.18,
+              49.67
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              30.06,
+              18.7
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              69.05,
+              17.0
+            ],
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                71.22,
+                15.75
+              ],
+              [
+                70.53,
+                14.63
+              ],
+              [
+                69.78,
+                13.55
+              ],
+              [
+                68.98,
+                12.51
+              ],
+              [
+                68.12,
+                11.51
+              ],
+              [
+                67.21,
+                10.56
+              ],
+              [
+                66.25,
+                9.66
+              ],
+              [
+                65.24,
+                8.82
+              ],
+              [
+                64.19,
+                8.03
+              ],
+              [
+                63.09,
+                7.29
+              ],
+              [
+                61.96,
+                6.62
+              ],
+              [
+                60.8,
+                6.01
+              ],
+              [
+                59.6,
+                5.46
+              ],
+              [
+                58.38,
+                4.98
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                66.89,
+                18.25
+              ],
+              [
+                66.35,
+                17.37
+              ],
+              [
+                65.76,
+                16.52
+              ],
+              [
+                65.13,
+                15.7
+              ],
+              [
+                64.46,
+                14.92
+              ],
+              [
+                63.75,
+                14.18
+              ],
+              [
+                63.0,
+                13.47
+              ],
+              [
+                62.22,
+                12.8
+              ],
+              [
+                61.39,
+                12.18
+              ],
+              [
+                60.54,
+                11.6
+              ],
+              [
+                59.66,
+                11.06
+              ],
+              [
+                58.75,
+                10.57
+              ],
+              [
+                57.82,
+                10.14
+              ],
+              [
+                56.86,
+                9.75
+              ],
+              [
+                55.89,
+                9.41
+              ],
+              [
+                54.9,
+                9.13
+              ],
+              [
+                53.89,
+                8.89
+              ],
+              [
+                52.88,
+                8.71
+              ],
+              [
+                51.85,
+                8.59
+              ],
+              [
+                50.82,
+                8.52
+              ],
+              [
+                49.79,
+                8.5
+              ],
+              [
+                48.76,
+                8.54
+              ],
+              [
+                47.74,
+                8.63
+              ],
+              [
+                46.72,
+                8.78
+              ],
+              [
+                45.7,
+                8.98
+              ],
+              [
+                44.7,
+                9.23
+              ],
+              [
+                43.72,
+                9.54
+              ],
+              [
+                42.75,
+                9.9
+              ],
+              [
+                41.81,
+                10.31
+              ],
+              [
+                40.88,
+                10.76
+              ],
+              [
+                39.98,
+                11.27
+              ],
+              [
+                39.11,
+                11.82
+              ],
+              [
+                38.27,
+                12.42
+              ],
+              [
+                37.47,
+                13.06
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 5: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.18,
+              49.67
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              30.06,
+              18.7
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              64.14,
+              11.15
+            ],
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                71.22,
+                15.75
+              ],
+              [
+                70.53,
+                14.63
+              ],
+              [
+                69.78,
+                13.55
+              ],
+              [
+                68.98,
+                12.51
+              ],
+              [
+                68.12,
+                11.51
+              ],
+              [
+                67.21,
+                10.56
+              ],
+              [
+                66.25,
+                9.66
+              ],
+              [
+                65.24,
+                8.82
+              ],
+              [
+                64.19,
+                8.03
+              ],
+              [
+                63.09,
+                7.29
+              ],
+              [
+                61.96,
+                6.62
+              ],
+              [
+                60.8,
+                6.01
+              ],
+              [
+                59.6,
+                5.46
+              ],
+              [
+                58.38,
+                4.98
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                66.89,
+                18.25
+              ],
+              [
+                66.35,
+                17.37
+              ],
+              [
+                65.76,
+                16.52
+              ],
+              [
+                65.13,
+                15.7
+              ],
+              [
+                64.46,
+                14.92
+              ],
+              [
+                63.75,
+                14.18
+              ],
+              [
+                63.0,
+                13.47
+              ],
+              [
+                62.22,
+                12.8
+              ],
+              [
+                61.39,
+                12.18
+              ],
+              [
+                60.54,
+                11.6
+              ],
+              [
+                59.66,
+                11.06
+              ],
+              [
+                58.75,
+                10.57
+              ],
+              [
+                57.82,
+                10.14
+              ],
+              [
+                56.86,
+                9.75
+              ],
+              [
+                55.89,
+                9.41
+              ],
+              [
+                54.9,
+                9.13
+              ],
+              [
+                53.89,
+                8.89
+              ],
+              [
+                52.88,
+                8.71
+              ],
+              [
+                51.85,
+                8.59
+              ],
+              [
+                50.82,
+                8.52
+              ],
+              [
+                49.79,
+                8.5
+              ],
+              [
+                48.76,
+                8.54
+              ],
+              [
+                47.74,
+                8.63
+              ],
+              [
+                46.72,
+                8.78
+              ],
+              [
+                45.7,
+                8.98
+              ],
+              [
+                44.7,
+                9.23
+              ],
+              [
+                43.72,
+                9.54
+              ],
+              [
+                42.75,
+                9.9
+              ],
+              [
+                41.81,
+                10.31
+              ],
+              [
+                40.88,
+                10.76
+              ],
+              [
+                39.98,
+                11.27
+              ],
+              [
+                39.11,
+                11.82
+              ],
+              [
+                38.27,
+                12.42
+              ],
+              [
+                37.47,
+                13.06
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.18,
+              49.67
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              30.06,
+              18.7
+            ],
+            "c": "near"
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                27.8,
+                17.65
+              ],
+              [
+                26.98,
+                19.62
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32.33,
+                19.76
+              ],
+              [
+                31.91,
+                20.73
+              ],
+              [
+                31.54,
+                21.71
+              ],
+              [
+                31.23,
+                22.72
+              ],
+              [
+                30.97,
+                23.74
+              ],
+              [
+                30.77,
+                24.77
+              ],
+              [
+                30.62,
+                25.82
+              ],
+              [
+                30.53,
+                26.87
+              ],
+              [
+                30.5,
+                27.92
+              ],
+              [
+                30.52,
+                28.97
+              ],
+              [
+                30.61,
+                30.02
+              ],
+              [
+                30.74,
+                31.07
+              ],
+              [
+                30.94,
+                32.1
+              ],
+              [
+                31.19,
+                33.13
+              ],
+              [
+                31.49,
+                34.13
+              ],
+              [
+                31.85,
+                35.12
+              ],
+              [
+                32.26,
+                36.09
+              ],
+              [
+                32.72,
+                37.04
+              ],
+              [
+                33.24,
+                37.96
+              ],
+              [
+                33.8,
+                38.85
+              ],
+              [
+                34.41,
+                39.71
+              ],
+              [
+                35.06,
+                40.53
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 3: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.18,
+              49.67
+            ],
+            "c": "near"
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                45.75,
+                52.13
+              ],
+              [
+                47.04,
+                52.32
+              ],
+              [
+                48.34,
+                52.44
+              ],
+              [
+                49.64,
+                52.5
+              ],
+              [
+                50.95,
+                52.48
+              ],
+              [
+                52.25,
+                52.4
+              ],
+              [
+                53.55,
+                52.24
+              ],
+              [
+                54.84,
+                52.02
+              ],
+              [
+                56.11,
+                51.73
+              ],
+              [
+                57.37,
+                51.37
+              ],
+              [
+                58.6,
+                50.94
+              ],
+              [
+                59.81,
+                50.45
+              ],
+              [
+                61.0,
+                49.89
+              ],
+              [
+                62.15,
+                49.28
+              ],
+              [
+                63.26,
+                48.6
+              ],
+              [
+                64.34,
+                47.86
+              ],
+              [
+                65.38,
+                47.07
+              ],
+              [
+                66.38,
+                46.22
+              ],
+              [
+                67.32,
+                45.32
+              ],
+              [
+                68.22,
+                44.38
+              ],
+              [
+                69.07,
+                43.38
+              ],
+              [
+                69.86,
+                42.34
+              ],
+              [
+                70.6,
+                41.26
+              ],
+              [
+                71.28,
+                40.15
+              ],
+              [
+                71.89,
+                39.0
+              ],
+              [
+                72.45,
+                37.81
+              ],
+              [
+                72.94,
+                36.6
+              ],
+              [
+                73.37,
+                35.37
+              ],
+              [
+                73.73,
+                34.11
+              ],
+              [
+                74.02,
+                32.84
+              ],
+              [
+                74.24,
+                31.55
+              ],
+              [
+                74.4,
+                30.25
+              ],
+              [
+                74.48,
+                28.95
+              ],
+              [
+                74.5,
+                27.64
+              ],
+              [
+                74.44,
+                26.34
+              ],
+              [
+                74.32,
+                25.04
+              ],
+              [
+                74.13,
+                23.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.61,
+                47.2
+              ],
+              [
+                47.64,
+                47.36
+              ],
+              [
+                48.66,
+                47.45
+              ],
+              [
+                49.7,
+                47.5
+              ],
+              [
+                50.73,
+                47.49
+              ],
+              [
+                51.76,
+                47.42
+              ],
+              [
+                52.79,
+                47.3
+              ],
+              [
+                53.8,
+                47.13
+              ],
+              [
+                54.81,
+                46.9
+              ],
+              [
+                55.81,
+                46.62
+              ],
+              [
+                56.78,
+                46.28
+              ],
+              [
+                57.74,
+                45.9
+              ],
+              [
+                58.68,
+                45.46
+              ],
+              [
+                59.59,
+                44.98
+              ],
+              [
+                60.48,
+                44.45
+              ],
+              [
+                61.33,
+                43.87
+              ],
+              [
+                62.16,
+                43.25
+              ],
+              [
+                62.95,
+                42.58
+              ],
+              [
+                63.7,
+                41.87
+              ],
+              [
+                64.42,
+                41.13
+              ],
+              [
+                65.09,
+                40.35
+              ],
+              [
+                65.73,
+                39.53
+              ],
+              [
+                66.31,
+                38.68
+              ],
+              [
+                66.86,
+                37.8
+              ],
+              [
+                67.35,
+                36.9
+              ],
+              [
+                67.8,
+                35.96
+              ],
+              [
+                68.2,
+                35.01
+              ],
+              [
+                68.54,
+                34.04
+              ],
+              [
+                68.84,
+                33.05
+              ],
+              [
+                69.08,
+                32.04
+              ],
+              [
+                69.26,
+                31.03
+              ],
+              [
+                69.4,
+                30.0
+              ],
+              [
+                69.48,
+                28.97
+              ],
+              [
+                69.5,
+                27.94
+              ],
+              [
+                69.47,
+                26.91
+              ],
+              [
+                69.38,
+                25.88
+              ],
+              [
+                69.24,
+                24.85
+              ],
+              [
+                69.05,
+                23.84
+              ],
+              [
+                68.8,
+                22.84
+              ],
+              [
+                68.5,
+                21.85
+              ],
+              [
+                68.15,
+                20.88
+              ],
+              [
+                67.75,
+                19.92
+              ],
+              [
+                67.3,
+                19.0
+              ],
+              [
+                66.8,
+                18.09
+              ],
+              [
+                66.25,
+                17.22
+              ],
+              [
+                65.65,
+                16.37
+              ],
+              [
+                65.02,
+                15.56
+              ],
+              [
+                64.34,
+                14.78
+              ],
+              [
+                63.62,
+                14.04
+              ],
+              [
+                62.86,
+                13.34
+              ],
+              [
+                62.06,
+                12.68
+              ],
+              [
+                61.23,
+                12.06
+              ],
+              [
+                60.37,
+                11.49
+              ],
+              [
+                59.49,
+                10.96
+              ],
+              [
+                58.57,
+                10.48
+              ],
+              [
+                57.63,
+                10.05
+              ],
+              [
+                56.67,
+                9.68
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 0: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              54.57,
+              49.52
+            ],
+            "c": "near"
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                45.75,
+                52.13
+              ],
+              [
+                47.04,
+                52.32
+              ],
+              [
+                48.34,
+                52.44
+              ],
+              [
+                49.64,
+                52.5
+              ],
+              [
+                50.95,
+                52.48
+              ],
+              [
+                52.25,
+                52.4
+              ],
+              [
+                53.55,
+                52.24
+              ],
+              [
+                54.84,
+                52.02
+              ],
+              [
+                56.11,
+                51.73
+              ],
+              [
+                57.37,
+                51.37
+              ],
+              [
+                58.6,
+                50.94
+              ],
+              [
+                59.81,
+                50.45
+              ],
+              [
+                61.0,
+                49.89
+              ],
+              [
+                62.15,
+                49.28
+              ],
+              [
+                63.26,
+                48.6
+              ],
+              [
+                64.34,
+                47.86
+              ],
+              [
+                65.38,
+                47.07
+              ],
+              [
+                66.38,
+                46.22
+              ],
+              [
+                67.32,
+                45.32
+              ],
+              [
+                68.22,
+                44.38
+              ],
+              [
+                69.07,
+                43.38
+              ],
+              [
+                69.86,
+                42.34
+              ],
+              [
+                70.6,
+                41.26
+              ],
+              [
+                71.28,
+                40.15
+              ],
+              [
+                71.89,
+                39.0
+              ],
+              [
+                72.45,
+                37.81
+              ],
+              [
+                72.94,
+                36.6
+              ],
+              [
+                73.37,
+                35.37
+              ],
+              [
+                73.73,
+                34.11
+              ],
+              [
+                74.02,
+                32.84
+              ],
+              [
+                74.24,
+                31.55
+              ],
+              [
+                74.4,
+                30.25
+              ],
+              [
+                74.48,
+                28.95
+              ],
+              [
+                74.5,
+                27.64
+              ],
+              [
+                74.44,
+                26.34
+              ],
+              [
+                74.32,
+                25.04
+              ],
+              [
+                74.13,
+                23.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.61,
+                47.2
+              ],
+              [
+                47.64,
+                47.36
+              ],
+              [
+                48.66,
+                47.45
+              ],
+              [
+                49.7,
+                47.5
+              ],
+              [
+                50.73,
+                47.49
+              ],
+              [
+                51.76,
+                47.42
+              ],
+              [
+                52.79,
+                47.3
+              ],
+              [
+                53.8,
+                47.13
+              ],
+              [
+                54.81,
+                46.9
+              ],
+              [
+                55.81,
+                46.62
+              ],
+              [
+                56.78,
+                46.28
+              ],
+              [
+                57.74,
+                45.9
+              ],
+              [
+                58.68,
+                45.46
+              ],
+              [
+                59.59,
+                44.98
+              ],
+              [
+                60.48,
+                44.45
+              ],
+              [
+                61.33,
+                43.87
+              ],
+              [
+                62.16,
+                43.25
+              ],
+              [
+                62.95,
+                42.58
+              ],
+              [
+                63.7,
+                41.87
+              ],
+              [
+                64.42,
+                41.13
+              ],
+              [
+                65.09,
+                40.35
+              ],
+              [
+                65.73,
+                39.53
+              ],
+              [
+                66.31,
+                38.68
+              ],
+              [
+                66.86,
+                37.8
+              ],
+              [
+                67.35,
+                36.9
+              ],
+              [
+                67.8,
+                35.96
+              ],
+              [
+                68.2,
+                35.01
+              ],
+              [
+                68.54,
+                34.04
+              ],
+              [
+                68.84,
+                33.05
+              ],
+              [
+                69.08,
+                32.04
+              ],
+              [
+                69.26,
+                31.03
+              ],
+              [
+                69.4,
+                30.0
+              ],
+              [
+                69.48,
+                28.97
+              ],
+              [
+                69.5,
+                27.94
+              ],
+              [
+                69.47,
+                26.91
+              ],
+              [
+                69.38,
+                25.88
+              ],
+              [
+                69.24,
+                24.85
+              ],
+              [
+                69.05,
+                23.84
+              ],
+              [
+                68.8,
+                22.84
+              ],
+              [
+                68.5,
+                21.85
+              ],
+              [
+                68.15,
+                20.88
+              ],
+              [
+                67.75,
+                19.92
+              ],
+              [
+                67.3,
+                19.0
+              ],
+              [
+                66.8,
+                18.09
+              ],
+              [
+                66.25,
+                17.22
+              ],
+              [
+                65.65,
+                16.37
+              ],
+              [
+                65.02,
+                15.56
+              ],
+              [
+                64.34,
+                14.78
+              ],
+              [
+                63.62,
+                14.04
+              ],
+              [
+                62.86,
+                13.34
+              ],
+              [
+                62.06,
+                12.68
+              ],
+              [
+                61.23,
+                12.06
+              ],
+              [
+                60.37,
+                11.49
+              ],
+              [
+                59.49,
+                10.96
+              ],
+              [
+                58.57,
+                10.48
+              ],
+              [
+                57.63,
+                10.05
+              ],
+              [
+                56.67,
+                9.68
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              62.3,
+              46.24
+            ],
+            "c": "near"
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                45.75,
+                52.13
+              ],
+              [
+                47.04,
+                52.32
+              ],
+              [
+                48.34,
+                52.44
+              ],
+              [
+                49.64,
+                52.5
+              ],
+              [
+                50.95,
+                52.48
+              ],
+              [
+                52.25,
+                52.4
+              ],
+              [
+                53.55,
+                52.24
+              ],
+              [
+                54.84,
+                52.02
+              ],
+              [
+                56.11,
+                51.73
+              ],
+              [
+                57.37,
+                51.37
+              ],
+              [
+                58.6,
+                50.94
+              ],
+              [
+                59.81,
+                50.45
+              ],
+              [
+                61.0,
+                49.89
+              ],
+              [
+                62.15,
+                49.28
+              ],
+              [
+                63.26,
+                48.6
+              ],
+              [
+                64.34,
+                47.86
+              ],
+              [
+                65.38,
+                47.07
+              ],
+              [
+                66.38,
+                46.22
+              ],
+              [
+                67.32,
+                45.32
+              ],
+              [
+                68.22,
+                44.38
+              ],
+              [
+                69.07,
+                43.38
+              ],
+              [
+                69.86,
+                42.34
+              ],
+              [
+                70.6,
+                41.26
+              ],
+              [
+                71.28,
+                40.15
+              ],
+              [
+                71.89,
+                39.0
+              ],
+              [
+                72.45,
+                37.81
+              ],
+              [
+                72.94,
+                36.6
+              ],
+              [
+                73.37,
+                35.37
+              ],
+              [
+                73.73,
+                34.11
+              ],
+              [
+                74.02,
+                32.84
+              ],
+              [
+                74.24,
+                31.55
+              ],
+              [
+                74.4,
+                30.25
+              ],
+              [
+                74.48,
+                28.95
+              ],
+              [
+                74.5,
+                27.64
+              ],
+              [
+                74.44,
+                26.34
+              ],
+              [
+                74.32,
+                25.04
+              ],
+              [
+                74.13,
+                23.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.61,
+                47.2
+              ],
+              [
+                47.64,
+                47.36
+              ],
+              [
+                48.66,
+                47.45
+              ],
+              [
+                49.7,
+                47.5
+              ],
+              [
+                50.73,
+                47.49
+              ],
+              [
+                51.76,
+                47.42
+              ],
+              [
+                52.79,
+                47.3
+              ],
+              [
+                53.8,
+                47.13
+              ],
+              [
+                54.81,
+                46.9
+              ],
+              [
+                55.81,
+                46.62
+              ],
+              [
+                56.78,
+                46.28
+              ],
+              [
+                57.74,
+                45.9
+              ],
+              [
+                58.68,
+                45.46
+              ],
+              [
+                59.59,
+                44.98
+              ],
+              [
+                60.48,
+                44.45
+              ],
+              [
+                61.33,
+                43.87
+              ],
+              [
+                62.16,
+                43.25
+              ],
+              [
+                62.95,
+                42.58
+              ],
+              [
+                63.7,
+                41.87
+              ],
+              [
+                64.42,
+                41.13
+              ],
+              [
+                65.09,
+                40.35
+              ],
+              [
+                65.73,
+                39.53
+              ],
+              [
+                66.31,
+                38.68
+              ],
+              [
+                66.86,
+                37.8
+              ],
+              [
+                67.35,
+                36.9
+              ],
+              [
+                67.8,
+                35.96
+              ],
+              [
+                68.2,
+                35.01
+              ],
+              [
+                68.54,
+                34.04
+              ],
+              [
+                68.84,
+                33.05
+              ],
+              [
+                69.08,
+                32.04
+              ],
+              [
+                69.26,
+                31.03
+              ],
+              [
+                69.4,
+                30.0
+              ],
+              [
+                69.48,
+                28.97
+              ],
+              [
+                69.5,
+                27.94
+              ],
+              [
+                69.47,
+                26.91
+              ],
+              [
+                69.38,
+                25.88
+              ],
+              [
+                69.24,
+                24.85
+              ],
+              [
+                69.05,
+                23.84
+              ],
+              [
+                68.8,
+                22.84
+              ],
+              [
+                68.5,
+                21.85
+              ],
+              [
+                68.15,
+                20.88
+              ],
+              [
+                67.75,
+                19.92
+              ],
+              [
+                67.3,
+                19.0
+              ],
+              [
+                66.8,
+                18.09
+              ],
+              [
+                66.25,
+                17.22
+              ],
+              [
+                65.65,
+                16.37
+              ],
+              [
+                65.02,
+                15.56
+              ],
+              [
+                64.34,
+                14.78
+              ],
+              [
+                63.62,
+                14.04
+              ],
+              [
+                62.86,
+                13.34
+              ],
+              [
+                62.06,
+                12.68
+              ],
+              [
+                61.23,
+                12.06
+              ],
+              [
+                60.37,
+                11.49
+              ],
+              [
+                59.49,
+                10.96
+              ],
+              [
+                58.57,
+                10.48
+              ],
+              [
+                57.63,
+                10.05
+              ],
+              [
+                56.67,
+                9.68
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              68.24,
+              40.3
+            ],
+            "c": "near"
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                45.75,
+                52.13
+              ],
+              [
+                47.04,
+                52.32
+              ],
+              [
+                48.34,
+                52.44
+              ],
+              [
+                49.64,
+                52.5
+              ],
+              [
+                50.95,
+                52.48
+              ],
+              [
+                52.25,
+                52.4
+              ],
+              [
+                53.55,
+                52.24
+              ],
+              [
+                54.84,
+                52.02
+              ],
+              [
+                56.11,
+                51.73
+              ],
+              [
+                57.37,
+                51.37
+              ],
+              [
+                58.6,
+                50.94
+              ],
+              [
+                59.81,
+                50.45
+              ],
+              [
+                61.0,
+                49.89
+              ],
+              [
+                62.15,
+                49.28
+              ],
+              [
+                63.26,
+                48.6
+              ],
+              [
+                64.34,
+                47.86
+              ],
+              [
+                65.38,
+                47.07
+              ],
+              [
+                66.38,
+                46.22
+              ],
+              [
+                67.32,
+                45.32
+              ],
+              [
+                68.22,
+                44.38
+              ],
+              [
+                69.07,
+                43.38
+              ],
+              [
+                69.86,
+                42.34
+              ],
+              [
+                70.6,
+                41.26
+              ],
+              [
+                71.28,
+                40.15
+              ],
+              [
+                71.89,
+                39.0
+              ],
+              [
+                72.45,
+                37.81
+              ],
+              [
+                72.94,
+                36.6
+              ],
+              [
+                73.37,
+                35.37
+              ],
+              [
+                73.73,
+                34.11
+              ],
+              [
+                74.02,
+                32.84
+              ],
+              [
+                74.24,
+                31.55
+              ],
+              [
+                74.4,
+                30.25
+              ],
+              [
+                74.48,
+                28.95
+              ],
+              [
+                74.5,
+                27.64
+              ],
+              [
+                74.44,
+                26.34
+              ],
+              [
+                74.32,
+                25.04
+              ],
+              [
+                74.13,
+                23.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.61,
+                47.2
+              ],
+              [
+                47.64,
+                47.36
+              ],
+              [
+                48.66,
+                47.45
+              ],
+              [
+                49.7,
+                47.5
+              ],
+              [
+                50.73,
+                47.49
+              ],
+              [
+                51.76,
+                47.42
+              ],
+              [
+                52.79,
+                47.3
+              ],
+              [
+                53.8,
+                47.13
+              ],
+              [
+                54.81,
+                46.9
+              ],
+              [
+                55.81,
+                46.62
+              ],
+              [
+                56.78,
+                46.28
+              ],
+              [
+                57.74,
+                45.9
+              ],
+              [
+                58.68,
+                45.46
+              ],
+              [
+                59.59,
+                44.98
+              ],
+              [
+                60.48,
+                44.45
+              ],
+              [
+                61.33,
+                43.87
+              ],
+              [
+                62.16,
+                43.25
+              ],
+              [
+                62.95,
+                42.58
+              ],
+              [
+                63.7,
+                41.87
+              ],
+              [
+                64.42,
+                41.13
+              ],
+              [
+                65.09,
+                40.35
+              ],
+              [
+                65.73,
+                39.53
+              ],
+              [
+                66.31,
+                38.68
+              ],
+              [
+                66.86,
+                37.8
+              ],
+              [
+                67.35,
+                36.9
+              ],
+              [
+                67.8,
+                35.96
+              ],
+              [
+                68.2,
+                35.01
+              ],
+              [
+                68.54,
+                34.04
+              ],
+              [
+                68.84,
+                33.05
+              ],
+              [
+                69.08,
+                32.04
+              ],
+              [
+                69.26,
+                31.03
+              ],
+              [
+                69.4,
+                30.0
+              ],
+              [
+                69.48,
+                28.97
+              ],
+              [
+                69.5,
+                27.94
+              ],
+              [
+                69.47,
+                26.91
+              ],
+              [
+                69.38,
+                25.88
+              ],
+              [
+                69.24,
+                24.85
+              ],
+              [
+                69.05,
+                23.84
+              ],
+              [
+                68.8,
+                22.84
+              ],
+              [
+                68.5,
+                21.85
+              ],
+              [
+                68.15,
+                20.88
+              ],
+              [
+                67.75,
+                19.92
+              ],
+              [
+                67.3,
+                19.0
+              ],
+              [
+                66.8,
+                18.09
+              ],
+              [
+                66.25,
+                17.22
+              ],
+              [
+                65.65,
+                16.37
+              ],
+              [
+                65.02,
+                15.56
+              ],
+              [
+                64.34,
+                14.78
+              ],
+              [
+                63.62,
+                14.04
+              ],
+              [
+                62.86,
+                13.34
+              ],
+              [
+                62.06,
+                12.68
+              ],
+              [
+                61.23,
+                12.06
+              ],
+              [
+                60.37,
+                11.49
+              ],
+              [
+                59.49,
+                10.96
+              ],
+              [
+                58.57,
+                10.48
+              ],
+              [
+                57.63,
+                10.05
+              ],
+              [
+                56.67,
+                9.68
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.52,
+              32.57
+            ],
+            "c": "near"
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                45.75,
+                52.13
+              ],
+              [
+                47.04,
+                52.32
+              ],
+              [
+                48.34,
+                52.44
+              ],
+              [
+                49.64,
+                52.5
+              ],
+              [
+                50.95,
+                52.48
+              ],
+              [
+                52.25,
+                52.4
+              ],
+              [
+                53.55,
+                52.24
+              ],
+              [
+                54.84,
+                52.02
+              ],
+              [
+                56.11,
+                51.73
+              ],
+              [
+                57.37,
+                51.37
+              ],
+              [
+                58.6,
+                50.94
+              ],
+              [
+                59.81,
+                50.45
+              ],
+              [
+                61.0,
+                49.89
+              ],
+              [
+                62.15,
+                49.28
+              ],
+              [
+                63.26,
+                48.6
+              ],
+              [
+                64.34,
+                47.86
+              ],
+              [
+                65.38,
+                47.07
+              ],
+              [
+                66.38,
+                46.22
+              ],
+              [
+                67.32,
+                45.32
+              ],
+              [
+                68.22,
+                44.38
+              ],
+              [
+                69.07,
+                43.38
+              ],
+              [
+                69.86,
+                42.34
+              ],
+              [
+                70.6,
+                41.26
+              ],
+              [
+                71.28,
+                40.15
+              ],
+              [
+                71.89,
+                39.0
+              ],
+              [
+                72.45,
+                37.81
+              ],
+              [
+                72.94,
+                36.6
+              ],
+              [
+                73.37,
+                35.37
+              ],
+              [
+                73.73,
+                34.11
+              ],
+              [
+                74.02,
+                32.84
+              ],
+              [
+                74.24,
+                31.55
+              ],
+              [
+                74.4,
+                30.25
+              ],
+              [
+                74.48,
+                28.95
+              ],
+              [
+                74.5,
+                27.64
+              ],
+              [
+                74.44,
+                26.34
+              ],
+              [
+                74.32,
+                25.04
+              ],
+              [
+                74.13,
+                23.75
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                46.61,
+                47.2
+              ],
+              [
+                47.64,
+                47.36
+              ],
+              [
+                48.66,
+                47.45
+              ],
+              [
+                49.7,
+                47.5
+              ],
+              [
+                50.73,
+                47.49
+              ],
+              [
+                51.76,
+                47.42
+              ],
+              [
+                52.79,
+                47.3
+              ],
+              [
+                53.8,
+                47.13
+              ],
+              [
+                54.81,
+                46.9
+              ],
+              [
+                55.81,
+                46.62
+              ],
+              [
+                56.78,
+                46.28
+              ],
+              [
+                57.74,
+                45.9
+              ],
+              [
+                58.68,
+                45.46
+              ],
+              [
+                59.59,
+                44.98
+              ],
+              [
+                60.48,
+                44.45
+              ],
+              [
+                61.33,
+                43.87
+              ],
+              [
+                62.16,
+                43.25
+              ],
+              [
+                62.95,
+                42.58
+              ],
+              [
+                63.7,
+                41.87
+              ],
+              [
+                64.42,
+                41.13
+              ],
+              [
+                65.09,
+                40.35
+              ],
+              [
+                65.73,
+                39.53
+              ],
+              [
+                66.31,
+                38.68
+              ],
+              [
+                66.86,
+                37.8
+              ],
+              [
+                67.35,
+                36.9
+              ],
+              [
+                67.8,
+                35.96
+              ],
+              [
+                68.2,
+                35.01
+              ],
+              [
+                68.54,
+                34.04
+              ],
+              [
+                68.84,
+                33.05
+              ],
+              [
+                69.08,
+                32.04
+              ],
+              [
+                69.26,
+                31.03
+              ],
+              [
+                69.4,
+                30.0
+              ],
+              [
+                69.48,
+                28.97
+              ],
+              [
+                69.5,
+                27.94
+              ],
+              [
+                69.47,
+                26.91
+              ],
+              [
+                69.38,
+                25.88
+              ],
+              [
+                69.24,
+                24.85
+              ],
+              [
+                69.05,
+                23.84
+              ],
+              [
+                68.8,
+                22.84
+              ],
+              [
+                68.5,
+                21.85
+              ],
+              [
+                68.15,
+                20.88
+              ],
+              [
+                67.75,
+                19.92
+              ],
+              [
+                67.3,
+                19.0
+              ],
+              [
+                66.8,
+                18.09
+              ],
+              [
+                66.25,
+                17.22
+              ],
+              [
+                65.65,
+                16.37
+              ],
+              [
+                65.02,
+                15.56
+              ],
+              [
+                64.34,
+                14.78
+              ],
+              [
+                63.62,
+                14.04
+              ],
+              [
+                62.86,
+                13.34
+              ],
+              [
+                62.06,
+                12.68
+              ],
+              [
+                61.23,
+                12.06
+              ],
+              [
+                60.37,
+                11.49
+              ],
+              [
+                59.49,
+                10.96
+              ],
+              [
+                58.57,
+                10.48
+              ],
+              [
+                57.63,
+                10.05
+              ],
+              [
+                56.67,
+                9.68
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              37.38,
+              46.02
+            ],
+            "c": "near"
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ],
+              [
+                42.84,
+                51.43
+              ],
+              [
+                44.07,
+                51.77
+              ],
+              [
+                45.33,
+                52.05
+              ],
+              [
+                46.59,
+                52.26
+              ],
+              [
+                47.86,
+                52.41
+              ],
+              [
+                49.14,
+                52.49
+              ],
+              [
+                50.43,
+                52.5
+              ],
+              [
+                51.71,
+                52.44
+              ],
+              [
+                52.99,
+                52.32
+              ],
+              [
+                54.25,
+                52.13
+              ],
+              [
+                55.51,
+                51.87
+              ],
+              [
+                56.75,
+                51.55
+              ],
+              [
+                57.98,
+                51.17
+              ],
+              [
+                59.18,
+                50.72
+              ],
+              [
+                60.35,
+                50.2
+              ],
+              [
+                61.5,
+                49.63
+              ],
+              [
+                62.62,
+                49.0
+              ],
+              [
+                63.7,
+                48.31
+              ],
+              [
+                64.74,
+                47.57
+              ],
+              [
+                65.75,
+                46.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ],
+              [
+                63.3,
+                42.26
+              ],
+              [
+                64.03,
+                41.55
+              ],
+              [
+                64.72,
+                40.79
+              ],
+              [
+                65.37,
+                40.01
+              ],
+              [
+                65.97,
+                39.18
+              ],
+              [
+                66.54,
+                38.33
+              ],
+              [
+                67.06,
+                37.45
+              ],
+              [
+                67.53,
+                36.55
+              ],
+              [
+                67.95,
+                35.62
+              ],
+              [
+                68.32,
+                34.67
+              ],
+              [
+                68.65,
+                33.7
+              ],
+              [
+                68.92,
+                32.72
+              ],
+              [
+                69.14,
+                31.72
+              ],
+              [
+                69.31,
+                30.71
+              ],
+              [
+                69.43,
+                29.7
+              ],
+              [
+                69.49,
+                28.68
+              ],
+              [
+                69.5,
+                27.66
+              ],
+              [
+                69.45,
+                26.64
+              ],
+              [
+                69.35,
+                25.62
+              ],
+              [
+                69.2,
+                24.61
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 1: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              43.84,
+              49.12
+            ],
+            "c": "near"
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ],
+              [
+                42.84,
+                51.43
+              ],
+              [
+                44.07,
+                51.77
+              ],
+              [
+                45.33,
+                52.05
+              ],
+              [
+                46.59,
+                52.26
+              ],
+              [
+                47.86,
+                52.41
+              ],
+              [
+                49.14,
+                52.49
+              ],
+              [
+                50.43,
+                52.5
+              ],
+              [
+                51.71,
+                52.44
+              ],
+              [
+                52.99,
+                52.32
+              ],
+              [
+                54.25,
+                52.13
+              ],
+              [
+                55.51,
+                51.87
+              ],
+              [
+                56.75,
+                51.55
+              ],
+              [
+                57.98,
+                51.17
+              ],
+              [
+                59.18,
+                50.72
+              ],
+              [
+                60.35,
+                50.2
+              ],
+              [
+                61.5,
+                49.63
+              ],
+              [
+                62.62,
+                49.0
+              ],
+              [
+                63.7,
+                48.31
+              ],
+              [
+                64.74,
+                47.57
+              ],
+              [
+                65.75,
+                46.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ],
+              [
+                63.3,
+                42.26
+              ],
+              [
+                64.03,
+                41.55
+              ],
+              [
+                64.72,
+                40.79
+              ],
+              [
+                65.37,
+                40.01
+              ],
+              [
+                65.97,
+                39.18
+              ],
+              [
+                66.54,
+                38.33
+              ],
+              [
+                67.06,
+                37.45
+              ],
+              [
+                67.53,
+                36.55
+              ],
+              [
+                67.95,
+                35.62
+              ],
+              [
+                68.32,
+                34.67
+              ],
+              [
+                68.65,
+                33.7
+              ],
+              [
+                68.92,
+                32.72
+              ],
+              [
+                69.14,
+                31.72
+              ],
+              [
+                69.31,
+                30.71
+              ],
+              [
+                69.43,
+                29.7
+              ],
+              [
+                69.49,
+                28.68
+              ],
+              [
+                69.5,
+                27.66
+              ],
+              [
+                69.45,
+                26.64
+              ],
+              [
+                69.35,
+                25.62
+              ],
+              [
+                69.2,
+                24.61
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              50.96,
+              49.98
+            ],
+            "c": "near"
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ],
+              [
+                42.84,
+                51.43
+              ],
+              [
+                44.07,
+                51.77
+              ],
+              [
+                45.33,
+                52.05
+              ],
+              [
+                46.59,
+                52.26
+              ],
+              [
+                47.86,
+                52.41
+              ],
+              [
+                49.14,
+                52.49
+              ],
+              [
+                50.43,
+                52.5
+              ],
+              [
+                51.71,
+                52.44
+              ],
+              [
+                52.99,
+                52.32
+              ],
+              [
+                54.25,
+                52.13
+              ],
+              [
+                55.51,
+                51.87
+              ],
+              [
+                56.75,
+                51.55
+              ],
+              [
+                57.98,
+                51.17
+              ],
+              [
+                59.18,
+                50.72
+              ],
+              [
+                60.35,
+                50.2
+              ],
+              [
+                61.5,
+                49.63
+              ],
+              [
+                62.62,
+                49.0
+              ],
+              [
+                63.7,
+                48.31
+              ],
+              [
+                64.74,
+                47.57
+              ],
+              [
+                65.75,
+                46.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ],
+              [
+                63.3,
+                42.26
+              ],
+              [
+                64.03,
+                41.55
+              ],
+              [
+                64.72,
+                40.79
+              ],
+              [
+                65.37,
+                40.01
+              ],
+              [
+                65.97,
+                39.18
+              ],
+              [
+                66.54,
+                38.33
+              ],
+              [
+                67.06,
+                37.45
+              ],
+              [
+                67.53,
+                36.55
+              ],
+              [
+                67.95,
+                35.62
+              ],
+              [
+                68.32,
+                34.67
+              ],
+              [
+                68.65,
+                33.7
+              ],
+              [
+                68.92,
+                32.72
+              ],
+              [
+                69.14,
+                31.72
+              ],
+              [
+                69.31,
+                30.71
+              ],
+              [
+                69.43,
+                29.7
+              ],
+              [
+                69.49,
+                28.68
+              ],
+              [
+                69.5,
+                27.66
+              ],
+              [
+                69.45,
+                26.64
+              ],
+              [
+                69.35,
+                25.62
+              ],
+              [
+                69.2,
+                24.61
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              57.97,
+              48.5
+            ],
+            "c": "near"
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ],
+              [
+                42.84,
+                51.43
+              ],
+              [
+                44.07,
+                51.77
+              ],
+              [
+                45.33,
+                52.05
+              ],
+              [
+                46.59,
+                52.26
+              ],
+              [
+                47.86,
+                52.41
+              ],
+              [
+                49.14,
+                52.49
+              ],
+              [
+                50.43,
+                52.5
+              ],
+              [
+                51.71,
+                52.44
+              ],
+              [
+                52.99,
+                52.32
+              ],
+              [
+                54.25,
+                52.13
+              ],
+              [
+                55.51,
+                51.87
+              ],
+              [
+                56.75,
+                51.55
+              ],
+              [
+                57.98,
+                51.17
+              ],
+              [
+                59.18,
+                50.72
+              ],
+              [
+                60.35,
+                50.2
+              ],
+              [
+                61.5,
+                49.63
+              ],
+              [
+                62.62,
+                49.0
+              ],
+              [
+                63.7,
+                48.31
+              ],
+              [
+                64.74,
+                47.57
+              ],
+              [
+                65.75,
+                46.77
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ],
+              [
+                63.3,
+                42.26
+              ],
+              [
+                64.03,
+                41.55
+              ],
+              [
+                64.72,
+                40.79
+              ],
+              [
+                65.37,
+                40.01
+              ],
+              [
+                65.97,
+                39.18
+              ],
+              [
+                66.54,
+                38.33
+              ],
+              [
+                67.06,
+                37.45
+              ],
+              [
+                67.53,
+                36.55
+              ],
+              [
+                67.95,
+                35.62
+              ],
+              [
+                68.32,
+                34.67
+              ],
+              [
+                68.65,
+                33.7
+              ],
+              [
+                68.92,
+                32.72
+              ],
+              [
+                69.14,
+                31.72
+              ],
+              [
+                69.31,
+                30.71
+              ],
+              [
+                69.43,
+                29.7
+              ],
+              [
+                69.49,
+                28.68
+              ],
+              [
+                69.5,
+                27.66
+              ],
+              [
+                69.45,
+                26.64
+              ],
+              [
+                69.35,
+                25.62
+              ],
+              [
+                69.2,
+                24.61
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              64.14,
+              44.85
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              33.15,
+              42.14
+            ],
+            "c": "near"
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                31.23,
+                43.75
+              ],
+              [
+                32.08,
+                44.71
+              ],
+              [
+                32.98,
+                45.62
+              ],
+              [
+                33.93,
+                46.49
+              ],
+              [
+                34.92,
+                47.31
+              ],
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.06,
+                40.53
+              ],
+              [
+                35.74,
+                41.3
+              ],
+              [
+                36.45,
+                42.03
+              ],
+              [
+                37.21,
+                42.72
+              ],
+              [
+                37.99,
+                43.37
+              ],
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 2: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              64.14,
+              44.85
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              37.38,
+              46.02
+            ],
+            "c": "near"
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                31.23,
+                43.75
+              ],
+              [
+                32.08,
+                44.71
+              ],
+              [
+                32.98,
+                45.62
+              ],
+              [
+                33.93,
+                46.49
+              ],
+              [
+                34.92,
+                47.31
+              ],
+              [
+                35.95,
+                48.07
+              ],
+              [
+                37.02,
+                48.78
+              ],
+              [
+                38.12,
+                49.43
+              ],
+              [
+                39.26,
+                50.02
+              ],
+              [
+                40.43,
+                50.55
+              ],
+              [
+                41.62,
+                51.02
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.06,
+                40.53
+              ],
+              [
+                35.74,
+                41.3
+              ],
+              [
+                36.45,
+                42.03
+              ],
+              [
+                37.21,
+                42.72
+              ],
+              [
+                37.99,
+                43.37
+              ],
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ],
+              [
+                44.3,
+                46.65
+              ],
+              [
+                45.28,
+                46.92
+              ],
+              [
+                46.28,
+                47.14
+              ],
+              [
+                47.29,
+                47.31
+              ],
+              [
+                48.3,
+                47.43
+              ],
+              [
+                49.32,
+                47.49
+              ],
+              [
+                50.34,
+                47.5
+              ],
+              [
+                51.36,
+                47.45
+              ],
+              [
+                52.38,
+                47.35
+              ],
+              [
+                53.39,
+                47.2
+              ],
+              [
+                54.39,
+                47.0
+              ],
+              [
+                55.37,
+                46.74
+              ],
+              [
+                56.35,
+                46.44
+              ],
+              [
+                57.3,
+                46.08
+              ],
+              [
+                58.24,
+                45.67
+              ],
+              [
+                59.15,
+                45.22
+              ],
+              [
+                60.04,
+                44.71
+              ],
+              [
+                60.9,
+                44.17
+              ],
+              [
+                61.74,
+                43.57
+              ],
+              [
+                62.53,
+                42.94
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              64.14,
+              44.85
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              42.48,
+              48.67
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              29.33,
+              20.48
+            ],
+            "c": "near"
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.98,
+                19.62
+              ],
+              [
+                26.57,
+                20.84
+              ],
+              [
+                26.23,
+                22.07
+              ],
+              [
+                25.95,
+                23.33
+              ],
+              [
+                25.74,
+                24.59
+              ],
+              [
+                25.59,
+                25.86
+              ],
+              [
+                25.51,
+                27.14
+              ],
+              [
+                25.5,
+                28.43
+              ],
+              [
+                25.56,
+                29.71
+              ],
+              [
+                25.68,
+                30.99
+              ],
+              [
+                25.87,
+                32.25
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                31.68,
+                21.33
+              ],
+              [
+                31.35,
+                22.3
+              ],
+              [
+                31.08,
+                23.28
+              ],
+              [
+                30.86,
+                24.28
+              ],
+              [
+                30.69,
+                25.29
+              ],
+              [
+                30.57,
+                26.3
+              ],
+              [
+                30.51,
+                27.32
+              ],
+              [
+                30.5,
+                28.34
+              ],
+              [
+                30.55,
+                29.36
+              ],
+              [
+                30.65,
+                30.38
+              ],
+              [
+                30.8,
+                31.39
+              ],
+              [
+                31.0,
+                32.39
+              ],
+              [
+                31.26,
+                33.37
+              ],
+              [
+                31.56,
+                34.35
+              ],
+              [
+                31.92,
+                35.3
+              ],
+              [
+                32.33,
+                36.24
+              ],
+              [
+                32.78,
+                37.15
+              ],
+              [
+                33.29,
+                38.04
+              ],
+              [
+                33.83,
+                38.9
+              ],
+              [
+                34.43,
+                39.74
+              ],
+              [
+                35.06,
+                40.53
+              ],
+              [
+                35.74,
+                41.3
+              ],
+              [
+                36.45,
+                42.03
+              ],
+              [
+                37.21,
+                42.72
+              ],
+              [
+                37.99,
+                43.37
+              ],
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ],
+        "label": "Robot 3: gap ahead > d, closes it to d"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              64.14,
+              44.85
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              42.48,
+              48.67
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              28.08,
+              26.08
+            ],
+            "c": "near"
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                26.98,
+                19.62
+              ],
+              [
+                26.57,
+                20.84
+              ],
+              [
+                26.23,
+                22.07
+              ],
+              [
+                25.95,
+                23.33
+              ],
+              [
+                25.74,
+                24.59
+              ],
+              [
+                25.59,
+                25.86
+              ],
+              [
+                25.51,
+                27.14
+              ],
+              [
+                25.5,
+                28.43
+              ],
+              [
+                25.56,
+                29.71
+              ],
+              [
+                25.68,
+                30.99
+              ],
+              [
+                25.87,
+                32.25
+              ]
+            ],
+            "c": "accent",
+            "dash": true,
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                31.68,
+                21.33
+              ],
+              [
+                31.35,
+                22.3
+              ],
+              [
+                31.08,
+                23.28
+              ],
+              [
+                30.86,
+                24.28
+              ],
+              [
+                30.69,
+                25.29
+              ],
+              [
+                30.57,
+                26.3
+              ],
+              [
+                30.51,
+                27.32
+              ],
+              [
+                30.5,
+                28.34
+              ],
+              [
+                30.55,
+                29.36
+              ],
+              [
+                30.65,
+                30.38
+              ],
+              [
+                30.8,
+                31.39
+              ],
+              [
+                31.0,
+                32.39
+              ],
+              [
+                31.26,
+                33.37
+              ],
+              [
+                31.56,
+                34.35
+              ],
+              [
+                31.92,
+                35.3
+              ],
+              [
+                32.33,
+                36.24
+              ],
+              [
+                32.78,
+                37.15
+              ],
+              [
+                33.29,
+                38.04
+              ],
+              [
+                33.83,
+                38.9
+              ],
+              [
+                34.43,
+                39.74
+              ],
+              [
+                35.06,
+                40.53
+              ],
+              [
+                35.74,
+                41.3
+              ],
+              [
+                36.45,
+                42.03
+              ],
+              [
+                37.21,
+                42.72
+              ],
+              [
+                37.99,
+                43.37
+              ],
+              [
+                38.82,
+                43.97
+              ],
+              [
+                39.67,
+                44.54
+              ],
+              [
+                40.55,
+                45.06
+              ],
+              [
+                41.45,
+                45.53
+              ],
+              [
+                42.38,
+                45.95
+              ],
+              [
+                43.33,
+                46.32
+              ]
+            ],
+            "c": "gap",
+            "w": 0.6
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      },
+      {
+        "label": "Final: every gap equals $d$; nobody moves",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              71.67,
+              24.18
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              64.14,
+              44.85
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              42.48,
+              48.67
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              28.33,
+              31.82
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              35.86,
+              11.15
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "p": [
+              57.52,
+              7.33
+            ],
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "poly",
+            "p": [
+              [
+                71.67,
+                24.18
+              ],
+              [
+                64.14,
+                44.85
+              ],
+              [
+                42.48,
+                48.67
+              ],
+              [
+                28.33,
+                31.82
+              ],
+              [
+                35.86,
+                11.15
+              ],
+              [
+                57.52,
+                7.33
+              ]
+            ],
+            "c": "tight",
+            "dash": true,
+            "w": 0.4
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                58.89,
+                52.43
+              ],
+              [
+                60.16,
+                51.93
+              ],
+              [
+                61.4,
+                51.37
+              ],
+              [
+                62.61,
+                50.74
+              ],
+              [
+                63.78,
+                50.05
+              ],
+              [
+                64.91,
+                49.3
+              ],
+              [
+                66.01,
+                48.49
+              ],
+              [
+                67.06,
+                47.62
+              ],
+              [
+                68.06,
+                46.7
+              ],
+              [
+                69.02,
+                45.73
+              ],
+              [
+                69.92,
+                44.71
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              67.21,
+              52.57
+            ],
+            "s": "cw",
+            "size": 3
+          }
+        ]
+      }
+    ]
+  }
+}

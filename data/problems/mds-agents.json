@@ -1,0 +1,1391 @@
+{
+  "id": "mds-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Minimal dominating set by agents",
+  "origin": {
+    "ref": "Chand2023Cover",
+    "year": 2023,
+    "note": "Introduced at ALGOSENSORS 2023."
+  },
+  "summary": "$n$ agents in an anonymous graph must mark a minimal dominating set.",
+  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must mark a minimal dominating set of nodes: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Imagine placing first-aid kits in some rooms of a building so that every room either has a kit or is next door to a room with one, and no kit can be removed without leaving some room uncovered. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$; rooms have no names, but the doors in a room are numbered (*ports*). A set of nodes such that every node is in it or adjacent to it is a *dominating set*; it is *minimal* if removing any node breaks this property (it need not be the smallest possible). $n$ agents with distinct IDs move in synchronous *rounds* (in each round a agent may talk to agents in the same room, then walk along one corridor) and must mark such a set: at the end every agent knows whether its node is in the set. We count rounds and bits of memory per agent. As for all problems in this family, one general method is to spread out one agent per node and then imitate a message-passing algorithm by walking to neighbours (explained under leader election by agents).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Depth-first search that colours as it settles",
+        "variant": "no-knowledge",
+        "ref": "Chand2023Cover",
+        "idea": "All $n$ agents start on one node and know nothing about the graph.\n\n1. The group walks the graph in depth-first order; at each empty node it reaches, the smallest-ID walking agent settles there and remembers the door back.\n2. The new settler decides its colour: if the node it was reached from holds a *black* agent it becomes *grey*; otherwise it visits all its neighbours and becomes grey if one of them is black, and black if none is.\n3. The others continue; an occupied node tells them the node was visited before.\n4. When all agents have settled, the black nodes are the dominating set.",
+        "analysis": "Every agent ends black or grey, and grey means \"next to a black one\", so the black nodes dominate the graph. They are also minimal: a black node has no black neighbour (all its neighbours are grey or settled after it and saw it), so removing it would leave it uncovered. In fact the black nodes form a maximal independent set, and every maximal independent set is a minimal dominating set. The walk crosses each edge a constant number of times and the checks cost $2\\deg(v)$ rounds per node $v$, $4m$ in total, so the algorithm takes $O(m)$ rounds with $O(\\log n)$ bits [Chand2023Cover]. The current best takes $O(n)$ rounds, from a rooted or arbitrary start, with $O(\\log n)$ bits [Chand2026MDS], building on a faster dispersion algorithm [Kshemkalyani2025Almost].",
+        "why_it_matters": "It is the template that later dominating-set and MIS algorithms for agents refine: settle agents greedily during exploration and let each settler decide from its neighbourhood."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Some agent must walk almost the whole diameter",
+        "variant": "no-knowledge",
+        "idea": "Let all agents start on the end $s$ of a path with $D+1$ nodes, so the *diameter* $D$ (largest distance between two nodes) is the path's length. The far end $u$ must be dominated: $u$ or its only neighbour must be marked, and a marked node holds a agent. Both are at distance at least $D-1$ from $s$.",
+        "analysis": "Agents move one edge per round, so the algorithm needs at least $D-1$ rounds on this path. This is our own short argument; the catalogue records no lower bound, so whether the $O(n)$ rounds of [Chand2026MDS] are optimal is open. On a path $D = n-1$, so on paths the $O(n)$ algorithm is optimal up to a constant factor.",
+        "why_it_matters": "It shows that linear time is the right target on long, thin graphs, and that a better lower bound would need graphs with small diameter."
+      }
+    ]
+  },
+  "history": "Dominating sets by agents were posed with time and memory as measures [Chand2023Cover]; building on optimal dispersion, linear time without any knowledge followed [Chand2026MDS].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "knowledge",
+    "initial",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of graph parameters",
+          "short": "no knowledge",
+          "definition": "Agents know no graph parameter ($n$, $m$, $\\Delta$, $D$)."
+        },
+        {
+          "id": "n-delta",
+          "level": 1,
+          "label": "$n$ and $\\Delta$ are known",
+          "short": "knows $n$, $\\Delta$",
+          "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
+        }
+      ],
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For minimal dominating sets the rooted algorithm of [Chand2023Cover] already needs no knowledge, and [Chand2026MDS] removes it from the arbitrary start as well."
+    }
+  ],
+  "variants": [
+    {
+      "id": "no-knowledge",
+      "title": "No knowledge",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "summary": "A minimal dominating set in $O(n)$ rounds with $O(\\log n)$ bits, from a rooted or arbitrary start.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chand2023Cover",
+          "role": "introductory",
+          "time": "O(m)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "rooted start"
+          ]
+        },
+        {
+          "ref": "Chand2026MDS",
+          "role": "best",
+          "time": "O(n)",
+          "memory": "O(\\log n)"
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound stated."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Minimal dominating set by a depth-first walk that colours as it settles [Chand2023Cover]: all agents start at node $a$; the group moves one edge per round in depth-first order (grey lines: the walk's tree), and at each empty node the smallest ID settles. A settler whose parent is black turns grey at once; otherwise it walks to each neighbour and back, and turns black only if none is black. Every node is black or next to a black node, and no black node can be dropped.",
+    "view": [
+      100,
+      50
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          12,
+          22
+        ],
+        "b": [
+          36,
+          22
+        ],
+        "c": [
+          60,
+          36
+        ],
+        "d": [
+          60,
+          8
+        ],
+        "e": [
+          86,
+          22
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "b",
+          "d"
+        ],
+        [
+          "c",
+          "e"
+        ],
+        [
+          "e",
+          "d"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: all 5 agents at node a",
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "b",
+            "l": "1"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          }
+        ],
+        "marks": [],
+        "label": "1 settles at a, visits its neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "a",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          }
+        ],
+        "marks": [],
+        "label": "no black neighbour: 1 turns black"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "b",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "2 settles at b; parent is black, so grey"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "3 settles at c and visits its neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "e",
+            "l": "3"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "c",
+            "l": "4"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "c",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "no black neighbour: 3 turns black"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "e",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "4 settles at e; parent is black, so grey"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                60,
+                8
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "5 settles at d and visits its neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                60,
+                8
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                60,
+                8
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "e",
+            "l": "5"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                60,
+                8
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "k": "agent",
+            "at": "a",
+            "l": "1",
+            "c": "fg"
+          },
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "b",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "fg"
+          },
+          {
+            "id": "4",
+            "k": "agent",
+            "at": "e",
+            "l": "4",
+            "c": "muted"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5",
+            "c": "fg"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                22
+              ],
+              [
+                36,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                22
+              ],
+              [
+                60,
+                36
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                60,
+                36
+              ],
+              [
+                86,
+                22
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                22
+              ],
+              [
+                60,
+                8
+              ]
+            ],
+            "c": "line",
+            "w": 1.4
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "fg",
+            "r": 3.4
+          },
+          {
+            "t": "node",
+            "n": "c",
+            "fill": "fg",
+            "r": 3.4
+          }
+        ],
+        "label": "Final: black a, c, d dominate, minimally"
+      }
+    ]
+  }
+}

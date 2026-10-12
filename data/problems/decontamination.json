@@ -1,0 +1,872 @@
+{
+  "id": "decontamination",
+  "model": "mobile-agents-on-graphs",
+  "name": "Network decontamination",
+  "origin": {
+    "ref": "Barriere2002Capture",
+    "year": 2002,
+    "note": "Capture of an intruder by mobile agents (SPAA 2002)."
+  },
+  "related": [
+    {
+      "problem": "black-hole-search",
+      "relation": "Both are security problems for agents in a hostile network: in black hole search the network destroys agents, in decontamination agents must clear a network that an arbitrarily fast intruder (or contamination) can re-enter."
+    }
+  ],
+  "summary": "A team of agents must clear a contaminated network, or equivalently capture an invisible, arbitrarily fast intruder, using as few agents as possible.",
+  "statement": "All nodes are initially contaminated. A node is cleaned when an agent visits it and is recontaminated when it has a contaminated neighbour and no agent guards it. Agents move along edges from a home base; the cleared part must stay connected. **Agents** is the number needed (the primary measure); **moves** and time are secondary.",
+  "primer": {
+    "intro": "Imagine a network of pipes filled with a contaminating gas: cleaners must clean every junction, but gas flows back into any clean junction that is left unguarded next to a dirty one. Here the network is a graph (dots joined by lines). At the start every node is **contaminated**. An agent cleans a node by standing on it; a clean node with no agent on it becomes contaminated again as soon as one of its neighbours is contaminated (*recontamination*). All agents start at one node $s$, the *home base*, move along lines, and the clean part must always be connected. In the basic version the graph is a tree (a graph without cycles) whose map the agents know. The task: clean every node; we count the agents needed first, and moves and time second.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Guard the junction, clean the branches one by one",
+        "variant": "trees",
+        "idea": "A standard approach on a tree, rooted at the home base $s$. Write $a(v)$ for the number of agents this method uses on the branch below node $v$.\n\n1. A node with no children (a *leaf*) needs one agent: $a(v) = 1$.\n2. At a node $v$, sort its child branches so that the first one needs the most agents.\n3. Keep one agent on $v$ as a guard. Clean the other branches one after another, each with its own team; when a branch is clean, its team comes back to $v$ to clean the next one.\n4. Finally the guard is no longer needed at $v$ (all its other neighbours are clean), so it joins the team for the first, largest branch.\n5. This gives $a(v) = \\max\\big(a(c_1),\\ a(c_2) + 1\\big)$, where $c_1$ and $c_2$ are the children with the largest and second-largest needs.",
+        "analysis": "No clean node is ever left unguarded next to a contaminated one, so nothing gets recontaminated, and the clean part always contains $s$ and stays connected. A path needs one agent; a star centred at $s$ needs two; a complete binary tree of height $h$ needs $h + 1$ with this rule, so about $\\log n$ agents for $n$ nodes. [Barriere2002Capture] compute the smallest possible team for any tree, and a strategy for it, in linear time; this primer does not claim that the simple rule above always matches it.",
+        "why_it_matters": "The idea of a guard that waits at a junction until its last branch is clean underlies decontamination strategies on trees and on many structured networks."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "One agent cannot clean a cycle",
+        "variant": "unknown-monotone",
+        "idea": "A standard argument. Let the graph be a ring and let one agent start at $s$. As soon as the agent steps to a neighbour, $s$ is unguarded, and its other neighbour is still contaminated, so $s$ becomes contaminated again. The agent can never have more than its current node clean.",
+        "analysis": "So any graph containing a cycle needs at least two agents: one guards while the other advances. More generally, the team must be large enough to guard every clean node that touches a contaminated node at every moment, which is why the answer depends on the shape of the graph (for the hypercube, $\\Theta(n/\\sqrt{\\log n})$ agents for $n$ nodes [Flocchini2008Hypercubes]).",
+        "why_it_matters": "It shows the basic counting idea of the problem: count the boundary between clean and dirty parts that must be guarded."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "The adversary grows the tree as you clean it",
+        "variant": "unknown-monotone",
+        "ref": "Ilcinkas2009Monotonicity",
+        "idea": "Now the agents do not know the graph, and they must never let a clean part become contaminated again (the strategy is *monotone*). The adversary builds the graph while the agents clean it [Ilcinkas2009Monotonicity]. Whenever an agent crosses a line into the unknown, the adversary attaches at the far end a new node with two more unexplored lines. Every clean node that still has an unexplored line must be guarded, because the line may lead to contamination. When the graph has reached $n$ nodes, the adversary stops adding lines: the result is a tree in which each node has at most three lines.",
+        "analysis": "At the end, every parent of a leaf in this tree has had to be guarded, and there are at least about $n/4$ such nodes, so the protocol used at least about $n/4$ agents. A team that knew the tree in advance could clean it with only $O(\\log n)$ agents. So not knowing the graph costs a factor $\\Omega(n/\\log n)$ in team size, and [Ilcinkas2009Monotonicity] give an algorithm that achieves this factor, even for asynchronous agents.",
+        "why_it_matters": "It is a clean example of a *competitive* lower bound: comparing a distributed team without a map to the best team with a map."
+      }
+    ]
+  },
+  "history": "From the start the objective was the **minimum number of agents** [Barriere2002Capture], first on special topologies [Flocchini2008Hypercubes] and then on unknown graphs, where the question becomes the competitive ratio against the optimal team [Ilcinkas2009Monotonicity].",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Agents",
+      "description": "number of agents needed"
+    },
+    {
+      "id": "time",
+      "name": "Moves",
+      "description": "total moves (or time, as stated)"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "unknown",
+          "level": 0,
+          "label": "the topology is unknown",
+          "short": "unknown graph",
+          "definition": "Agents know nothing about $G$."
+        },
+        {
+          "id": "known",
+          "level": 1,
+          "label": "the topology is known",
+          "short": "known graph",
+          "definition": "The topology is known to the agents (or to a coordinator)."
+        }
+      ],
+      "origin": "Barrière, Flocchini, Fraigniaud and Santoro introduced contiguous search by mobile agents, in which agents cannot jump and the cleared part must stay connected; they solved it on trees with a linear-time algorithm that computes the minimum team and its strategy, and stressed that the algorithm is naturally distributed, so a tree network can compute its own strategy [Barriere2002Capture] (abstract read). Later work on specific topologies also builds the strategy from the known structure; for hypercubes, Flocchini, Huang and Luccio use a coordinator that leads the other agents [Flocchini2008Hypercubes] (abstract read). The unknown level asks what is lost when searchers must clear a graph they discover as they go. Blin, Fraigniaud, Nisse and Vial cleared any unknown graph with one searcher more than the optimum, but not monotonically and possibly in exponentially many steps [Blin2008Chasing] (as reported by [Ilcinkas2009Monotonicity]); Ilcinkas, Nisse and Soguet showed that if clearing must also be monotone, a protocol with no a priori information about the graph has competitive ratio $\\Theta(n/\\log n)$ in the number of searchers, the lower bound holding even for synchronous searchers on trees of maximum degree 3 [Ilcinkas2009Monotonicity]."
+    }
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "timing",
+    "knowledge",
+    "topology"
+  ],
+  "variants": [
+    {
+      "id": "trees",
+      "title": "Trees",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "knowledge": "known",
+        "topology": "tree"
+      },
+      "summary": "On trees the minimum team and a strategy are computed in linear time.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Barriere2002Capture",
+          "role": "best",
+          "agents": "\\text{optimal}",
+          "note": "Introductory and current best; also a decentralised version with a linear number of messages."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Optimal team size."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "hypercube",
+      "title": "Hypercubes",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "knowledge": "known",
+        "topology": "hypercube"
+      },
+      "summary": "A hypercube needs $\\Theta(n/\\sqrt{\\log n})$ agents, matching its pathwidth.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Omega(n/\\sqrt{\\log n})",
+          "ref": "Flocchini2008Hypercubes",
+          "bottleneck": "pathwidth",
+          "preconditions": [
+            "connected monotone strategies"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2008Hypercubes",
+          "role": "best",
+          "agents": "O(n/\\sqrt{\\log n})",
+          "time": "O(n\\log n)",
+          "note": "Introductory and current best (with a coordinator); with visibility, $n/2$ agents in $O(\\log n)$ time."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Theta(n/\\sqrt{\\log n})$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "unknown-monotone",
+      "title": "Unknown graphs, monotone strategies",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected"
+      },
+      "summary": "Clearing an unknown graph monotonically costs a factor $\\Theta(n/\\log n)$ in agents over the optimum.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Omega(n/\\log n)\\cdot\\text{opt}",
+          "ref": "Ilcinkas2009Monotonicity",
+          "bottleneck": "unknown topology",
+          "preconditions": [
+            "monotone connected strategies",
+            "holds even for synchronous agents"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Ilcinkas2009Monotonicity",
+          "role": "best",
+          "agents": "O(n/\\log n)\\cdot\\text{opt}",
+          "note": "Achievable even asynchronously."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Competitive ratio $\\Theta(n/\\log n)$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Decontamination of a tree [Barriere2002Capture] with the guard-the-junction rule: every node is contaminated (red) and agents start at the home base $s$; a node is clean (green) once visited and would be recontaminated if left unguarded next to a red node. One agent guards $s$ while the other cleans the smaller branch and comes back; then the guard is free, both enter the other branch, and the same rule is applied at $a$. Nothing is ever recontaminated, the clean part stays connected, and two agents suffice.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          50,
+          46
+        ],
+        "a": [
+          30,
+          30
+        ],
+        "b": [
+          70,
+          30
+        ],
+        "a1": [
+          18,
+          12
+        ],
+        "a2": [
+          42,
+          12
+        ],
+        "b1": [
+          70,
+          12
+        ]
+      },
+      "edges": [
+        [
+          "s",
+          "a"
+        ],
+        [
+          "s",
+          "b"
+        ],
+        [
+          "a",
+          "a1"
+        ],
+        [
+          "a",
+          "a2"
+        ],
+        [
+          "b",
+          "b1"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "s",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "s",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Start: all nodes contaminated; agents 1, 2 at s"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "s",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Agent 1 guards s; agent 2 cleans the smaller branch b"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "s",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b1",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "s",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "s",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "s",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Branch b is clean: the guard at s is no longer needed"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Both enter branch a; agent 1 guards a, agent 2 cleans a2"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a2",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "gap",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a1",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a1",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "s",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "a2",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "node",
+            "n": "b1",
+            "fill": "tight",
+            "r": 2.2
+          },
+          {
+            "t": "text",
+            "p": [
+              56,
+              49
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Last branch: the guard joins; every node is clean with 2 agents"
+      }
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://drdebmath.github.io/mobility-matters/sitemap.xml

@@ -1,0 +1,1759 @@
+{
+  "id": "mobile-robots-in-the-plane",
+  "name": "Mobile robots in the plane",
+  "summary": "Anonymous point robots in the Euclidean plane repeat Look–Compute–Move cycles; what they agree on, remember, see and rely on is fixed by its assumption axes.",
+  "focus": "The primary question has been **solvability under the fewest assumptions**: which combinations of synchrony, agreement on coordinates, rigidity, multiplicity detection, visibility and memory make a task possible at all. Time (in rounds or epochs) and the number of light colours became the measures later, once the feasibility frontier was mapped.",
+  "description": "There are $n$ robots, modelled as points in $\\mathbb{R}^2$. They are **anonymous** (no identifiers), **identical** (same algorithm) and **silent** (no messages). Each robot repeats a cycle: **Look** (take a snapshot of the positions of the robots it can see, in its own local coordinate system), **Compute** (run the algorithm on the snapshot) and **Move** (move towards the computed point). Unless assumed otherwise robots are **oblivious**: nothing survives from one cycle to the next.\n\nA **scheduler** decides when robots are active: in FSYNC all robots act in every round; in SSYNC an arbitrary non-empty subset acts in each round, atomically; in ASYNC cycles are arbitrary and a robot may look at others while they move. Time is counted in rounds (FSYNC, SSYNC) or epochs (ASYNC): intervals of time in which every robot completes at least one full cycle, not necessarily the shortest ones.\n\nThis is the OBLOT model of Suzuki and Yamashita and of Flocchini, Prencipe and Santoro; **lights are the robots' memory**: a light with a constant number of colours, set by its robot, persists between cycles. A robot may see only its own light (FSTA: finite state), only the others' lights (FCOM: finite communication), or all of them (LUMI); oblivious robots (OBLOT) have none. The number of colours is a measure.\n\n**How the axes work.** As for graphs, level 0 on every axis assumes nothing, and higher levels are stronger assumptions. A problem variant is a point on all axes; the catalogue arranges variants as a tree rooted at *no assumptions* and as a graph of strengthenings.",
+  "story": [
+    {
+      "heading": "Weak robots and the least that suffices",
+      "body": "Suzuki and Yamashita [Suzuki1999Formation] modelled a swarm of identical robots that observe each other's positions at unpredictable times and \"communicate\" only by their moves, with no common coordinate system. Flocchini, Prencipe and Santoro describe the field that grew from this as asking for \"the minimal capabilities that the robots should have in order to solve a problem\" [Flocchini2012Book], and later work states the goal as identifying \"the minimal assumptions on internal capabilities of the robots (e.g., persistent memory, communication) and external conditions of the system (e.g., synchrony, activation scheduler)\" [Flocchini2023Asynchrony]. The robots are deliberately weak: anonymous, uniform, disoriented, oblivious and silent, the \"weakest and de facto standard model\" OBLOT [Flocchini2023Asynchrony]. Each axis of this model is one capability that can be granted on top of that baseline (memory, agreement, synchrony, detection, sight, identity, randomness), and a result is read as a point in the product of these scales. Impossibilities such as gathering without multiplicity detection [Prencipe2007Impossibility] tell which capability is needed; algorithms tell which suffices."
+    },
+    {
+      "heading": "The adversary acts in time, in space and in the frames",
+      "body": "Correctness is proved against an adversary, and most axes describe what that adversary controls. The scheduler decides when robots act and, in ASYNC, how long each phase lasts, so that a robot may compute on an outdated snapshot [Prencipe2007Impossibility] [Flocchini2023Asynchrony]. Non-rigid moves let it decide where a move ends, subject only to a minimum distance $\\delta$ [Prencipe2007Impossibility] [Flocchini2016Constant]. Disorientation lets it choose each robot's coordinate system, and in some models change it at every activation [DiLuna2014Robots] [Izumi2012TwoRobots]. Faults let it control some robots outright [Agmon2006Fault], and with randomization the question is what it may know about the coins [Efrima2009Partition]. Weakening one of these powers is the usual way to study an axis: SSYNC removes stale snapshots, rigid moves remove the choice of stopping point, a compass removes the choice of frame."
+    },
+    {
+      "heading": "Symmetry is the obstacle",
+      "body": "Anonymous, disoriented, deterministic robots in a symmetric configuration receive equivalent snapshots and move symmetrically, so symmetry can persist forever; the formability characterisations are stated in terms of the symmetry of the configuration [Suzuki1999Formation] [Dieudonne2010Leader]. Several axes are ways to break it. Agreement on chirality or on axes removes reflections and rotations [Dieudonne2010Leader] [Flocchini2008Arbitrary]; labels distinguish robots [Bouzid2011Homonyms] [Asahiro2025MAS]; random bits break ties with probability 1 [Dieudonne2009Scatter] [Bramas2016Probabilistic]; a sequential scheduler activates one robot at a time and so elects a leader for free [Flocchini2026Universal]. For gathering, a multiplicity point is itself an asymmetry, which is why multiplicity detection lets $n \\ge 3$ robots gather [Cieliebak2012Gathering] while two robots, which cannot create one, need memory, lights or compasses [Suzuki1999Formation] [Izumi2012TwoRobots] [Viglietta2013Rendezvous]."
+    },
+    {
+      "heading": "Lights: memory and communication in one register",
+      "body": "Persistent memory and explicit communication were both absent from the original model. The light, suggested by Peleg [Peleg2005Swarms] and formalised by Das et al. [Das2016Lights], gives each robot a constant number of colours that persist and are seen by all, and it removes the difference between SSYNC and ASYNC [Das2016Lights]. Showing only one's own light (FSTA) or only the others' (FCOM) separates remembering from communicating [Flocchini2016Constant], which turned the memory axis and the scheduler axis into a single landscape of model–scheduler pairs [Flocchini2019Synchronous] [Flocchini2023Asynchrony]. Lights also serve the geometric axes: with obstructed visibility they let robots coordinate without collisions [DiLuna2014Robots], and with two robots they replace persistent memory [Viglietta2013Rendezvous] [Heriban2018Optimally]."
+    },
+    {
+      "heading": "Where the standard setting sits",
+      "body": "The usual setting is weak on the axes that concern computability (anonymous, oblivious, disoriented, deterministic, SSYNC or ASYNC, often non-rigid) and idealised on the geometric ones: point robots, transparent, with unlimited visibility and exact sensing [Flocchini2023Asynchrony] [Bandettini2011Survey]. The idealisations were kept because they make the questions about synchrony, memory and agreement clean, and they were later relaxed one at a time: limited visibility [Ando1999Convergence] [Flocchini2005Limited], fat bodies [Czyzowicz2009Fat] [Agathangelou2013Fat], opacity [DiLuna2014Robots], faults [Agmon2006Fault]. In the catalogue every axis starts at its most hostile value, so that the root of each tree is the setting in which nothing is assumed; the standard variant of a problem is then a point well above the root on the geometric axes and close to it on the others."
+    }
+  ],
+  "axes": [
+    {
+      "id": "body",
+      "name": "Body",
+      "values": [
+        {
+          "id": "fat",
+          "level": 0,
+          "label": "fat robots (unit discs)",
+          "short": "fat",
+          "definition": "Each robot is a closed disc of radius 1 (unit disc). Discs may not overlap, so robots cannot share a point and must avoid collisions; a disc hides what lies behind it from other robots. Gathering then asks for a configuration whose union of discs is connected and in which every robot sees all others [Czyzowicz2009Fat]."
+        },
+        {
+          "id": "point",
+          "level": 1,
+          "label": "point robots",
+          "short": "point",
+          "definition": "Each robot is a point of the plane: several robots may share a point (multiplicity), and a robot hides only what lies exactly behind it on a line of sight."
+        }
+      ],
+      "origin": "Suzuki and Yamashita's robots are points: each one observes \"the positions of all the robots\" [Suzuki1999Formation], several robots may share a point, and nobody blocks anybody's view. Czyzowicz, Gąsieniec and Pelc [Czyzowicz2009Fat] introduced *fat* robots, closed unit discs that cannot overlap and hide what lies behind them: a robot sees another if some segment between their boundary circles meets no third robot, and a robot that touches another stops and ends its cycle. Gathering then asks for \"a configuration for which the union of all discs representing them is connected\", in which moreover every robot sees all others, so that all know the task is done [Czyzowicz2009Fat]. Their motivation is realism: \"In reality, even very small robots occupy some space\", so robots may block each other's view and motion [Czyzowicz2009Fat]; later accounts say the same [Agathangelou2013Fat]. [Czyzowicz2009Fat] solved three and four oblivious, disoriented robots in ASYNC (non-rigid moves, robots know $n$) by case analysis and left $n \\ge 5$ open (\"We were unable to do it\"); Agathangelou, Georgiou and Mavronicolas [Agathangelou2013Fat] answered it for any $n$ in ASYNC, assuming chirality and knowledge of $n$. Fatness is not weaker in every respect: the common radius gives all robots \"a common measure of unit\" [Czyzowicz2009Fat], a unit of length \"for free\" [Agathangelou2013Fat] [Bandettini2011Survey]. The catalogue puts fat robots at level 0 because they lose multiplicity points and gain obstruction and collisions; point robots are the setting of almost all other work [Bandettini2011Survey]."
+    },
+    {
+      "id": "scheduler",
+      "name": "Scheduler",
+      "values": [
+        {
+          "id": "async",
+          "level": 0,
+          "label": "asynchronous (ASYNC)",
+          "short": "ASYNC",
+          "description": "Cycles of different robots are arbitrary but finite; a robot may observe others while they move.",
+          "definition": "**ASYNC**: each robot's Look, Compute and Move phases take finite but unbounded, adversarially chosen time; a robot may look while others move, and compute on an outdated snapshot. Time is counted in epochs: an **epoch** is an interval of time in which every robot completes at least one full Look–Compute–Move cycle; it need not be the shortest such interval. The execution is divided into consecutive epochs, and a bound of $X$ epochs holds for every such division. In FSYNC and SSYNC time is counted in rounds. Called *Corda* by Prencipe [Prencipe2007Impossibility]. Intermediate variants restrict interleavings: *LC-atomic* (no Look by another robot between a robot's Look and its Compute), *Move-atomic* (no Look during another robot's Move) and *CM-atomic* [Flocchini2023Asynchrony]."
+        },
+        {
+          "id": "ssync",
+          "level": 1,
+          "label": "semi-synchronous (SSYNC)",
+          "short": "SSYNC",
+          "description": "In each round an adversary activates a non-empty subset of robots; their cycles are atomic.",
+          "definition": "**SSYNC**: time is divided into rounds; in each round a non-empty subset of robots, chosen by a fair adversary, executes one atomic Look–Compute–Move cycle. Called *Atom* by Prencipe [Prencipe2007Impossibility]."
+        },
+        {
+          "id": "sequential",
+          "level": 2,
+          "label": "sequential: exactly one robot is activated per round",
+          "short": "sequential",
+          "description": "Stronger than SSYNC and incomparable with FSYNC [Flocchini2026Universal].",
+          "definition": "**Sequential**: an SSYNC scheduler that activates exactly one robot per round (fairly). Also called a *centralized* scheduler [Terai2023Gathering]; a *round-robin* scheduler is a fair special case."
+        },
+        {
+          "id": "fsync",
+          "level": 2,
+          "label": "fully synchronous (FSYNC)",
+          "short": "FSYNC",
+          "definition": "**FSYNC**: every robot executes one atomic cycle in every round."
+        }
+      ],
+      "origin": "Suzuki and Yamashita [Suzuki1999Formation] introduced the semi-synchronous model: robots act \"at infinitely many unpredictable time instants\", and in each round of a discrete time an arbitrary non-empty set of robots observes and moves instantaneously, every robot being active infinitely often; Prencipe calls it *Atom* [Prencipe2007Impossibility] and FSYNC, where every robot acts in every round, is its special case [Das2016Lights]. The asynchronous model (later named CORDA) is due to Flocchini, Prencipe, Santoro and Widmayer [Flocchini1999Hard], as [Flocchini2023Asynchrony] and [Prencipe2007Impossibility] also state: they assume \"asynchronicity within one step\", so that \"the actual move of a robot may be based on a situation that lies arbitrarily far in the past\", and a robot \"may be seen an arbitrary number of times by other robots\" while moving; they call this \"the most radical deviation\" from Suzuki and Yamashita's atomic steps [Flocchini1999Hard]. In Prencipe's words, \"computations can be made based on obsolete observations\" [Prencipe2007Impossibility]. Prencipe motivates delays inside a cycle as a way \"to model also different motorial speeds of the robots\" [Prencipe2007Impossibility]. The schedulers are interesting because they form a hierarchy: rendezvous of two oblivious robots is solvable in FSYNC and not in SSYNC [Suzuki1999Formation] (Theorem 3.1 and footnote 5), while a problem separating SSYNC from ASYNC for oblivious robots was sought \"for more than two decades\" and is known only under limited visibility [Flocchini2023Asynchrony] [Kirkpatrick2024Separating]. Intermediate schedulers (RSYNC, LC-, CM- and Move-atomic ASYNC) were introduced to locate exactly where the power is lost [Flocchini2023Asynchrony] [Buchin2022Energy]. Sequential schedulers, which activate one robot per round, break symmetry by themselves; Flocchini, Navarra, Pattanayak, Piselli and Santoro note that their relationship with FSYNC \"has so far been ignored\" and show that the two are orthogonal [Flocchini2026Universal]."
+    },
+    {
+      "id": "memory",
+      "name": "Lights (persistent memory)",
+      "values": [
+        {
+          "id": "oblivious",
+          "level": 0,
+          "label": "oblivious, no light (OBLOT)",
+          "short": "oblivious",
+          "description": "Nothing survives from one cycle to the next.",
+          "definition": "**OBLOT**: a robot's computation depends only on the current snapshot; nothing persists across cycles."
+        },
+        {
+          "id": "fsta",
+          "level": 1,
+          "label": "internal light only (FSTA): a robot sees its own light, not the others'",
+          "short": "internal light (FSTA)",
+          "description": "Constant persistent memory, no communication.",
+          "definition": "**FSTA**: each robot has a light with $c$ colours that only it can see; it persists between cycles (constant persistent memory, no communication). Also called an *internal* light."
+        },
+        {
+          "id": "fcom",
+          "level": 1,
+          "label": "external light only (FCOM): a robot sees the others' lights, not its own",
+          "short": "external light (FCOM)",
+          "description": "Constant communication, no persistent memory of its own.",
+          "definition": "**FCOM**: each robot has a light with $c$ colours that only the others can see (constant communication, no persistent memory of its own). Also called an *external* light."
+        },
+        {
+          "id": "lights",
+          "level": 2,
+          "label": "full light (LUMI): every robot sees all lights, including its own",
+          "short": "lights (LUMI)",
+          "description": "A light with a constant number of colours is both persistent memory and a means of communication.",
+          "definition": "**LUMI**: each robot has a light with $c$ colours, set at the end of Compute, visible to all robots including itself; it is both memory and communication. Also called *luminous* robots, or a *full* light."
+        }
+      ],
+      "origin": "Suzuki and Yamashita model a robot as \"a mobile processor with infinite memory\" and call an algorithm *oblivious* when the new position depends only on the current observation, noting that \"oblivious algorithms are self-stabilizing by definition\" [Suzuki1999Formation]. Obliviousness then became the default, partly because \"any algorithm proved correct in this model is also self-stabilizing\" [Clement2010Cost] [Defago2006Fault]; oblivious, silent robots communicate only by moving, \"reminiscent of bees in a bee dance\" [Flocchini1999Hard] [Prencipe2007Impossibility]. Unbounded memory was compared early: two non-oblivious robots can rendezvous in SSYNC and oblivious ones cannot [Suzuki1999Formation] (Theorems 3.1 and 3.3) [Izumi2012TwoRobots]. Lights were \"initially suggested by Peleg\" [Das2016Lights] [DiLuna2014Robots]: his survey proposes giving robots \"a small amount (say, O(1) bits) of stable memory\" and \"marking (at least some of) the robots with colors, flags or visible indicator lights\" [Peleg2005Swarms] (see also [Efrima2007Models]); Das, Flocchini, Prencipe, Santoro and Yamashita [Das2016Lights] turned them into the LUMI model, a constant-size register that is persistent and visible to all, so that a robot can remember and communicate a constant number of bits per cycle. Their main results are that LUMI under ASYNC is equivalent to LUMI under SSYNC and strictly stronger than OBLOT under SSYNC [Das2016Lights]. To separate the two roles of a light, Flocchini, Santoro, Viglietta and Yamashita [Flocchini2016Constant] defined FSTA (a robot sees only its own light: constant memory, no communication) and FCOM (it sees only the others' lights: constant communication, no memory), and showed that FSTA robots with rigid moves rendezvous in SSYNC and FCOM robots even in ASYNC. The question \"is it better to remember or to communicate\" then became a programme comparing the four models under every scheduler [Flocchini2019Synchronous] [Flocchini2023Asynchrony] [Das2024Visibility]."
+    },
+    {
+      "id": "frames",
+      "name": "Agreement on coordinates",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no agreement on local coordinate systems",
+          "short": "disoriented",
+          "definition": "Each robot $r$ observes in its own coordinate system, obtained from the global one by an unknown similarity (translation, rotation, uniform scaling, and possibly reflection); systems may differ between robots and, in some models, between cycles. Papers that call robots *disoriented* do not always mean this: Défago and Souissi use the word while assuming chirality [Defago2008NonUniform]. Some papers also let the adversary change a robot's rotation, reflection and unit at every Look (*variable disorientation*) [Flocchini2023Asynchrony] [Masuzawa2026Disorientation]."
+        },
+        {
+          "id": "chirality",
+          "level": 1,
+          "label": "common chirality (same clockwise orientation)",
+          "short": "chirality",
+          "definition": "All local coordinate systems have the same handedness (clockwise orientation): no reflection. Also called *handedness*. Prencipe uses *chirality* for agreement on North and East, i.e. a compass [Prencipe2007Impossibility]."
+        },
+        {
+          "id": "one-axis",
+          "level": 1,
+          "label": "agreement on one axis (no common chirality)",
+          "short": "one axis",
+          "definition": "All robots agree on the direction and orientation of one axis (e.g. North), but not necessarily on handedness: two robots may disagree on which side is East. This is how the papers use *one axis agreement* (e.g. robots \"agree on only 'left' and 'right'\" [Bose2021Opaque]; robots \"do not necessarily have the same handedness\" [Pagli2015Near]). One axis and chirality are alternatives on this axis; together they amount to a common compass."
+        },
+        {
+          "id": "compass",
+          "level": 2,
+          "label": "agreement on both axes (common compass)",
+          "short": "compass",
+          "definition": "All robots agree on the directions and orientations of both axes (a common compass); they may still disagree on origin and unit. Called *full compass* by Efrima and Peleg, who also use *half compass* (both axis directions, the positive sense of one axis, no chirality), *direction-only* and *axes-only* [Efrima2009Partition]. Agreement on one axis together with common chirality is equivalent: the orientation of the second axis then follows from handedness."
+        }
+      ],
+      "origin": "Suzuki and Yamashita's robots \"initially do not have a common x-y coordinate system\", although they share handedness: in every local frame \"the positive y-direction is 90 degrees counterclockwise from the positive x-direction\" [Suzuki1999Formation]; together with anonymity, this disorientation is what keeps symmetric configurations symmetric. Flocchini, Prencipe, Santoro and Widmayer [Flocchini1999Hard] [Flocchini2008Arbitrary] dropped that common handedness and made agreement a parameter, studying \"the role of common knowledge\" in pattern formation by asynchronous robots: with the directions and orientations of both axes any pattern can be formed; with one axis direction (with or without its orientation) the problem is solvable when $n$ is odd and in general not when $n$ is even; with no axis it is unsolvable in general (ISAAC version, proofs omitted) [Flocchini1999Hard]. Efrima and Peleg [Efrima2009Partition], \"elaborating on\" that work, list full compass, half compass, direction-only, axes-only and no compass, and note that without a common orientation robots \"do not share the notion of 'clockwise'\". Common handedness, *chirality*, became the usual intermediate assumption: Dieudonné, Petit and Villain list sense of direction and chirality among the global properties that decide what a swarm can do, and show that leader election and arbitrary pattern formation are equivalent in ASYNC for $n \\ge 4$ with chirality and $n \\ge 5$ without [Dieudonne2010Leader]; removing chirality from pattern formation and gathering is a research line of its own [Bramas2015WaitFree] [Cicerone2019Asynchronous]. Partial agreement has also been quantified: Izumi et al. give each robot an \"unreliable compass\" and find the largest deviation that still lets two oblivious robots gather [Izumi2012TwoRobots], and agreement on one axis is used for gathering under limited visibility [Poudel2021TimeOptimal] [Castenow2022Unifying]."
+    },
+    {
+      "id": "movement",
+      "name": "Movement",
+      "values": [
+        {
+          "id": "non-rigid",
+          "level": 0,
+          "label": "non-rigid: the adversary may stop a move after some minimum distance $\\delta$",
+          "short": "non-rigid",
+          "definition": "In a Move phase the adversary may stop a robot before its destination, but only after it has travelled at least $\\delta>0$ (a constant unknown to the robots) or reached the destination."
+        },
+        {
+          "id": "rigid",
+          "level": 1,
+          "label": "rigid: every move reaches its destination",
+          "short": "rigid",
+          "definition": "Every Move phase ends at the computed destination."
+        }
+      ],
+      "origin": "In CORDA a move may stop before its destination: Prencipe's Assumption A1 gives each robot a constant $\\delta_r > 0$ such that it either reaches its destination or travels at least $\\delta_r$ towards it, so that \"it cannot know how far it will go in the current cycle\" [Prencipe2007Impossibility]. The physical motivation is \"limits to the robot's motorial capabilities\" [Prencipe2007Impossibility]; the lower bound $\\delta$ is needed because without it no algorithm could be guaranteed to terminate [Bandettini2011Survey]. Non-rigid moves let the adversary act in space as the scheduler acts in time, and *rigid* moves (every move reaches its destination) are the stronger assumption that many results state explicitly. Flocchini, Santoro, Viglietta and Yamashita [Flocchini2016Constant] first proved their rendezvous algorithms for rigid moves and then showed that \"rigidity of the movements can be traded with knowledge of $\\delta$\". Heriban, Défago and Tixeuil [Heriban2018Optimally] work explicitly in \"the non-rigid ASYNC model\", and later landscape papers removed rigidity (and chirality) from the earlier synchronous comparisons of OBLOT, FSTA, FCOM and LUMI, as reported by [Das2024Visibility]."
+    },
+    {
+      "id": "multiplicity",
+      "name": "Multiplicity detection",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "none: a point with several robots looks like one robot",
+          "short": "no multiplicity detection",
+          "definition": "A snapshot is a set of points: a point occupied by several robots looks like a single robot."
+        },
+        {
+          "id": "weak",
+          "level": 1,
+          "label": "weak: a robot sees whether a point holds more than one robot",
+          "short": "weak multiplicity",
+          "definition": "A snapshot marks each occupied point as holding one robot or more than one."
+        },
+        {
+          "id": "strong",
+          "level": 2,
+          "label": "strong: a robot sees how many robots are at each point",
+          "short": "strong multiplicity",
+          "definition": "A snapshot is a multiset: each occupied point comes with the exact number of robots on it."
+        }
+      ],
+      "origin": "With point robots several robots can share a point, and the snapshot decides whether this is visible. In Prencipe's statement of CORDA robots \"can not distinguish whether there is more than one fellow on a given position\" [Prencipe2007Impossibility]. Prencipe observed that every known gathering algorithm used some \"extra\" assumption, mainly that robots \"detect whether a given point on the plane is occupied by one or more robots\", and proved gathering impossible without such help [Prencipe2007Impossibility]. Cieliebak, Flocchini, Prencipe and Santoro [Cieliebak2012Gathering] then showed that with multiplicity detection any $n > 2$ oblivious, disoriented, asynchronous robots gather (abstract read); the idea is to create one multiplicity point and keep it unique [Bandettini2011Survey]. Later work distinguishes a *weak* detector (one robot or more) from a *strong* one (the exact number) [Bouzid2013Crash] [Pattanayak2019Crash]; the earliest source of this split was not traced. The level matters: Terai, Wada and Katayama note that strong detection alone lets robots without lights gather, so a model with lights must keep colours from revealing multiplicities [Terai2023Gathering]; under sequential schedulers weak detection is necessary and sufficient for gathering [Flocchini2026Universal]."
+    },
+    {
+      "id": "visibility",
+      "name": "Visibility",
+      "values": [
+        {
+          "id": "limited",
+          "level": 0,
+          "label": "limited: robots see only within a fixed radius",
+          "short": "limited visibility",
+          "definition": "A robot sees exactly the robots within Euclidean distance $V$ of its position, for a fixed radius $V>0$."
+        },
+        {
+          "id": "unlimited",
+          "level": 1,
+          "label": "unlimited",
+          "short": "unlimited visibility",
+          "definition": "A robot sees all robots (subject to opacity)."
+        }
+      ],
+      "origin": "Ando, Oasa, Suzuki and Yamashita [Ando1999Convergence] introduced robots that see only within a fixed radius $V$; Kirkpatrick et al. call it \"the pioneering work on Point Convergence under limited visibility\", [Kirkpatrick2024Separating]. Each robot moves towards the centre of the smallest enclosing circle of the robots it sees, but only so far that every robot it sees stays within distance $V$; the proof assumes points, no obstruction, and phases of negligible duration (so the scheduler is SSYNC although the paper calls the robots asynchronous), with each move reaching its computed destination, at most a small constant away [Ando1999Convergence]. Flocchini, Prencipe, Santoro and Widmayer [Flocchini2005Limited] gathered oblivious robots with limited visibility in ASYNC, with non-rigid moves and without multiplicity detection, when they share \"orientation\", i.e. agree on the directions and orientations of both axes but not on unit or origin; they conclude that \"orientation is at least as powerful as instantaneous movements\". Limited visibility makes the model local: the initial visibility graph must be connected [Flocchini2005Limited] (Lemma 4.7), and known algorithms keep every initially visible pair visible [Ando1999Convergence] [Bandettini2011Survey] [Kirkpatrick2024Separating]. It also became a tool for separation: Katreniak introduced bounded asynchrony for this problem [Katreniak2011Convergence], and convergence with limited visibility is the known problem that separates SSYNC from ASYNC for oblivious robots [Kirkpatrick2024Separating] [Flocchini2023Asynchrony]. Das et al. argue that full visibility \"is not practically feasible\" and compare OBLOT, FSTA, FCOM and LUMI under both visibilities [Das2024Visibility]."
+    },
+    {
+      "id": "opacity",
+      "name": "Opacity",
+      "values": [
+        {
+          "id": "opaque",
+          "level": 0,
+          "label": "opaque: collinear robots hide each other",
+          "short": "opaque",
+          "definition": "Robots are points that obstruct sight: $r$ sees $s$ iff no third robot lies on the open segment $\\overline{rs}$."
+        },
+        {
+          "id": "transparent",
+          "level": 1,
+          "label": "transparent: every robot sees every robot within range",
+          "short": "transparent",
+          "definition": "Robots do not obstruct each other's view."
+        }
+      ],
+      "origin": "In Suzuki and Yamashita's model and in CORDA robots are transparent: \"three or more collinear agents are assumed to be mutually visible\" [DiLuna2014Robots]. Di Luna, Flocchini, Gan Chaudhuri, Santoro and Viglietta [DiLuna2014Robots] [DiLuna2017Mutual] started \"the study of computing when visibility is obstructable\" for point robots, since \"given three collinear agents, the one in the middle blocks the visibility between the other two\". Before them obstruction had been studied for fat robots [Czyzowicz2009Fat] [Agathangelou2013Fat] and for robots on a line, according to [DiLuna2014Robots]. The basic problem they posed, Complete (Mutual) Visibility, asks the robots to reach a configuration in which all see each other; they solved it in ASYNC without collisions with a constant number of colours [DiLuna2014Robots]. Opaque robots with lights then became a line of work on time and colours [Vaidyanathan2015Log] [Sharma2021Constant] and on pattern formation [Bose2021Opaque], and Feletti, Mambretti, Mereghetti and Palano compare the computational power of transparent and opaque robots directly [Feletti2025Transparency]."
+    },
+    {
+      "id": "faults",
+      "name": "Faults",
+      "values": [
+        {
+          "id": "byzantine",
+          "level": 0,
+          "label": "up to $f$ Byzantine robots",
+          "short": "Byzantine",
+          "definition": "Up to $f$ robots move arbitrarily (adversarially); with lights, they may also set arbitrary colours."
+        },
+        {
+          "id": "crash",
+          "level": 1,
+          "label": "up to $f$ robots may crash",
+          "short": "crash faults",
+          "definition": "Up to $f$ robots stop forever at adversarial times and remain visible at their last position."
+        },
+        {
+          "id": "none",
+          "level": 2,
+          "label": "no faults",
+          "short": "no faults",
+          "definition": "All robots follow the algorithm forever."
+        }
+      ],
+      "origin": "Agmon and Peleg [Agmon2006Fault] (SODA 2004) brought crash and Byzantine robots into the Look–Compute–Move model, requiring the algorithm \"to successfully gather the nonfaulty robots, independently of the behavior of the faulty ones\". They observed that most existing algorithms fail with a single crash, gathered $n \\ge 3$ robots with one crash in SSYNC (Theorem 3.8), proved that three robots cannot gather, or even converge, in SSYNC if one may be Byzantine (Theorem 4.4; hence also in ASYNC, which their abstract states), and gathered $n \\ge 3f+1$ robots with $f$ Byzantine faults in FSYNC (Theorem 5.10) [Agmon2006Fault]. Their robots share handedness, see multiplicities (a Look returns a multiset) and make non-rigid moves of at least a fixed distance [Agmon2006Fault]. The motivation is deployment in adverse environments, where a swarm must \"ensure coordination in spite of faulty robots\" [Clement2010Cost], and oblivious algorithms are already self-stabilizing, so transient faults come for free and permanent ones are the question [Defago2006Fault]. Défago, Gradinariu, Messika and Raipin-Parvédy [Defago2006Fault] extended the feasibility study to bounded schedulers and to probabilistic gathering under crash and Byzantine faults. A crashed robot \"simply stops moving\" and, since correct robots may also stay still, cannot be identified [Efrima2009Partition]; crash-tolerant gathering of many faults was obtained with strong multiplicity detection [Bouzid2013Crash] and with weak multiplicity detection [Pattanayak2019Crash]."
+    },
+    {
+      "id": "algorithm",
+      "name": "Randomness",
+      "values": [
+        {
+          "id": "deterministic",
+          "level": 0,
+          "label": "deterministic",
+          "short": "deterministic",
+          "definition": "The destination computed in a cycle is a function of the snapshot (and the light, if any)."
+        },
+        {
+          "id": "randomized",
+          "level": 1,
+          "label": "randomized",
+          "short": "randomized",
+          "definition": "Robots may use random bits in Compute; guarantees hold with probability 1 or in expectation, as stated per result."
+        }
+      ],
+      "origin": "The classical model is deterministic: in CORDA the Compute phase runs \"a deterministic algorithm\" [Prencipe2007Impossibility], so a configuration that looks the same to two anonymous, disoriented robots makes them act alike forever. Randomization was introduced to escape such impossibilities: Dieudonné and Petit [Dieudonne2009Scatter] proved that scattering cannot be solved deterministically in SSYNC and gave a randomized algorithm, and Défago, Gradinariu, Messika and Raipin-Parvédy [Defago2006Fault] studied probabilistic gathering with and without faults (abstract read). Clément et al. note that work around the impossibilities had focused on additional assumptions, \"less attention being shown to the use of randomization\", and analyse probabilistic gathering and scattering with Markov chains [Clement2010Cost]. Yamauchi and Yamashita [Yamauchi2014Randomized] formed any pattern in ASYNC without a common coordinate system by randomization, as reported by [Bramas2016Probabilistic]; Bramas and Tixeuil then treated randomness as a resource, using one random bit per cycle for pattern formation [Bramas2016Probabilistic] and proving that $n \\log n$ random bits are necessary to scatter $n$ robots [Bramas2017RandomBit]. What the adversary may learn about the coin flips (adaptive or not) is part of the model and is fixed per paper [Efrima2009Partition]."
+    },
+    {
+      "id": "ids",
+      "name": "Identifiers",
+      "values": [
+        {
+          "id": "anonymous",
+          "level": 0,
+          "label": "anonymous: all robots are identical",
+          "short": "anonymous",
+          "definition": "Robots are indistinguishable and run the same algorithm."
+        },
+        {
+          "id": "homonymous",
+          "level": 1,
+          "label": "homonymous: robots carry labels, but several may share a label",
+          "short": "homonymous",
+          "description": "Between anonymous and eponymous: labels exist but need not be distinct.",
+          "definition": "Robots carry labels from a set of size $\\ell$, $1\\le\\ell\\le n$, which may repeat; equivalently, robots may run one of $\\ell$ algorithms. The minimum $\\ell$ that solves a problem is its *minimum algorithm size* [Asahiro2025MAS]."
+        },
+        {
+          "id": "unique",
+          "level": 2,
+          "label": "distinct identifiers (eponymous): robots have pairwise distinct identifiers",
+          "short": "distinct IDs (eponymous)",
+          "definition": "**Distinct identifiers** (eponymous robots): labels are pairwise distinct ($\\ell=n$); whether others can see a robot's label is stated per result."
+        }
+      ],
+      "origin": "Suzuki and Yamashita's robots are anonymous: \"they all execute the same algorithm and they cannot be distinguished by their appearances\" [Suzuki1999Formation]. With disorientation and determinism, anonymity makes symmetry the central obstacle, and the characterisations of solvable instances are stated in terms of the symmetry of the configuration [Suzuki1999Formation] [Dieudonne2010Leader]. Das, Flocchini, Santoro and Yamashita [Das2015Sequences] compared anonymous and identified (*eponymous*) robots on forming sequences of patterns and found that anonymous robots form only sequences of equal symmetricity while identified robots form nearly all, as summarised by [Bouzid2011Homonyms]. To measure the gap, Bouzid and Lamani [Bouzid2011Homonyms] imported the homonymous model of Delporte-Gallet et al. [Delporte2013Homonyms], in which $n$ robots share $\\ell$ labels, into the Suzuki–Yamashita model. Asahiro and Yamashita [Asahiro2025MAS] recast labels as algorithms: robots running one of $\\ell$ algorithms behave like robots with $\\ell$ shared labels, so the *minimum algorithm size* of a task measures how much identification it needs."
+    }
+  ],
+  "landscape": {
+    "title": "Which model is stronger",
+    "intro": "Robot models combine a memory model (OBLOT, FSTA, FCOM, LUMI) with a scheduler. Model $X$ is **stronger** than $Y$ ($X > Y$) if every problem solvable in $Y$ is solvable in $X$ and some problem, the *separator*, is solvable in $X$ but not in $Y$; $X \\equiv Y$ if they solve the same problems; $X \\perp Y$ if each solves a problem the other cannot. The schedulers between FSYNC and ASYNC are RSYNC (after an optional fully synchronous prefix, consecutive sets of active robots are disjoint), SSYNC, and three restrictions of ASYNC: LC-atomic (no robot looks between another's Look and Compute), CM-atomic and Move-atomic (no robot looks while another moves) [Flocchini2023Asynchrony] [Buchin2022Energy].",
+    "memories": [
+      {
+        "id": "LUMI",
+        "label": "LUMI",
+        "name": "full light"
+      },
+      {
+        "id": "FCOM",
+        "label": "FCOM",
+        "name": "external light"
+      },
+      {
+        "id": "FSTA",
+        "label": "FSTA",
+        "name": "internal light"
+      },
+      {
+        "id": "OBLOT",
+        "label": "OBLOT",
+        "name": "oblivious"
+      }
+    ],
+    "schedulers": [
+      {
+        "id": "F",
+        "label": "FSYNC"
+      },
+      {
+        "id": "R",
+        "label": "RSYNC"
+      },
+      {
+        "id": "S",
+        "label": "SSYNC"
+      },
+      {
+        "id": "A_LC",
+        "label": "LC-atomic"
+      },
+      {
+        "id": "A_CM",
+        "label": "CM-atomic"
+      },
+      {
+        "id": "A_M",
+        "label": "Move-atomic"
+      },
+      {
+        "id": "A",
+        "label": "ASYNC"
+      }
+    ],
+    "trivial": "A scheduler that allows fewer executions gives at least as much power: FSYNC $\\ge$ SSYNC, RSYNC $\\ge$ SSYNC, and SSYNC $\\ge$ each atomic ASYNC $\\ge$ ASYNC. More visible light gives at least as much power under the same scheduler: LUMI $\\ge$ FCOM, FSTA $\\ge$ OBLOT.",
+    "views": [
+      {
+        "id": "general",
+        "title": "Any number of robots",
+        "assumptions": "Most results assume chirality and rigid moves; separators use small teams (often $n \\le 4$). Sources: [Das2016Lights] [Flocchini2019Synchronous] [Buchin2022Energy] [Flocchini2023Asynchrony] [Das2021FiniteMemory] [Naito2025Beyond] [Flocchini2026Universal] [Kirkpatrick2024Separating].",
+        "relations": [
+          {
+            "a": "OBLOT^F",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Suzuki1999Formation",
+            "thm": "Theorem 3.1 (no oblivious algorithm for two robots) and footnote 5 (midpoint algorithm for synchronized robots); see also [Flocchini2019Synchronous] Thm 20.4 and [Das2016Lights] Lemma 3.3",
+            "also": [
+              "Flocchini2019Synchronous"
+            ],
+            "note": "Suzuki and Yamashita's robots share handedness and each move reaches its computed destination (bounded step length); the impossibility holds a fortiori without these."
+          },
+          {
+            "a": "LUMI^A",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Das2016Lights",
+            "thm": "Thm 3.4 (via Lemma 3.3, Thm 3.3)"
+          },
+          {
+            "a": "LUMI^A",
+            "rel": "≡",
+            "b": "LUMI^S",
+            "sep": [],
+            "ref": "Das2016Lights",
+            "thm": "Thm 3.6 (via Thm 3.5)",
+            "also": [
+              "Flocchini2023Asynchrony"
+            ]
+          },
+          {
+            "a": "FCOM^F",
+            "rel": "≡",
+            "b": "LUMI^F",
+            "sep": [],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 2 (Lemma 1, simulation LUbyFCinFSY)"
+          },
+          {
+            "a": "FCOM^F",
+            "rel": ">",
+            "b": "FSTA^F",
+            "sep": [
+              "¬IL"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 6 (Lemmas 4, 5)",
+            "also": [
+              "Buchin2022Energy"
+            ]
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "OBLOT^F",
+            "sep": [
+              "OSP"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 10 (Lemmas 8, 9)"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "¬IL",
+              "TAR(d)"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 14"
+          },
+          {
+            "a": "FSTA^S",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 15",
+            "caveat": "Uses rendezvous by FSTA robots in SSYNC [Flocchini2016Constant], which needs each robot's unit of distance to stay fixed."
+          },
+          {
+            "a": "FCOM^S",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 15"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": ">",
+            "b": "FSTA^S",
+            "sep": [
+              "OSP"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 17 (Lemma 16)"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": ">",
+            "b": "FCOM^S",
+            "sep": [
+              "OSP"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 17 (Lemma 16)"
+          },
+          {
+            "a": "LUMI^F",
+            "rel": ">",
+            "b": "LUMI^S",
+            "sep": [
+              "CGE"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 20.1 (Lemma 19)"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "FSTA^S",
+            "sep": [
+              "CGE"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 20.2"
+          },
+          {
+            "a": "FCOM^F",
+            "rel": ">",
+            "b": "LUMI^S",
+            "sep": [
+              "CGE"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 20.3"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO",
+              "¬IL"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 25 (Lemmas 22, 23)"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SRO",
+              "TAR(d)"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 25"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": "⊥",
+            "b": "FSTA^F",
+            "sep": [
+              "¬IL",
+              "CGE"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 26"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^F",
+            "sep": [
+              "¬IL",
+              "CGE"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 26"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": "⊥",
+            "b": "OBLOT^F",
+            "sep": [
+              "OSP",
+              "CGE*"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Thm 28 (answers the [Das2016Lights] question for LUMI^A since LUMI^A ≡ LUMI^S)"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "CGE",
+              "RDV"
+            ],
+            "ref": "Flocchini2019Synchronous",
+            "thm": "Table 3 (Th. 15, 20)"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO",
+              "RDV"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 3.1"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SRO",
+              "RDV"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 3.2"
+          },
+          {
+            "a": "FCOM^R",
+            "rel": ">",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 3.3"
+          },
+          {
+            "a": "FSTA^R",
+            "rel": ">",
+            "b": "FSTA^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 3.4"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 3.5"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "CYC"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 4.1"
+          },
+          {
+            "a": "FSTA^R",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO",
+              "CYC"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 4.2"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": "≡",
+            "b": "LUMI^R",
+            "sep": [],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 6 (Thm 5, simulation sim-RS-by-S)"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": "⊥",
+            "b": "LUMI^R",
+            "sep": [
+              "CYC",
+              "CGE"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 8.1"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": "⊥",
+            "b": "FCOM^R",
+            "sep": [
+              "CYC",
+              "CGE"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 8.2"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "LUMI^R",
+            "sep": [
+              "OSP",
+              "CGE*"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 9.1"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FCOM^R",
+            "sep": [
+              "OSP",
+              "CGE*"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 9.2"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^R",
+            "sep": [
+              "OSP",
+              "CGE*"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 9.3",
+            "also": [
+              "Naito2025Beyond"
+            ]
+          },
+          {
+            "a": "FCOM^R",
+            "rel": "≡",
+            "b": "LUMI^R",
+            "sep": [],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 11 (Thm 10: LUMI^S ⊆ FCOM^RS)"
+          },
+          {
+            "a": "FCOM^R",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "CYC"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 11"
+          },
+          {
+            "a": "FSTA^R",
+            "rel": ">",
+            "b": "OBLOT^R",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 11 (Lemma 1: RDV ∉ OBLOT^RS)"
+          },
+          {
+            "a": "OBLOT^S",
+            "rel": ">",
+            "b": "OBLOT^A",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 6 (arXiv Thm 1)",
+            "also": [
+              "Kirkpatrick2024Separating"
+            ]
+          },
+          {
+            "a": "OBLOT^A_M",
+            "rel": ">",
+            "b": "OBLOT^A",
+            "sep": [
+              "TF"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 10 (arXiv Thm 2)"
+          },
+          {
+            "a": "OBLOT^S",
+            "rel": ">",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 11 (arXiv Thm 3)"
+          },
+          {
+            "a": "OBLOT^A_LC",
+            "rel": "≡",
+            "b": "OBLOT^A",
+            "sep": [],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 11 (arXiv Thm 3)"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": ">",
+            "b": "FCOM^A",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 14 (arXiv Thm 4)",
+            "also": [
+              "Naito2025Beyond"
+            ]
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "≡",
+            "b": "FCOM^A",
+            "sep": [],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 15 (arXiv Thm 5), simulation SIM"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "≡",
+            "b": "FCOM^A_LC",
+            "sep": [],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 17 (arXiv Thm 6)"
+          },
+          {
+            "a": "FCOM^A_LC",
+            "rel": ">",
+            "b": "FCOM^A_CM",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 18 (arXiv Thm 7)"
+          },
+          {
+            "a": "FSTA^S",
+            "rel": ">",
+            "b": "FSTA^A",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 21 (arXiv Thm 8)"
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": ">",
+            "b": "FSTA^A",
+            "sep": [
+              "TF"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 23 (arXiv Thm 9)"
+          },
+          {
+            "a": "FSTA^S",
+            "rel": ">",
+            "b": "FSTA^A_M",
+            "sep": [
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 24.2 (arXiv Thm 10.2)",
+            "also": [
+              "Naito2025Beyond"
+            ]
+          },
+          {
+            "a": "FSTA^A_LC",
+            "rel": "≡",
+            "b": "FSTA^A",
+            "sep": [],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 24.1"
+          },
+          {
+            "a": "FCOM^A_LC",
+            "rel": "⊥",
+            "b": "FSTA^A_M",
+            "sep": [
+              "CYC",
+              "GCNCL"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 28.1 (arXiv Thm 11.1)"
+          },
+          {
+            "a": "FCOM^A_LC",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "CYC",
+              "GCNCL"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 28.2"
+          },
+          {
+            "a": "FCOM^A_LC",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 28.3"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^A_M",
+            "sep": [
+              "CYC",
+              "GCNCL"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 29.1 (arXiv Thm 12.1)"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "CYC",
+              "GCNCL"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 29.2",
+            "also": [
+              "Das2021FiniteMemory"
+            ]
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "MLCv",
+              "CYC"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 29.3"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": ">",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 29.4",
+            "caveat": "Uses rendezvous by FCOM robots in ASYNC with 12 colours [Flocchini2016Constant], which needs a fixed unit of distance; under variable disorientation it is impossible [Masuzawa2026Disorientation]."
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV",
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 30.1 (arXiv Thm 13.1)",
+            "caveat": "Uses rendezvous by FSTA robots in ASYNC, stated without proof; under variable disorientation it is impossible [Masuzawa2026Disorientation]."
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": ">",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 30.2",
+            "caveat": "Uses rendezvous by FSTA robots in ASYNC, stated without proof; under variable disorientation it is impossible [Masuzawa2026Disorientation].",
+            "also": [
+              "Naito2025Beyond"
+            ]
+          },
+          {
+            "a": "FSTA^A",
+            "rel": "⊥",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "RDV",
+              "TF"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 30.3",
+            "caveat": "Uses rendezvous by FSTA robots in ASYNC, stated without proof; under variable disorientation it is impossible [Masuzawa2026Disorientation]."
+          },
+          {
+            "a": "FSTA^A",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "RDV",
+              "MLCv"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 30.4",
+            "caveat": "Uses rendezvous by FSTA robots in ASYNC, stated without proof; under variable disorientation it is impossible [Masuzawa2026Disorientation]."
+          },
+          {
+            "a": "FSTA^A",
+            "rel": ">",
+            "b": "OBLOT^A",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Flocchini2023Asynchrony",
+            "thm": "LIPIcs Thm 30.5",
+            "caveat": "Uses rendezvous by FSTA robots in ASYNC, stated without proof; under variable disorientation it is impossible [Masuzawa2026Disorientation].",
+            "also": [
+              "Das2021FiniteMemory",
+              "Naito2025Beyond"
+            ]
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "SRO",
+              "OC"
+            ],
+            "ref": "Das2021FiniteMemory",
+            "thm": "Thm 1 (Lemmas 1, 2)"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^F",
+            "sep": [
+              "¬IL",
+              "CGE"
+            ],
+            "ref": "Das2021FiniteMemory",
+            "thm": "Thm 3 (Lemma 3: ¬IL ∈ FCOM^A)"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "¬IL",
+              "TAR(d)"
+            ],
+            "ref": "Das2021FiniteMemory",
+            "thm": "Thm 4"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "OBLOT^F",
+            "sep": [
+              "¬IL",
+              "SRO"
+            ],
+            "ref": "Das2021FiniteMemory",
+            "thm": "Thm 5"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "¬IL",
+              "IOP"
+            ],
+            "ref": "Das2021FiniteMemory",
+            "thm": "Thm 6 (Lemmas 4, 5)"
+          },
+          {
+            "a": "LUMI^F",
+            "rel": ">",
+            "b": "FSTA^F",
+            "sep": [
+              "ETE"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 3 (Lemmas 3–5)"
+          },
+          {
+            "a": "LUMI^F",
+            "rel": ">",
+            "b": "LUMI^R",
+            "sep": [
+              "ETE"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 3"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "HET"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 4 (Lemmas 6–10)"
+          },
+          {
+            "a": "LUMI^R",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "HET",
+              "TAR(d)*"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 4, Thm 5"
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "VEC",
+              "CYC"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 7 (+ CYC from [Buchin2022Energy])"
+          },
+          {
+            "a": "FCOM^A_M",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "LP–Cv",
+              "ZCC"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 8, Thm 9"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": ">",
+            "b": "OBLOT^R",
+            "sep": [
+              "LCM–M"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 11"
+          },
+          {
+            "a": "FSTA^A",
+            "rel": "⊥",
+            "b": "OBLOT^R",
+            "sep": [
+              "LCM–M",
+              "SRO"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Thm 11 (+ SRO from [Flocchini2019Synchronous]"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": ">",
+            "b": "FCOM^A_M",
+            "sep": [
+              "RDV"
+            ],
+            "ref": "Naito2025Beyond",
+            "thm": "Table 1 (compiled 'known' relations"
+          },
+          {
+            "a": "OBLOT^SEQ",
+            "rel": "⊥",
+            "b": "OBLOT^F",
+            "sep": [
+              "UPF*",
+              "Gathering (no multiplicity detection)"
+            ],
+            "ref": "Flocchini2026Universal",
+            "thm": "Thms 1, 2, 3, 4"
+          },
+          {
+            "a": "OBLOT^SEQ",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "UPF*"
+            ],
+            "ref": "Flocchini2026Universal",
+            "thm": "Sect. 8.1 (Thm 1 + Thms 2, 3)"
+          },
+          {
+            "a": "FCOM^F",
+            "rel": ">",
+            "b": "FCOM^R",
+            "sep": [
+              "CGE"
+            ],
+            "ref": "Buchin2022Energy",
+            "thm": "Thm 7"
+          }
+        ]
+      },
+      {
+        "id": "two",
+        "title": "Two robots",
+        "assumptions": "Two robots, variable disorientation, chirality and rigid moves; the 14 models collapse to 13 classes [Kitamura2025TwoRobot], a preprint.",
+        "relations": [
+          {
+            "a": "LUMI^F",
+            "rel": "≡",
+            "b": "FCOM^F",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 2"
+          },
+          {
+            "a": "LUMI^F",
+            "rel": "≡",
+            "b": "FSTA^F",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 2"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "OBLOT^F",
+            "sep": [
+              "OSP"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "",
+            "note": "as for general $n$ [Flocchini2019Synchronous]"
+          },
+          {
+            "a": "LUMI^F",
+            "rel": ">",
+            "b": "LUMI^R",
+            "sep": [
+              "CGE*"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 6"
+          },
+          {
+            "a": "FCOM^F",
+            "rel": ">",
+            "b": "FCOM^R",
+            "sep": [
+              "CGE*"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 6"
+          },
+          {
+            "a": "FSTA^F",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "CGE*"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 6"
+          },
+          {
+            "a": "LUMI^R",
+            "rel": "≡",
+            "b": "LUMI^S",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 1"
+          },
+          {
+            "a": "LUMI^S",
+            "rel": "≡",
+            "b": "LUMI^A",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 1"
+          },
+          {
+            "a": "LUMI^R",
+            "rel": "≡",
+            "b": "FCOM^R",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 3"
+          },
+          {
+            "a": "FCOM^R",
+            "rel": ">",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 7"
+          },
+          {
+            "a": "FSTA^R",
+            "rel": ">",
+            "b": "FSTA^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 7"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "SRO"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 7"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "≡",
+            "b": "FCOM^A_LC",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 5"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": ">",
+            "b": "FCOM^A_CM",
+            "sep": [
+              "MCv"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 8"
+          },
+          {
+            "a": "FSTA^S",
+            "rel": ">",
+            "b": "FSTA^A_CM",
+            "sep": [
+              "MCv"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 8"
+          },
+          {
+            "a": "OBLOT^S",
+            "rel": ">",
+            "b": "OBLOT^A_CM",
+            "sep": [
+              "MCv"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 8"
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "≡",
+            "b": "FCOM^A",
+            "sep": [],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 4"
+          },
+          {
+            "a": "FSTA^A_CM",
+            "rel": ">",
+            "b": "FSTA^A",
+            "sep": [
+              "DMSD"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 9"
+          },
+          {
+            "a": "OBLOT^A_CM",
+            "rel": ">",
+            "b": "OBLOT^A",
+            "sep": [
+              "DMSD"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thm 9"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^R",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^A_CM",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "⊥",
+            "b": "FSTA^R",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "⊥",
+            "b": "FSTA^A_CM",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A_CM",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^R",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^A_CM",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "SM",
+              "RDAM"
+            ],
+            "ref": "Kitamura2025TwoRobot",
+            "thm": "Thms 10, 11"
+          }
+        ]
+      }
+    ],
+    "problems": [
+      {
+        "abbrev": "RDV",
+        "name": "Rendezvous",
+        "definition": "Two robots must, within finite time, occupy the same point (not fixed in advance) and stay there.",
+        "refs": [
+          "Suzuki1999Formation",
+          "Flocchini2016Constant"
+        ]
+      },
+      {
+        "abbrev": "OSP",
+        "name": "Oscillating Points",
+        "definition": "Two robots, from any distance d(t0) > 0, alternately get strictly closer (monotonically) and strictly farther (monotonically) forever.",
+        "refs": [
+          "Das2016Lights"
+        ]
+      },
+      {
+        "abbrev": "¬IL",
+        "name": "¬IL",
+        "definition": "Three robots in a fixed initial pattern must form a second pattern (a moves 90° clockwise) and then an asymmetric third pattern (b moves 45° clockwise) whose formation requires b to tell a from c.",
+        "refs": [
+          "Flocchini2019Synchronous"
+        ]
+      },
+      {
+        "abbrev": "TAR(d)",
+        "name": "Triangle Rotation",
+        "definition": "Three robots forming triangle ABC (circumcircle C, d known) must form A'B'C' on the same circumcircle with |AA'| = |BB'| = |CC'| = d.",
+        "refs": [
+          "Flocchini2019Synchronous"
+        ]
+      },
+      {
+        "abbrev": "TAR(d)*",
+        "name": "Perpetual Triangle Rotation",
+        "definition": "TAR(d) repeated forever from each new triangle.",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "CGE",
+        "name": "Center of Gravity Expansion",
+        "definition": "Every robot moves directly from (x,y) to (⌊2x − c_x⌋, ⌊2y − c_y⌋), (c_x, c_y) the initial centre of gravity, then stops.",
+        "refs": [
+          "Flocchini2019Synchronous"
+        ]
+      },
+      {
+        "abbrev": "CGE*",
+        "name": "Perpetual CGE",
+        "definition": "CGE repeated forever from each new configuration.",
+        "refs": [
+          "Flocchini2019Synchronous"
+        ]
+      },
+      {
+        "abbrev": "SRO",
+        "name": "Shrinking Rotation",
+        "definition": "Two robots repeatedly move so that the segment either rotates 90° clockwise about its midpoint or rotates 45° and shrinks by 1/√2, always staying inside the square of the previous step.",
+        "refs": [
+          "Flocchini2019Synchronous"
+        ]
+      },
+      {
+        "abbrev": "CYC",
+        "name": "Cyclic Circles",
+        "definition": "n ≥ 3 robots: n−1 on a circle, one at the centre; the centre robot must visit, in cyclic order, the 2^{n−1} positions at distances d(i) (d non-invertible) along a fixed radius, returning to the centre between visits.",
+        "refs": [
+          "Buchin2022Energy"
+        ]
+      },
+      {
+        "abbrev": "MLCv",
+        "name": "Monotone Line Convergence",
+        "definition": "CLCv with the distance between the robots never increasing.",
+        "refs": [
+          "Flocchini2023Asynchrony"
+        ]
+      },
+      {
+        "abbrev": "MCv",
+        "name": "Monotone Convergence",
+        "definition": "Two robots converge to a common point without ever increasing their distance (no line constraint).",
+        "refs": [
+          "Kitamura2025TwoRobot"
+        ]
+      },
+      {
+        "abbrev": "TF",
+        "name": "Trapezoid Formation",
+        "definition": "Four robots on a convex quadrilateral with one longest side CD: stay still if it is a trapezoid; otherwise exactly one of a, b (chosen by whether angle α ≥ π/4) moves perpendicular to CD to make ab ∥ CD.",
+        "refs": [
+          "Flocchini2023Asynchrony"
+        ]
+      },
+      {
+        "abbrev": "GCNCL",
+        "name": "Get Closer but Not too Close on Line",
+        "definition": "Two robots approach each other on their segment, never increasing distance, and stop at final distance in [d0/2, d0).",
+        "refs": [
+          "Flocchini2023Asynchrony"
+        ]
+      },
+      {
+        "abbrev": "SM",
+        "name": "Single Move",
+        "definition": "Each of two robots makes exactly one non-null move (attributed to [Flocchini2023Asynchrony] by [Naito2025Beyond] and [Kitamura2025TwoRobot], but not in its arXiv or LIPIcs text).",
+        "refs": [
+          "Naito2025Beyond",
+          "Kitamura2025TwoRobot"
+        ]
+      },
+      {
+        "abbrev": "DMSD",
+        "name": "Dyadic-Multiple Stopped-Distance",
+        "definition": "Whenever both of two robots are stopped, their distance is a dyadic-rational multiple of the initial distance.",
+        "refs": [
+          "Kitamura2025TwoRobot"
+        ]
+      },
+      {
+        "abbrev": "RDAM",
+        "name": "Rendezvous in one move or Asymmetric Move",
+        "definition": "RDV1 (meet after exactly one move each) or AM (one robot moves ≤ 1 time and stops, the other moves ≥ 2 times).",
+        "refs": [
+          "Kitamura2025TwoRobot"
+        ]
+      },
+      {
+        "abbrev": "ETE",
+        "name": "Exponential Times Expansion",
+        "definition": "n ≥ 3 robots (circle + centre) must form a sequence of 2^{n−1} expansion patterns determined by a non-invertible function (details in paper).",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "HET",
+        "name": "Hexagonal Edge Traversal",
+        "definition": "Two robots on opposite vertices of a regular hexagon must perform a prescribed cyclic 13-step traversal (edge to adjacent vertex, diagonal, return).",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "VEC",
+        "name": "Vertical Configuration",
+        "definition": "SRO-like two-robot rotation problem with an extra 'stay' option and conditions 1–5 (see paper).",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "ZCC",
+        "name": "Zig-Zag Collision-free Convergence",
+        "definition": "Two robots converge collision-free while oscillating along their line (alternately approaching and receding from the start).",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "LP–Cv",
+        "name": "Leave the Place – Convergence",
+        "definition": "Each robot first moves away from the other along their line, then they converge.",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "LCM–M",
+        "name": "Least Common Multiple – Movement",
+        "definition": "Three collinear robots A, B, C with AB:BC = 2:1; B must twice move away from A by d_AB, C once away from A by d_AC.",
+        "refs": [
+          "Naito2025Beyond"
+        ]
+      },
+      {
+        "abbrev": "OC",
+        "name": "Oscillating Configurations",
+        "definition": "Four robots must cycle forever through configurations I-II-III-II-I-…",
+        "refs": [
+          "Das2021FiniteMemory"
+        ]
+      },
+      {
+        "abbrev": "IOP",
+        "name": "Independent Oscillating Problem",
+        "definition": "Three collinear robots; each end robot independently oscillates between distance x_i and 2x_i from the middle robot whenever activated.",
+        "refs": [
+          "Das2021FiniteMemory"
+        ]
+      }
+    ],
+    "other": [
+      "**Limited visibility.** Under FSYNC and SSYNC, every model with full visibility is stronger than the same model with limited visibility, FSYNC is stronger than SSYNC under limited visibility, and a model with limited visibility under FSYNC is incomparable with the same model with full visibility under SSYNC [Das2024Visibility].",
+      "**Opaque robots.** For every memory model and scheduler, opaque robots are weaker than transparent ones; for opaque robots, OBLOT and FSTA are stronger under SSYNC than under ASYNC, and whether LUMI is equally strong under SSYNC and ASYNC is open [Feletti2025Transparency].",
+      "**Robots on graphs.** On graphs embedded in the plane the FSYNC/SSYNC landscape is mapped; one separator uses a crash fault [Sharma2025Discrete].",
+      "**Bounded asynchrony.** With limited visibility and imprecise measurements, oblivious robots are stronger under k-bounded asynchrony (k-ASYNC) than under ASYNC, separated by cohesive convergence; whether k-bounded asynchrony is weaker than SSYNC is open [Kirkpatrick2024Separating].",
+      "**Sequential schedulers.** Oblivious robots activated one at a time are stronger than under SSYNC and incomparable with FSYNC [Flocchini2026Universal]."
+    ],
+    "conflicts": [
+      "Rendezvous by FSTA robots in SSYNC [Flocchini2016Constant] needs each robot's unit of distance to stay fixed; several separations use it, and under variable disorientation it is impossible [Masuzawa2026Disorientation].",
+      "One paper uses rendezvous by FSTA robots in ASYNC without proof, under variable disorientation where it is impossible; five FSTA-versus-OBLOT relations rest on it [Flocchini2023Asynchrony] [Masuzawa2026Disorientation]. FSTA$^A$ > OBLOT$^A$ still holds by another separator [Das2021FiniteMemory].",
+      "The Single Move problem is attributed to [Flocchini2023Asynchrony] by [Kitamura2025TwoRobot] and [Naito2025Beyond], but neither version of that paper contains it.",
+      "Simulation costs disagree across papers: for LUMI under SSYNC simulated by FCOM under RSYNC, the colour counts reported for a simulated light with $c$ colours are $O(c\\cdot 2^c)$, $64c\\cdot 2^c$ and $64c^2$ [Buchin2022Energy] [Nakajima2024Simulations] [Kitamura2025TwoRobot].",
+      "Two papers each claim the first separation of SSYNC from ASYNC for oblivious robots, under different assumptions: limited visibility with imprecision [Kirkpatrick2024Separating], and full visibility [Flocchini2023Asynchrony]."
+    ],
+    "open": [
+      "Is there a problem separating k-bounded asynchrony from SSYNC [Kirkpatrick2024Separating]?",
+      "The landscape without chirality and rigid moves, especially under ASYNC [Flocchini2019Synchronous] [Kitamura2025TwoRobot].",
+      "Can FSTA robots solve rendezvous in ASYNC with a fixed unit of distance [Flocchini2016Constant] [Masuzawa2026Disorientation]?",
+      "Is LUMI equally strong under SSYNC and ASYNC for opaque robots [Feletti2025Transparency]?",
+      "Which model classes have no problem solvable there but in no strictly weaker model (the \"white regions\") [Naito2025Beyond]?",
+      "Schedulers beyond the atomicity-defined ones, and robots with energy constraints [Flocchini2023Asynchrony] [Buchin2022Energy]."
+    ]
+  }
+}

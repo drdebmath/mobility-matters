@@ -1,0 +1,1882 @@
+{
+  "id": "leader-election-plane",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Leader election in the plane",
+  "origin": {
+    "ref": "Dieudonne2013Geoleader",
+    "year": 2007,
+    "note": "Posed for disoriented robots at OPODIS 2007 (Dieudonné and Petit); characterised in [Dieudonne2013Geoleader]."
+  },
+  "related": [
+    {
+      "problem": "pattern-formation",
+      "relation": "Arbitrary pattern formation is solvable from a configuration exactly when leader election is, in ASYNC without chirality [Cicerone2019Asynchronous]; with chirality and $n \\ge 4$ this was shown by [Dieudonne2010Leader]."
+    }
+  ],
+  "summary": "Anonymous robots must agree on one of them, using only their positions.",
+  "statement": "$n$ anonymous robots at distinct points must agree on a single robot (the leader), each deciding from its own snapshot.",
+  "primer": {
+    "intro": "Imagine $n$ identical drones hovering at different spots in a field. They carry no name tags, they cannot talk, and each one has its own private idea of which way is north, what counts as one metre, and possibly even which way is clockwise. Each drone takes a photograph of where all the drones are (a *snapshot*) and, using the same program as everybody else, must decide \"I am the leader\" or \"I am not\", so that exactly one drone says yes. The robots are *anonymous* (they look the same and run the same program) and *disoriented* (no shared compass, unit of length or, without *chirality*, shared sense of clockwise). The question is: for which arrangements of points can this be done at all?",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Read the configuration as a word around the smallest enclosing circle",
+        "variant": "disoriented",
+        "ref": "Dieudonne2013Geoleader",
+        "idea": "This is the version where the robots agree on clockwise (chirality).\n1. Draw the smallest circle that encloses all robots; every robot finds the same circle. Call its centre $O$. If a robot sits exactly at $O$, it is the leader; stop.\n2. Draw a ray from $O$ through every robot (several robots may share a ray).\n3. For each ray, list the distances between consecutive robots on it, starting from $O$, measured as fractions of the circle's radius (so the private unit of length does not matter).\n4. Starting at a ray and walking clockwise around the circle, write down a \"word\": the list for this ray, then the angle to the next ray, then the list for the next ray, and so on, once around.\n5. Every robot computes the word of every ray and picks the ray whose word is alphabetically smallest. If only one ray has that word, the leader is the robot on that ray nearest to $O$.",
+        "analysis": "All robots compute the same words, because everything is measured relative to the circle and the shared clockwise direction, so they all pick the same robot. The words of different rays are rotations of one another; two rays can have the same word only if turning the whole picture around $O$ moves one ray onto the other, that is, if the configuration has rotational symmetry. [Dieudonne2013Geoleader] prove that this is the exact borderline: with chirality, a leader can be elected exactly when the smallest word is unique (they phrase it with Lyndon words), and they give a similar but more delicate rule, reading in both directions, when robots do not share clockwise.",
+        "why_it_matters": "Turning a picture into a word and comparing words is the standard way robot papers break symmetry, and electing a leader this way is the first step of arbitrary pattern formation [Dieudonne2010Leader]."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Symmetric pictures look the same to everybody",
+        "variant": "disoriented",
+        "ref": "Dieudonne2013Geoleader",
+        "idea": "Place six robots at the corners of a regular hexagon. The adversary (an imagined opponent who chooses everything the algorithm does not control, here the robots' private coordinate systems) gives each robot a compass that points from the centre through that robot, and the same unit and handedness for all. Now every robot's snapshot is literally the same list of coordinates. The same happens for any $n = 2$: two points are always swapped by a half-turn around their midpoint.",
+        "analysis": "A deterministic program (no coin flips) that receives the same input gives the same output. So either every robot declares itself leader or none does; exactly one is impossible. The same argument works for any configuration that some rotation maps onto itself while moving robots, which is why the characterisation of [Dieudonne2013Geoleader] is phrased in terms of symmetry.",
+        "why_it_matters": "Almost every impossibility for robots in the plane, from pattern formation to gathering, is this argument: build a symmetric start and choose coordinate systems so that symmetric robots see identical snapshots."
+      }
+    ]
+  },
+  "history": "Leader election in the plane was asked as **a characterisation of the configurations from which anonymous robots can agree on one of them** [Dieudonne2013Geoleader]; its importance comes from its equivalence with arbitrary pattern formation [Dieudonne2010Leader] [Cicerone2019Asynchronous].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "disoriented",
+      "title": "Disoriented robots, with or without chirality",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "Whether anonymous robots can agree on a leader from their positions is characterised by Lyndon words around the smallest enclosing circle.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Dieudonne2013Geoleader",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "$n = 2$",
+            "symmetric configurations"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dieudonne2013Geoleader",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Complete characterisation for every $n > 1$, with and without chirality. Introduced at OPODIS 2007 by Dieudonné and Petit."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Leader election here is a static decision."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "fat-transparent",
+      "title": "Transparent fat robots, no chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "body": "fat"
+      },
+      "summary": "Transparent fat robots without chirality can agree on an ordering, and so on a leader, exactly when their configuration is asymmetric.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "GanChaudhuri2015Leader",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "symmetric configurations (Theorem 6)",
+            "deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "GanChaudhuri2015Leader",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best (Theorems 1–6, algorithm MakeAsym)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Solvable exactly on asymmetric configurations."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text (arXiv 1208.4484).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Leader election: anonymous robots at distinct points must agree on one robot, each deciding from its own snapshot, without moving. With chirality: draw the smallest enclosing circle, a ray from its centre $O$ through every robot, read the configuration clockwise from each ray as a word (distances along the ray, angle to the next ray); the ray with the unique smallest word carries the leader, its robot nearest $O$. A leader can be elected exactly when this word is unique, that is, when the configuration has no rotational symmetry [Dieudonne2013Geoleader].",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: anonymous robots at distinct points",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Smallest enclosing circle, centre O",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          }
+        ]
+      },
+      {
+        "label": "A ray from O through every robot",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.78,
+                52.31
+              ],
+              [
+                58.1,
+                51.92
+              ],
+              [
+                59.39,
+                51.46
+              ],
+              [
+                60.66,
+                50.93
+              ],
+              [
+                61.89,
+                50.34
+              ],
+              [
+                63.1,
+                49.69
+              ],
+              [
+                64.27,
+                48.97
+              ],
+              [
+                65.4,
+                48.2
+              ],
+              [
+                66.49,
+                47.36
+              ],
+              [
+                67.53,
+                46.47
+              ],
+              [
+                68.53,
+                45.53
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Each robot reads every ray's word clockwise"
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.78,
+                52.31
+              ],
+              [
+                58.1,
+                51.92
+              ],
+              [
+                59.39,
+                51.46
+              ],
+              [
+                60.66,
+                50.93
+              ],
+              [
+                61.89,
+                50.34
+              ],
+              [
+                63.1,
+                49.69
+              ],
+              [
+                64.27,
+                48.97
+              ],
+              [
+                65.4,
+                48.2
+              ],
+              [
+                66.49,
+                47.36
+              ],
+              [
+                67.53,
+                46.47
+              ],
+              [
+                68.53,
+                45.53
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.78,
+                52.31
+              ],
+              [
+                58.1,
+                51.92
+              ],
+              [
+                59.39,
+                51.46
+              ],
+              [
+                60.66,
+                50.93
+              ],
+              [
+                61.89,
+                50.34
+              ],
+              [
+                63.1,
+                49.69
+              ],
+              [
+                64.27,
+                48.97
+              ],
+              [
+                65.4,
+                48.2
+              ],
+              [
+                66.49,
+                47.36
+              ],
+              [
+                67.53,
+                46.47
+              ],
+              [
+                68.53,
+                45.53
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.78,
+                52.31
+              ],
+              [
+                58.1,
+                51.92
+              ],
+              [
+                59.39,
+                51.46
+              ],
+              [
+                60.66,
+                50.93
+              ],
+              [
+                61.89,
+                50.34
+              ],
+              [
+                63.1,
+                49.69
+              ],
+              [
+                64.27,
+                48.97
+              ],
+              [
+                65.4,
+                48.2
+              ],
+              [
+                66.49,
+                47.36
+              ],
+              [
+                67.53,
+                46.47
+              ],
+              [
+                68.53,
+                45.53
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                56.78,
+                52.31
+              ],
+              [
+                58.1,
+                51.92
+              ],
+              [
+                59.39,
+                51.46
+              ],
+              [
+                60.66,
+                50.93
+              ],
+              [
+                61.89,
+                50.34
+              ],
+              [
+                63.1,
+                49.69
+              ],
+              [
+                64.27,
+                48.97
+              ],
+              [
+                65.4,
+                48.2
+              ],
+              [
+                66.49,
+                47.36
+              ],
+              [
+                67.53,
+                46.47
+              ],
+              [
+                68.53,
+                45.53
+              ]
+            ],
+            "c": "muted",
+            "w": 0.5,
+            "arrow": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "label": "The smallest word is unique: this ray",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ]
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          }
+        ]
+      },
+      {
+        "label": "Final: the robot on it nearest O is the leader",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              46.01,
+              49.65
+            ]
+          },
+          {
+            "id": "1",
+            "p": [
+              31.16,
+              13.81
+            ]
+          },
+          {
+            "id": "2",
+            "p": [
+              71.61,
+              19.13
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              40.58,
+              20.4
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              60.57,
+              35.87
+            ]
+          },
+          {
+            "id": "5",
+            "p": [
+              42.44,
+              29.75
+            ],
+            "c": "tight",
+            "l": "L",
+            "r": 2.6
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 23.0,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              27.0
+            ],
+            "r": 0.7,
+            "c": "fg",
+            "fill": "fg"
+          },
+          {
+            "t": "text",
+            "p": [
+              52.4,
+              28.8
+            ],
+            "s": "O",
+            "c": "fg"
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                71.61,
+                19.13
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                31.16,
+                13.81
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                46.01,
+                49.65
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                67.62,
+                41.78
+              ]
+            ],
+            "c": "line",
+            "w": 0.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                27.0
+              ],
+              [
+                28.39,
+                34.87
+              ]
+            ],
+            "c": "tight",
+            "w": 1.2
+          }
+        ]
+      }
+    ]
+  }
+}
