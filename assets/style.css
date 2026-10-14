@@ -918,3 +918,7 @@ details.statement + .panel, details.statement + section { border-top: 0; padding
 /* light/dark switch in the top bar */
 .theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: 1.7rem; height: 1.7rem; margin: -.15rem 0; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--bg-elev); color: var(--muted); font: 1rem/1 var(--sans); cursor: pointer; }
 .theme-toggle:hover, .theme-toggle:focus-visible { color: var(--fg); border-color: var(--muted); }
+
+/* last-updated tag on the home page */
+.updated { font-family: var(--sans); font-size: .82rem; color: var(--muted); margin: -.2rem 0 1rem; }
+.updated-tag { display: inline-block; font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); border: 1px solid currentColor; border-radius: 3px; padding: .05rem .4rem; margin-right: .35rem; vertical-align: .08em; }

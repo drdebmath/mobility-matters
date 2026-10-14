@@ -6,8 +6,9 @@ is working on, or finds interesting. It doubles as a **compendium of progress**:
 for every problem variant it records what is known (lower bounds, the paper that
 introduced the variant, the current best result) and what is still open.
 
-It is a static website. There is no build step: `index.html` loads the JSON files in
-`data/` and renders them in the browser. The same data also builds a book,
+It is a static website. There is no build step for working on it: `index.html` loads the
+JSON files in `data/` and renders them in the browser. The deployed site adds generated
+files (see *Deployment and crawlable pages*), built by a GitHub Action, never committed. The same data also builds a book,
 `mobility-matters.pdf` (*Mobility Matters: A Living Survey of Open Problems on
 Autonomous Agents, Robots and Particles*).
 
@@ -563,12 +564,25 @@ at 09:00; `updates/` is git-ignored.
   by Zenodo gets a DOI; put it in `citation.doi` once issued).
 * **Indexing.** `python3 scripts/sync-meta.py` regenerates, from `data/index.json`
   (`citation`, `abstract`, problems), the Google Scholar `citation_*` meta tags in
-  `index.html`, the plain landing page `about.html`, `sitemap.xml` and `robots.txt`;
+  `index.html`, the plain landing page `about.html` and `robots.txt`;
   the PDF's title, author and keywords are set by `build-pdf.py`. It also links
   `assets/style.css` and `assets/app.js` with a hash of their content (`?v=…`), so a
   browser never pairs a new stylesheet with an old renderer; run it after editing either. Run it after
   changing the version, citation, abstract or problem list; `validate.py` warns
   when the generated files are stale.
+* **Deployment and crawlable pages.** GitHub Pages deploys from the workflow
+  `.github/workflows/pages.yml` (Settings → Pages → Source: GitHub Actions), on every push
+  to `main`: it runs `validate.py`, then `scripts/build-site.sh _site`, which copies the
+  static files and adds (1) `llms.txt` and `llms-full.txt` (`scripts/build-llms.py`: an
+  index and the whole atlas as Markdown, for language models), (2) one prerendered page per
+  route (`scripts/prerender.js`: home, models, perspectives, problems, progress maps, every
+  setting, notation, open questions, references, timeline, cite, acknowledgements) at a real
+  address such as `problem/dispersion/base/`, with its own title, description, canonical
+  link and JSON-LD, math as TeX, links between pages rewritten to these addresses; the
+  renderer takes over in a browser (`<html data-route>`), and (3) `sitemap.xml` listing them
+  all. Nothing generated is committed. Preview locally with `bash scripts/build-site.sh`
+  and `python3 -m http.server 8765 -d build/site`. When a new route type or a new page
+  matters to readers, add it to `routes()` in `prerender.js`.
 * **Reference check.** `python3 scripts/check-refs.py` checks every DOI against
   Crossref/DataCite, every arXiv id against arXiv, titles, and duplicates; run it
   before a release and after adding many references.

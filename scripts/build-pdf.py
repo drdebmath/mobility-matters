@@ -25,6 +25,15 @@ BUILD = ROOT / "build"
 
 # ---------------------------------------------------------------- data
 
+
+def long_date(v):
+    """'2026-10-14' -> '14 October 2026' (the version is the release date)."""
+    m = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", v or "")
+    if not m:
+        return v or ""
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    return f"{int(m[3])} {months[int(m[2]) - 1]} {m[1]}"
+
 def load(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
 
@@ -1153,7 +1162,7 @@ def title_page():
 \vspace{7mm}{\sffamily\Large\color{accent} %s\par}
 \vspace{12mm}{\large\itshape %s\par}
 \vfill
-{\Large %s\par}\vspace{3mm}{\color{muted}Version %s\par}
+{\Large %s\par}\vspace{3mm}{\color{muted}Last updated %s\par}
 \vspace{10mm}{\small\color{muted}\colorbox{accentsoft}{\sffamily\scriptsize\color{accent}AI USE} %s\par}
 \vspace*{15mm}
 \end{titlepage}
@@ -1168,7 +1177,7 @@ def title_page():
 \noindent{\small\color{muted}\raggedright\urlstyle{same}This is a living survey: the website and this book are generated from the same data, and each version is dated. The latest version is at \url{%s}.}
 \clearpage
 """ % (esc_plain(main.strip()), esc_plain(sub.strip()), esc_plain(IDX.get("tagline", "")), author,
-       esc_plain(c.get("version", "")), esc_plain(IDX.get("ai_disclaimer", "")), citation_text(), bib, c.get("url", ""))
+       esc_plain(long_date(c.get("version", ""))), esc_plain(IDX.get("ai_disclaimer", "")), citation_text(), bib, c.get("url", ""))
 
 def main():
     pre = PREAMBLE.replace("AIFOOTER", esc_plain(IDX.get("ai_disclaimer", "")))

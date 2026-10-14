@@ -33,7 +33,7 @@ function render(route, lib) {
     vm.createContext(sandbox);
     vm.runInContext(lib['katex.min.js'], sandbox);
     vm.runInContext(lib['marked.min.js'], sandbox);
-    const app = { innerHTML: '', querySelector: () => null, addEventListener: () => {} };
+    const app = { innerHTML: '', dataset: {}, querySelector: () => null, addEventListener: () => {} };
     sandbox.innerWidth = 1280;
     const els = { app, 'footer-text': { textContent: '' }, 'repo-link': { hidden: true }, 'cite-footer': { innerHTML: '' }, 'ai-footer': { innerHTML: '' } };
     sandbox.document = { getElementById: id => els[id] || null, querySelectorAll: () => [], title: '' };
@@ -45,7 +45,11 @@ function render(route, lib) {
     };
     sandbox.addEventListener = () => {}; sandbox.scrollTo = () => {};
     vm.runInContext(fs.readFileSync(path.join(ROOT, 'assets/app.js'), 'utf8'), sandbox);
-    setTimeout(() => resolve(app.innerHTML), 400);
+    // resolve once the renderer has filled the page (data loads asynchronously), at most after 3 s
+    const t0 = Date.now();
+    const done = () => resolve(Object.assign(new String(app.innerHTML), { page: app.dataset && app.dataset.page, footer: els['footer-text'].innerHTML || '', cite: els['cite-footer'].innerHTML, ai: els['ai-footer'].innerHTML, title: sandbox.document.title }));
+    const poll = () => (app.innerHTML && app.dataset.page) || Date.now() - t0 > 3000 ? setTimeout(done, 0) : setTimeout(poll, 5);
+    poll();
   });
 }
 
@@ -64,7 +68,7 @@ async function main() {
   const seen = new Set(routes);
   for (let i = 0; i < routes.length; i++) {
     const r = routes[i];
-    const html = await render(r, lib);
+    const html = String(await render(r, lib));
     // follow links to computed nodes of the assumption tree (unnamed settings)
     if (process.argv.length <= 2) for (const m of html.matchAll(/href="(#\/problem\/[^"\/]+\/[^"\/]+)"/g)) {
       if (!seen.has(m[1])) { seen.add(m[1]); routes.push(m[1]); }
@@ -80,4 +84,5 @@ async function main() {
   console.log(`${routes.length} routes, ${failures} failure(s)`);
   process.exit(failures ? 1 : 0);
 }
-main().catch(e => { console.error(e); process.exit(2); });
+if (require.main === module) main().catch(e => { console.error(e); process.exit(2); });
+module.exports = { libs, render };

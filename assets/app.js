@@ -13,6 +13,13 @@
 
   /* ---------- utilities ---------- */
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // '2026-10-14' -> '14 October 2026' (the version is the release date)
+  function longDate(v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+    if (!m) return v || '';
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${+m[3]} ${months[+m[2] - 1]} ${m[1]}`;
+  }
   const stripP = h => h.replace(/^<p>|<\/p>\s*$/g, '');
 
   function tex(src, display = false) {
@@ -113,7 +120,7 @@
     problems.forEach(p => { prepareProblem(p); state.problems[p.id] = p; });
     const ft = document.getElementById('footer-text');
     const ver = (idx.citation || {}).version;
-    if (ft) ft.innerHTML = `${esc(idx.title)}${ver ? ` · version ${esc(ver)}` : ''}${idx.owner ? ' · maintained by ' + (idx.owner_url ? `<a href="${esc(idx.owner_url)}" rel="noopener">${esc(idx.owner)}</a>` : esc(idx.owner)) : ''}${idx.license ? ' · ' + (idx.license_url ? `<a href="${esc(idx.license_url)}" rel="noopener">${esc(idx.license)}</a>` : esc(idx.license)) : ''}
+    if (ft) ft.innerHTML = `${esc(idx.title)}${ver ? ` · last updated <time datetime="${esc(ver)}">${esc(longDate(ver))}</time>` : ''}${idx.owner ? ' · maintained by ' + (idx.owner_url ? `<a href="${esc(idx.owner_url)}" rel="noopener">${esc(idx.owner)}</a>` : esc(idx.owner)) : ''}${idx.license ? ' · ' + (idx.license_url ? `<a href="${esc(idx.license_url)}" rel="noopener">${esc(idx.license)}</a>` : esc(idx.license)) : ''}
       <div class="foot-links">${idx.repo ? `<a href="${esc(issueUrl('new-result.yml', {}))}" rel="noopener">Suggest a result</a> · <a href="${esc(issueUrl('error.yml', {}))}" rel="noopener">Report an error</a> · <a href="${esc(issueUrl('new-problem.yml', {}))}" rel="noopener">Suggest a problem</a> · ` : ''}<a href="about.html">About</a> · <a href="${L('acknowledgements')}">Acknowledgements</a>${idx.changelog_url ? ` · <a href="${esc(idx.changelog_url)}" rel="noopener">Changelog</a>` : ''}${idx.repo ? ` · <a href="${esc(idx.repo)}" rel="noopener">Source</a>` : ''}</div>`;
     if (idx.repo) { const l = document.getElementById('repo-link'); l.href = idx.repo; l.hidden = false; }
   }
@@ -412,6 +419,7 @@
           <h1>${esc(idx.title)}</h1>
           ${idx.subtitle ? `<p class="subtitle">${esc(idx.subtitle)}</p>` : ''}
           <p class="tagline">${esc(idx.tagline)}</p>
+          ${(idx.citation || {}).version ? `<p class="updated"><span class="updated-tag">Last updated</span> <time datetime="${esc(idx.citation.version)}">${esc(longDate(idx.citation.version))}</time>${idx.changelog_url ? ` · <a href="${esc(idx.changelog_url)}" rel="noopener">what changed</a>` : ''}</p>` : ''}
           ${aiNote('sub')}
           <p class="hh-intro">${mdInline(idx.intro || 'Every problem is a tree of settings. Its root assumes nothing; each edge adds one assumption, until it reaches the settings studied in the literature. Each setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.')}</p>
           <div class="hh-links"><a class="btn" href="${L('explore')}">Explore by assumptions</a><a class="btn" href="${L('open')}">Open questions</a><a class="btn ghost" href="${L('timeline')}">Timeline</a><a class="btn ghost" href="${L('references')}">References</a><a class="btn ghost" href="${esc((idx.citation || {}).pdf || 'mobility-matters.pdf')}">PDF</a></div>
@@ -1433,8 +1441,12 @@
     });
   }
   let prevParts = null;
+  // a prerendered page (scripts/prerender.js) names its route on <html data-route>; an app route in the hash wins
+  const pageRoute = (document.documentElement && document.documentElement.dataset && document.documentElement.dataset.route) || '';
+  const currentRoute = () => /^#\//.test(location.hash) || !pageRoute ? location.hash : pageRoute;
   function render() {
-    const parts = location.hash.replace(/^#\/?/, '').split(/[\/.]/).filter(Boolean);
+    const route = currentRoute();
+    const parts = route.replace(/^#\/?/, '').split(/[\/.]/).filter(Boolean);
     const sameProblem = prevParts && prevParts[0] === 'problem' && parts[0] === 'problem' && prevParts[1] === parts[1];
     prevParts = parts;
     let html;
@@ -1450,7 +1462,7 @@
       else if (parts[0] === 'explore') html = explorePage(parts);
       else if (parts[0] === 'notation') html = notationPage();
       else if (parts[0] === 'acknowledgements') html = acknowledgementsPage();
-      else if (parts[0] === 'search') html = searchPage(location.hash.replace(/^#\/?search[\/.]?/, ''));
+      else if (parts[0] === 'search') html = searchPage(route.replace(/^#\/?search[\/.]?/, ''));
       else html = notFound('page', parts.join('/'));
     } catch (e) { console.error(e); html = `<div class="error">Render error: ${esc(e.message)}</div>`; }
     app.innerHTML = html;
@@ -1459,8 +1471,8 @@
     markNav(parts[0] || '');
     fitGraph();
     initFigures();
-    if (parts[0] === 'references' && parts[1]) {
-      const el = document.getElementById('ref-' + parts[1]);
+    if (parts[0] === 'references' && (parts[1] || /^#ref-/.test(location.hash))) {
+      const el = document.getElementById(parts[1] ? 'ref-' + parts[1] : location.hash.slice(1));
       if (el) el.scrollIntoView({ block: 'start' });
     } else if (parts[0] === 'problem' && parts[2] && sameProblem) {
       // keep the problem header out of the way when jumping between variants

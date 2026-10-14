@@ -5,8 +5,9 @@
   <!-- scholar:begin --> and <!-- scholar:end -->.
 * about.html: a plain, crawlable landing page (no JavaScript) with the title,
   author, version, abstract, contents, how to cite, licence and links, plus the same
-  meta tags. Search engines and Google Scholar read this page; the atlas itself is
-  a JavaScript application.
+  meta tags. Google Scholar reads this page. The crawlable page of every route, the
+  full sitemap.xml and llms.txt are written at deploy time by scripts/build-site.sh.
+* robots.txt, pointing at the sitemap.
 
 Run after changing the citation, version, abstract or the list of problems:
     python3 scripts/sync-meta.py          # write both files
@@ -67,9 +68,9 @@ def about(idx):
         for f in idx.get("families", []):
             ps = [probs[p] for p in f["problems"] if p in probs and probs[p]["model"] == mid]
             if ps:
-                items = "".join(f'<li><a href="./#/problem/{E(p["id"])}">{E(p["name"])}</a>: {E(plain(p["summary"]))}</li>' for p in ps)
+                items = "".join(f'<li><a href="problem/{E(p["id"])}/">{E(p["name"])}</a>: {E(plain(p["summary"]))}</li>' for p in ps)
                 fams.append(f"<h4>{E(f['name'])}</h4><ul>{items}</ul>")
-        sections.append(f'<h3><a href="./#/model/{E(mid)}">{E(m["name"])}</a></h3><p>{E(plain(m["summary"]))}</p>{"".join(fams)}')
+        sections.append(f'<h3><a href="model/{E(mid)}/">{E(m["name"])}</a></h3><p>{E(plain(m["summary"]))}</p>{"".join(fams)}')
     cite = f'{", ".join(c["authors"])}. {c["title"]}. Living survey, version {c.get("version", "")}. {c["url"]}' + (f" doi:{c['doi']}" if c.get("doi") else "")
     return f"""<!doctype html>
 <html lang="en">
@@ -136,9 +137,6 @@ def main():
             sys.exit(1)
         return
     url = idx["citation"]["url"].rstrip("/") + "/"
-    v = idx["citation"].get("version", "")
-    (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(
-        f"  <url><loc>{url}{p}</loc><lastmod>{v}</lastmod></url>\n" for p in ("", "about.html", idx["citation"].get("pdf", "mobility-matters.pdf"))) + "</urlset>\n", encoding="utf-8")
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {url}sitemap.xml\n", encoding="utf-8")
     page.write_text(new, encoding="utf-8")
     (ROOT / "about.html").write_text(ab, encoding="utf-8")

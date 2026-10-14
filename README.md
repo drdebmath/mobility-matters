@@ -52,8 +52,10 @@ python3 scripts/build-pdf.py             # the book (needs LuaLaTeX)
 zsh scripts/weekly.sh                    # weekly search for new papers (see AGENTS.md)
 ```
 
-The site is static (`index.html`, `assets/`, `data/`) and runs unchanged on GitHub
-Pages. `AGENTS.md` describes the data schema and every convention.
+The site is static (`index.html`, `assets/`, `data/`). A GitHub Action deploys it to
+GitHub Pages and adds a crawlable page for every problem and setting, `sitemap.xml`,
+`llms.txt` and `llms-full.txt` (`bash scripts/build-site.sh` builds the same in
+`build/site`). `AGENTS.md` describes the data schema and every convention.
 
 ## Licence
 

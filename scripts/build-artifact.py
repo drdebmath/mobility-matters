@@ -6,8 +6,10 @@
 
 The fragment has no <html>/<head>/<body> tags (the Artifact host adds them). Both
 outputs inline the stylesheet, the KaTeX stylesheet with its fonts as data URIs,
-all catalogue data, and the renderer; KaTeX and Marked themselves load from
-cdnjs, which the Artifact host allows. Routes use dot-separated anchors
+all catalogue data, and the renderer. In the fragment KaTeX and Marked load from
+cdnjs, which the Artifact host allows; the --full page inlines them too, so it
+works offline (only the web fonts need a connection; without one the page falls
+back to system fonts). Routes use dot-separated anchors
 (#problem.dispersion.base) because that host only passes plain anchors through.
 KaTeX assets are cached under scripts/.cache/katex/.
 """
@@ -85,6 +87,13 @@ def build(full):
         body_markup(),
         "<script>\n" + app + "\n</script>",
     ]
+    if full:
+        # standalone: inline KaTeX and Marked too, so the file works offline
+        katex_js = fetch(f"{KATEX}/katex.min.js", CACHE / "katex.min.js").decode("utf-8")
+        marked_js = fetch(MARKED, CACHE / "marked.min.js").decode("utf-8")
+        assert "</script" not in katex_js and "</script" not in marked_js
+        parts[3] = "<script>\n" + katex_js + "\n</script>"
+        parts[4] = "<script>\n" + marked_js + "\n</script>"
     out = "\n".join(parts) + "\n"
     if full:
         out = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'

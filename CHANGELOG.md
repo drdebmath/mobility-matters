@@ -16,6 +16,11 @@ Versions are dated; the website footer and the book's title page show the curren
   sequences received corrections found on the way.
 - **Notation.** In partitioning, $k$ is the number of groups (each of $n/k$ robots); in
   chauffeuring the number of exits is $e$.
+- **Findable.** Every problem, setting, model and perspective has its own address (for
+  example `problem/dispersion/base/`) with the page already in the HTML, so search engines
+  and language models can read and cite it; a full sitemap, `llms.txt` and
+  `llms-full.txt` (the whole atlas as text). The home page shows when the atlas was last
+  updated, and the single-file offline build now works without a connection.
 - **Book.** Figures redrawn as TikZ figures in a paper's style; each problem has a drawn
   case tree, a *What is known* table and lighter setting sections; citations no longer
   produce double parentheses.
