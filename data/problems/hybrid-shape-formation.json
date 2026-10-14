@@ -14,39 +14,130 @@
     }
   ],
   "summary": "One finite-automaton agent rearranges passive tiles into a target shape.",
-  "statement": "$n$ passive hexagonal tiles (rhombic dodecahedra in 3D) occupy nodes of a lattice and form a connected structure. A single active agent, a deterministic finite automaton, starts on a tile, must always stand on or next to a tile, sees its node and the adjacent nodes, and in each step lifts a tile, places the tile it carries, or moves to an adjacent node; it carries at most one tile, and the tiles (with the carried tile counted at the agent's node) must stay connected. It must rearrange the tiles into a target shape (a line, a triangle, or an intermediate structure such as a block or a tree). **Time** counts the agent's steps (rounds).",
+  "statement": "$n$ passive hexagonal tiles (rhombic dodecahedra in 3D) occupy nodes of a lattice and form a connected structure. A single active agent, a deterministic finite automaton, starts on a tile, must always stand on or next to a tile, sees its node and the adjacent nodes, and in each **round** lifts a tile, places the tile it carries, or moves to an adjacent node; it carries at most one tile, and the tiles (with the carried tile counted at the agent's node) must stay connected. It must rearrange the tiles into a target shape (a line, a triangle, or an intermediate structure such as a block or a tree). **Time** counts the agent's rounds.",
   "primer": {
-    "intro": "Imagine a single small robot on a beach of hexagonal tiles, which can pick up one tile at a time, carry it, and put it down elsewhere, and must rebuild the whole pile into a given shape. Here $n$ passive hexagonal tiles sit on nodes of the triangular grid and form a connected structure; one active robot, with only a fixed finite memory (a *finite automaton*), starts on a tile. Unlike in the amoebot model, the tiles cannot expand or contract; only the robot moves, one step to a neighbouring node per round, always staying on or next to a tile, and it may lift the tile under it or place the tile it carries. The tiles (counting the carried one) must stay connected. The goal is a target shape such as a straight line or a triangle; time is the number of the robot's steps, and $D$ is the diameter of the initial structure.",
+    "intro": "Imagine a single small machine on a beach of hexagonal tiles, which can pick up one tile at a time, carry it, and put it down elsewhere, and must rebuild the whole pile into a given shape. Here the machine is an **agent** and the beach is the **triangular lattice**: the infinite tiling of the plane by equilateral triangles, whose corners are its **nodes**. $n$ passive hexagonal **tiles** sit on nodes, one tile per node; together they form a **structure**, which must be **connected**: from every tile one can reach every other tile by moving between tiles on adjacent nodes. The agent has only a fixed finite memory (it is a **finite automaton**) and starts on a tile. Unlike in the amoebot model, the tiles cannot expand or contract; only the agent moves. In each **round** it does one thing: it moves to an adjacent node, always staying on or next to a tile, or it lifts the tile under it, or it places the tile it carries. The tiles (counting the carried one) must stay connected. The goal is a **target shape** such as a straight **line** of tiles (tiles on consecutive nodes in one direction) or a triangle; time is the number of rounds, and $D$ is the **diameter** of the initial structure, the largest distance between two of its tiles, counted in moves between adjacent nodes.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Build a line by moving top-left tiles down",
         "variant": "planar",
         "ref": "Gmyr2020Tile",
-        "idea": "The line will be a vertical column of tiles.\\n\\n1. The robot walks south (down) as long as there is a tile below it.\\n2. **Search.** It walks north, north-west or south-west (in that order of preference) as long as one of these has a tile. It stops on a tile that is locally top-left.\\n3. **Move.** It lifts that tile, steps once to the south-east, walks south until it reaches an empty node, and places the tile there.\\n4. It repeats from step 2. When a search finds no tile to the east or west, the structure is a line and the robot stops.",
-        "analysis": "The tile it moves is never needed to hold the structure together, because it is placed back where it reconnects any neighbours it might have separated. Tiles only move south-east and south, and each tile moves at most about $2n$ steps, so there are $O(n^2)$ moving steps; a bookkeeping argument bounds the searching steps by the same amount. Total: $O(n^2)$ rounds [Gmyr2020Tile]. The same paper builds a more compact intermediate shape (a *block*) in $O(nD)$ rounds, and from it a triangle in $O(nD)$ rounds, which is $O(n^{3/2})$ when $D$ is about $\\sqrt n$.",
-        "why_it_matters": "It shows a robot with constant memory can reshape a large structure, using simple intermediate shapes it can navigate."
+        "idea": "Here the line runs north-south.\n\n1. The agent walks south (down) as long as there is a tile below it.\n2. **Search.** It walks north, north-west or south-west (in that order of preference) as long as one of these has a tile. It stops on a **top-left tile**: a tile with no tile to its north, north-west or south-west.\n3. **Move.** It lifts that tile, moves once to the south-east, walks south until it reaches an empty node, and places the tile there.\n4. It repeats the search. When a search finds no tile to the east or west, the structure is a line and the agent stops.",
+        "analysis": "The tile it moves is never needed to hold the structure together, because it is placed back where it reconnects any tiles it might have separated. Tiles only move south-east and south, and each tile is carried across at most about $2n$ nodes, so there are $O(n^2)$ rounds in which the agent carries a tile; a bookkeeping argument bounds the searching rounds by the same amount. Total: $O(n^2)$ rounds [Gmyr2020Tile]. The same paper builds a more compact intermediate shape (a **block**) in $O(nD)$ rounds, and from it a triangle in $O(nD)$ rounds, which is $O(n^{3/2})$ when $D$ is about $\\sqrt n$.",
+        "why_it_matters": "It shows an agent with constant memory can reshape a large structure, using simple intermediate shapes it can navigate."
       },
       {
         "kind": "lower-bound",
         "title": "Carrying one tile at a time is slow",
         "variant": "planar",
         "ref": "Gmyr2020Tile",
-        "idea": "Start from a compact blob of $n$ tiles, of diameter about $\\sqrt n$, and ask for a line. As in shape formation, a constant fraction of the tiles must end at distance proportional to $n$ from where they started. The robot carries one tile at a time and moves one node per step, so each such tile costs it about $n$ steps of carrying.",
-        "analysis": "So a constant fraction of $n$ tiles times about $n$ steps each gives $\\Omega(n^2)$ steps [Gmyr2020Tile], and the line algorithm above is optimal. A similar argument gives $\\Omega(nD)$ for the block, so the block algorithm is optimal as well.",
-        "why_it_matters": "With a single worker, the total distance tiles must travel directly bounds the time."
+        "idea": "Start from a compact structure of $n$ tiles, of diameter about $\\sqrt n$, and ask for a line. As in shape formation, a constant fraction of the tiles must end at distance proportional to $n$ from where they started. The agent carries one tile at a time and moves to one adjacent node per round, so each such tile costs it about $n$ rounds of carrying.",
+        "analysis": "So a constant fraction of $n$ tiles times about $n$ rounds each gives $\\Omega(n^2)$ rounds [Gmyr2020Tile], and the line algorithm above is optimal. A similar argument gives $\\Omega(nD)$ for the block, so the block algorithm is optimal as well.",
+        "why_it_matters": "With a single agent, the total distance tiles must travel directly bounds the time."
       },
       {
         "kind": "impossibility",
-        "title": "A robot with finite memory cannot find a safe tile",
+        "title": "An agent with finite memory cannot find a safely removable tile",
         "variant": "planar",
         "ref": "Gmyr2020Tile",
-        "idea": "The naive approach would be: find a tile whose removal keeps the structure connected (a *safely removable* tile), carry it to the target, repeat. Consider a large hollow hexagon of tiles, a closed ring. A robot with $s$ memory states walking along a long side of the ring sees the same thing at every step, so after at most $s$ steps it repeats its behaviour; it cannot count the length of a side. So it cannot tell this ring apart from a structure that looks the same nearby but is not closed far away, where the same tile is no longer safe to remove. [Gmyr2020Tile] (Theorem 1) make this precise with hollow hexagons and spirals; the full proof is longer.",
-        "analysis": "No finite automaton can, without lifting tiles, always stop on a safely removable tile. With a single *pebble*, a marker it can drop and pick up, it can find one in $O(n^2)$ rounds [Gmyr2020Tile] (Theorem 2). This is why the algorithms above move tiles only in ways that are always locally safe.",
+        "idea": "The naive approach would be: find a tile whose removal keeps the structure connected (a **safely removable** tile), carry it to its place in the target shape, repeat. Consider a large hollow hexagon of tiles, a closed ring. An agent with $s$ memory states walking along a long side of the ring sees the same thing in every round, so after at most $s$ rounds it repeats its behaviour; it cannot count the length of a side. So it cannot tell this ring apart from a structure that looks the same nearby but is not closed far away, where the same tile is no longer safely removable. [Gmyr2020Tile] (Theorem 1) make this precise with hollow hexagons and spirals; the full proof is longer.",
+        "analysis": "No finite automaton can, without lifting tiles, always stop on a safely removable tile. With a single **pebble**, a marker it can drop and pick up, it can find one in $O(n^2)$ rounds [Gmyr2020Tile] (Theorem 2). This is why the algorithms above move tiles only in ways that are always locally safe.",
         "why_it_matters": "It shows how far a finite memory falls short of seeing the whole picture, and why a single marker helps so much."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "agent",
+      "definition": "the single active entity: a deterministic finite automaton that stands on or next to a tile, sees its node and the adjacent nodes, and carries at most one tile",
+      "avoid": [
+        "robot",
+        "worker"
+      ]
+    },
+    {
+      "term": "tile",
+      "definition": "a passive hexagonal particle (a rhombic dodecahedron in 3D) that occupies one node; it moves only when the agent carries it",
+      "avoid": [
+        "module"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph whose nodes are the corners of the tiling of the plane by equilateral triangles; each node has six adjacent nodes (in 3D, the face-centred cubic lattice, twelve)",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the lattice; it holds at most one tile",
+      "avoid": [
+        "cell",
+        "vertex"
+      ]
+    },
+    {
+      "term": "structure",
+      "definition": "the set of tiles, with the carried tile counted at the agent's node",
+      "avoid": [
+        "blob"
+      ]
+    },
+    {
+      "term": "connected",
+      "definition": "said of the structure when every tile can be reached from every other by moving between tiles on adjacent nodes",
+      "avoid": []
+    },
+    {
+      "term": "finite automaton",
+      "definition": "a machine with a constant number $s$ of memory states, independent of $n$",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one action of the agent: a move to an adjacent node, lifting the tile at its node, or placing the tile it carries; time counts rounds",
+      "avoid": [
+        "step",
+        "steps"
+      ]
+    },
+    {
+      "term": "target shape",
+      "definition": "the shape the tiles must form: a line, a triangle, or an intermediate structure such as a block, a tree or (in 3D) an icicle",
+      "avoid": []
+    },
+    {
+      "term": "line",
+      "definition": "a structure whose tiles occupy consecutive nodes in one direction",
+      "avoid": [
+        "column"
+      ]
+    },
+    {
+      "term": "top-left tile",
+      "definition": "a tile with no tile on the adjacent nodes to its north, north-west and south-west; the line algorithm moves such tiles",
+      "avoid": [
+        "north-westernmost"
+      ]
+    },
+    {
+      "term": "safely removable",
+      "definition": "said of a tile whose removal leaves the rest of the structure connected",
+      "avoid": []
+    },
+    {
+      "term": "pebble",
+      "definition": "a marker that the agent can drop on a node and pick up again",
+      "avoid": []
+    },
+    {
+      "term": "diameter",
+      "definition": "$D$: the largest lattice distance between two tiles of the initial structure",
+      "avoid": []
+    }
+  ],
   "history": "The hybrid model asked what **one weak active agent** can build from passive material; the first answer was that it cannot always find a tile that is safe to remove, so it builds intermediate structures by local moves instead [Gmyr2020Tile], and then whether the same holds in 3D [Hinnenthal2024Shape3D].",
   "ignore_axes": [
     "orientation",
@@ -116,7 +207,7 @@
           "ref": "Gmyr2020Tile",
           "bottleneck": "memory",
           "preconditions": [
-            "the agent must stop on a safely removable tile (not a cut vertex) without lifting any tile",
+            "the agent must stop on a safely removable tile (one whose removal keeps the structure connected) without lifting any tile",
             "no pebble",
             "instances: hollow hexagons and a spiral of long segments"
           ],
@@ -150,7 +241,7 @@
       "assumptions": {
         "space": "3d"
       },
-      "summary": "In 3D, one agent turns any connected tile structure into a low-diameter icicle in $O(n^3)$ steps.",
+      "summary": "In 3D, one agent turns any connected tile structure into a low-diameter icicle in $O(n^3)$ rounds.",
       "lower_bounds": [],
       "results": [
         {
@@ -177,7 +268,7 @@
     }
   ],
   "figure": {
-    "caption": "Shape formation by hybrid programmable matter, the line algorithm of [Gmyr2020Tile]: a single robot (blue ring), a finite automaton, walks on passive hexagonal tiles and carries at most one tile (amber). It first walks south as far as there are tiles; then it repeatedly searches, walking N, NW or SW (in that order) while there is a tile there, until it stands on a locally north-westernmost tile; it lifts that tile, steps once SE, walks S to the first empty node and places the tile there. One frame per step (move, lift or place); the tiles, with the carried tile counted at the robot, stay connected. It stops when the tiles form a single north-south line.",
+    "caption": "Shape formation by hybrid programmable matter, the line algorithm of [Gmyr2020Tile]: a single agent (blue ring), a finite automaton, walks on passive hexagonal tiles and carries at most one tile (amber). It first walks south as far as there are tiles; then it repeatedly searches, walking N, NW or SW (in that order) while there is a tile there, until it stands on a top-left tile (no tile to its N, NW or SW); it lifts that tile, moves once SE, walks S to the first empty node and places the tile there. One frame per round (move, lift or place); the tiles, with the carried tile counted at the agent, stay connected. It stops when the tiles form a single north-south line.",
     "view": [
       100,
       56
@@ -831,7 +922,7 @@
     ],
     "frames": [
       {
-        "label": "Start: connected tiles, robot on a tile",
+        "label": "Start: connected tiles, agent on a tile",
         "ents": [
           {
             "id": "t0",
@@ -1022,7 +1113,7 @@
         ]
       },
       {
-        "label": "Search for a north-westernmost tile",
+        "label": "Search for a top-left tile",
         "ents": [
           {
             "id": "t0",
@@ -1212,7 +1303,7 @@
         ]
       },
       {
-        "label": "Lift it, step SE, walk S",
+        "label": "Lift it, move SE, walk S",
         "ents": [
           {
             "id": "t0",

@@ -31,6 +31,60 @@ def load(path):
         return None
 
 
+def problem_prose(p):
+    """The problem-level text a reader meets first: summary, statement, primer, figure caption and frame labels."""
+    out = [p.get("summary", ""), p.get("statement", "")]
+    pr = p.get("primer") or {}
+    out.append(pr.get("intro", ""))
+    for x in pr.get("ideas", []):
+        out += [x.get(k, "") for k in ("title", "idea", "analysis", "why_it_matters")]
+    fig = p.get("figure") or {}
+    out.append(fig.get("caption", ""))
+    out += [f.get("label", "") for f in fig.get("frames", [])]
+    return "\n".join(o for o in out if o)
+
+
+def variant_prose(p):
+    """(variant id, its prose with math, citations and quotations removed). Bottleneck names are standard labels and stay out."""
+    for v in p.get("variants", []):
+        parts = [v.get(k, "") for k in ("title", "summary", "statement", "notes")] + list(v.get("open", []) or [])
+        parts += [r.get("note", "") for r in v.get("results", [])] + [a for r in v.get("results", []) for a in (r.get("assumes") or [])]
+        parts += [lb.get("note", "") for lb in v.get("lower_bounds", [])] + [c for lb in v.get("lower_bounds", []) for c in (lb.get("preconditions") or [])]
+        parts += [o.get("note", "") for o in (v.get("optimality") or {}).values() if isinstance(o, dict)]
+        t = "\n".join(x for x in parts if x)
+        yield v.get("id"), re.sub(r"\$\$.+?\$\$|\$[^$\n]+?\$|\[[A-Z][A-Za-z]*\d{4}[A-Za-z0-9]*\]|\"[^\"\n]*\"", " ", t)
+
+
+def check_glossary(p, rel):
+    """glossary: [{term, definition, avoid[]}]. The terms are the problem's words; each is defined in the text at its
+    first use (not shown as a list). Warn when a term never occurs or a word in 'avoid' is used for it."""
+    g = p.get("glossary")
+    if g is None:
+        warn(f"{rel}: no glossary")
+        return
+    text = problem_prose(p)
+    plain = re.sub(r"\$\$.+?\$\$|\$[^$\n]+?\$|\[[A-Z][A-Za-z]*\d{4}[A-Za-z0-9]*\]|\"[^\"\n]*\"", " ", text)
+    terms = set()
+    for e in g:
+        t = e.get("term")
+        if not t or not e.get("definition"):
+            err(f"{rel}: glossary entry needs 'term' and 'definition'")
+            continue
+        if t.lower() in terms:
+            err(f"{rel}: glossary lists '{t}' twice")
+        terms.add(t.lower())
+        if t.lower() not in text.lower():
+            warn(f"{rel}: glossary term '{t}' is not used in the summary, statement, primer or figure")
+        for w in e.get("avoid", []) or []:
+            hits = re.findall(r"(?<![\w-])%s(?![\w-])" % re.escape(w), plain, flags=re.I)
+            if hits:
+                warn(f"{rel}: '{w}' is used {len(hits)}x; the glossary says '{t}'")
+            for vid, vt in variant_prose(p):
+                vh = re.findall(r"(?<![\w-])%s(?![\w-])" % re.escape(w), vt, flags=re.I)
+                if vh:
+                    warn(f"{rel}: variant '{vid}' uses '{w}' {len(vh)}x; the glossary says '{t}'")
+
+
 def check_axis_values(ax, rel):
     """Return {value id: level}; levels are integers >= 0, exactly one value at level 0."""
     ids = {}
@@ -287,6 +341,7 @@ def main():
                 if k not in refs:
                     err(f"{path.relative_to(ROOT)}: primer cites unknown reference '{k}'")
                 used.add(k)
+        check_glossary(p, path.relative_to(ROOT))
         pblob = json.dumps({k: p.get(k) for k in ("history", "statement", "origin", "derived_from", "related", "figure", "further", "axes")})
         for k in refs:
             if f"[{k}]" in pblob:

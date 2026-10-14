@@ -14,9 +14,9 @@
     }
   ],
   "summary": "Robots on a circle must spread out to equal spacing.",
-  "statement": "$n$ robots on a circle (or a ring of length $L$) must reach positions at equal distance $d=L/n$ from their neighbours and stop. Spreading on a segment is the one-dimensional analogue.",
+  "statement": "$n$ robots on a **ring** (a circle of length $L$) must reach positions at equal distance $d=L/n$ from their **neighbours** (the next robots along the ring in either direction) and stop. Spreading on a segment is the one-dimensional analogue.",
   "primer": {
-    "intro": "Picture $n$ guards spread at random along a circular wall who must spread out so that every two neighbours are the same distance apart. In uniform deployment, $n$ robots sit at distinct points of a circle of length $L$ and must reach positions where every gap between consecutive robots is exactly $d = L/n$, and then stop. In the basic version robots are oblivious (they forget everything after each move), asynchronous (an adversary decides when each robot looks and moves, and a robot may see others in mid-move), and agree on which way is clockwise (an *oriented* ring).",
+    "intro": "Imagine $n$ guards spread at random along a circular wall who must spread out so that every two neighbours are the same distance apart. In **uniform deployment** the guards are $n$ **robots** at distinct points of a **ring**, a circle of length $L$. Consecutive robots along the ring are **neighbours**, and the **gap** of a robot is the distance along the ring to its clockwise neighbour. The robots must reach positions where every gap is exactly $d = L/n$, and then stop. In the basic version robots are **oblivious** (they forget everything after each move), the **scheduler** is asynchronous (ASYNC: an **adversary**, an imagined opponent, decides the **activation** of each robot, that is, when it looks and moves, and a robot may see others in mid-move), and robots agree on which way is clockwise (an **oriented ring**).",
     "ideas": [
       {
         "kind": "algorithm",
@@ -32,12 +32,83 @@
         "title": "Two mirror-image teams that always overshoot",
         "variant": "oriented",
         "ref": "Flocchini2008Deployment",
-        "idea": "Without a shared clockwise direction exact deployment is impossible, even with full memory and SSYNC activation. Take $n = 4$: black robots at two opposite points, white robots at two opposite points, the white pair rotated by a small angle from the uniform position. Black robots think clockwise is one way, white robots think it is the other, so each black robot sees exactly what each white robot sees, in mirror image. The adversary then plays:\n1. If moving only the blacks would not finish the job, move only the blacks (the picture keeps the same two-team shape).\n2. If moving only the blacks would finish, then by the mirror image moving only the whites would also finish; so move both. Each team closes the same gap, together they overshoot, and again the picture has the same shape.\n3. Alternate between starting with the blacks and the whites, so every robot moves infinitely often.",
-        "analysis": "Every round leaves the robots in two rotated half-teams, never equally spaced, so the algorithm never finishes [Flocchini2008Deployment]. The argument works for every even $n$ with two interleaved regular $n/2$-gons. It is why the catalogued variant assumes an oriented ring.",
+        "idea": "Without a shared clockwise direction exact deployment is impossible, even with full memory and SSYNC activation (time is divided into **rounds**; in each round the adversary activates some robots, and each looks and moves once). Take $n = 4$: black robots at two opposite points, white robots at two opposite points, the white pair rotated by a small angle from the uniform position; the two black robots form one **team** and the two white robots the other. Black robots think clockwise is one way, white robots think it is the other, so each black robot sees exactly what each white robot sees, in mirror image. The adversary then plays:\n1. If moving only the blacks would not finish the job, move only the blacks (the **configuration**, the positions of all robots, keeps the same two-team shape).\n2. If moving only the blacks would finish, then by the mirror image moving only the whites would also finish; so move both. Each team closes the same gap, together they overshoot, and again the configuration has the same shape.\n3. Alternate between starting with the blacks and the whites, so every robot moves infinitely often.",
+        "analysis": "Every round leaves the robots in two rotated teams, never equally spaced, so the algorithm never finishes [Flocchini2008Deployment]. The argument works for every even $n$ with two interleaved regular $n/2$-gons. It is why the catalogued variant assumes an oriented ring.",
         "why_it_matters": "It is a model example of an adversary that exploits mirror symmetry and the freedom to choose who moves."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "the circle of length $L$ on which the robots stand and along which they move",
+      "avoid": []
+    },
+    {
+      "term": "uniform deployment",
+      "definition": "the task of reaching positions on the ring with every gap equal to $d = L/n$, and then stopping",
+      "avoid": []
+    },
+    {
+      "term": "gap",
+      "definition": "the distance along the ring from a robot to the next robot clockwise",
+      "avoid": []
+    },
+    {
+      "term": "neighbour",
+      "definition": "the next robot along the ring in either direction",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that makes every choice the algorithm does not control: activations, the duration of phases, where non-rigid moves stop, and the local coordinate systems",
+      "avoid": []
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice that a robot starts a Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "oriented ring",
+      "definition": "all robots agree on which direction along the ring is clockwise",
+      "avoid": []
+    },
+    {
+      "term": "team",
+      "definition": "in the impossibility argument, the robots of one colour (black or white), which sit on a regular $n/2$-gon and see mirror images of what the other team sees",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": [
+        "picture"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "in FSYNC and SSYNC, one step of time in which every activated robot performs one full Look–Compute–Move cycle",
+      "avoid": []
+    }
+  ],
   "history": "Self-deployment asked **under which assumptions robots can spread uniformly** around a ring [Flocchini2008Deployment] or along a segment [Cohen2008Spreading]: orientation and knowledge of the target distance turned out to be the deciding factors.",
   "measures": [
     {

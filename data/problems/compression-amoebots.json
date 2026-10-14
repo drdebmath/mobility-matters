@@ -8,30 +8,110 @@
     "note": "PODC 2016."
   },
   "summary": "Particles following a local stochastic rule must gather into a configuration with small perimeter.",
-  "statement": "Starting connected, particles perform a Markov chain with bias $\\lambda$ towards having more neighbours. The system is $\\alpha$-compressed if its perimeter is at most $\\alpha$ times the minimum possible.",
+  "statement": "Starting connected, the $n$ particles perform a **Markov chain** (at each step one particle, chosen at random, proposes a move and accepts it with a probability that depends only on its neighbourhood) with **bias** $\\lambda$ towards having more neighbours. The system is $\\alpha$-**compressed** if its **perimeter** is at most $\\alpha$ times the minimum possible.",
   "primer": {
-    "intro": "Picture a crowd of penguins huddling together for warmth, each one just shuffling towards places with more neighbours. Here $n$ particles start as a connected group on the triangular grid. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. One particle at a time, chosen at random, makes a random move; particles have no names, a few bits of memory, and no compass. The goal is to become *compressed*: the *perimeter* (the length of the walk around the outside of the group) should be at most $\\alpha$ times the smallest possible perimeter for $n$ particles, for a constant $\\alpha > 1$. The question is not how fast this happens, but whether, after running long enough, the group is compressed with very high probability.",
+    "intro": "Picture a crowd of penguins huddling together for warmth, each one just shuffling towards places with more neighbours. The floor is the **triangular lattice**: the endless graph whose **nodes** are the corners of a tiling of the plane by equal triangles; each node is joined by an edge to six others, its **neighbours**. A **particle** occupies one node and moves in two actions: an **expansion** into an empty neighbouring node, after which it occupies both, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. The **system** of $n$ particles starts connected. One particle at a time, chosen at random, is activated (an **activation**) and makes a random move; particles have no names, a few bits of memory, and no compass. The goal is to become **compressed**: the **perimeter** (the length of the walk around the outside of the system) should be at most $\\alpha$ times the smallest possible perimeter for $n$ particles, for a constant $\\alpha > 1$. The question is not how fast this happens, but whether, after running long enough, the system is compressed with very high probability.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Move at random, but prefer more neighbours",
         "variant": "stochastic",
         "ref": "Cannon2016Compression",
-        "idea": "Fix a number $\\lambda > 0$, the *bias*. A randomly chosen particle does the following.\\n\\n1. Pick one of its six directions at random. If that node is empty, expand into it.\\n2. Count $e$, its neighbours at the old node, and $e'$, the neighbours it would have at the new node.\\n3. Check, by looking only at nearby nodes, that the move would neither split the group nor enclose a hole. If it would, contract back.\\n4. Otherwise contract into the new node with probability $\\lambda^{e'-e}$ (or with certainty if this number exceeds 1); else contract back.\\n\\nSo moves that gain neighbours are always accepted when $\\lambda > 1$, and moves that lose neighbours are accepted only sometimes.",
-        "analysis": "In the long run, each shape appears with probability proportional to $\\lambda$ raised to its number of touching pairs, and fewer touching pairs means a longer perimeter. For a large bias, $\\lambda > 2+\\sqrt2 \\approx 3.41$, the group is compressed with all but exponentially small probability [Cannon2016Compression]. For a small bias, $\\lambda < 2.17$, it is the opposite: the group stays stretched out, with perimeter a constant fraction of the largest possible, even though each particle still prefers neighbours. Between $2.17$ and $3.41$ the paper's theorems say nothing.",
+        "idea": "Fix a number $\\lambda > 0$, the **bias**. A randomly chosen particle does the following.\n\n1. Pick one of its six directions at random. If that node is empty, expand into it.\n2. Count $e$, its neighbours at the old node, and $e'$, the neighbours it would have at the new node.\n3. Check, by looking only at nearby nodes, that the move would neither split the system nor enclose a **hole** (a region of empty nodes surrounded by particles). If it would, contract back.\n4. Otherwise contract into the new node with probability $\\lambda^{e'-e}$ (or with certainty if this number exceeds 1); else contract back.\n\nSo moves that gain neighbours are always accepted when $\\lambda > 1$, and moves that lose neighbours are accepted only sometimes.",
+        "analysis": "In the long run, each **configuration** (set of occupied nodes) appears with probability proportional to $\\lambda$ raised to its number of pairs of neighbours, and fewer pairs of neighbours means a longer perimeter. For a large bias, $\\lambda > 2+\\sqrt2 \\approx 3.41$, the system is compressed with all but exponentially small probability [Cannon2016Compression]. For a small bias, $\\lambda < 2.17$, it is the opposite: the system stays stretched out, with perimeter a constant fraction of the largest possible, even though each particle still prefers neighbours. Between $2.17$ and $3.41$ the paper's theorems say nothing.",
         "why_it_matters": "This 'local random rule with a bias' recipe became the template for separation, alignment and bridging."
       },
       {
         "kind": "lower-bound",
-        "title": "Too many stretched shapes: why a weak bias fails",
+        "title": "Too many stretched configurations: why a weak bias fails",
         "variant": "stochastic",
         "ref": "Cannon2016Compression",
-        "idea": "Two forces compete. The bias favours each single compact shape over each single stretched one: a shape with perimeter $p$ gets weight roughly $\\lambda^{-p}$. But stretched shapes are far more numerous. The number of shapes whose boundary has length $p$ grows roughly like $(2+\\sqrt2)^p$, because a boundary is a walk that never crosses itself on the honeycomb grid, and such walks grow at exactly that rate. Multiply: all shapes of perimeter $p$ together weigh about $\\left((2+\\sqrt2)/\\lambda\\right)^p$.",
-        "analysis": "If $\\lambda > 2+\\sqrt2$, this total shrinks exponentially as $p$ grows, so long perimeters are very unlikely and the group compresses. If $\\lambda$ is small, the sheer number of long-perimeter shapes outweighs the bias, and [Cannon2016Compression] prove that for $\\lambda < 2.17$ the perimeter stays at least a constant fraction of its maximum. This is the same balance of energy against counting that physicists use for phase transitions.",
+        "idea": "Two forces compete. The bias favours each single compact configuration over each single stretched one: a configuration with perimeter $p$ gets weight roughly $\\lambda^{-p}$. But stretched configurations are far more numerous. The number of configurations with perimeter $p$ grows roughly like $(2+\\sqrt2)^p$, because the walk around the outside never crosses itself on the honeycomb lattice (the hexagonal lattice of the triangles' centres), and such walks grow at exactly that rate. Multiply: all configurations of perimeter $p$ together weigh about $\\left((2+\\sqrt2)/\\lambda\\right)^p$.",
+        "analysis": "If $\\lambda > 2+\\sqrt2$, this total shrinks exponentially as $p$ grows, so long perimeters are very unlikely and the system compresses. If $\\lambda$ is small, the sheer number of long-perimeter configurations outweighs the bias, and [Cannon2016Compression] prove that for $\\lambda < 2.17$ the perimeter stays at least a constant fraction of its maximum. This is the same balance of energy against counting that physicists use for phase transitions.",
         "why_it_matters": "It explains why 'prefer neighbours' is not enough on its own and how strong the preference must be."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous computing unit of constant size that occupies one node of the triangular lattice, or two neighbouring nodes while it moves",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph $G_\\Delta$ whose nodes are the corners of a tiling of the plane by equilateral triangles; every node has six neighbours",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; it is empty or occupied by a particle (an expanded particle occupies two)",
+      "avoid": [
+        "spot",
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "two nodes are neighbours when an edge of the triangular lattice joins them; two particles are neighbours when they occupy neighbouring nodes",
+      "avoid": [
+        "adjacent",
+        "touching"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the action in which a particle that occupies one node extends into an empty neighbouring node and then occupies both"
+    },
+    {
+      "term": "contraction",
+      "definition": "the action in which a particle that occupies two nodes withdraws into one of them"
+    },
+    {
+      "term": "activation",
+      "definition": "one action of a particle chosen by the scheduler: it looks at its neighbourhood, updates its state and performs at most one expansion or contraction"
+    },
+    {
+      "term": "system",
+      "definition": "the set of all $n$ particles",
+      "avoid": [
+        "group",
+        "swarm"
+      ]
+    },
+    {
+      "term": "hole",
+      "definition": "a finite set of empty nodes enclosed by particles"
+    },
+    {
+      "term": "perimeter",
+      "definition": "the length of the closed walk around the outside of the system"
+    },
+    {
+      "term": "compressed",
+      "definition": "having perimeter at most $\\alpha$ times the minimum possible perimeter of $n$ particles, for a constant $\\alpha > 1$"
+    },
+    {
+      "term": "Markov chain",
+      "definition": "the random process in which, at each step, one particle chosen uniformly at random proposes an action and accepts it with a probability set by the biases and its neighbourhood; results describe its stationary distribution"
+    },
+    {
+      "term": "configuration",
+      "definition": "the set of nodes occupied by the particles",
+      "avoid": [
+        "shape"
+      ]
+    },
+    {
+      "term": "bias",
+      "definition": "the parameter $\\lambda > 0$ of the Markov chain: a move that keeps the system connected without holes and changes the particle's number of neighbours from $e$ to $e'$ is accepted with probability $\\min(1, \\lambda^{e'-e})$"
+    }
+  ],
   "history": "Compression introduced the **stochastic** approach to programmable matter, where the question is which bias produces which emergent behaviour [Cannon2016Compression].",
   "variants": [
     {

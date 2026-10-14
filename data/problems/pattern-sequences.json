@@ -13,17 +13,17 @@
     "relation": "Forming one pattern is the case $m = 1$; a sequence needs the robots to remember (or encode in the configuration) which pattern comes next."
   },
   "summary": "Robots must form a given sequence of patterns, one after the other, forever.",
-  "statement": "Robots must form patterns $P_1, P_2, \\dots, P_m$ in order, repeatedly, with all robots taking part in each.",
+  "statement": "Robots are given a sequence of **patterns** $P_1, P_2, \\dots, P_m$ (sets of points in the plane) and must form them in order, repeatedly, with all robots taking part in each.",
   "primer": {
-    "intro": "Picture a marching band that must form a sequence of shapes, for instance a square, then a line, then a triangle, then the square again, over and over. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). In the basic version they are **oblivious** (no memory between cycles), agree on what clockwise means (**chirality**) but on nothing else, their moves always reach the computed destination (**rigid** moves), and the scheduler is SSYNC: in each round an adversary wakes some of the robots. Given patterns $P_1, P_2, \\dots, P_m$ ($m$ is the number of patterns), the robots must form $P_1$, then $P_2$, and so on up to $P_m$, then $P_1$ again, forever, with every robot taking part in each pattern.",
+    "intro": "Picture a marching band that must form a sequence of shapes, for instance a square, then a line, then a triangle, then the square again, over and over. There are $n$ **robots**, points in the plane; their positions form the **configuration**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). In the basic version they are **oblivious** (no memory between cycles), agree on what clockwise means (**chirality**) but on nothing else, every move is a **rigid move** (it always reaches the computed destination), and the **scheduler**, an adversary, is SSYNC: time runs in **rounds**, and in each round it decides the **activation** of some of the robots, each of which performs one cycle. Given **patterns** $P_1, P_2, \\dots, P_m$ ($m$ is the number of patterns; a pattern is a set of points, formed when the configuration has its shape), the robots must form $P_1$, then $P_2$, and so on up to $P_m$, then $P_1$ again, forever, with every robot taking part in each pattern.",
     "ideas": [
       {
         "kind": "impossibility",
         "title": "Oblivious robots cannot repeat a pattern",
         "variant": "ssync-chirality",
         "ref": "Das2015Sequences",
-        "idea": "Take $n = 4$ and the sequence square, line, square, kite. When the robots stand in the square they must decide where to go next: to the line (if this is the first square) or to the kite (if it is the second). But oblivious robots see only the current positions, and the two squares look exactly alike to robots that see only shapes, not sizes or directions. With the same snapshot a robot makes the same decision, so it cannot follow both continuations. A second obstacle is symmetry: robots can form a pattern only if it has at least the symmetry of the configuration they start from. In a cycle $P_1 \\to P_2 \\to \\dots \\to P_m \\to P_1$ each pattern must have at least the symmetry of the one before, and going round the cycle this forces all of them to have the same symmetry.",
-        "analysis": "Das, Flocchini, Santoro and Yamashita characterised the sequences formable by oblivious robots under these assumptions [Das2015Sequences]: as summarised in [Das2020Luminous], all patterns must have the same number of points and no pattern may appear twice, and the catalogue records that the patterns must have equal symmetricity, a multiple of the start's. With distinct identifiers, any sequence of patterns of size at most $n$ can be formed.",
+        "idea": "Take $n = 4$ and the sequence square, line, square, kite. When the robots stand in the square they must decide where to go next: to the line (if this is the first square) or to the kite (if it is the second). But oblivious robots use only the current snapshot, and the two squares look exactly alike to robots that see only shapes, not sizes or directions. With the same snapshot a robot computes the same destination, so it cannot follow both continuations. A second obstacle is symmetry: robots can form a pattern only if it has at least the symmetry of the configuration they start from. In a cycle $P_1 \\to P_2 \\to \\dots \\to P_m \\to P_1$ each pattern must have at least the symmetry of the one before, and going round the cycle this forces all of them to have the same symmetry.",
+        "analysis": "Das, Flocchini, Santoro and Yamashita characterised the sequences formable by oblivious robots under these assumptions [Das2015Sequences]: as summarised in [Das2020Luminous], all patterns must have the same number of points and no pattern may appear twice, and the catalogue records that the patterns must have equal **symmetricity** (the largest $q$ such that the points split into regular $q$-gons centred at the centre of their smallest enclosing circle, a point at that centre counting as a $1$-gon [Das2020Luminous]), a multiple of that of the initial configuration. With distinct identifiers, any sequence of patterns of size at most $n$ can be formed.",
         "why_it_matters": "It isolates what memory buys: forming one pattern needs none, but following a script needs a way to know where you are in it."
       },
       {
@@ -32,11 +32,77 @@
         "variant": "lights-async",
         "ref": "Das2020Luminous",
         "idea": "Give each robot a **light**: a lamp that shows one of $c$ colours, set by its robot, visible to all robots and kept between cycles.\n\n1. Use the colours shown by the robots to record which step of the sequence is being formed.\n2. Form the current pattern with a single-pattern algorithm.\n3. When the pattern is complete, the robots change their colours to record the next step, and start forming the next pattern.\n4. A repeated pattern is no longer a problem: the positions are the same, but the colours differ.",
-        "analysis": "Lights act as a small shared memory, so repetitions, and even patterns with fewer points than robots, become possible. Das, Flocchini, Prencipe and Santoro give one protocol that forms every formable sequence, in ASYNC and with non-rigid moves [Das2020Luminous]. The number of colours is bounded but not by a constant: it must grow with the number of repetitions and contractions in the sequence, by a lower bound that holds even for fully synchronous robots with rigid moves (Theorem 18 of [Das2020Luminous]). The steps above are the basic idea, not the paper's protocol, which must also cope with robots acting on outdated snapshots and with symmetric starts.",
+        "analysis": "Lights act as a small shared memory, so repetitions, and even patterns with fewer points than robots, become possible. Das, Flocchini, Prencipe and Santoro give one protocol that forms every formable sequence, in ASYNC and with non-rigid moves [Das2020Luminous]. The number of colours is bounded but not by a constant: it must grow with the number of repetitions and contractions in the sequence, by a lower bound that holds even for fully synchronous robots with rigid moves (Theorem 18 of [Das2020Luminous]). The steps above are the basic idea, not the paper's protocol, which must also cope with robots acting on outdated snapshots and with symmetric initial configurations.",
         "why_it_matters": "It measures, in colours, exactly how much memory a choreography needs."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "chirality",
+      "definition": "agreement of all robots on the clockwise direction (handedness) of their local coordinate systems, with no agreement on axes, unit or origin"
+    },
+    {
+      "term": "rigid move",
+      "definition": "a move that always reaches the destination computed in Compute"
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "round",
+      "definition": "one time step of FSYNC, SSYNC or the sequential scheduler: each activated robot performs one complete Look–Compute–Move cycle"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "pattern",
+      "definition": "one of the given sets of points $P_1, \\dots, P_m$; it is formed when the configuration is similar to it, and the sequence is formed when the patterns are formed in order, cyclically, by all robots"
+    },
+    {
+      "term": "light",
+      "definition": "a register of a robot that shows one of $c$ colours, is set by the robot in Compute, is seen by the other robots and persists between cycles"
+    },
+    {
+      "term": "symmetricity",
+      "definition": "the largest $q$ such that the points, grouped by the concentric circles centred at the centre of their smallest enclosing circle, split into regular $q$-gons; a point at the centre counts as a $1$-gon, so then $q = 1$ [Das2020Luminous]"
+    }
+  ],
   "history": "Forming a sequence of patterns asked how much **memory the configuration itself can hold** for oblivious robots: the answer is a symmetricity condition [Das2015Sequences]; lights remove the restriction and work asynchronously [Das2020Luminous].",
   "measures": [
     {

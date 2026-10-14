@@ -13,17 +13,17 @@
     "relation": "If the agents can break symmetry (for example by their labels), one may wait while the other explores, so exploration solves rendezvous; the work is in doing better than that, or in meeting when neither knows who should wait [Pelc2019Survey]."
   },
   "summary": "Two agents start at different nodes of an unknown graph and must meet; how long does it take, and how much memory or symmetry breaking does it need?",
-  "statement": "Two mobile agents start at different nodes of an unknown connected port-labelled graph. In the synchronous model they must be at the same node in the same round; in the asynchronous model an adversary controls their speeds and they may also meet inside an edge. Agents are either **labelled** (distinct labels from $\\{1,\\dots,L\\}$; $\\lambda$ is the smaller label) or **anonymous**. They may start at different times; $\\tau$ is the delay. **Time** is the number of rounds from the start of the later agent (synchronous) or the total number of edge traversals (asynchronous cost). **Memory** is bits per agent.",
+  "statement": "Two mobile agents start at different nodes of an unknown connected port-labelled graph. In the synchronous model they must be at the same node in the same round; in the asynchronous model an adversary controls their speeds and they may also meet inside an edge. Agents are either **labelled** (distinct labels from $\\{1,\\dots,L\\}$; $\\lambda$ is the smaller label) or **anonymous**. They may start at different times; $\\tau$ is the delay. **Time** is the number of rounds from the start of the later agent (synchronous) or the total number of moves, that is edge traversals (asynchronous cost). **Memory** is bits per agent.",
   "primer": {
-    "intro": "Two friends lose each other in a city with no phones and want to meet at the same spot. Two agents start at different nodes of an unknown connected graph (dots joined by lines) with port numbers on the edges (local numbers of the edges at each node). Time passes in synchronous **rounds**; in each round an agent stays or walks along one edge, and the agents meet when they are on the same node in the same round (crossing inside an edge does not count). In the basic version each agent knows its own **label**, a distinct integer from $\\{1,\\dots,L\\}$, but not the other's label and nothing about the graph; $\\lambda$ is the smaller of the two labels, $n$ the number of nodes, and the later agent may start $\\tau$ rounds after the earlier one. The task is to meet, and the cost is the number of rounds from the start of the later agent.",
+    "intro": "Two friends lose each other in a city with no phones and want to meet at the same spot. The city is a **graph**: street corners are **nodes** and the streets between them are **edges**; the friends are two **agents** that start at different nodes of this unknown connected graph. At each node the edges at that node carry local numbers, its **ports**. Time passes in synchronous **rounds**; in each round an agent stays or makes a **move** along one edge, and the agents **meet** when they are on the same node in the same round (crossing inside an edge does not count). In the basic version each agent knows its own **label**, a distinct integer from $\\{1,\\dots,L\\}$, but not the other's label and nothing about the graph; $\\lambda$ is the smaller of the two labels, $n$ the number of nodes, and the later agent may start $\\tau$ rounds after the earlier one (the **delay**). The task is to meet, and the cost is the number of rounds from the start of the later agent.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Explore or wait, bit by bit (trees, simultaneous start)",
         "variant": "labelled-trees",
         "ref": "Dessmark2006Deterministic",
-        "idea": "If one agent knew it should wait, the other could simply search the graph (\"wait for mommy\" in [Dessmark2006Deterministic]). Without knowing the other label, use the bits of your own label to take turns. This is a simplified version of their idea, for a tree (no cycles), both agents starting in the same round.\n1. Explore the tree by depth-first search and return to your start node; you learn $n$, and this takes $2(n-1)$ rounds. Call $2(n-1)$ rounds a **block**.\n2. Write your label in binary, write every bit twice, and append $0\\,1$. For example $5 = 101$ becomes $11\\,00\\,11\\,01$.\n3. Go through this string one bit per block: on a bit 1, explore the tree and return to your start node; on a bit 0, wait at your start node for the whole block.",
-        "analysis": "Both agents compute the same block length, so their blocks line up. Two different labels give strings that differ at some position before the shorter one ends (the final $0\\,1$ marks the end, and no doubled bit looks like it). In that block one agent explores while the other waits at its start node, so the explorer walks onto it. The cost is $O(\\log\\lambda)$ blocks of $O(n)$ rounds, $O(n\\log\\lambda)$ in all. [Dessmark2006Deterministic] reach $O(n+\\log\\lambda)$ on trees even with a delay $\\tau$, which is optimal; on general graphs the best known is $\\tilde O(n^5\\log\\lambda)$ [TaShma2014Deterministic], against a lower bound of $\\Omega(n^2)$.",
+        "idea": "If one agent knew it should wait, the other could simply search the graph (\"wait for mommy\" in [Dessmark2006Deterministic]). Without knowing the other label, use the bits of your own label to take turns. This is a simplified version of their idea, for a tree (no cycles), both agents starting in the same round.\n1. Explore the tree by depth-first search and return to your **start node** (the node where you began); you learn $n$, and this takes $2(n-1)$ rounds. Call $2(n-1)$ rounds a **block**.\n2. Write your label in binary, write every bit twice, and append $0\\,1$. For example $5 = 101$ becomes $11\\,00\\,11\\,01$.\n3. Go through this string one bit per block: on a bit 1, explore the tree and return to your start node; on a bit 0, wait at your start node for the whole block.",
+        "analysis": "Both agents compute the same block length, so their blocks start and end in the same rounds. Two different labels give strings that differ at some position before the shorter one ends (the final $0\\,1$ marks the end, and no doubled bit looks like it). In that block one agent explores while the other waits at its start node, so the exploring agent walks onto it. The cost is $O(\\log\\lambda)$ blocks of $O(n)$ rounds, $O(n\\log\\lambda)$ in all. [Dessmark2006Deterministic] reach $O(n+\\log\\lambda)$ on trees even with a delay $\\tau$, which is optimal; on general graphs the best known is $\\tilde O(n^5\\log\\lambda)$ [TaShma2014Deterministic], against a lower bound of $\\Omega(n^2)$.",
         "why_it_matters": "Turning distinct labels into different move/wait patterns is the basic symmetry-breaking device of deterministic rendezvous."
       },
       {
@@ -31,8 +31,8 @@
         "title": "Identical agents in symmetric positions",
         "variant": "anonymous",
         "ref": "Czyzowicz2012Forget",
-        "idea": "Take a ring of 6 nodes where at every node port 0 leads clockwise and port 1 counterclockwise. Put two agents without labels (**anonymous**: same algorithm, same initial memory) on opposite nodes, 3 edges apart, starting in the same round. Each agent sees exactly what the other sees: a node of degree 2, the same entry ports, nobody else around. So in every round they make the same choice: both stay, both go clockwise, or both go counterclockwise.",
-        "analysis": "After any number of rounds they are still exactly 3 edges apart, so they never meet, whatever the algorithm and however much memory they have. Identical agents can meet only when their starting positions are not symmetric in this sense, and for those positions $\\Theta(\\log n)$ bits of memory are exactly what is needed [Czyzowicz2012Forget].",
+        "idea": "Take a ring of 6 nodes where at every node port 0 leads clockwise and port 1 counterclockwise. Put two agents without labels (**anonymous**: same algorithm, same initial memory) on opposite nodes, 3 edges apart, starting in the same round. Each agent sees exactly what the other sees: a node of **degree** 2 (two edges at it), the same entry ports, nobody else around. So in every round they make the same choice: both stay, both go clockwise, or both go counterclockwise.",
+        "analysis": "After any number of rounds they are still exactly 3 edges apart, so they never meet, whatever the algorithm and however much **memory** (bits kept between rounds) they have. Identical agents can meet only when their starting positions are not symmetric in this sense, and for those positions $\\Theta(\\log n)$ bits of memory are exactly what is needed [Czyzowicz2012Forget].",
         "why_it_matters": "It explains why most rendezvous work gives the agents labels, and why for identical agents the question becomes which starting positions can be told apart."
       },
       {
@@ -46,6 +46,94 @@
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the unknown connected graph $G = (V, E)$ with $n$ nodes on which the two agents move",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; in the asynchronous model agents may also meet inside an edge",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "one of the two mobile entities, each running the same algorithm with its own label (if any)",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number of an edge at a node $v$; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit",
+        "door"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous time step in which each agent stays or moves along one edge",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by one agent",
+      "avoid": []
+    },
+    {
+      "term": "meet",
+      "definition": "to be on the same node in the same round (synchronous), or at the same point, possibly inside an edge (asynchronous)",
+      "avoid": []
+    },
+    {
+      "term": "label",
+      "definition": "a distinct integer from $\\{1,\\dots,L\\}$ that an agent knows about itself; $\\lambda$ is the smaller of the two",
+      "avoid": [
+        "identifier",
+        "name"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "for agents: without labels, with the same algorithm and the same initial memory; for nodes: without names the agents can read",
+      "avoid": []
+    },
+    {
+      "term": "delay",
+      "definition": "$\\tau$, the number of rounds between the starts of the earlier and the later agent",
+      "avoid": []
+    },
+    {
+      "term": "start node",
+      "definition": "the node where an agent begins",
+      "avoid": [
+        "home"
+      ]
+    },
+    {
+      "term": "block",
+      "definition": "in the explore-or-wait algorithm on a tree, $2(n-1)$ consecutive rounds, one per bit of the transformed label",
+      "avoid": []
+    }
+  ],
   "history": "Deterministic rendezvous in graphs started with the question of **feasibility and cost polynomial in the graph size and the label length**, for labelled agents that may start at different times [Dessmark2006Deterministic]. The community then removed the dependence on the delay [Kowalski2008Meet], made the algorithms constructive [TaShma2014Deterministic], asked how little **memory** anonymous agents need [Czyzowicz2012Forget] [Fraigniaud2013Delays], and moved to asynchronous agents, where even feasibility in every graph took years [DeMarco2006Asynchronous] [Czyzowicz2012Everywhere] [Dieudonne2015Polynomial]. Pelc's survey records this evolution [Pelc2019Survey].",
   "measures": [
     {
@@ -524,7 +612,7 @@
     }
   ],
   "figure": {
-    "caption": "Rendezvous of two labelled agents in a tree, simultaneous start, by the explore-or-wait idea of [Dessmark2006Deterministic] (simplified): after one depth-first tour to learn $n$, each agent reads its label in binary with every bit doubled and $01$ appended, and spends one block of $2(n-1)$ rounds per bit, exploring and returning on a 1, waiting at home on a 0. Labels 1 and 3 give $11\\,01$ and $11\\,11\\,01$; in block 3 agent 3 explores while agent 1 waits, and they meet. One frame per round.",
+    "caption": "Rendezvous of two labelled agents in a tree, simultaneous start, by the explore-or-wait idea of [Dessmark2006Deterministic] (simplified): after one depth-first tour to learn $n$, each agent reads its label in binary with every bit doubled and $01$ appended, and spends one block of $2(n-1)$ rounds per bit, exploring and returning on a 1, waiting at its start node on a 0. Labels 1 and 3 give $11\\,01$ and $11\\,11\\,01$; in block 3 agent 3 explores while agent 1 waits, and they meet. One frame per round.",
     "view": [
       100,
       56

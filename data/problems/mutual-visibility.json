@@ -13,17 +13,17 @@
     "relation": "Mutual visibility asks for any pattern in general position, a family of patterns; it is the usual first step of pattern formation for opaque robots."
   },
   "summary": "Opaque robots must reach positions where no three are collinear, so that every robot sees every other.",
-  "statement": "$n$ opaque point robots (or unit discs) start at distinct points; a robot hides others behind it. They must reach a configuration in which every robot sees every other (no three collinear), without collisions.",
+  "statement": "$n$ **opaque** point robots (or unit discs) start at distinct points: a robot hides the robots behind it on the same line of sight. They must reach a configuration in which every robot sees every other (no three collinear), without collisions.",
   "primer": {
-    "intro": "Picture people at a party who want every pair of them to be able to see each other, but bodies block the view: you cannot see someone directly behind another person. There are $n$ robots, points at distinct places in the plane, and they are **opaque**: robot $r$ sees robot $s$ only if no third robot lies on the straight segment between them. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Each robot carries a **light** showing one of $c$ colours, which all robots can see and which persists between cycles; otherwise robots remember nothing. In the basic version the scheduler is SSYNC (in each round an adversary wakes some robots) and moves are rigid (a robot always reaches its destination). The robots must reach, without two of them ever colliding, a configuration in which no three are on a line, so all see each other, and then stop.",
+    "intro": "Picture people at a party who want every pair of them to be able to see each other, but bodies block the view: you cannot see someone directly behind another person. There are $n$ **robots**, points at distinct places in the plane; their positions form the **configuration**. The robots are **opaque**: robot $r$ sees robot $s$ only if no third robot lies on the straight segment between them. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of the robots it sees (Look), decides on a destination point (Compute) and moves towards it (Move). Each robot carries a **light** showing one of $c$ colours, which all robots can see and which persists between cycles; otherwise robots remember nothing. In the basic version the **scheduler**, an adversary, is SSYNC: time runs in **rounds**, and in each round it decides the **activation** of some robots, each of which performs one cycle; every move is a **rigid move** (a robot always reaches its destination). The robots must reach, without two of them ever colliding, a configuration in which no three are on a line, so all see each other, and then stop.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Shrink: only corner robots move, cutting corners of the convex hull",
         "variant": "lights",
         "ref": "DiLuna2017Mutual",
-        "idea": "The **convex hull** is the shape of a rubber band stretched around all robots. Lights have two colours, Off and Vertex, all starting Off.\n\n1. A robot that is not a corner of the convex hull of the robots it sees does nothing.\n2. A corner robot sets its light to Vertex, finds its two neighbours $a$ and $b$ along the hull, and moves a little into the triangle formed by itself, $a$ and $b$, cutting off its corner.\n3. The move is kept inside a smaller safe triangle, so that robots moving at the same time cannot collide, and the robot stops on the nearest line parallel to $ab$ through another robot, so that it stays a corner.\n4. A robot that sees only robots with light Vertex knows that it sees everybody, and stops.",
-        "analysis": "Each cut shrinks the hull and can turn a robot that was hidden on an edge or inside into a new corner; eventually all robots are corners of a convex polygon, and then nobody blocks anybody. Some configurations need an inside robot to move: in a centrally symmetric configuration with a robot at the centre, symmetric robots can be made to move symmetrically forever, and the central robot keeps hiding pairs; the paper handles such cases separately. Di Luna, Flocchini, Gan Chaudhuri, Poloni, Santoro and Viglietta prove that this solves the problem in rigid SSYNC with 2 colours, which is optimal, and with no lights if $n$ is known [DiLuna2017Mutual]. In ASYNC, $O(1)$ epochs are achievable with more colours [Sharma2021Constant].",
+        "idea": "The **convex hull** is the shape of a rubber band stretched around all robots; its corner points are its **corners**, and a robot at one of them is a corner robot. Lights have two colours, Off and Vertex (meaning: I am at a corner), all starting Off.\n\n1. A robot that is not at a corner of the convex hull of the robots it sees does nothing.\n2. A corner robot sets its light to Vertex, finds its two neighbours $a$ and $b$ along the hull, and moves a little into the triangle formed by itself, $a$ and $b$, cutting off its corner.\n3. The move is kept inside a smaller safe triangle, so that robots moving at the same time cannot collide, and the robot stops on the nearest line parallel to $ab$ through another robot, so that it stays at a corner.\n4. A robot that sees only robots with light Vertex knows that it sees everybody, and stops.",
+        "analysis": "Each cut shrinks the hull and can turn a robot that was hidden on an edge or inside into a new corner robot; eventually all robots are at the corners of a convex polygon, and then nobody blocks anybody. Some configurations need an inside robot to move: in a centrally symmetric configuration with a robot at the centre, symmetric robots can be made to move symmetrically forever, and the central robot keeps hiding pairs; the paper handles such cases separately. Di Luna, Flocchini, Gan Chaudhuri, Poloni, Santoro and Viglietta prove that this solves the problem in rigid SSYNC with 2 colours, which is optimal, and with no lights if $n$ is known [DiLuna2017Mutual]. In ASYNC, $O(1)$ epochs (intervals in which every robot completes a cycle) are achievable with more colours [Sharma2021Constant].",
         "why_it_matters": "It introduced the luminous-robot approach to obstructed visibility, and its output (all robots on a convex polygon) is a starting point for other tasks on opaque robots."
       },
       {
@@ -31,12 +31,84 @@
         "title": "Without lights, a robot cannot know when to stop",
         "variant": "lights",
         "ref": "DiLuna2017Mutual",
-        "idea": "Suppose robots have no lights (one colour) and do not know $n$. A robot sees, say, four other robots at the corners of a square. Maybe that is everybody, and it should stop. Or maybe a fifth robot hides exactly behind one of the four, on the same line of sight, and the robots must still move. The two situations give the robot the same snapshot, and stopping cannot be undone, so whatever it decides is wrong in one of them.",
+        "idea": "Suppose robots have no lights (one colour) and do not know $n$. A robot sees, say, four other robots at the vertices of a square. Maybe that is everybody, and it should stop. Or maybe a fifth robot hides exactly behind one of the four, on the same line of sight, and the robots must still move. The two situations give the robot the same snapshot, and stopping cannot be undone, so whatever it decides is wrong in one of them.",
         "analysis": "Hence at least 2 colours are needed when $n$ is unknown and robots must stop (Section 7 of [DiLuna2017Mutual]), and Shrink shows that 2 suffice in rigid SSYNC. If $n$ is known, a robot can count the robots it sees and stop when it sees $n - 1$ others, so no light is needed. The authors note that if robots only need to stand still forever, without explicitly stopping, this argument does not apply.",
         "why_it_matters": "It shows that the cost of detecting completion, not of reaching it, is what forces memory."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the positions and light colours of the robots that a robot sees in Look, expressed in its local coordinate system; opaque robots may hide some robots from it"
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "round",
+      "definition": "one time step of FSYNC, SSYNC or the sequential scheduler: each activated robot performs one complete Look–Compute–Move cycle"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "rigid move",
+      "definition": "a move that always reaches the destination computed in Compute"
+    },
+    {
+      "term": "opaque",
+      "definition": "robot $r$ sees robot $s$ only if no third robot lies on the segment between them (for unit discs: if some segment from $r$ to $s$ meets no other disc)",
+      "avoid": [
+        "obstructed robot"
+      ]
+    },
+    {
+      "term": "light",
+      "definition": "a register of a robot that shows one of $c$ colours, is set by the robot in Compute, is seen by the other robots and persists between cycles"
+    },
+    {
+      "term": "convex hull",
+      "definition": "the smallest convex polygon that contains a set of robots (here usually the robots that a robot sees)"
+    },
+    {
+      "term": "corner",
+      "definition": "a vertex of the convex hull of the robots that a robot sees; a robot at a corner is a corner robot",
+      "avoid": [
+        "hull vertex"
+      ]
+    },
+    {
+      "term": "collision",
+      "definition": "two robots at the same point at the same time (for unit discs, two overlapping discs)"
+    }
+  ],
   "history": "Mutual visibility arose from **obstructed visibility**: before opaque robots can coordinate they must see each other. The first questions were feasibility and the **number of colours** [DiLuna2017Mutual] [Sharma2015Optimal]; then **time** with $O(1)$ colours [Vaidyanathan2015Log] [Sharma2021Constant], and fat robots [Sharma2018Fat] [Bhagat2024Fat].",
   "measures": [
     {
@@ -497,7 +569,7 @@
   ],
   "notes": "",
   "figure": {
-    "caption": "Mutual visibility: opaque robots at distinct points, where a robot hides those behind it, must reach a configuration with no three robots collinear, so that every robot sees every other, without collisions. Shown: the Shrink idea of [DiLuna2017Mutual] in SSYNC rounds with rigid moves: a ringed (activated) robot that is a corner of the convex hull (dashed) it sees moves a little into the triangle with its two hull neighbours, staying a corner, and sets its light to Vertex (green); hidden robots become corners in turn.",
+    "caption": "Mutual visibility: opaque robots at distinct points, where a robot hides those behind it, must reach a configuration with no three robots collinear, so that every robot sees every other, without collisions. Shown: the Shrink idea of [DiLuna2017Mutual] in SSYNC rounds with rigid moves: a ringed (activated) robot that is at a corner of the convex hull (dashed) of the robots it sees moves a little into the triangle with its two hull neighbours, staying at a corner, and sets its light to Vertex (green); hidden robots become corner robots in turn.",
     "view": [
       100,
       56
@@ -761,7 +833,7 @@
             "arrow": true
           }
         ],
-        "label": "Corners cut in and turn their light to Vertex"
+        "label": "Corner robots cut in and set their light to Vertex"
       },
       {
         "ents": [

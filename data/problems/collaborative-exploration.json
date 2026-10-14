@@ -10,24 +10,24 @@
   "summary": "$k$ agents start together at the root of an unknown graph and must visit all its nodes; how much faster than one agent can a team be?",
   "statement": "A team of $k$ distinguishable agents starts at a node $s$ (the root) of an unknown connected graph with $n$ nodes; $D$ is the largest distance from $s$. In synchronous rounds every agent traverses at most one edge. When an agent reaches a node it sees the incident edges. The team must **visit every node** (some papers also require all agents to return to $s$; the bounds coincide asymptotically).\n\n**Time** is the number of rounds (in the asynchronous model: the total number of moves). The offline optimum is $\\Theta(n/k + D)$, so an algorithm that explores every tree in $\\mathrm{CR}(k)\\cdot(n/k+D)$ rounds is called $\\mathrm{CR}(k)$-competitive; a single depth-first search is $O(k)$-competitive. **Memory** is bits per agent; most of this literature lets it be unbounded.\n\nUnless a variant says otherwise, nodes are **labelled** (an agent recognises a node it has seen), which is the standard assumption of collective tree exploration; on trees it does not matter for lower bounds [Disser2020General]. With anonymous nodes and $k = n$, the problem is solved by rooted dispersion.",
   "primer": {
-    "intro": "Imagine $k$ rescue robots entering a cave system through one entrance; they want every chamber checked as soon as possible. The cave is a tree (a graph without cycles: dots joined by lines, with exactly one route between any two dots) with $n$ nodes, rooted at the entrance $s$; $D$ is the depth, the largest distance from $s$. All $k$ agents start at $s$; time passes in **rounds**, and in each round every agent may walk along one edge. Nodes can be recognised, an agent at a node sees the edges leaving it, and in the basic version all agents share one map (**global communication**). The team must visit every node; the time is the number of rounds, and an algorithm is judged by how close it gets to the best possible time of about $n/k + D$ rounds.",
+    "intro": "Imagine $k$ rescuers entering a cave system through one entrance; they want every chamber checked as soon as possible. We model the cave as a graph: chambers are **nodes**, tunnels between two chambers are **edges**, and each rescuer is an **agent**. The cave is a **tree** (a graph without cycles, so there is exactly one route between any two nodes) with $n$ nodes; the entrance is its **root** $s$, and the **depth** $D$ is the largest distance from $s$. All $k$ agents start at $s$; time passes in **rounds**, and in each round every agent may walk along one edge. Nodes are **labelled** (an agent recognises a node it has seen before), and an agent at a node sees the edges leaving it. In the basic version all agents share everything they learn (**global communication**), so they act on one **map**: the part of the tree seen so far. The team must visit every node; the time is the number of rounds, and an algorithm is judged by how close it gets to the best possible time of about $n/k + D$ rounds.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Breadth-First Depth-Next",
         "variant": "tree-global",
         "ref": "Cosson2023BFDN",
-        "idea": "The algorithm BFDN of [Cosson2023BFDN]. Call an edge **dangling** if it is seen but not yet walked.\n1. When an agent is at the root, give it an **anchor**: a known node with a dangling edge, preferring nodes closest to the root and, among those, the ones with the fewest agents already anchored there.\n2. The agent walks along the known map to its anchor.\n3. From there it does a depth-first search: if a dangling edge leaves its node and no other agent has chosen it this round, it takes it; otherwise it steps one edge back towards the root.\n4. Back at the root it gets a new anchor. The team stops when all agents are at the root and no dangling edge is left.",
-        "analysis": "Each agent mostly does what a single explorer does (walk down unexplored edges, back up when stuck), and the anchors spread the team over the shallowest unfinished parts of the tree. [Cosson2023BFDN] prove a time of $\\tfrac{2n}{k} + D^2(\\min\\{\\log\\Delta,\\log k\\}+2)$ rounds, where $\\Delta$ is the maximum degree; the $2n/k$ term is what $k$ agents need just to walk every edge twice. The best known algorithm today takes $\\tfrac{2n}{k} + O(D\\log^2 k)$ rounds [Cosson2026Polylog].",
-        "why_it_matters": "Its analysis through a simple game against an adversary opened the line of work that brought the overhead from roughly a factor $k/\\log k$ down to polylogarithmic in $k$."
+        "idea": "The algorithm BFDN of [Cosson2023BFDN]. Call an edge **unexplored** if it has been seen but no agent has walked it yet (the paper calls it *dangling*).\n1. When an agent is at the root, give it an **anchor**: a node of the map with an unexplored edge, preferring nodes closest to the root and, among those, the ones with the fewest agents already anchored there.\n2. The agent walks along the map to its anchor.\n3. From there it does a **depth-first search**: if an unexplored edge leaves its node and no other agent has chosen it this round, it takes it; otherwise it steps one edge back towards the root.\n4. Back at the root it gets a new anchor. The team stops when all agents are at the root and no unexplored edge is left.",
+        "analysis": "Each agent mostly does what a single agent exploring alone does (walk down unexplored edges, back up when stuck), and the anchors spread the team over the shallowest unfinished parts of the tree. [Cosson2023BFDN] prove a time of $\\tfrac{2n}{k} + D^2(\\min\\{\\log\\Delta,\\log k\\}+2)$ rounds, where $\\Delta$ is the maximum degree; the $2n/k$ term is what $k$ agents need just to walk every edge twice. The best known algorithm today takes $\\tfrac{2n}{k} + O(D\\log^2 k)$ rounds [Cosson2026Polylog].",
+        "why_it_matters": "Its analysis through a simple game against an adversary opened the series of papers that brought the overhead from roughly a factor $k/\\log k$ down to polylogarithmic in $k$."
       },
       {
         "kind": "lower-bound",
-        "title": "Even with a map: n/k + D",
+        "title": "Even knowing the tree: n/k + D",
         "variant": "tree-global",
         "ref": "Cosson2023BFDN",
         "idea": "Suppose the agents knew the whole tree in advance. Two things still take time.\n1. Some agent must reach the deepest node, which is $D$ edges from the root: at least $D$ rounds.\n2. Each of the $n-1$ nodes other than the root must be entered for the first time by some agent, and in one round $k$ agents enter at most $k$ nodes: at least $(n-1)/k$ rounds.",
-        "analysis": "So no algorithm beats about $\\max\\{n/k, D\\}$, which is at least half of $n/k + D$. With the map this is also achievable up to a factor 2: cut a depth-first tour of the tree (length $2(n-1)$) into $k$ pieces of length $2(n-1)/k$ and send one agent to each piece, for $2(n/k + D)$ rounds in total, as recalled in [Cosson2023BFDN]. An online algorithm (one that discovers the tree as it goes) that is always within a factor $\\mathrm{CR}(k)$ of $n/k + D$ is called $\\mathrm{CR}(k)$-competitive; a single depth-first search by one agent is $O(k)$-competitive.",
+        "analysis": "So no algorithm beats about $\\max\\{n/k, D\\}$, which is at least half of $n/k + D$. Knowing the tree, this is also achievable up to a factor 2: cut a depth-first tour of the tree (length $2(n-1)$) into $k$ pieces of length $2(n-1)/k$ and send one agent to each piece, for $2(n/k + D)$ rounds in total, as recalled in [Cosson2023BFDN]. An online algorithm (one that discovers the tree as it goes) that is always within a factor $\\mathrm{CR}(k)$ of $n/k + D$ is called **$\\mathrm{CR}(k)$-competitive**; a single depth-first search by one agent is $O(k)$-competitive.",
         "why_it_matters": "This simple yardstick is what every result on collaborative exploration is measured against."
       },
       {
@@ -35,12 +35,105 @@
         "title": "An adversary that grows the tree",
         "variant": "tree-global",
         "ref": "Disser2020General",
-        "idea": "Without a map, the tree is revealed only where agents stand, so one can imagine an **adversary** (an opponent who builds the worst input) drawing the tree during the run. When the agents reach a node, the adversary decides how many children it has. Whatever way the agents split up, the adversary can make the long branches continue where few agents went and end the branches that received many agents. The full proof that this costs a factor $\\Omega(\\log k/\\log\\log k)$ is longer [Disser2020General].",
+        "idea": "When the tree is not known in advance, it is revealed only where agents stand, so one can imagine an **adversary** (an opponent who builds the worst input) drawing the tree during the run. When the agents reach a node, the adversary decides how many children it has. Whatever way the agents split up, the adversary can make the long branches continue where few agents went and end the branches that received many agents. The full proof that this costs a factor $\\Omega(\\log k/\\log\\log k)$ is longer [Disser2020General].",
         "analysis": "Every deterministic algorithm takes $\\Omega\\big(\\tfrac{\\log k}{\\log\\log k}(\\tfrac nk + D)\\big)$ rounds on some tree, even with global communication and unlimited memory [Disser2020General]; it was first shown by [Dynia2007Maps] for $k < \\sqrt n$. The best algorithm is $O(\\log^2 k)$-competitive [Cosson2026Polylog], so the remaining gap is between $\\log k/\\log\\log k$ and $\\log^2 k$.",
         "why_it_matters": "It refuted the hope of a constant competitive ratio and shows that not knowing where the work is costs something no amount of communication can repair."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "tree",
+      "definition": "a connected graph without cycles: there is exactly one path between any two nodes",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; the tree has $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; an agent traverses at most one edge per round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "one of the $k$ distinguishable mobile entities that move along edges",
+      "avoid": [
+        "robot",
+        "robots",
+        "explorer"
+      ]
+    },
+    {
+      "term": "root",
+      "definition": "the node $s$ at which all $k$ agents start",
+      "avoid": []
+    },
+    {
+      "term": "depth",
+      "definition": "$D$, the largest distance from the root $s$ to a node",
+      "avoid": [
+        "height"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step in which every agent traverses at most one edge; time is counted in rounds",
+      "avoid": []
+    },
+    {
+      "term": "labelled",
+      "definition": "nodes are labelled when an agent recognises a node it has seen before",
+      "avoid": []
+    },
+    {
+      "term": "global communication",
+      "definition": "all agents share all information at every round, so they act on one common map",
+      "avoid": []
+    },
+    {
+      "term": "map",
+      "definition": "the part of the tree seen so far: the visited nodes and the edges seen at them",
+      "avoid": []
+    },
+    {
+      "term": "unexplored edge",
+      "definition": "an edge that has been seen at a visited node but that no agent has traversed yet ([Cosson2023BFDN] call it dangling)",
+      "avoid": []
+    },
+    {
+      "term": "anchor",
+      "definition": "in Breadth-First Depth-Next, the visited node with an unexplored edge to which an agent at the root is sent",
+      "avoid": []
+    },
+    {
+      "term": "depth-first search",
+      "definition": "a walk that takes an unexplored edge from the current node when there is one, and otherwise steps one edge back towards the root",
+      "avoid": []
+    },
+    {
+      "term": "competitive",
+      "definition": "an algorithm is $\\mathrm{CR}(k)$-competitive if on every tree it finishes within $\\mathrm{CR}(k)\\cdot(n/k + D)$ rounds",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that builds the worst input, here the tree, during the run",
+      "avoid": []
+    }
+  ],
   "history": "Collaborative exploration asked a different question from the single-agent line: not how little memory, but **how much faster** $k$ agents can be than one. Fraigniaud, Gąsieniec, Kowalski and Pelc measured an algorithm by its competitive ratio against the offline optimum $\\Theta(n/k + D)$ and showed that communication matters: without it, $k$ agents gain nothing [Fraigniaud2006Collective]. The following twenty years were spent narrowing the ratio from $O(k/\\log k)$ towards the $\\Omega(\\log k/\\log\\log k)$ lower bound [Dynia2007Maps] [Disser2020General] [Cosson2024Potential], and on what very large teams can do [Dereniowski2015Fast].",
   "measures": [
     {
@@ -169,7 +262,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
@@ -207,7 +300,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
@@ -254,7 +347,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [],
@@ -312,7 +405,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [],
@@ -346,7 +439,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
@@ -376,7 +469,7 @@
           "bottleneck": "online tree revelation",
           "preconditions": [
             "deterministic, global communication",
-            "**existential in $D$**: the hard tree has height $D=\\lceil\\sqrt{\\log n}\\rceil$ (Theorem 2.5)",
+            "**existential in $D$**: the hard tree has depth $D=\\lceil\\sqrt{\\log n}\\rceil$ (Theorem 2.5)",
             "not shown for larger heights"
           ]
         },
@@ -401,15 +494,15 @@
       "optimality": {
         "time": {
           "status": "gap",
-          "note": "$D^2$ is matched only for trees of height about $\\sqrt{\\log n}$; for other heights the gap is a factor $D$."
+          "note": "$D^2$ is matched only for trees of depth about $\\sqrt{\\log n}$; for other depths the gap is a factor $D$."
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
-        "For $k=n$ and trees of height $D$ well above $\\sqrt{\\log n}$ (e.g. $D=\\sqrt n$), is $\\Omega(D^2)$ still necessary?"
+        "For $k=n$ and trees of depth $D$ well above $\\sqrt{\\log n}$ (e.g. $D=\\sqrt n$), is $\\Omega(D^2)$ still necessary?"
       ],
       "notes": "Dispersion papers cite this bound as \"$\\Omega(D^2)$ for $n$ agents on trees\" [Augustine2018Tradeoffs] [Kshemkalyani2022GlobalJ]; the theorem is existential in $D$, see the overview *From exploration to dispersion*.",
       "status": "verified"
@@ -444,7 +537,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
@@ -496,7 +589,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
@@ -545,7 +638,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [],
@@ -659,7 +752,7 @@
     }
   ],
   "figure": {
-    "caption": "Collective tree exploration [Fraigniaud2006Collective], here by Breadth-First Depth-Next [Cosson2023BFDN]: $k = 3$ agents start at the root $s$ of an unknown tree and share one map. An agent at the root is sent to the shallowest node with an unexplored edge; from there it walks down unexplored edges that no other agent takes in that round, and steps back towards the root when there is none. One frame per round; the time is compared with the offline optimum $\\Theta(n/k + D)$.",
+    "caption": "Collective tree exploration [Fraigniaud2006Collective], here by Breadth-First Depth-Next [Cosson2023BFDN]: $k = 3$ agents start at the root $s$ of an unknown tree and share one map. An agent at the root is sent to the shallowest node with an unexplored edge (its anchor); from there it walks down unexplored edges that no other agent takes in that round, and steps back towards the root when there is none. One frame per round; the time is compared with the offline optimum $\\Theta(n/k + D)$.",
     "view": [
       100,
       56

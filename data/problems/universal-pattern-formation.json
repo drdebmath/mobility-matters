@@ -12,31 +12,104 @@
     "kind": "strengthening of",
     "relation": "Pattern formation asks which patterns are formable from a given start; universal pattern formation asks for all patterns from all starts, which symmetry forbids under SSYNC and FSYNC but sequential schedulers allow [Flocchini2026Universal]."
   },
-  "summary": "Robots must be able to form any pattern from any starting configuration, not only the ones symmetry allows.",
-  "statement": "From every initial configuration of $n$ robots (several robots may start on the same point, forming a multiplicity [Flocchini2026Universal]), the robots must form every given pattern of $n$ points (multiplicities allowed). With lights, universal dancing asks for any sequence of patterns.",
+  "summary": "Robots must be able to form any pattern from any initial configuration, not only the ones symmetry allows.",
+  "statement": "From every initial configuration of $n$ robots (several robots may start on the same point, forming a multiplicity [Flocchini2026Universal]), the robots must form every given **pattern** of $n$ points (a multiset of points given to every robot; multiplicities allowed). With lights, universal dancing asks for any sequence of patterns.",
   "primer": {
-    "intro": "Imagine a troupe that must be able to form every shape the director might ask for, from wherever its members happen to stand, even if some of them are standing on top of each other. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (no memory between cycles) and share no sense of direction. The **scheduler** here is **sequential**: in each round it wakes exactly one robot, and every robot is woken again and again. Universal pattern formation asks for one algorithm that, from every starting configuration, forms every given pattern of $n$ points (points may hold several robots) and then stops.",
+    "intro": "Imagine a troupe that must be able to form every shape the director might ask for, from wherever its members happen to stand, even if some of them are standing on top of each other. There are $n$ **robots**, points in the plane; their positions form the **configuration**, and a point that holds two or more robots is a **multiplicity**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (no memory between cycles), and each uses its own **local coordinate system**, so they agree on no direction. The **scheduler**, an adversary, decides the **activation** of robots, that is, when each performs a cycle; here it is **sequential**: time runs in **rounds**, in each round it activates exactly one robot, and every robot is activated again and again. Universal pattern formation asks for one algorithm that, from every initial configuration, forms every given **pattern** of $n$ points (a list of points that every robot is given, to be matched up to position, rotation and size; it may contain multiplicities) and then stops.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "One robot at a time: create enough points, agree on a map, fill it in",
+        "title": "One robot at a time: create enough occupied points, agree on a map, fill it in",
         "variant": "sequential",
         "ref": "Flocchini2026Universal",
-        "idea": "1. **Initialization.** If the robots occupy fewer distinct points than the pattern has, robots leave crowded points one at a time until there are enough occupied points.\n2. Scale the pattern so that its smallest enclosing circle matches the robots' smallest enclosing circle.\n3. **Leader configuration.** Move robots so that all of them agree on how the pattern is laid over the robots' positions (a common map from robots to pattern points).\n4. **Partial formation.** Fill the empty pattern points one by one in an agreed order, moving along detours that never pass over another robot.\n5. **Finalization.** When only one robot is off the pattern, the last robots move to their places.",
-        "analysis": "Under a sequential scheduler only one robot moves at a time, so the moving robot is automatically different from all others; in particular, two robots on the same point can be separated, since only one of them moves. Flocchini, Navarra, Pattanayak, Piselli and Santoro show that this gives oblivious robots universal pattern formation with no extra assumption, except for the single point (gathering), which needs weak multiplicity detection, necessary and sufficient [Flocchini2026Universal]. The steps above are their high-level plan; the actual algorithm handles many special cases, and patterns with fewer than 5 points separately. Time is not analysed.",
+        "idea": "1. **Initialization.** If the robots occupy fewer distinct points than the pattern has, robots leave multiplicities one at a time until there are enough occupied points.\n2. Scale the pattern so that its **smallest enclosing circle** (the smallest circle containing all its points) matches the smallest enclosing circle of the configuration.\n3. **Leader configuration.** Move robots so that all of them agree on how the pattern is laid over the robots' positions (a common map from robots to pattern points).\n4. **Partial formation.** Fill the empty points of the pattern one by one in an agreed order, moving along detours that never pass over another robot.\n5. **Finalization.** When only one robot is off the pattern, the last robots move to their places.",
+        "analysis": "Under a sequential scheduler only one robot moves at a time, so the moving robot is automatically different from all others; in particular, a multiplicity can be split, since only one of its robots moves. Flocchini, Navarra, Pattanayak, Piselli and Santoro show that this gives oblivious robots universal pattern formation with no extra assumption, except for the single point (gathering), which needs **weak multiplicity detection** (a robot sees whether a point holds more than one robot), necessary and sufficient [Flocchini2026Universal]. The steps above are their high-level plan; the actual algorithm handles many special cases, and patterns with fewer than 5 points separately. Time is not analysed.",
         "why_it_matters": "It shows that sequential activation is more than a way to elect a leader: it gives power that even a leader with full synchrony does not have."
       },
       {
         "kind": "impossibility",
-        "title": "Fully synchronous robots cannot split a pair",
+        "title": "Fully synchronous robots cannot split a multiplicity",
         "variant": "sequential",
         "ref": "Flocchini2026Universal",
-        "idea": "Take three robots: two on one point, the third alone elsewhere. Under FSYNC every robot is woken in every round. The two robots on the shared point see the same snapshot; even if they share one coordinate system, move rigidly, can count robots on each point, and the third robot is a recognisable leader, the two compute the same destination and move together. They stay on one point forever, so no pattern with three distinct points is ever formed.",
-        "analysis": "This is Theorem 1 of [Flocchini2026Universal]: universal pattern formation is unsolvable under FSYNC for $n \\ge 3$, even with all these extra capabilities, and hence also under SSYNC and ASYNC, where the scheduler may choose to wake everyone. Gathering alone, in contrast, is solvable under FSYNC with no extra capability.",
+        "idea": "Take three robots: two on one point, the third alone elsewhere. Under FSYNC every robot is activated in every round. The two robots on the multiplicity get the same snapshot; even if they have identical local coordinate systems, move rigidly, can count robots on each point, and the third robot is a recognisable leader, the two compute the same destination and move together. They stay on one point forever, so no pattern with three distinct points is ever formed.",
+        "analysis": "This is Theorem 1 of [Flocchini2026Universal]: universal pattern formation is unsolvable under FSYNC for $n \\ge 3$, even with all these extra capabilities, and hence also under SSYNC and ASYNC, where the scheduler may choose to activate every robot. Gathering alone, in contrast, is solvable under FSYNC with no extra capability.",
         "why_it_matters": "It shows that the fully synchronous and the sequential schedulers are incomparable: each solves something the other cannot."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "the origin, axes, unit of length and handedness in which a robot expresses its snapshot and its destination; robots agree on none of these unless the setting assumes chirality, one common axis or a common compass",
+      "avoid": [
+        "private coordinate system"
+      ]
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one time step of FSYNC, SSYNC or the sequential scheduler: each activated robot performs one complete Look–Compute–Move cycle"
+    },
+    {
+      "term": "multiplicity",
+      "definition": "a point of the plane occupied by two or more robots",
+      "avoid": [
+        "crowded point",
+        "double point"
+      ]
+    },
+    {
+      "term": "pattern",
+      "definition": "a multiset of $n$ points given to every robot in its local coordinate system (a point of the pattern may be a multiplicity); it is formed when the configuration is similar to it"
+    },
+    {
+      "term": "smallest enclosing circle",
+      "definition": "the unique smallest circle that contains a given finite set of points (by default the robots of the configuration), abbreviated SEC; it does not depend on any local coordinate system"
+    },
+    {
+      "term": "weak multiplicity detection",
+      "definition": "the capability of a robot to see, for each occupied point, whether it holds one robot or more than one, but not how many"
+    }
+  ],
   "history": "Universal pattern formation asked whether a **scheduler alone** can break the symmetry that blocks pattern formation: under sequential schedulers it can, except for a single point [Flocchini2026Universal]; with lights, robots can then perform any sequence of patterns [Feletti2026Dancing].",
   "measures": [
     {
@@ -113,7 +186,7 @@
     }
   ],
   "figure": {
-    "caption": "Universal pattern formation: from every configuration of $n$ robots, possibly with several robots on one point, the robots must be able to form every given pattern of $n$ points, including patterns with multiplicities [Flocchini2026Universal]. Shown, simplified, the plan of [Flocchini2026Universal] under the sequential scheduler (one ringed robot moves per round): a robot leaves a crowded point until the robots occupy as many points as the pattern (hollow), then the pattern points are filled one by one; the last robot creates the double point.",
+    "caption": "Universal pattern formation: from every configuration of $n$ robots, possibly with several robots on one point (a multiplicity), the robots must be able to form every given pattern of $n$ points, including patterns with multiplicities [Flocchini2026Universal]. Shown, simplified, the plan of [Flocchini2026Universal] under the sequential scheduler (one ringed robot is activated per round): a robot leaves a multiplicity until the robots occupy as many points as the pattern (hollow), then the points of the pattern are filled one by one; the last robot creates the pattern's multiplicity.",
     "view": [
       100,
       56
@@ -1095,7 +1168,7 @@
         ]
       },
       {
-        "label": "Final: the pattern, with its double point",
+        "label": "Final: the pattern, with its multiplicity",
         "ents": [
           {
             "id": "a",

@@ -13,17 +13,17 @@
       "relation": "A central controller plans the moves, so the question is which mechanisms are universal and how many moves they need, not how particles coordinate."
     }
   ],
-  "summary": "A central algorithm must transform one connected shape of $n$ modules on the square grid into another using local moves.",
-  "statement": "$n$ modules occupy cells of the square grid and form a connected shape. A centralised algorithm must transform it into a given target shape with the same number of modules, using only the allowed local moves, keeping the shape connected where required. **Moves** counts sequential moves; **time** is parallel time when several moves may happen at once.",
+  "summary": "A centralised algorithm must transform one connected shape of $n$ modules on the square grid into another using local moves.",
+  "statement": "$n$ **modules** (unit squares, the particles of this model) occupy **cells** of the square grid and form a connected **shape**; modules in cells that share a side are **neighbours**, and the shape is connected when every module can be reached from every other through neighbours. A **centralised algorithm** must transform it into a given target shape with the same number of modules, using only the allowed local moves, keeping the shape connected where required. **Moves** counts sequential moves; **time** is parallel time when several moves may happen at once.",
   "primer": {
-    "intro": "Picture a set of square magnets on a chessboard, all touching one another, that you are allowed to rearrange only by small local moves, and ask: can one arrangement be turned into another, and how many moves does it take? Here $n$ square modules occupy cells of the square grid and form a connected shape; a central planner sees everything and decides the moves. Unlike amoebot particles, which move by expanding and contracting, a module moves by *rotation* (turning a quarter circle around a neighbouring module, ending on a diagonal cell) or by *sliding* (moving one cell along two neighbouring modules); a move is allowed only if the cells it sweeps through are empty. The goal: transform the shape into a given target shape with the same number of modules, and count *moves* (one at a time) or *parallel time* (several moves at once).",
+    "intro": "Picture a set of square magnets on a chessboard, all touching one another, that you are allowed to rearrange only by small local moves, and ask: can one arrangement be turned into another, and how many moves does it take? Here the magnets are $n$ square **modules** and the squares of the board are **cells** of the infinite **square grid**. Modules in cells that share a side are **neighbours**, and the modules form a **connected** **shape**: every module can be reached from every other through neighbours. A **centralised algorithm** sees everything and decides the moves. Unlike amoebot particles, which move by expanding and contracting, a module moves by **rotation** (turning a quarter circle around a neighbour, ending on a diagonal cell) or by **sliding** (moving one cell along two neighbouring modules); a **move** is allowed only if the cells it sweeps through are empty. The goal: transform the shape into a given **target shape** with the same number of modules, and count moves (one at a time) or **parallel time** (the number of steps when several moves may happen at once).",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Everything turns into a line, and moves can be undone",
         "variant": "sliding",
         "ref": "Michail2019Transformation",
-        "idea": "With rotations and slidings both allowed:\\n\\n1. Find a module on the outside of the shape whose removal keeps the rest connected; every connected shape with at least two modules has at least two.\\n2. That module can walk around the outside of the rest, rotating at corners and sliding along straight stretches, without ever losing contact.\\n3. Walk it to the end of a horizontal line growing from the shape's lowest right-most module; repeat until all $n$ modules form the line.\\n4. To reach a target shape $B$, also plan $B \\to$ line, then play that plan backwards: every rotation and sliding can be undone by the opposite move.",
+        "idea": "With rotations and slidings both allowed:\n\n1. Find a module on the outside of the shape whose removal keeps the rest connected; every connected shape with at least two modules has at least two.\n2. That module can walk around the outside of the rest, rotating at corners and sliding along straight stretches, always staying a neighbour of some module.\n3. Walk it to the end of a horizontal **line** (modules in consecutive cells of one row) growing from the shape's lowest right-most module; repeat until all $n$ modules form the line.\n4. To reach a target shape $B$, also plan $B \\to$ line, then play that plan backwards: every rotation and sliding can be undone by the opposite move.",
         "analysis": "So any two connected shapes with the same number of modules can be transformed into each other without ever disconnecting [Michail2019Transformation]. Each module walks at most about the perimeter of the shape, so the plan uses $O(n^2)$ moves, and that is the best possible in the worst case (the third idea). Allowing many moves at once, the same paper reaches $O(n)$ parallel time, also best possible.",
         "why_it_matters": "Going through a canonical shape and using reversibility is the standard way to prove that a set of moves is universal."
       },
@@ -32,9 +32,9 @@
         "title": "Rotations never change a module's chessboard colour",
         "variant": "rotation",
         "ref": "Michail2019Transformation",
-        "idea": "Colour the grid like a chessboard. A rotation moves a module to a diagonally neighbouring cell, which has the same colour. So with rotations alone, the number of modules on black cells never changes, and neither does the number on white cells. Example: a horizontal line of 3 modules on black, white, black cells has two on black; a shape of 3 modules with two on white cells can never be reached from it.",
+        "idea": "Colour the grid like a chessboard. A rotation moves a module to a cell diagonal to its old one, which has the same colour. So with rotations alone, the number of modules on black cells never changes, and neither does the number on white cells. Example: a horizontal line of 3 modules on black, white, black cells has two on black; a shape of 3 modules with two on white cells can never be reached from it.",
         "analysis": "Two shapes with different colour counts can never be transformed into each other by rotations [Michail2019Transformation]. Equal colour counts are not enough either: some shapes have no rotation available at all and are stuck. If disconnecting is allowed, the paper shows that deciding whether a transformation exists takes polynomial time; if connectivity must be kept, the decision is in PSPACE.",
-        "why_it_matters": "An invariant, a quantity that no move changes, is the simplest tool for proving that a transformation is impossible."
+        "why_it_matters": "An **invariant**, a quantity that no move changes, is the simplest tool for proving that a transformation is impossible."
       },
       {
         "kind": "lower-bound",
@@ -47,6 +47,90 @@
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "module",
+      "definition": "a unit square that occupies one cell; the modules are the particles of this model, and a centralised algorithm moves them one rotation or sliding at a time",
+      "avoid": [
+        "tile",
+        "robot"
+      ]
+    },
+    {
+      "term": "cell",
+      "definition": "a unit square of the square grid; it holds at most one module",
+      "avoid": [
+        "node"
+      ]
+    },
+    {
+      "term": "square grid",
+      "definition": "the tiling of the plane by unit squares, whose squares are the cells",
+      "avoid": [
+        "lattice"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a module in a cell that shares a side with the cell of the given module",
+      "avoid": []
+    },
+    {
+      "term": "connected",
+      "definition": "said of a shape when every module can be reached from every other through neighbours",
+      "avoid": []
+    },
+    {
+      "term": "shape",
+      "definition": "the set of cells occupied by the $n$ modules",
+      "avoid": [
+        "configuration"
+      ]
+    },
+    {
+      "term": "centralised algorithm",
+      "definition": "an algorithm that sees the whole shape and chooses every move",
+      "avoid": [
+        "planner",
+        "central algorithm"
+      ]
+    },
+    {
+      "term": "rotation",
+      "definition": "the move in which a module turns a quarter circle around a neighbour and ends on a cell diagonal to its old one; the cells it sweeps must be empty",
+      "avoid": []
+    },
+    {
+      "term": "sliding",
+      "definition": "the move in which a module moves to an adjacent cell along two neighbouring modules; the cell it enters must be empty",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one rotation or one sliding of one module",
+      "avoid": []
+    },
+    {
+      "term": "parallel time",
+      "definition": "the number of steps of a transformation in which several moves may happen at once",
+      "avoid": []
+    },
+    {
+      "term": "target shape",
+      "definition": "the given shape, with the same number $n$ of modules, that the transformation must reach",
+      "avoid": []
+    },
+    {
+      "term": "line",
+      "definition": "a shape whose modules occupy consecutive cells of one row",
+      "avoid": []
+    },
+    {
+      "term": "invariant",
+      "definition": "a quantity that no move changes, such as the number of modules on black cells under rotations",
+      "avoid": []
+    }
+  ],
   "history": "The first question was **which mechanisms are universal** and how hard it is to decide transformability [Michail2019Transformation]; then how far stronger mechanisms reduce the number of moves [Almethen2020Pushing] [Akitaya2021Musketeers].",
   "ignore_axes": [
     "orientation",

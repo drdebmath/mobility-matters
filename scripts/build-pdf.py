@@ -99,7 +99,18 @@ def inline(s):
     s = re.sub(r"\$\$.+?\$\$|\$[^$\n]+?\$", lambda m: hold(fix_math(m.group(0))), s)
     s = re.sub(r"`([^`]+)`", lambda m: hold(r"\texttt{%s}" % esc_plain(m.group(1))), s)
     s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", lambda m: hold(r"\href{%s}{%s}" % (m.group(2).replace("%", r"\%").replace("#", r"\#"), esc_plain(m.group(1)))), s)
-    s = CITE_RE.sub(lambda m: hold(r"\citep{%s}" % m.group(1)) if m.group(1) in REFS else m.group(0), s)
+    def cite(m):
+        k = m.group(1)
+        if k not in REFS:
+            return m.group(0)
+        after = s[m.end():m.end() + 2]
+        if after in ("'s", "’s"):
+            return hold(r"\citet{%s}" % k)            # [Key]'s -> Author (Year)'s
+        before = s[:m.start()]
+        if before.count("(") > before.count(")"):
+            return hold(r"\citealp{%s}" % k)          # already inside parentheses: no second pair
+        return hold(r"\citep{%s}" % k)
+    s = CITE_RE.sub(cite, s)
     s = esc_plain(s)
     s = emph(s)
     return re.sub("\x00(\\d+)\x00", lambda m: held[int(m.group(1))], s)
@@ -342,24 +353,49 @@ def axes_table(axes, scope=None):
     return "\n".join(out)
 
 def tree_outline(p):
-    lines = []
+    """The case tree as a drawn tree (dirtree: connector lines, breaks across pages). Each entry: in grey what its
+    edge adds or leaves unassumed, then the setting with its status per measure and page; branch points in italics."""
     measures = p["measures"]
+    rows = []
     for n in p["_order"]:
         v = n["variant"]
-        ind = n["depth"] * 1.1
-        title = inline(node_title(p, n))
+        # each dirtree level starts 19.2pt further right (offset + width + sep of \DTsetlength at 11pt), and \linewidth
+        # is not narrowed: shrink the entry by the same amount so the dots and page numbers line up on the right
+        width = r"\dimexpr\linewidth-%.2fpt-1.5em-5pt\relax" % (19.71 * n["depth"])
+        edge = r"{\footnotesize\color{muted}%s}\newline " % edge_text(p, n) if n["parent"] else ""   # \dirtree is not \long: no \par
         if v:
-            title = r"\hyperref[%s]{\textbf{%s}}" % (vlabel(p, v), title)
-            dots = "".join(dot(status_of(v, m["id"])) for m in measures)
-            tail = r"\hfill %s\ \textcolor{muted}{\pageref{%s}}" % (dots, vlabel(p, v))
-            if v.get("standard"):
-                title += r" \stdtag"
+            dots = r"\,".join(dot(status_of(v, m["id"])) for m in measures)
+            title = r"\hyperref[%s]{\textbf{%s}}%s\hfill\mbox{%s\enspace\textcolor{muted}{\footnotesize p.\,\pageref{%s}}}" % (
+                vlabel(p, v), inline(node_title(p, n)), r"\ \stdtag" if v.get("standard") else "", dots, vlabel(p, v))
         else:
-            title = r"\textcolor{muted}{\textit{%s}}" % title
-            tail = ""
-        edge = r"{\footnotesize\textcolor{muted}{%s}}\newline" % edge_text(p, n) if n["parent"] else ""
-        lines.append(r"\treeline{%.1fem}{%s%s%s}" % (ind, edge, title, tail))
-    return "\\begin{treebox}\n" + "\n".join(lines) + "\n\\end{treebox}"
+            title = r"\textcolor{muted}{\textit{%s}}" % inline(node_title(p, n))
+        # the line to the children leaves just right of the entry's start: the title is indented past it
+        body = r"%s\hspace*{0.8em}\parbox[t]{\dimexpr\linewidth-0.8em\relax}{\raggedright %s}" % (edge, title) if n["parent"] else title
+        rows.append(r".%d {\begin{minipage}[t]{%s}\color{black}\raggedright\leavevmode %s\end{minipage}}." % (n["depth"] + 1, width, body))
+    return "\\begin{casetree}\n\\dirtree{%\n" + "\n".join(rows) + "\n}\n\\end{casetree}"
+
+def known_summary(p):
+    """One row per catalogued setting: per measure the status and the best upper bound against the lower bound."""
+    ms = p["measures"]
+    w = 0.53 / len(ms)          # with the column gaps (2\tabcolsep each) the row stays inside \linewidth
+    def cell(v, m):
+        st, lb, br = status_of(v, m["id"]), (lower_bounds(v, m["id"]) or [None])[0], best_result(v, m["id"])
+        if st == "impossible":
+            return r"%s\,{\scriptsize\sffamily impossible}" % dot(st)
+        ub = math(br[m["id"]]) if br else r"\textcolor{muted}{---}"
+        lo = math(lb["bound"]) if lb else r"\textcolor{muted}{---}"
+        return r"%s\,{\scriptsize\sffamily %s}\newline %s \textcolor{muted}{vs} %s" % (dot(st), STATUS_LABEL[st], ub, lo)
+    head = r"\textbf{Setting} & " + " & ".join(r"\textbf{%s}" % esc_plain(m["name"]) for m in ms) + r" & \textbf{p.}"
+    rows = []
+    for n in p["_order"]:
+        v = n["variant"]
+        if not v:
+            continue
+        rows.append(r"\hyperref[%s]{%s}%s & %s & \pageref{%s} \\ \addlinespace[2pt]" % (
+            vlabel(p, v), inline(v["title"]), r"\newline\stdtag" if v.get("standard") else "", " & ".join(cell(v, m) for m in ms), vlabel(p, v)))
+    spec = r"@{}>{\raggedright\arraybackslash}p{0.31\linewidth}" + "".join(r">{\raggedright\arraybackslash}p{%.3f\linewidth}" % w for _ in ms) + r">{\raggedleft\arraybackslash}p{0.04\linewidth}@{}"
+    return (r"{\small\setlength{\LTpre}{4pt}\setlength{\LTpost}{0pt}\begin{longtable}{%s}\toprule %s \\ \midrule\endhead" % (spec, head)
+            + "\n" + "\n".join(rows) + "\n" + r"\bottomrule\end{longtable}}")
 
 def known_table(p, v):
     rows = []
@@ -367,64 +403,62 @@ def known_table(p, v):
         mid = m["id"]
         lbs = lower_bounds(v, mid)
         lb = "; ".join(r"%s~%s" % (math(b["bound"]), r"\citep{%s}" % b["ref"] if b.get("ref") in REFS else "") for b in lbs) or r"\textcolor{muted}{none known}"
-        ir, br = intro_result(v, mid), best_result(v, mid)
-        it = r"%s~\citep{%s}" % (math(ir[mid]), ir["ref"]) if ir else r"\textcolor{muted}{---}"
+        br = best_result(v, mid)
         bt = r"%s~\citep{%s}" % (math(br[mid]), br["ref"]) if br else r"\textcolor{muted}{---}"
         st = status_of(v, mid)
         note = ((v.get("optimality") or {}).get(mid) or {}).get("note")
-        stcell = r"%s~%s" % (dot(st), STATUS_LABEL[st]) + (r"\newline{\footnotesize %s}" % inline(note) if note else "")
-        rows.append(r"\textbf{%s} & %s & %s & %s & %s \\" % (esc_plain(m["name"]), lb, it, bt, stcell))
-    return ("\\begin{knowntable}\n\\textbf{Measure} & \\textbf{Lower bound} & \\textbf{Introductory} & \\textbf{Current best} & \\textbf{Status} \\\\ \\midrule\n"
+        rows.append(r"\textbf{%s} & %s & %s & %s~%s \\" % (esc_plain(m["name"]), lb, bt, dot(st), STATUS_LABEL[st]))
+        if note:   # the note on the gap runs under the row, across the bound columns
+            rows.append(r"& \multicolumn{3}{>{\raggedright\arraybackslash}p{\dimexpr0.87\linewidth-2\tabcolsep\relax}@{}}{\textcolor{muted}{%s}} \\" % inline(note))
+        rows.append(r"\addlinespace[3pt]")
+    return ("\\begin{knowntable}\n\\textbf{Measure} & \\textbf{Lower bound} & \\textbf{Best upper bound} & \\textbf{Status} \\\\ \\midrule\n"
             + "\n".join(rows) + "\n\\end{knowntable}")
 
 def variant_section(p, v, n):
+    """One setting: where it sits in the tree, its one-line summary, the assumptions in small print, a bounds table,
+    then every result (lower bounds first) in one list, open questions and notes."""
     out = []
-    path = " \\textrightarrow\\ ".join(edge_text(p, x) for x in [y for y in path_of(n) if y["parent"]]) or "no assumptions"
-    tags = []
-    if v.get("standard"):
-        tags.append(r"\stdtag")
-    tags.append(r"\vstatus{%s}" % (v.get("status") or "draft"))
+    par = n["parent"]
+    while par and not par["variant"] and par["parent"]:
+        par = par["parent"]
+    tags = ([r"\stdtag"] if v.get("standard") else []) + [r"\vstatus{%s}" % (v.get("status") or "draft")]
     out.append(r"\subsection{%s}\label{%s}" % (inline(v["title"]), vlabel(p, v)))
-    out.append(r"\noindent{\raggedright\footnotesize\textcolor{muted}{%s}\par}\nopagebreak\noindent %s" % (path, " ".join(tags)))
-    out.append(r"\begin{summarybox}%s\end{summarybox}" % inline(v.get("summary", "")))
+    where = r"\textbf{Adds} %s" % edge_text(p, n) if n["parent"] else "the root: no assumptions"
+    if par and par["variant"]:
+        where += r" \textbf{to} \hyperref[%s]{%s} (p.\,\pageref{%s})" % (vlabel(p, par["variant"]), inline(par["variant"]["title"]), vlabel(p, par["variant"]))
+    out.append(r"\noindent{\raggedright\footnotesize\textcolor{muted}{%s}\hfill %s\par}\nopagebreak\smallskip" % (where, " ".join(tags)))
+    out.append(r"\noindent\textit{%s}\par" % inline(v.get("summary", "")))
     assumed = [a for a in p["_axes"] if p["_level"](a["id"], v["_full"][a["id"]]) > 0]
     free = [a for a in p["_axes"] if not p["_level"](a["id"], v["_full"][a["id"]])]
-    out.append(r"\begin{settingbox}\textbf{Assumed:} %s\par\smallskip\textbf{Not assumed:} %s\end{settingbox}" % (
-        "; ".join(r"%s: %s" % (esc_plain(a["name"]), inline(value(p, a["id"], v["_full"][a["id"]])["label"])) for a in assumed) or "nothing",
-        "; ".join(r"%s: %s" % (esc_plain(a["name"]), inline(value(p, a["id"], v["_full"][a["id"]])["label"])) for a in free) or "---"))
+    out.append(r"\noindent{\footnotesize\textcolor{muted}{\textbf{Assumed:} %s. \textbf{Not assumed:} %s.}\par}" % (
+        "; ".join(r"%s: %s" % (esc_plain(a["name"]).lower(), inline(value(p, a["id"], v["_full"][a["id"]])["label"])) for a in assumed) or "nothing",
+        "; ".join(r"%s: %s" % (esc_plain(a["name"]).lower(), inline(value(p, a["id"], v["_full"][a["id"]])["label"])) for a in free) or "---"))
     if v.get("statement"):
-        out.append(r"\paragraph{Statement for this variant.}" + block(v["statement"]))
-    out.append(r"\blockhead{What is known}" + "\n" + known_table(p, v))
-    lbs = v.get("lower_bounds", [])
-    if lbs:
-        items = []
-        for b in lbs:
-            meas = next((m["name"] for m in p["measures"] if m["id"] == b["measure"]), b["measure"])
-            s = r"\item[%s] %s" % (esc_plain(meas), math(b["bound"]))
-            if b.get("ref") in REFS:
-                s += r" \citep{%s}" % b["ref"]
-            if b.get("bottleneck"):
-                s += r". \emph{Bottleneck:} %s" % inline(b["bottleneck"])
-            if b.get("preconditions"):
-                s += r". \emph{Holds when:} " + "; ".join(inline(x) for x in b["preconditions"])
-            if b.get("note"):
-                s += r". " + inline(b["note"])
-            items.append(s)
-        out.append(r"\paragraph{Lower bounds.}" + "\n\\begin{lbdesc}\n" + "\n".join(items) + "\n\\end{lbdesc}")
-    rs = v.get("results", [])
-    if rs:
-        items = []
-        for r in rs:
-            bounds = ", ".join(r"%s %s" % (esc_plain(m["name"]).lower(), math(r[m["id"]])) for m in p["measures"] if r.get(m["id"]))
-            s = r"\item \citet{%s}~\roletag{%s}%s" % (r["ref"], r["role"], "")
-            if bounds:
-                s += r": " + bounds + "."
-            if r.get("assumes"):
-                s += r" \emph{Assumes:} " + "; ".join(inline(x) for x in r["assumes"]) + "."
-            if r.get("note"):
-                s += " " + inline(r["note"])
-            items.append(s)
-        out.append(r"\paragraph{Results, in order of publication.}" + "\n\\begin{resultlist}\n" + "\n".join(items) + "\n\\end{resultlist}")
+        out.append(r"\paragraph{Statement for this setting.}" + block(v["statement"]))
+    out.append(known_table(p, v))
+    items = []
+    for b in v.get("lower_bounds", []):
+        meas = next((m["name"] for m in p["measures"] if m["id"] == b["measure"]), b["measure"])
+        s = r"\item %s~\roletag{lb}: %s %s." % (r"\citet{%s}" % b["ref"] if b.get("ref") in REFS else "", esc_plain(meas).lower(), math(b["bound"]))
+        if b.get("bottleneck"):
+            s += r" \emph{Bottleneck:} %s." % inline(b["bottleneck"])
+        if b.get("preconditions"):
+            s += r" \emph{Holds when:} " + "; ".join(inline(x) for x in b["preconditions"]) + "."
+        if b.get("note"):
+            s += " " + inline(b["note"])
+        items.append(s)
+    for r in v.get("results", []):
+        bounds = ", ".join(r"%s %s" % (esc_plain(m["name"]).lower(), math(r[m["id"]])) for m in p["measures"] if r.get(m["id"]))
+        s = r"\item \citet{%s}~\roletag{%s}" % (r["ref"], r["role"])
+        if bounds:
+            s += r": " + bounds + "."
+        if r.get("assumes"):
+            s += r" \emph{Assumes:} " + "; ".join(inline(x) for x in r["assumes"]) + "."
+        if r.get("note"):
+            s += " " + inline(r["note"])
+        items.append(s)
+    if items:
+        out.append(r"\paragraph{Results.}" + "\n\\begin{resultlist}\n" + "\n".join(items) + "\n\\end{resultlist}")
     if v.get("open"):
         out.append(r"\paragraph{Open questions.}" + "\n\\begin{openlist}\n" + "\n".join(r"\item " + inline(q) for q in v["open"]) + "\n\\end{openlist}")
     if v.get("notes"):
@@ -438,10 +472,16 @@ def path_of(n):
         n = n["parent"]
     return list(reversed(out))
 
-TIKZ_COL = {"accent": "accent", "tight": "tight", "gap": "gap", "near": "near", "muted": "muted", "fg": "impossible", "disputed": "disputed", "l1": "lone", "l2": "ltwo", "l3": "lthree", "l4": "lfour", "soft": "soft", "line": "figline"}
+# ---------------------------------------------------------------- figures
+# The PDF does not copy the animated web figure. It draws two panels in the idiom of a
+# TikZ figure in a paper: (a) the first frame, (b) the last frame with the motion traced
+# (grey start positions and arrowed paths in the plane, bent arrows along traversed edges
+# on graphs). Black ink; a small print palette only where a colour carries meaning.
+
+FIGCOL = {"accent": "fink", "tight": "fgreen", "gap": "fred", "near": "fochre", "muted": "fgrey", "fg": "black",
+          "disputed": "fviolet", "l1": "fone", "l2": "ftwo", "l3": "fthree", "l4": "ffour", "soft": "fsoft", "line": "fline"}
 def tcol(c, default="accent"):
-    c = c or default
-    return TIKZ_COL.get(c, default if not re.match(r"^[a-z]+$", c) else c)
+    return "none" if c == "none" else FIGCOL.get(c or default, FIGCOL[default])
 
 def fig_point(fig, e):
     if e.get("at") and fig.get("graph") and e["at"] in fig["graph"]["nodes"]:
@@ -451,84 +491,173 @@ def fig_point(fig, e):
         return [o[0] + u * (i + j / 2), o[1] + u * j * 3 ** 0.5 / 2]
     return e.get("p", [0, 0])
 
-def tikz_shape(fig, sh):
+def fig_label(s):
+    """An entity label: a single symbol is set in math italic, anything else as text."""
+    s = str(s)
+    return "$%s$" % s if re.fullmatch(r"[A-Za-z0-9]{1,3}", s) else esc_plain(s)
+
+def lw(w, base=0.6):
+    return "line width=%.2fpt" % max(0.3, 0.45 * (w if w is not None else base) / 0.6)
+
+def tikz_shape(fig, sh, lattice=False):
     P = lambda q: "(%.2f,%.2f)" % tuple(q if isinstance(q, list) else fig_point(fig, q))
-    opt = ["draw=%s" % tcol(sh.get("c"), "line"), "line width=%.2fpt" % (0.5 * sh.get("w", 0.6) / 0.6)]
-    if sh.get("dash"): opt.append("dashed")
+    c = tcol(sh.get("c"), "line")
+    if sh["t"] == "line" and sh.get("c", "line") in ("line", "soft") and (lattice or sh.get("w", 0.6) <= 0.35):
+        c = "flattice"                     # grid and lattice lines stay in the background
+    opt = ["draw=%s" % c, lw(sh.get("w"))]
+    if sh.get("dash"): opt.append("dash pattern=on 1.6pt off 1.2pt")
     if sh.get("fill"): opt.append("fill=%s" % tcol(sh["fill"]))
-    if sh.get("op"): opt.append("opacity=%s" % sh["op"])
+    if sh.get("op"): opt.append("fill opacity=%s" % sh["op"])
     t = sh["t"]
     if t == "circle": return r"\draw[%s] %s circle (%.2f);" % (",".join(opt), P(sh["p"]), sh["r"])
-    if t in ("line", "path"): return r"\draw[%s%s] %s;" % (",".join(opt), ",->" if sh.get("arrow") else "", " -- ".join(P(q) for q in sh["p"]))
-    if t == "poly": return r"\draw[%s] %s -- cycle;" % (",".join(opt), " -- ".join(P(q) for q in sh["p"]))
-    if t == "node": return r"\fill[%s] %s circle (%.2f);" % (tcol(sh.get("fill"), "fg"), P(fig["graph"]["nodes"][sh["n"]]), sh.get("r", 2.2))
-    if t == "text": return r"\node[text=%s,font=\scriptsize\sffamily] at %s {%s};" % (tcol(sh.get("c"), "muted"), P(sh["p"]), inline(sh["s"]))
-    if t == "star": return r"\node[star,star points=5,star point ratio=2.2,fill=%s,inner sep=0pt,minimum size=%.2fpt] at %s {};" % (tcol(sh.get("c"), "near"), 2 * sh.get("r", 2.4) * UNIT_PT, P(sh["p"]))
-    if t == "rect": return r"\draw[%s] %s rectangle ++(%.2f,%.2f);" % (",".join(opt), "(%.2f,%.2f)" % (fig_point(fig, {"p": sh["p"]})[0] - sh.get("wd", 3) / 2, fig_point(fig, {"p": sh["p"]})[1] - sh.get("ht", 3) / 2), sh.get("wd", 3), sh.get("ht", 3))
+    if t in ("line", "path"):
+        return r"\draw[%s%s,line cap=round,line join=round] %s;" % (",".join(opt), ",-{Latex[length=3.2pt,width=2.6pt]}" if sh.get("arrow") else "", " -- ".join(P(q) for q in sh["p"]))
+    if t == "poly": return r"\draw[%s,line join=round] %s -- cycle;" % (",".join(opt), " -- ".join(P(q) for q in sh["p"]))
+    if t == "node": return r"\filldraw[fill=%s,draw=black,line width=0.4pt] %s circle (%.2f);" % (tcol(sh.get("fill"), "fg"), P(fig["graph"]["nodes"][sh["n"]]), max(sh.get("r", 2.2), NODE_R + 0.4))
+    if t == "text": return r"\node[text=%s,font=\fontsize{6.5}{7}\selectfont] at %s {%s};" % (tcol(sh.get("c"), "fg") if sh.get("c") not in (None, "muted") else "fgrey", P(sh["p"]), fig_text(sh["s"]))
+    if t == "star": return r"\node[star,star points=5,star point ratio=2.3,fill=%s,draw=black,line width=0.3pt,inner sep=0pt,minimum size=%.2fpt] at %s {};" % (tcol(sh.get("c"), "near"), 2.2 * sh.get("r", 2.4) * UNIT_PT, P(sh["p"]))
+    if t == "rect":
+        x, y = fig_point(fig, {"p": sh["p"]})
+        return r"\draw[%s] (%.2f,%.2f) rectangle ++(%.2f,%.2f);" % (",".join(opt), x - sh.get("wd", 3) / 2, y - sh.get("ht", 3) / 2, sh.get("wd", 3), sh.get("ht", 3))
     return ""
 
+def fig_text(s):
+    s = str(s)
+    if "$" in s: return inline(s)
+    if re.fullmatch(r"[A-Za-z]|[A-Za-z]?\d+|[A-Za-z]_?\d", s): return "$%s$" % s.replace("_", "")
+    return inline(s)
+
 def frame_points(fig, f):
-    """Positions of a frame's entities; entities sharing a graph node or lattice point sit on a small ring around it."""
+    """Positions of a frame's entities; entities sharing a graph node or lattice point sit on a small ring around it.
+    Returns {id: (x, y, angle)} where angle is the direction in which the label goes."""
+    import math
     by = {}
     for e in f.get("ents", []):
         if (e.get("at") or e.get("lat")) and not e.get("p"):
             by.setdefault(e.get("at") or tuple(e["lat"]), []).append(e["id"])
     pts = {}
     for e in f.get("ents", []):
-        x, y = fig_point(fig, e)
+        x, y = fig_point(fig, e); a = math.pi / 4
         grp = by.get(e.get("at") or (tuple(e["lat"]) if e.get("lat") else None), [])
         if len(grp) > 1:
-            import math
-            j = grp.index(e["id"]); a = math.pi / 2 + 2 * math.pi * j / len(grp); rad = fig.get("cluster", 3.2)
+            j = grp.index(e["id"]); a = math.pi / 2 + 2 * math.pi * j / len(grp)
+            rad = max(NODE_R + AGENT_R - 0.7, len(grp) * (2 * AGENT_R + 0.5) / (2 * math.pi)) if fig.get("graph") else fig.get("cluster", 3.2)
             x, y = x + rad * math.cos(a), y + rad * math.sin(a)
-        pts[e["id"]] = (x, y)
+        pts[e["id"]] = (x, y, a)
     return pts
 
-def tikz_entity(fig, e, xy=None):
-    x, y = xy or fig_point(fig, e); k = e.get("k", "robot"); c = tcol(e.get("c"))
+MOVERS = ("robot", "agent")
+
+def tikz_entity(fig, e, xy, ghost=False):
+    import math
+    x, y, a = xy; k = e.get("k", "robot"); c = tcol(e.get("c"))
     r = e.get("r", 2.6 if k == "particle" else 3.2 if k == "tile" else 1.9)
+    on_node = bool(fig.get("graph") and e.get("at")) and k in MOVERS
+    if on_node: r = AGENT_R
     out = []
-    if e.get("q") or e.get("qlat"):
-        qx, qy = fig_point(fig, {"lat": e["qlat"]}) if e.get("qlat") else e["q"]; out.append(r"\draw[%s,line width=%.2f,line cap=round] (%.2f,%.2f) -- (%.2f,%.2f);" % (c, 2 * r * UNIT_PT, x, y, qx, qy))
-    if k == "tile": out.append(r"\node[regular polygon,regular polygon sides=6,shape border rotate=30,fill=%s,draw=white,inner sep=0pt,minimum size=%.2fpt] at (%.2f,%.2f) {};" % (c, 2 * r * UNIT_PT, x, y))
-    elif k == "agent":
-        out.append(r"\fill[%s] (%.2f,%.2f) circle (%.2f); \draw[%s,line width=0.3pt] (%.2f,%.2f) circle (%.2f);" % (c, x, y, r, c, x, y, r + 0.7))
-        if e.get("l"): out.append(r"\node[text=white,font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries] at (%.2f,%.2f) {%s};" % (x, y, esc_plain(e["l"])))
-    elif k == "crashed": out.append(r"\draw[%s,fill=white] (%.2f,%.2f) circle (%.2f); \draw[%s] (%.2f,%.2f) -- ++(%.2f,%.2f) (%.2f,%.2f) -- ++(%.2f,%.2f);" % (c, x, y, r, c, x - .6 * r, y - .6 * r, 1.2 * r, 1.2 * r, x - .6 * r, y + .6 * r, 1.2 * r, -1.2 * r))
-    elif k == "target": out.append(r"\node[star,star points=5,star point ratio=2.2,fill=%s,inner sep=0pt,minimum size=%.2fpt] at (%.2f,%.2f) {};" % (c, 2.6 * r * UNIT_PT, x, y))
-    elif k == "exit": out.append(r"\fill[%s] (%.2f,%.2f) rectangle ++(%.2f,%.2f);" % (c, x - r, y - r, 2 * r, 2 * r))
+    if ghost:
+        return r"\draw[fghost,line width=0.4pt,dash pattern=on 1pt off 0.8pt] (%.2f,%.2f) circle (%.2f);" % (x, y, r)
+    if k == "particle":
+        # the amoebot convention: a particle is a dot on a lattice node; an expanded one is two dots joined by a bar
+        rr = min(r, fig.get("unit", 8) * 0.3)
+        if e.get("q") or e.get("qlat"):
+            qx, qy = fig_point(fig, {"lat": e["qlat"]}) if e.get("qlat") else e["q"]
+            out.append(r"\draw[%s,line width=%.2fpt,line cap=round] (%.2f,%.2f) -- (%.2f,%.2f);" % (c, 0.9 * rr * UNIT_PT, x, y, qx, qy))
+            out.append(r"\filldraw[fill=%s,draw=black,line width=0.35pt] (%.2f,%.2f) circle (%.2f);" % (c, qx, qy, rr))
+        out.append(r"\filldraw[fill=%s,draw=black,line width=0.35pt] (%.2f,%.2f) circle (%.2f);" % (c, x, y, rr))
+    elif k == "tile":
+        out.append(r"\node[regular polygon,regular polygon sides=6,shape border rotate=30,fill=%s,draw=black,line width=0.3pt,inner sep=0pt,minimum size=%.2fpt] at (%.2f,%.2f) {};" % (c if e.get("c") not in (None, "muted") else "fsoft!70!fgrey", 1.9 * r * UNIT_PT, x, y))
+    elif k == "crashed":
+        out.append(r"\draw[%s,fill=white,line width=0.5pt] (%.2f,%.2f) circle (%.2f); \draw[%s,line width=0.5pt] (%.2f,%.2f) -- ++(%.2f,%.2f) (%.2f,%.2f) -- ++(%.2f,%.2f);" % (c, x, y, r, c, x - .6 * r, y - .6 * r, 1.2 * r, 1.2 * r, x - .6 * r, y + .6 * r, 1.2 * r, -1.2 * r))
+    elif k == "target":
+        out.append(r"\node[star,star points=5,star point ratio=2.3,fill=%s,draw=black,line width=0.3pt,inner sep=0pt,minimum size=%.2fpt] at (%.2f,%.2f) {};" % (c, 2.8 * r * UNIT_PT, x, y))
+    elif k == "exit":
+        out.append(r"\filldraw[fill=%s,draw=black,line width=0.35pt] (%.2f,%.2f) rectangle ++(%.2f,%.2f);" % (c, x - r, y - r, 2 * r, 2 * r))
     else:
-        out.append(r"\fill[%s] (%.2f,%.2f) circle (%.2f);" % (c, x, y, r))
-        if e.get("l"): out.append(r"\node[text=white,font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries] at (%.2f,%.2f) {%s};" % (x, y, esc_plain(e["l"])))
+        out.append(r"\filldraw[fill=%s,draw=black,line width=0.35pt] (%.2f,%.2f) circle (%.2f);" % (c, x, y, r))
+    if e.get("l") and on_node:
+        out.append(r"\node[text=%s,font=\fontsize{5.5}{6}\selectfont,inner sep=0pt] at (%.2f,%.2f) {%s};" % ("black" if e.get("c") in ("l3", "near", "soft") else "white", x, y, fig_label(e["l"])))
+    elif e.get("l"):
+        d = r + 2.0
+        out.append(r"\node[font=\fontsize{6.5}{7}\selectfont,inner sep=0pt] at (%.2f,%.2f) {%s};" % (x + d * math.cos(a), y + d * math.sin(a), fig_label(e["l"])))
     return "\n".join(out)
 
+def traces(fig, frames, model):
+    """Arrowed paths of every robot that moves, drawn on the last panel: the polyline through its positions."""
+    if fig.get("graph"):
+        return []                          # on graphs the final marks (trees, settled nodes) say more than arrows
+    paths = {}
+    for f in frames:
+        pts = frame_points(fig, f)
+        for e in f.get("ents", []):
+            if e.get("k", "robot") not in MOVERS: continue
+            p = paths.setdefault(e["id"], [])
+            here = tuple(round(v, 2) for v in pts[e["id"]][:2])
+            if not p or p[-1] != here: p.append(here)
+    out = []
+    for p in paths.values():
+        if len(p) < 2: continue
+        out.append(r"\draw[ftrace,line width=0.5pt,dash pattern=on 2pt off 1.2pt,line join=round,-{Latex[length=3.2pt,width=2.6pt]},shorten >=2.2] %s;" % " -- ".join("(%.2f,%.2f)" % q for q in p))
+    return out
+
 UNIT_PT = 1.0
-def tikz_frame(fig, f, width_cm):
+NODE_R = 3.0
+AGENT_R = 2.2
+def tikz_frame(fig, f, width_cm, frames=None, model=""):
     global UNIT_PT
     W, H = fig.get("view", [100, 60])
     sc = width_cm / W
-    UNIT_PT = sc * 28.45  # 1 user unit in pt, for line widths of expanded particles
-    lines = [r"\begin{tikzpicture}[x=%.4fcm,y=%.4fcm,every node/.style={inner sep=1pt},>=stealth]" % (sc, sc),
-             r"\path[use as bounding box] (-2,-2) rectangle (%.2f,%.2f);" % (W + 2, H + 2)]
-    lines += [tikz_shape(fig, sh) for sh in fig.get("static", [])]
+    UNIT_PT = sc * 28.45  # 1 user unit in pt
+    lattice = bool(fig.get("unit")) and not fig.get("graph")
+    lines = [r"\begin{tikzpicture}[x=%.4fcm,y=%.4fcm,every node/.style={inner sep=1pt},>=Latex]" % (sc, sc),
+             r"\path[use as bounding box] (-3,-3) rectangle (%.2f,%.2f);" % (W + 3, H + 3)]
+    lines += [tikz_shape(fig, sh, lattice) for sh in fig.get("static", [])]
     g = fig.get("graph")
     if g:
         for a, b in g.get("edges", []):
-            lines.append(r"\draw[figline,line width=0.5pt%s] (%.2f,%.2f) -- (%.2f,%.2f);" % (",-{Stealth[length=3pt]},shorten >=3pt" if g.get("directed") else "", *g["nodes"][a], *g["nodes"][b]))
+            lines.append(r"\draw[black!75,line width=0.5pt%s] (%.2f,%.2f) -- (%.2f,%.2f);" % (",-{Latex[length=3.6pt,width=2.8pt]},shorten >=%.2f" % (NODE_R + 0.3) if g.get("directed") else "", *g["nodes"][a], *g["nodes"][b]))
+    lines += [tikz_shape(fig, sh, lattice) for sh in f.get("marks", []) if sh["t"] != "node"]
+    if g:
+        marked = {sh["n"] for sh in f.get("marks", []) if sh["t"] == "node"}
         for k, (x, y) in g["nodes"].items():
-            lines.append(r"\draw[muted,fill=white,line width=0.4pt] (%.2f,%.2f) circle (%.2f);" % (x, y, g.get("r", 1.3)))
-    lines += [tikz_shape(fig, sh) for sh in f.get("marks", [])]
+            if k not in marked:
+                lines.append(r"\filldraw[fill=white,draw=black,line width=0.45pt] (%.2f,%.2f) circle (%.2f);" % (x, y, NODE_R))
+        lines += [tikz_shape(fig, sh, lattice) for sh in f.get("marks", []) if sh["t"] == "node"]
     pts = frame_points(fig, f)
-    lines += [tikz_entity(fig, e, pts.get(e["id"])) for e in f.get("ents", [])]
+    if frames:
+        trail = traces(fig, frames, model)
+        if trail and not g:
+            p0 = frame_points(fig, frames[0]); now = {e["id"] for e in f.get("ents", [])}
+            for e in frames[0].get("ents", []):
+                if e.get("k", "robot") in MOVERS and e["id"] in now and (round(p0[e["id"]][0], 2), round(p0[e["id"]][1], 2)) != (round(pts[e["id"]][0], 2), round(pts[e["id"]][1], 2)):
+                    lines.append(tikz_entity(fig, e, p0[e["id"]], ghost=True))
+        lines += trail
+    lines += [tikz_entity(fig, e, pts[e["id"]]) for e in f.get("ents", [])]
     lines.append(r"\end{tikzpicture}")
     return "\n".join(l for l in lines if l)
+
+def wants_traces(p):
+    fig = p["figure"]; F = fig["frames"]
+    if len(F) < 2 or (fig.get("unit") and not fig.get("graph")):
+        return False                       # lattice: the before/after pair says it
+    if any(sh["t"] == "path" for sh in F[-1].get("marks", [])) and not fig.get("graph"):
+        return False                       # the figure already draws the trajectories
+    return p["id"] not in FIG_NO_TRACES
+
+FIG_NO_TRACES = {"pattern-sequences", "patrolling", "hybrid-shape-formation"}   # periodic or back-and-forth runs: the arrows would only clutter
 
 def figure_tikz(p):
     fig = p["figure"]; F = fig.get("frames", [])
     if not F: return ""
     first, last = F[0], F[-1]
-    cell = lambda f: r"\begin{minipage}[b]{0.48\linewidth}\centering %s\par\smallskip{\sffamily\footnotesize\color{muted}%s}\end{minipage}" % (tikz_frame(fig, f, 6.6), inline(f.get("label", "")))
-    body = cell(first) + (r"\hfill" + cell(last) if len(F) > 1 else "")
+    tr = wants_traces(p)
+    def cell(tag, f, frames=None):
+        lab = inline(f.get("label", ""))
+        if frames and traces(fig, frames, p["model"]):
+            lab += (" " if lab else "") + r"\textcolor{fgrey}{(arrows: moves%s)}" % ("" if fig.get("graph") else "; dashed circles: starting positions")
+        return (r"\begin{minipage}[t]{0.485\linewidth}\centering %s\par\smallskip"
+                r"\begin{minipage}[t]{0.94\linewidth}\sffamily\footnotesize (%s)~%s\end{minipage}\end{minipage}") % (tikz_frame(fig, f, 7.2, frames, p["model"]), tag, lab)
+    body = cell("a", first) + (r"\hfill" + cell("b", last, F if tr else None) if len(F) > 1 else "")
     return r"\begin{figure}[htbp]\centering%s" % "\n" + body + "\n" + r"\caption{%s}\end{figure}" % inline(fig.get("caption", p["name"]))
 
 def problem_section(p):
@@ -572,10 +701,11 @@ def problem_section(p):
         out.append(r"\subsection*{Relations to other problems}" + "\n\\begin{itemize}\n" + "\n".join(r"\item " + x for x in rel) + "\n\\end{itemize}")
     local = p.get("axes", [])
     if local:
-        out.append(r"\subsection*{Axes specific to this problem}" + "\n" + axes_table(local, p["id"]))
-    out.append(r"\subsection*{Assumption tree}" +
-               r"\noindent{\small The root assumes nothing. Each line shows, in grey, what its edge adds (\textbf{+}) or leaves unassumed, then the setting. Bold entries are catalogued variants, with their status per measure (%s) and page; grey italic entries are branch points, named after the axis on which their branches differ. Axis order: %s.}" % (
+        out.append(r"\subsection*{Assumptions specific to this problem}" + "\n" + axes_table(local, p["id"]))
+    out.append(r"\Needspace{10\baselineskip}\subsection*{Case tree}" +
+               r"\noindent{\small The root assumes nothing; going down, each edge adds the assumptions written in grey (\textbf{+}) or leaves an axis unassumed. Bold entries are catalogued settings with their status per measure (%s) and page; italic entries are branch points, named after the axis on which their branches differ. Axis order: %s.}" % (
                    ", ".join(esc_plain(m["name"]) for m in p["measures"]), " \\textrightarrow\\ ".join(esc_plain(a["name"]) for a in p["_axes"])) + "\n\n" + tree_outline(p))
+    out.append(r"\subsection*{What is known}" + r"\noindent{\small The best upper bound against the best lower bound in each catalogued setting, in tree order. The settings follow in detail.}" + "\n\n" + known_summary(p))
     for n in p["_order"]:
         if n["variant"]:
             out.append(variant_section(p, n["variant"], n))
@@ -930,7 +1060,13 @@ PREAMBLE = r"""\documentclass[11pt,a4paper,openany]{book}
 \setlist{itemsep=2pt,topsep=4pt}
 \usepackage[skins,breakable]{tcolorbox}
 \usepackage{tikz}\usetikzlibrary{shapes.geometric,arrows.meta}
-\definecolor{lone}{HTML}{E4572E}\definecolor{ltwo}{HTML}{17BEBB}\definecolor{lthree}{HTML}{FFC914}\definecolor{lfour}{HTML}{76B041}\definecolor{figline}{HTML}{C9C4BA}
+\usepackage{needspace}\usepackage{dirtree}\DTsetlength{0.3em}{1.15em}{0.35em}{0.5pt}{0pt}\renewcommand*\DTstyle{\rmfamily}\renewcommand*\DTstylecomment{\rmfamily}\setlength{\DTbaselineskip}{14pt}
+\newenvironment{casetree}{\par\smallskip\begingroup\color{fline}\small}{\endgroup\par\medskip}
+% figure palette: black ink, a navy for plain entities, muted print colours where a colour carries meaning
+\definecolor{fink}{HTML}{23407A}\definecolor{fgreen}{HTML}{2E7D46}\definecolor{fred}{HTML}{B03A2E}\definecolor{fochre}{HTML}{D29A22}
+\definecolor{fgrey}{HTML}{8C8C8C}\definecolor{fviolet}{HTML}{7A4FA3}\definecolor{fsoft}{HTML}{EDEDED}\definecolor{fline}{HTML}{9A9A9A}
+\definecolor{flattice}{HTML}{D2D2D2}\definecolor{fghost}{HTML}{8C8C8C}\definecolor{ftrace}{HTML}{6E6E6E}
+\definecolor{fone}{HTML}{C0503A}\definecolor{ftwo}{HTML}{2C8A99}\definecolor{fthree}{HTML}{E0B33A}\definecolor{ffour}{HTML}{6A9A3A}
 \usepackage{caption}\captionsetup[figure]{font={small,sf},labelfont={bf,color=accent}}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
@@ -978,7 +1114,7 @@ PDFMETA
 \newtcolorbox{originbox}{enhanced,breakable,colback=accentsoft,colframe=accentsoft,boxrule=0pt,arc=2pt,left=8pt,right=8pt,top=4pt,bottom=4pt}
 \newtcolorbox{citebox}{enhanced,colback=soft,colframe=accent,boxrule=0pt,leftrule=3pt,arc=0pt,left=10pt,right=10pt,top=8pt,bottom=8pt}
 \newcommand{\treeline}[2]{\par\noindent\hspace*{#1}\parbox[t]{\dimexpr\linewidth-#1\relax}{\raggedright #2}\par\vspace{2pt}}
-\newenvironment{knowntable}{\par\smallskip\noindent\footnotesize\tabularx{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.12\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.2\linewidth}@{}}\toprule}{\bottomrule\endtabularx\par}
+\newenvironment{knowntable}{\par\smallskip\noindent\footnotesize\tabularx{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.12\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.17\linewidth}@{}}\toprule}{\bottomrule\endtabularx\par}
 \newenvironment{lbdesc}{\begin{description}[style=nextline,leftmargin=1.2em,font=\normalfont\sffamily\small\bfseries]\small}{\end{description}}
 \newenvironment{resultlist}{\begin{itemize}[leftmargin=1.2em]\small}{\end{itemize}}
 \newenvironment{openlist}{\begin{enumerate}[leftmargin=1.6em,label=\textcolor{accent}{\sffamily\small Q\arabic*.}]}{\end{enumerate}}

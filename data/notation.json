@@ -374,12 +374,13 @@
       },
       {
         "symbol": "k",
-        "meaning": "number of groups ($k$-grouping, partitioning)",
+        "meaning": "number of groups ($k$-grouping; in partitioning the number of fixed points, each receiving $n/k$ robots)",
         "where": [
           "k-grouping",
           "partitioning-plane",
           "separation"
-        ]
+        ],
+        "papers_write": "[Bhagat2021kCircle] write $k$ for the group size of partitioning, which is $n/k$ here"
       },
       {
         "symbol": "L",
@@ -446,6 +447,13 @@
       {
         "symbol": "m",
         "meaning": "number of rays sharing an endpoint"
+      },
+      {
+        "symbol": "e",
+        "meaning": "number of exits on the boundary",
+        "where": [
+          "chauffeuring"
+        ]
       },
       {
         "symbol": "d",

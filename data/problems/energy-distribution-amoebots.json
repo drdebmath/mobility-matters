@@ -8,17 +8,17 @@
     "note": "arXiv 2020; ICDCN 2021."
   },
   "summary": "Only some particles reach the energy source; particles must share energy so that every action is paid for.",
-  "statement": "Each action costs energy, and only $s$ particles, the sources, can harvest energy from outside. Particles must distribute energy locally so that every particle can act, or so that a given energy-agnostic algorithm runs correctly. **Time** is in rounds.",
+  "statement": "Each action costs energy, and only $s$ particles, the **sources**, can harvest energy from outside. Particles must distribute energy locally so that every particle can act, or so that a given energy-agnostic algorithm runs correctly. **Time** is in rounds.",
   "primer": {
-    "intro": "Think of a colony of bacteria where only cells at the edge of the colony get food and must pass nutrients inward so that every cell can keep working. Here $n$ particles form a connected group on the triangular grid; only $s$ of them, the *sources*, can take energy from outside. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. Every action (a move, or any step of some other algorithm) costs energy; each particle has a battery of fixed capacity and can pass a limited amount of energy to a neighbour per activation. The goal is that no particle stays *stressed* (short of energy for its next action) for long, and that the system as a whole keeps acting; we count rounds (stretches in which every particle acts at least once). Particles have constant memory and no compass.",
+    "intro": "Think of a colony of bacteria where only cells at the edge of the colony get food and must pass nutrients inward so that every cell can keep working. The floor is the **triangular lattice**: the endless graph whose **nodes** are the corners of a tiling of the plane by equal triangles; each node is joined by an edge to six others, its **neighbours**. A **particle** occupies one node and moves in two actions: an **expansion** into an empty neighbouring node, after which it occupies both, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. The **system** of $n$ particles is connected; only $s$ of them, the **sources**, can take energy from outside. Every action (a move, or any step of some other algorithm) costs energy; each particle has a **battery** of fixed capacity and can pass a limited amount of energy to a neighbour each time it is activated (an **activation**). The goal is that no particle stays **stressed** (short of energy for its next action) for long, and that the system as a whole keeps acting; we count **rounds** (intervals of time in which every particle is activated at least once). Particles have constant memory and no compass.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Share energy down a forest, and hold back when someone is starving",
+        "title": "Share energy down a forest, and hold back when a particle is stressed",
         "variant": "unfair",
         "ref": "Daymude2021Energy",
-        "idea": "1. **Set-up.** The sources are roots. Every other particle picks a neighbour that is already in a tree as its parent, so the group becomes a forest of trees hanging from the sources.\\n2. **Signal.** A stressed particle raises a 'stress' flag. A particle with a stressed child raises its flag too, so the signal climbs to the root.\\n3. **Inhibit.** A root that hears of stress raises an 'inhibit' flag, which spreads down its whole tree: inhibited particles stop spending energy on their own actions.\\n4. **Share.** Roots harvest energy; any particle with enough energy passes some to a child whose battery is not full.\\n5. **Use.** A particle that is not inhibited and has enough energy performs its next action. Flags are cleared when the stress is gone.",
-        "analysis": "Energy flows down the trees like water through pipes, and the inhibit signal stops particles near the source from using everything before it reaches the far ends. [Daymude2021Energy] prove that no particle stays stressed for more than $O(n)$ rounds; without the inhibit step, their simulations show particles starving forever. With a constant number of sources this is optimal, by the next idea. [Weber2023Energy] show how to run any algorithm designed without energy limits on top of this: one that needs $T$ rounds then needs $O(n^2\\,T)$ rounds.",
+        "idea": "1. **Set-up.** The sources are **roots**. Every other particle picks a neighbour that is already in a tree as its *parent*, so the system becomes a forest of trees hanging from the sources.\n2. **Signal.** A stressed particle raises a 'stress' flag. A particle with a stressed child raises its flag too, so the signal climbs to the root.\n3. **Inhibit.** A root that hears of stress raises an 'inhibit' flag, which spreads down its whole tree: **inhibited** particles stop spending energy on their own actions.\n4. **Share.** Roots harvest energy; any particle with enough energy passes some to a child whose battery is not full.\n5. **Use.** A particle that is not inhibited and has enough energy performs its next action. Flags are cleared when the stress is gone.",
+        "analysis": "Energy flows down the trees like water through pipes, and the inhibit signal stops particles near the source from using everything before it reaches the far ends. [Daymude2021Energy] prove that no particle stays stressed for more than $O(n)$ rounds; without the inhibit step, their simulations show particles staying stressed forever. With a constant number of sources this is optimal, by the next idea. [Weber2023Energy] show how to run any algorithm designed without energy limits on top of this: one that needs $T$ rounds then needs $O(n^2\\,T)$ rounds.",
         "why_it_matters": "It was the first model of energy as a limited resource in programmable matter, and the stress/inhibit signals are modelled on how bacterial biofilms share nutrients."
       },
       {
@@ -26,12 +26,95 @@
         "title": "Energy enters only through the sources",
         "variant": "unfair",
         "ref": "Daymude2021Energy",
-        "idea": "Start with every battery empty and every particle needing a full battery. Then the group needs $n$ full batteries' worth of energy in total. Energy enters only at the $s$ sources, and each source harvests at most a fixed amount per activation. An unkind scheduler activates each source only once per round.",
+        "idea": "Start with every battery empty and every particle needing a full battery. Then the system needs $n$ full batteries' worth of energy in total. Energy enters only at the $s$ sources, and each source harvests at most a fixed amount per activation. An unkind scheduler activates each source only once per round.",
         "analysis": "So at most a constant times $s$ units of energy enter per round, and filling $n$ batteries takes at least a constant times $n/s$ rounds: $\\Omega(n/s)$ [Daymude2021Energy] (Theorem 9). With a constant number of sources this matches the $O(n)$ algorithm; with many sources there is a gap of a factor $s$ between $n/s$ and $n$ that has not been closed.",
         "why_it_matters": "It is a supply argument rather than a distance argument: the bottleneck is how fast energy can enter, not how far it must travel."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous computing unit of constant size that occupies one node of the triangular lattice, or two neighbouring nodes while it moves",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph $G_\\Delta$ whose nodes are the corners of a tiling of the plane by equilateral triangles; every node has six neighbours",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; it is empty or occupied by a particle (an expanded particle occupies two)",
+      "avoid": [
+        "spot",
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "two nodes are neighbours when an edge of the triangular lattice joins them; two particles are neighbours when they occupy neighbouring nodes",
+      "avoid": [
+        "adjacent",
+        "touching"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the action in which a particle that occupies one node extends into an empty neighbouring node and then occupies both"
+    },
+    {
+      "term": "contraction",
+      "definition": "the action in which a particle that occupies two nodes withdraws into one of them"
+    },
+    {
+      "term": "system",
+      "definition": "the set of all $n$ particles",
+      "avoid": [
+        "group",
+        "swarm"
+      ]
+    },
+    {
+      "term": "source",
+      "definition": "one of the $s$ particles that can harvest energy from outside, at most a fixed amount per activation"
+    },
+    {
+      "term": "battery",
+      "definition": "the energy a particle stores, between 0 and a fixed capacity; every action spends energy from it"
+    },
+    {
+      "term": "activation",
+      "definition": "one action of a particle chosen by the scheduler: it looks at its neighbourhood, updates its state and performs at most one expansion or contraction"
+    },
+    {
+      "term": "stressed",
+      "definition": "a particle is stressed when its battery holds less energy than its next action costs",
+      "avoid": [
+        "starving"
+      ]
+    },
+    {
+      "term": "inhibited",
+      "definition": "a particle is inhibited while its root's inhibit signal is set; it then spends no energy on its own actions and only passes energy on"
+    },
+    {
+      "term": "root",
+      "definition": "a source at the top of a tree of particles in which every other particle points to a neighbour, its parent; energy flows from parents to children"
+    },
+    {
+      "term": "round",
+      "definition": "an interval of time in which every particle is activated at least once (an asynchronous round); a bound holds for every division of the execution into consecutive rounds",
+      "avoid": [
+        "epoch"
+      ]
+    }
+  ],
   "history": "Energy distribution was inspired by biofilms [Daymude2021Energy]; the later question was a **general transformation** of energy-agnostic algorithms and its overhead under unfair adversaries [Weber2023Energy].",
   "measures": [
     {

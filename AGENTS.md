@@ -242,8 +242,10 @@ then one chapter per model: description, the `story`, the model's symbols, every
 axis with its `origin` and formal definitions, the landscape); Part *Perspectives* (one chapter per overview, in
 the order of `index.json`, except `consequential-open-problems`); one part per
 model with one chapter per family and one section per problem (statement,
-figure, *A first look*, history, relations, assumption tree, every variant with
-bounds, results, open questions, notes); appendices: all open questions (opening
+figure, *A first look*, history, relations, the case tree drawn as a
+tree, a *What is known* table with one row per setting, then every setting: what it
+adds to its parent, its assumptions in small print, a bounds table, one list of results
+with lower bounds first, open questions, notes); appendices: all open questions (opening
 with the ranked problems and the unnumbered sections of
 `consequential-open-problems`), the alphabetical *Index of assumptions*, the
 timeline and the bibliography. It must state exactly what
@@ -367,7 +369,11 @@ paper was not read, and put any dependency on a disputed result in `caveat`.
 
 Every problem may carry `figure`: a small scene that the website animates (SVG,
 looping through all frames) and the PDF draws as two TikZ pictures, the first frame
-(initial configuration) and the last (final configuration). Coordinates are math
+(initial configuration) and the last (final configuration). The PDF does not copy the
+web look: it uses the idiom of a TikZ figure in a paper (black ink, hollow graph nodes,
+math labels, a small print palette where colour carries meaning) and, in the plane and
+in search domains, traces each robot's moves on panel (b) with dashed arrows from grey
+starting positions (`FIG_NO_TRACES` in `build-pdf.py` turns this off). Coordinates are math
 coordinates inside `view: [W, H]`; positions are `p: [x, y]`, a graph node `at`, or
 a triangular-lattice point `lat: [i, j]` (with `unit`, `origin`). Fields: `caption`,
 `view`, optional `graph {nodes, edges, directed}`, `static` shapes, and `frames`
@@ -413,6 +419,18 @@ counting argument, and how far it is from the best known result. Prefer the
 simplest correct algorithm to the best one; never invent a bound; define every
 technical word. The site shows the primer at the top of the problem page, the PDF
 as "A first look" in each problem section.
+
+## Glossary (one per problem)
+
+Every problem carries `glossary: [{term, definition, avoid[]}]`: the words its
+problem-level text uses (the model's core words, such as node, edge, port, agent, and the
+problem's own, such as map, marker, settled agent). The glossary is not shown as a list;
+it fixes the wording. The summary, statement, primer, figure caption and frame labels use
+exactly these terms, one word per thing, and define each term in the running text at its
+first use (the primer defines every term again, because it is read on its own). `avoid`
+lists synonyms that must not appear for the term (e.g. "line" for edge); the validator
+warns on each one outside math, citations and quotations, and on a term the text never
+uses. Variant text keeps its verified wording.
 
 ## Further reading
 
@@ -546,7 +564,9 @@ at 09:00; `updates/` is git-ignored.
 * **Indexing.** `python3 scripts/sync-meta.py` regenerates, from `data/index.json`
   (`citation`, `abstract`, problems), the Google Scholar `citation_*` meta tags in
   `index.html`, the plain landing page `about.html`, `sitemap.xml` and `robots.txt`;
-  the PDF's title, author and keywords are set by `build-pdf.py`. Run it after
+  the PDF's title, author and keywords are set by `build-pdf.py`. It also links
+  `assets/style.css` and `assets/app.js` with a hash of their content (`?v=…`), so a
+  browser never pairs a new stylesheet with an old renderer; run it after editing either. Run it after
   changing the version, citation, abstract or problem list; `validate.py` warns
   when the generated files are stale.
 * **Reference check.** `python3 scripts/check-refs.py` checks every DOI against

@@ -8,38 +8,133 @@
     "note": "Leader election in the agent-based model, with MST as an application (DISC 2024)."
   },
   "summary": "$n$ agents in an anonymous graph must elect one leader; how fast, and with how little memory?",
-  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must elect exactly one leader: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must elect exactly one leader: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
   "primer": {
-    "intro": "Picture $n$ small agents dropped into a building with $n$ rooms, where the rooms carry no names and a agent can only talk to agents standing in the same room. The building is a graph: rooms are dots (*nodes*), corridors are lines (*edges*); there are $n$ nodes, $m$ edges, and at most $\\Delta$ corridors leave any room (the *maximum degree*). The doors of a room are numbered $1, 2, \\dots$ (these numbers are called *ports*), so a agent can say \"leave by door 3\", and every agent carries a distinct identifier (an ID number). Time runs in *rounds*: in one round every agent may talk to the agents in its room and then walk along one corridor. The task is to pick exactly one agent as *leader*: at the end the leader knows it is the leader and every other agent knows it is not, and we count the rounds and the bits of memory each agent needs. If all agents start in one room the task is easy (the smallest ID wins), so the interesting case is when they start spread out, one agent per room (a *dispersed* start), or in a few clusters.",
+    "intro": "Picture $n$ **agents** (small mobile computers) dropped into a building with $n$ rooms, where the rooms carry no names and an agent can only talk to agents standing in the same room. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. The **degree** $\\deg(v)$ of a node $v$ is the number of edges at it, and $\\Delta$ is the maximum degree. Nodes have no names, but the edges at a node $v$ are numbered $1, 2, \\dots, \\deg(v)$; these numbers are **ports**, so an agent can say \"leave by port 3\". Every agent carries a distinct **identifier** (an ID number). Time runs in **rounds**: in one round every agent may talk to the agents on its node and then move along at most one edge. The task is to pick exactly one agent as **leader**: at the end the leader knows it is the leader and every other agent knows it is not, and we count the rounds and the bits of **memory** each agent needs. If all agents start on one node the task is easy (the smallest ID wins), so the interesting case is when they start with one agent on each node (a **dispersed** start), or in a few clusters.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Disperse, then simulate message passing by walking to neighbours",
+        "title": "Disperse, then simulate message passing by visiting neighbours",
         "variant": "known-n-delta",
         "ref": "Kshemkalyani2024AgentLE",
-        "idea": "This is the idea behind every problem in this family. In the classic *message-passing* model, computers sit still on the nodes and in each round send a message to every neighbour. Agents can pretend to be such computers, provided there is one agent per node and neighbouring agents can meet once per simulated round. Here the agents know $n$ and $\\Delta$.\n\n1. **Disperse.** Run a dispersion algorithm so that every node holds exactly one agent. Knowing $n$ tells the agents how long to wait before they can be sure dispersion is over.\n2. **Pad the IDs.** Each agent writes its ID in binary with exactly $b = O(\\log n)$ bits, adding leading zeros (knowing $n$ fixes $b$).\n3. **Meet every neighbour.** Split time into $b$ blocks of $2\\Delta$ rounds. In block $i$, a agent whose $i$-th bit is $1$ visits its neighbours one by one (go through door 1, come back, go through door 2, come back, ...); a agent whose $i$-th bit is $0$ stays at home.\n4. Two neighbouring agents have different IDs, so in some block one of them has bit $1$ and the other bit $0$: the first walks in while the second is at home, and they meet. A visitor recognises the resident as the agent whose current bit is $0$.\n5. **Simulate.** When two neighbours meet they hand over the messages the message-passing algorithm would send along their edge. So $b$ blocks simulate one round of message passing.\n6. Run any message-passing leader election this way, for example one that needs $O(D)$ rounds, where $D$ is the *diameter* (the largest distance between two nodes).",
-        "analysis": "A block lasts $2\\Delta$ rounds because a visit to a neighbour and back takes 2 rounds and there are at most $\\Delta$ neighbours. So one message-passing round costs $2\\Delta b = O(\\Delta\\log n)$ rounds, and a message-passing algorithm of $R$ rounds costs $O(\\Delta R\\log n)$ rounds, plus the time to disperse ($O(n\\log^2 n)$ rounds with the dispersion algorithm the paper uses [Sudo2024NearLinear]). With an $O(D)$-round election this gives $O(\\Delta D\\log n + n\\log^2 n)$ rounds. The catch is memory: each agent must store whatever a message-passing node stores, which can be large; [Kshemkalyani2026Leader] reach a bound of the same form, $O(n\\log^2 n + D\\Delta\\log n)$, with only $O(\\log n)$ bits per agent.",
-        "why_it_matters": "It turns decades of message-passing algorithms into agent algorithms at a cost of a factor $\\Delta\\log n$, and the bit-by-bit meeting schedule is reused by almost every later paper on computing with agents."
+        "idea": "This is the idea behind every problem in this family. In the classic **message-passing model**, a computer sits still on each node and in each round sends a message to every neighbour. Agents can pretend to be such computers, provided there is one agent per node and neighbouring agents can meet once per simulated round. Here the agents know $n$ and $\\Delta$.\n\n1. **Disperse.** Run a dispersion algorithm so that every node holds exactly one agent; that node is the agent's **home**. Knowing $n$ tells the agents how long to wait before they can be sure dispersion is over.\n2. **Pad the IDs.** Each agent writes its ID in binary with the same number of bits, $O(\\log n)$, adding leading zeros (knowing $n$ fixes this number).\n3. **Meet every neighbour.** Split time into blocks of $2\\Delta$ rounds, one block per bit. In block $i$, an agent whose $i$-th bit is $1$ visits its neighbours one by one (leave by port 1, come back, leave by port 2, come back, ...); an agent whose $i$-th bit is $0$ stays at home. This meeting schedule is the **ID-bit schedule**.\n4. Two neighbouring agents have different IDs, so in some block one of them has bit $1$ and the other bit $0$: the first arrives while the second is at home, and they meet. A visitor recognises the agent at home as the one whose current bit is $0$.\n5. **Simulate.** When two neighbouring agents meet they hand over the messages the message-passing algorithm would send along their edge. So one pass through all the blocks simulates one round of message passing.\n6. Run any message-passing leader election this way, for example one that needs $O(D)$ rounds, where $D$ is the *diameter* (the largest distance between two nodes).",
+        "analysis": "A block lasts $2\\Delta$ rounds because a visit to a neighbour and back takes 2 rounds and there are at most $\\Delta$ neighbours. So one message-passing round costs $O(\\log n)$ blocks of $2\\Delta$ rounds, that is $O(\\Delta\\log n)$ rounds, and a message-passing algorithm of $R$ rounds costs $O(\\Delta R\\log n)$ rounds, plus the time to disperse ($O(n\\log^2 n)$ rounds with the dispersion algorithm the paper uses [Sudo2024NearLinear]). With an $O(D)$-round election this gives $O(\\Delta D\\log n + n\\log^2 n)$ rounds. The catch is memory: each agent must store whatever a message-passing node stores, which can be large; [Kshemkalyani2026Leader] reach a bound of the same form, $O(n\\log^2 n + D\\Delta\\log n)$, with only $O(\\log n)$ bits per agent.",
+        "why_it_matters": "It turns decades of message-passing algorithms into agent algorithms at a cost of a factor $\\Delta\\log n$, and the ID-bit schedule is reused by almost every later paper on computing with agents."
       },
       {
         "kind": "algorithm",
-        "title": "Walk every corridor and come home",
+        "title": "Walk every edge and come home",
         "variant": "no-knowledge",
         "ref": "Kshemkalyani2024AgentLE",
-        "idea": "Without knowing $n$ or $\\Delta$, the agents cannot use fixed-length blocks, and a agent that starts alone in its room does not even know whether the others are also alone. The first algorithm for this setting works as follows (simplified here for a dispersed start).\n\n1. Each agent visits its neighbours once and returns. It stays a *candidate* only if its node has the smallest degree among its neighbours (number of corridors), with ties broken by ID; otherwise it gives up. At least one candidate survives.\n2. Each surviving candidate tells a neighbour where its home is, so that others do not mistake its empty home for an unvisited room.\n3. Each candidate then performs a depth-first walk that crosses every corridor of the building, carrying a tag (start round, ID).\n4. When two walks meet, the one with the smaller tag stops and its owner gives up.\n5. A candidate whose walk crosses every corridor and returns home declares itself leader.",
-        "analysis": "A depth-first walk crosses each corridor at most twice (once out, once back), so it ends within $O(m)$ rounds. The delicate part, which the paper proves, is that once one candidate declares itself leader no other can; this needs the home-markers of step 2 and care when walks pass each other. When the agents start in clusters the same paper first spreads them out with depth-first walks, and then needs $O(n\\log n)$ bits per agent. Later work brought the time down to $O(n)$ rounds with $O(\\log n)$ bits [Chand2026MDS], building on optimal dispersion [Kshemkalyani2025Almost].",
+        "idea": "Without knowing $n$ or $\\Delta$, the agents cannot use blocks of fixed length, and an agent that starts alone on its node does not even know whether the others are also alone. The first algorithm for this setting works as follows (simplified here for a dispersed start).\n\n1. Each agent visits its neighbours once and returns home. It stays a *candidate* only if its node has the smallest degree among its neighbours, with ties broken by ID; otherwise it gives up. At least one candidate survives.\n2. Each surviving candidate tells a neighbouring agent where its home is, so that others do not mistake its empty home for an unvisited node.\n3. Each candidate then performs a *depth-first walk* (it leaves by a port it has not tried yet when there is one, and otherwise goes back the way it came) that crosses every edge of the graph, carrying a tag (start round, ID).\n4. When two walks meet, the one with the smaller tag stops and its owner gives up.\n5. A candidate whose walk crosses every edge and returns home declares itself leader.",
+        "analysis": "A depth-first walk crosses each edge at most twice (once out, once back), so it ends within $O(m)$ rounds. The delicate part, which the paper proves, is that once one candidate declares itself leader no other can; this needs the home markers of step 2 and care when walks pass each other. When the agents start in clusters the same paper first disperses them with depth-first walks, and then needs $O(n\\log n)$ bits per agent. Later work brought the time down to $O(n)$ rounds with $O(\\log n)$ bits [Chand2026MDS], building on optimal dispersion [Kshemkalyani2025Almost].",
         "why_it_matters": "It showed that leader election, and with it MST, MIS and dominating sets, can be solved with no knowledge of the graph at all, which is the setting all later papers aim for."
       },
       {
         "kind": "impossibility",
         "title": "Why the agents need distinct identifiers",
         "variant": "no-knowledge",
-        "idea": "Every setting in this catalogue gives the agents distinct IDs. Here is why. Take a ring of 6 nodes, one agent on each, and number the doors so that at every node door 1 leads clockwise and door 2 counter-clockwise. Suppose the 6 agents are identical (no IDs) and follow the same deterministic program. In round 1 they all see exactly the same thing, so they all do the same thing: all stay, or all walk clockwise, or all walk counter-clockwise. After the move each agent again sees exactly what every other agent sees. By the same reasoning round after round, all 6 agents are always in the same state. If one of them ever decides \"I am the leader\", all 6 decide it at the same moment.",
-        "analysis": "So no deterministic algorithm elects a leader among identical agents on this ring, no matter how many rounds it uses or how much memory the agents have. The argument is a standard symmetry argument, not a result of a particular paper in this catalogue. Distinct IDs break the symmetry; the algorithms above use them both to decide who wins and, through the bits of the IDs, to schedule meetings.",
+        "idea": "Every setting in this catalogue gives the agents distinct IDs. Here is why. Take a ring of 6 nodes, one agent on each, and number the ports so that at every node port 1 leads clockwise and port 2 counter-clockwise. Suppose the 6 agents are identical (no IDs) and follow the same deterministic program. In round 1 they all see exactly the same thing, so they all do the same thing: all stay, or all move clockwise, or all move counter-clockwise. After the move each agent again sees exactly what every other agent sees. By the same reasoning round after round, all 6 agents are always in the same state. If one of them ever decides \"I am the leader\", all 6 decide it at the same moment.",
+        "analysis": "So no deterministic algorithm elects a leader among identical agents on this ring, no matter how many rounds it uses or how much memory the agents have. The argument is a standard symmetry argument, not a result of a particular paper in this catalogue. Distinct IDs break the symmetry; the algorithms above use them both to decide who wins and, through the bits of the IDs (the ID-bit schedule), to schedule meetings.",
         "why_it_matters": "Symmetry is the basic obstacle to leader election, and it explains why identifiers (or randomness) are part of every model in which leaders are elected."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "memory",
+      "definition": "the bits an agent keeps between rounds, counted per agent",
+      "avoid": []
+    },
+    {
+      "term": "dispersed",
+      "definition": "with exactly one agent on every node; a dispersed start begins so, and to disperse is to reach this configuration",
+      "avoid": [
+        "spread out"
+      ]
+    },
+    {
+      "term": "home",
+      "definition": "the node on which an agent of a dispersed configuration stays, and to which it returns after each visit to a neighbour",
+      "avoid": []
+    },
+    {
+      "term": "leader",
+      "definition": "the one agent that ends knowing it is elected, while every other agent ends knowing it is not",
+      "avoid": []
+    },
+    {
+      "term": "ID-bit schedule",
+      "definition": "the meeting schedule in which every agent writes its ID with the same number of bits and time is cut into blocks of $2\\Delta$ rounds; in block $i$ the agents whose $i$-th bit is $1$ visit their neighbours one by one (out along one edge, back along it) and the agents whose $i$-th bit is $0$ wait on their nodes, so any two neighbouring agents meet",
+      "avoid": [
+        "bit-by-bit meeting schedule"
+      ]
+    },
+    {
+      "term": "message-passing model",
+      "definition": "the classical model of distributed computing in which a fixed computer on each node sends, in each round, one message along each of its edges; agents simulate it once dispersed",
+      "avoid": []
+    }
+  ],
   "history": "The agent-based model asks what graph problems **agents** can solve on an anonymous network, with **rounds first and memory second** as the measures [Kshemkalyani2024AgentLE]. Leader election came first because it unlocks the rest (MST, BFS trees, gathering).",
   "measures": [
     {
@@ -180,7 +275,7 @@
     }
   ],
   "figure": {
-    "caption": "Leader election by simulating message passing [Kshemkalyani2024AgentLE]: the agents, already dispersed one per node of a path, write their IDs in 2 bits. In block $i$ (of $2\\Delta = 4$ rounds) an agent whose $i$-th bit is 1 walks to each neighbour and back, one edge per round, while agents with bit 0 wait at home; every visit to a waiting neighbour (blue edge) carries the messages of one simulated round, here the smallest ID seen (\"min\"). Both simulated rounds are shown round by round; after $n-1 = 2$ of them every agent knows that agent 1 is the leader.",
+    "caption": "Leader election by simulating message passing [Kshemkalyani2024AgentLE]: the agents, already dispersed one per node of a path, write their IDs in 2 bits. In block $i$ (of $2\\Delta = 4$ rounds) an agent whose $i$-th bit is 1 visits each neighbour and comes back, one edge per round, while agents with bit 0 wait at home (the ID-bit schedule); every visit to a waiting neighbour (blue edge) carries the messages of one simulated round, here the smallest ID seen (\"min\"). Both simulated rounds are shown round by round; after $n-1 = 2$ of them every agent knows that agent 1 is the leader.",
     "view": [
       100,
       50

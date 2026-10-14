@@ -19,40 +19,128 @@
     }
   ],
   "summary": "A single agent with little or no memory must visit every node of an anonymous graph whose nodes carry colours it can read and rewrite; how many colours are needed, and how much does it help to recolour, to see neighbours or to have port numbers?",
-  "statement": "A single deterministic agent starts at a node $s$ of a connected, simple, undirected, anonymous graph $G=(V,E)$ with $n$ nodes, $m$ edges, maximum degree $\\Delta$ and diameter $D$. Every node $v$ holds a colour $\\psi(v)$ from a palette of $c$ colours that persists between visits. In each step the agent at $v$ observes $\\psi(v)$ (and, depending on the setting, $\\deg(v)$, port numbers, the entry port, and the multiset of its neighbours' colours), sets $\\psi(v)$ to a new colour if the setting allows it, and then moves to a neighbour or stops. In the main model [Bockenhauer2023Inports] there are no port numbers: the agent names a colour and the adversary moves it to any neighbour of that colour; the agent is oblivious; all nodes start with the initial colour $c_0$; and the agent must **visit every node, return to $s$ and stop there**, from every start and against every adversary. Other settings fix the colours in advance (label-guided exploration), give port numbers, or ask only for perpetual exploration. **Measures:** the number of colours $c$, counting $c_0$ (the main measure); time, the number of moves until termination (or until every node is visited, for perpetual exploration); and the agent's memory. All known results are for one agent.",
-  "history": "**A flag planted in the node.** Picture every node with a flagpole. The flag shows one of $c$ colours, and it stays up when the agent leaves: whoever arrives later, the same agent included, sees it, and in the main model an agent also sees the flags on the neighbouring nodes. Compare the three other ways the catalogue leaves information behind. A luminous robot's light is a flag on the robot's own mast: it moves with its owner and is a message to the robots in sight and a memory for the owner [Das2016Lights] (problem *Exploration by luminous robots*); here the flag stays in place and is a memory of the *place*, read by whoever comes by. A whiteboard is the same idea with an unbounded or $O(\\log n)$-bit board [Dobrev2006Searching]; a recolourable node is a whiteboard of $\\log_2 c$ bits with $c$ a constant. A pebble or token is a marker the agent carries and drops [Blum1978Compass] [Disser2019Pebbles] [Dobrev2013Tokens]: there are few of them and they move, whereas every node has its own flag and none ever moves.\\n\\n**Where it started.** Fixed flags came first: Cohen, Fraigniaud, Ilcinkas, Korman and Peleg let a designer colour the nodes in advance, and three colours (depth mod 3 from a root) let a finite automaton explore every graph [Cohen2008Label], although no finite automaton explores all graphs without help [Fraigniaud2005Automaton]. The rotor-router, from the Eulerian walkers of physics [Priezzhev1996Eulerian] and the patrolling ants of Yanovski, Wagner and Bruckstein [Yanovski2003Ant], is a node colour that the agent rewrites by a fixed rule: a pointer to the next port to use, which explores any graph from any initial pointers in $O(mD)$ moves, and no oblivious agent that is not told its entry port does better in the worst case [Menc2017Rotor]. Böckenhauer, Frei, Unger and Wehner then posed the problem in its present form: no port numbers, no memory, the agent colours nodes and sees its neighbours' colours. If each node can be coloured only once, $n$ colours are necessary and sufficient, four for trees; with recolouring, eight suffice for every graph [Bockenhauer2023Inports]. Takahashi, Kanaya, Hiraoka, Eguchi and Sudo brought this down to six with a depth-first search whose return path never has a chord [Takahashi2025Recolorable], and Hiraoka, Imori, Takahashi and Sudo proved the first lower bound, four colours, by a computer-checked argument, which is tight for cacti, and three colours for trees [Hiraoka2026Block].\\n\\n**What the colours do.** In every algorithm the colours give the agent a sense of direction that the anonymous graph lacks: depth mod 3 tells parent from child [Cohen2008Label] [Bockenhauer2023Inports], a path colour marks the way back [Takahashi2025Recolorable], a pointer tells which port is next [Menc2017Rotor]. Recolouring is what makes the palette constant: a once-coloured node must keep a colour that distinguishes it forever, and that costs $n$ colours [Bockenhauer2023Inports]. All known results are for a single agent.",
+  "statement": "A single deterministic agent starts at a node $s$ of a connected, simple, undirected, anonymous graph $G=(V,E)$ with $n$ nodes, $m$ edges, maximum degree $\\Delta$ and diameter $D$. Every node $v$ holds a colour $\\psi(v)$ from a palette of $c$ colours that persists between visits. In each step the agent at $v$ observes $\\psi(v)$ (and, depending on the setting, $\\deg(v)$, port numbers, the entry port, and the multiset of its neighbours' colours), sets $\\psi(v)$ to a new colour (**recolours** $v$) if the setting allows it, and then moves to a neighbour or stops. In the main model [Bockenhauer2023Inports] there are no port numbers: the agent names a colour and the adversary moves it to any neighbour of that colour; the agent is **oblivious** (it keeps no memory between steps); all nodes start with the **initial colour** $c_0$; and the agent must **visit every node, return to $s$ and stop there**, from every start and against every adversary. Other settings fix the colours in advance (label-guided exploration), give port numbers, or ask only for perpetual exploration. **Measures:** the number of colours $c$, counting $c_0$ (the main measure); time, the number of moves (traversals of one edge) until termination (or until every node is visited, for perpetual exploration); and the agent's memory. All known results are for one agent.",
+  "history": "**A flag planted in the node.** Picture every node with a flagpole. The flag shows one of $c$ colours, and it stays up when the agent leaves: whoever arrives later, the same agent included, sees it, and in the main model an agent also sees the flags on the neighbouring nodes. Compare the three other ways the catalogue leaves information behind. A luminous robot's light is a flag on the robot's own mast: it moves with its owner and is a message to the robots in sight and a memory for the owner [Das2016Lights] (problem *Exploration by luminous robots*); here the flag stays in place and is a memory of the *place*, read by whoever comes by. A whiteboard is the same idea with an unbounded or $O(\\log n)$-bit board [Dobrev2006Searching]; a recolourable node is a whiteboard of $\\log_2 c$ bits with $c$ a constant. A pebble or token is a marker the agent carries and drops [Blum1978Compass] [Disser2019Pebbles] [Dobrev2013Tokens]: there are few of them and they move, whereas every node has its own flag and none ever moves.\n\n**Where it started.** Fixed flags came first: Cohen, Fraigniaud, Ilcinkas, Korman and Peleg let a designer colour the nodes in advance, and three colours (depth mod 3 from a root) let a finite automaton explore every graph [Cohen2008Label], although no finite automaton explores all graphs without help [Fraigniaud2005Automaton]. The rotor-router, from the Eulerian walkers of physics [Priezzhev1996Eulerian] and the patrolling ants of Yanovski, Wagner and Bruckstein [Yanovski2003Ant], is a node colour that the agent rewrites by a fixed rule: a pointer to the next port to use, which explores any graph from any initial pointers in $O(mD)$ moves, and no oblivious agent that is not told its entry port does better in the worst case [Menc2017Rotor]. Böckenhauer, Frei, Unger and Wehner then posed the problem in its present form: no port numbers, no memory, the agent colours nodes and sees its neighbours' colours. If each node can be coloured only once, $n$ colours are necessary and sufficient, four for trees; with recolouring, eight suffice for every graph [Bockenhauer2023Inports]. Takahashi, Kanaya, Hiraoka, Eguchi and Sudo brought this down to six with a depth-first search whose return path never has a chord [Takahashi2025Recolorable], and Hiraoka, Imori, Takahashi and Sudo proved the first lower bound, four colours, by a computer-checked argument, which is tight for cacti, and three colours for trees [Hiraoka2026Block].\n\n**What the colours do.** In every algorithm the colours give the agent a sense of direction that the anonymous graph lacks: depth mod 3 tells parent from child [Cohen2008Label] [Bockenhauer2023Inports], a path colour marks the way back [Takahashi2025Recolorable], a pointer tells which port is next [Menc2017Rotor]. Recolouring is what makes the palette constant: a once-coloured node must keep a colour that distinguishes it forever, and that costs $n$ colours [Bockenhauer2023Inports]. All known results are for a single agent.",
   "primer": {
-    "intro": "Imagine exploring a town of identical squares joined by streets, with no street signs and no memory at all: after each step you forget everything. What you do have is a box of coloured flags, one flagpole on every square, and good eyes: standing on a square you see its flag and the flags on the squares next to it. You may change the flag where you stand, then name a colour and walk to a neighbouring square showing that colour; if several do, an **adversary** (an imagined opponent) picks which one. We model the town as a graph: squares are **nodes**, streets are **edges**, $n$ is the number of nodes. In the basic version every flag starts with the same colour $0$, you may change flags as often as you like, and you must visit every node, come back to where you started and stop there. The question is how many colours $c$ are needed for every possible town.",
+    "intro": "Imagine exploring a town of identical squares joined by streets, with no street signs and no memory at all: after each step you forget everything. What you do have is a box of coloured flags, one flagpole on every square, and good eyes: standing on a square you see its flag and the flags on the squares next to it. You may change the flag where you stand, then name a colour and walk to a neighbouring square showing that colour; if several do, an **adversary** (an imagined opponent) picks which one. We model the town as a graph: squares are **nodes**, streets are **edges**, the flag on a square is the **colour** of that node, and you are the **agent**, which is **oblivious** (it remembers nothing between steps); $n$ is the number of nodes. In the basic version every node starts with the same colour $0$, the **initial colour** (a node that still has it is **uncoloured**), you may **recolour** the node where you stand (change its colour) as often as you like, and you must visit every node, come back to where you started and stop there. The question is how many colours $c$ are needed for every possible graph.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Colour by depth mod 3 (trees)",
         "variant": "once-trees",
         "ref": "Bockenhauer2023Inports",
-        "idea": "For a town without loops (a **tree**):\n1. On an uncoloured node, give it the colour one more than the largest colour among its neighbours, counting cyclically 1, 2, 3, 1, ... (at the start all neighbours are 0, so the start gets 1).\n2. If a neighbour is uncoloured, walk to one.\n3. Otherwise, if your node has colour 1 and no neighbour of colour 3, stop.\n4. Otherwise walk to the neighbour whose colour is one less than yours (cyclically): it is your parent.",
-        "analysis": "A node at distance $j$ from the start gets colour $(j \\bmod 3)+1$, so its parent has the previous colour and its children the next one; in a tree the parent is the only neighbour with the previous colour, so the way back is never ambiguous. The start is the only node of colour 1 without a neighbour of colour 3. Each edge is walked once down and once up, so the walk has $2(n-1)$ moves. Three colours plus the initial one are needed: on a path of seven nodes two colours (plus 0) always leave the agent unable to tell the way back [Bockenhauer2023Inports]. With recolouring allowed, three colours in all suffice on trees [Hiraoka2026Block].",
+        "idea": "For a graph without cycles (a **tree**):\n1. On an uncoloured node, recolour it with the colour one more than the largest colour among its neighbours, counting cyclically 1, 2, 3, 1, ... (at the start all neighbours are 0, so the start gets 1).\n2. If a neighbour is uncoloured, walk to one.\n3. Otherwise, if your node has colour 1 and no neighbour of colour 3, stop.\n4. Otherwise walk to the neighbour whose colour is one less than yours (cyclically): it is your **parent**, the neighbour one edge closer to the start.",
+        "analysis": "A node at distance $j$ from the start gets colour $(j \\bmod 3)+1$, so its parent has the previous colour and its children the next one; in a tree the parent is the only neighbour with the previous colour, so the way back is never ambiguous. The start is the only node of colour 1 without a neighbour of colour 3. Each edge is walked once down and once up, so the walk has $2(n-1)$ **moves** (one move is one traversal of one edge). Three colours plus the initial one are needed: on a path of seven nodes two colours (plus 0) always leave the agent unable to tell the way back [Bockenhauer2023Inports]. With recolouring allowed, three colours in all suffice on trees [Hiraoka2026Block].",
         "why_it_matters": "Depth mod 3 is the basic trick of the whole area: a designer uses it in label-guided exploration [Cohen2008Label], and the general eight-colour algorithm is this idea with a phase colour on top [Bockenhauer2023Inports]."
       },
       {
         "kind": "algorithm",
-        "title": "The rotor-router: a pointer as the flag",
+        "title": "The rotor-router: a pointer as the colour",
         "variant": "rotor-router",
         "ref": "Menc2017Rotor",
-        "idea": "Now the streets at each square are numbered $1, \\dots, d$, but you are not told by which street you arrived. The flag at a square of degree $d$ shows a number $\\pi$ between 1 and $d$.\n1. Leave by street $\\pi$.\n2. Before leaving, change the flag to $\\pi + 1$ (and after $d$ back to 1).\n3. Repeat forever.",
-        "analysis": "Each square sends you out along its streets in turn, so no street is neglected for long. Whatever the flags show at the start, after $O(mD)$ moves ($m$ streets, $D$ the largest distance between two squares) the walk follows a fixed tour that uses every street once in each direction, so every square is visited [Yanovski2003Ant] [Menc2017Rotor]. A square of degree $d$ needs $d$ flag colours, since otherwise some street can never be chosen, and no memoryless rule without the arrival street is faster in the worst case, even with unlimited flags [Menc2017Rotor].",
-        "why_it_matters": "It shows that memory can live entirely in the nodes, and that the flags can even start in a mess (self-stabilization)."
+        "idea": "Now the edges at each node are numbered $1, \\dots, d$, where $d$ is the **degree** of the node (its number of edges); these numbers are **ports**. You are not told through which port you arrived. The colour of a node of degree $d$ is a number $\\pi$ between 1 and $d$.\n1. Leave through port $\\pi$.\n2. Before leaving, recolour the node to $\\pi + 1$ (and after $d$ back to 1).\n3. Repeat forever.",
+        "analysis": "Each node sends you out through its ports in turn, so no edge is neglected for long. Whatever the colours are at the start, after $O(mD)$ moves ($m$ edges, $D$ the largest distance between two nodes) the walk follows a fixed tour that uses every edge once in each direction, so every node is visited [Yanovski2003Ant] [Menc2017Rotor]. A node of degree $d$ needs $d$ colours, since otherwise some port can never be chosen, and no oblivious rule without the arrival port is faster in the worst case, even with unlimited colours [Menc2017Rotor].",
+        "why_it_matters": "It shows that memory can live entirely in the nodes, and that the colours can even start in a mess (self-stabilization)."
       },
       {
         "kind": "lower-bound",
-        "title": "Flags that can never be changed cost $n$ colours",
+        "title": "Colours that can never be changed cost $n$ colours",
         "variant": "once",
         "ref": "Bockenhauer2023Inports",
-        "idea": "Suppose a flag, once set, stays forever. To return to the start the agent must always recognise which neighbour it came from. The adversary builds graphs with a long path whose nodes have extra edges between them, so that a node on the way back sees several coloured neighbours, and any repeated colour lets the adversary send the agent the wrong way or around in a loop.",
+        "idea": "Suppose a colour, once set, stays forever. To return to the start the agent must always recognise which neighbour it came from. The adversary builds graphs with a long path whose nodes have extra edges between them, so that a node on the way back sees several coloured neighbours, and any repeated colour lets the adversary send the agent the wrong way or around in a loop.",
         "analysis": "Böckenhauer et al. turn this into a proof that for every $n$ some $n$-node graph forces $n$ colours, counting the initial one, and a depth-first search that gives each new node a colour larger than its coloured neighbours achieves it [Bockenhauer2023Inports]. With recolouring the agent can erase and reuse colours, and six colours suffice for all graphs [Takahashi2025Recolorable]; at least four are needed [Hiraoka2026Block].",
         "why_it_matters": "The gap between $n$ and a constant is the measure of what the right to recolour is worth."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of $V$; the graph has $n$ nodes, which are anonymous",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; the agent moves along edges",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "the single deterministic mobile entity that explores the graph",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "colour",
+      "definition": "the value $\\psi(v)$ from a palette of $c$ colours held by node $v$; it persists between visits",
+      "avoid": [
+        "color",
+        "colors"
+      ]
+    },
+    {
+      "term": "initial colour",
+      "definition": "the colour $c_0$ (written $0$ in the primer) that every node holds at the start; it is counted among the $c$ colours",
+      "avoid": []
+    },
+    {
+      "term": "uncoloured",
+      "definition": "a node is uncoloured while it still holds the initial colour",
+      "avoid": []
+    },
+    {
+      "term": "recolour",
+      "definition": "to set the colour of the node where the agent stands to a new value, when the setting allows it",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "the agent keeps no memory from one step to the next; it acts only on what it observes at its node",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that, when the agent names a colour held by several neighbours, picks the neighbour it moves to",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it, in the settings that have port numbers",
+      "avoid": []
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by the agent; time is the number of moves",
+      "avoid": []
+    },
+    {
+      "term": "tree",
+      "definition": "a connected graph without cycles",
+      "avoid": []
+    },
+    {
+      "term": "parent",
+      "definition": "in the depth-mod-3 algorithm on a tree, the neighbour of a node that is one edge closer to the start",
+      "avoid": []
+    }
+  ],
   "measures": [
     {
       "id": "colours",
@@ -858,9 +946,9 @@
           "ref": "Cohen2008Label",
           "bottleneck": "port addressing",
           "preconditions": [
-            "for every $\\Delta > 4$ and every one-state robot with at most $\\lfloor\\log\\Delta\\rfloor - 2$ colours there is a simple graph of maximum degree $\\Delta$ it does not explore (Theorem 4.5)",
+            "for every $\\Delta > 4$ and every one-state agent with at most $\\lfloor\\log\\Delta\\rfloor - 2$ colours there is a simple graph of maximum degree $\\Delta$ it does not explore (Theorem 4.5)",
             "with self-loops allowed the bound rises to $\\Delta/2$ colours (Theorem 4.2)",
-            "star-like graphs whose central node is entered and left by ports the robot's colour functions cannot cover; applies to visiting all nodes, so to every termination requirement"
+            "star-like graphs whose central node is entered and left by ports the agent's colour functions cannot cover; applies to visiting all nodes, so to every termination requirement"
           ]
         }
       ],
@@ -887,7 +975,7 @@
     }
   ],
   "figure": {
-    "caption": "Exploration with colourable nodes [Bockenhauer2023Inports]: an oblivious agent on a tree without port numbers sees the colour of its node and of its neighbours. On an uncoloured node it writes one more than the largest neighbouring colour (cyclically 1, 2, 3), which is its depth mod 3 plus one; it moves to an uncoloured neighbour if there is one (the adversary picks which) and otherwise to its parent, the unique neighbour of the previous colour; it stops at the start, the only node of colour 1 without a neighbour of colour 3. The coloured rings are the flags planted in the nodes; the agent itself remembers nothing.",
+    "caption": "Exploration with colourable nodes [Bockenhauer2023Inports]: an oblivious agent on a tree without port numbers sees the colour of its node and of its neighbours. On an uncoloured node it recolours the node with one more than the largest neighbouring colour (cyclically 1, 2, 3), which is its depth mod 3 plus one; it moves to an uncoloured neighbour if there is one (the adversary picks which) and otherwise to its parent, the unique neighbour of the previous colour; it stops at the start, the only node of colour 1 without a neighbour of colour 3. The coloured rings show the colours of the nodes; the agent itself remembers nothing.",
     "view": [
       90,
       56

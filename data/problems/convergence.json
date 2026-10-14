@@ -20,7 +20,7 @@
   "summary": "Robots must get arbitrarily close to a common point; they need not ever meet.",
   "statement": "$n$ robots start at arbitrary points. For every $\\varepsilon > 0$ there must be a time after which all robots stay within distance $\\varepsilon$ of each other (equivalently, of a common limit point). Robots never need to coincide.",
   "primer": {
-    "intro": "Think of a flock that must squeeze ever closer together, without ever needing to land on one spot. There are $n$ robots, points in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), and each has its own private coordinate system; in the basic version the scheduler is ASYNC (each phase may take any finite time, so a robot may act on an outdated snapshot) and every robot sees all others. The robots must converge: for every distance $\\varepsilon > 0$, there must come a time after which all robots stay within $\\varepsilon$ of each other. Unlike gathering, they never have to meet exactly.",
+    "intro": "Think of a flock that must squeeze ever closer together, without ever needing to land on one spot. There are $n$ **robots**, points in the plane; their positions form the **configuration**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), and each has its own **local coordinate system**; the **scheduler**, an adversary, decides the **activation** of robots, that is, when each performs a cycle. In the basic version the scheduler is ASYNC (each phase may take any finite time, so a robot may act on an outdated snapshot) and every robot sees all others. The robots must converge: for every distance $\\varepsilon > 0$, there must come a time after which all robots stay within $\\varepsilon$ of each other. Unlike gathering, they never have to meet exactly.",
     "ideas": [
       {
         "kind": "algorithm",
@@ -28,8 +28,8 @@
         "variant": "async",
         "ref": "Cohen2005Gravitational",
         "idea": "1. Look at the positions of all robots.\n2. Compute their **centre of gravity**: the average of all positions (add up the $x$-coordinates and divide by $n$, and the same for $y$).\n3. Move towards it.",
-        "analysis": "The centre of gravity does not depend on the coordinate system, so robots with different private coordinates aim at the same point. In FSYNC with moves that reach their destination, all robots compute the same point and meet in one round. In ASYNC the snapshots are outdated, but each destination is an average of positions that were already inside the region spanned by the robots, so the region spanned by the robots and their destinations never grows; Cohen and Peleg prove that it actually shrinks to a point [Cohen2005Gravitational]. A later analysis shows that $O(n)$ rounds halve the diameter, improving $O(n^2)$ [CordLandwehr2011Convergence]; the catalogue has not checked which scheduler that analysis assumes.",
-        "why_it_matters": "It is the simplest convergence rule, and the never-growing region is reused as a building block, for example to split robots into groups [Efrima2009Partition]."
+        "analysis": "The centre of gravity does not depend on the local coordinate system, so robots with different local coordinate systems aim at the same point. In FSYNC (every robot is activated in every **round**) with **rigid moves** (moves that reach their destination), all robots compute the same point and meet in one round. In ASYNC the snapshots are outdated, but each destination is an average of positions that were already inside the **convex hull** of the robots (the smallest convex region containing them), so the convex hull of the robots and their destinations never grows; Cohen and Peleg prove that it actually shrinks to a point [Cohen2005Gravitational]. A later analysis shows that $O(n)$ rounds halve the diameter, improving $O(n^2)$ [CordLandwehr2011Convergence]; the catalogue has not checked which scheduler that analysis assumes.",
+        "why_it_matters": "It is the simplest convergence rule, and the never-growing convex hull is reused as a building block, for example to split robots into groups [Efrima2009Partition]."
       },
       {
         "kind": "algorithm",
@@ -37,11 +37,91 @@
         "variant": "limited-ssync",
         "ref": "Ando1999Convergence",
         "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**).\n\n1. Compute the **smallest enclosing circle** of the robots you see, and head for its centre.\n2. Do not go farther than a fixed maximum step.\n3. For every robot you see, stay inside the disc of radius $V/2$ around the midpoint between you and it.",
-        "analysis": "If two robots that see each other both obey rule 3, both end in the same disc of radius $V/2$, so they are still within $V$ and still see each other (Lemma 2 of [Ando1999Convergence]). Groups therefore never split, the region spanned by each group never grows, and Ando, Oasa, Suzuki and Yamashita prove that each connected group converges to a point in SSYNC with rigid moves (Theorem 1). The argument uses that a whole cycle happens at once; in ASYNC a robot may move on outdated information and break a visibility link. The catalogue records limited-visibility convergence as solved for every bounded amount of asynchrony and open for full ASYNC [Kirkpatrick2024Separating].",
+        "analysis": "If two robots that see each other both obey rule 3, both end in the same disc of radius $V/2$, so they are still within $V$ and still see each other (Lemma 2 of [Ando1999Convergence]). Groups therefore never split, the convex hull of each group never grows, and Ando, Oasa, Suzuki and Yamashita prove that each connected group converges to a point in SSYNC with rigid moves (Theorem 1). The argument uses that a whole cycle happens at once; in ASYNC a robot may move on outdated information and break a visibility link. The catalogue records limited-visibility convergence as solved for every bounded amount of asynchrony and open for full ASYNC [Kirkpatrick2024Separating].",
         "why_it_matters": "Its \"stay within $V/2$ of the midpoint\" trick for keeping neighbours is reused by many limited-visibility algorithms, including Go-To-the-Center gathering [Castenow2022Unifying]."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "the origin, axes, unit of length and handedness in which a robot expresses its snapshot and its destination; robots agree on none of these unless the setting assumes chirality, one common axis or a common compass",
+      "avoid": [
+        "private coordinate system"
+      ]
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one time step of FSYNC, SSYNC or the sequential scheduler: each activated robot performs one complete Look–Compute–Move cycle"
+    },
+    {
+      "term": "rigid move",
+      "definition": "a move that always reaches the destination computed in Compute"
+    },
+    {
+      "term": "centre of gravity",
+      "definition": "the average $\\frac{1}{n}\\sum_r p_r$ of the positions $p_r$ of the robots in a snapshot",
+      "avoid": [
+        "centroid",
+        "barycentre"
+      ]
+    },
+    {
+      "term": "convex hull",
+      "definition": "the smallest convex region that contains a given set of points (the robots, or the robots and their destinations)",
+      "avoid": [
+        "region spanned"
+      ]
+    },
+    {
+      "term": "visibility radius",
+      "definition": "the distance $V$ within which a robot sees other robots under limited visibility"
+    },
+    {
+      "term": "smallest enclosing circle",
+      "definition": "the unique smallest circle that contains a given finite set of points (by default the robots of the configuration), abbreviated SEC; it does not depend on any local coordinate system"
+    }
+  ],
   "history": "Convergence was introduced alongside gathering as its relaxation [Suzuki1999Formation]. The first questions were **which simple rules converge** under each scheduler (centre of gravity in ASYNC [Cohen2005Gravitational], limited visibility in SSYNC [Ando1999Convergence]); then the **rate** of convergence [CordLandwehr2011Convergence], and how much asynchrony is compatible with limited visibility [Kirkpatrick2024Separating].",
   "measures": [
     {
@@ -1377,7 +1457,7 @@
         ]
       },
       {
-        "label": "After 9 rounds: the hull keeps shrinking",
+        "label": "After 9 rounds: the convex hull keeps shrinking",
         "ents": [
           {
             "id": "0",

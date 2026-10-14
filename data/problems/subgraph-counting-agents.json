@@ -8,16 +8,16 @@
     "note": "Agent-based triangle counting (arXiv 2024; IEEE Transactions on Networking 2026)."
   },
   "summary": "$n$ agents in an anonymous graph must count small subgraphs (triangles; butterflies in bipartite graphs) at every node.",
-  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must compute, at every node, the number of triangles (or butterflies) it belongs to: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must compute, at every node, the number of triangles (or butterflies) it belongs to: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
   "primer": {
-    "intro": "Imagine $n$ agents, one in each room of a building, who want to know how tightly the rooms are linked: for each room, how many pairs of its neighbouring rooms are also linked to each other. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$ (most corridors at one room); a *triangle* is three nodes all joined to each other. Agents have distinct IDs between $1$ and $L$, can talk only to agents in the same room, and move in synchronous *rounds* (talk, then walk along at most one corridor). For the basic version the agents start anywhere and know nothing about the graph; at the end the agent on each node $v$ must know the number of triangles containing $v$. We count rounds and bits of memory per agent. Like all problems in this family, the work starts by spreading out one agent per node and letting neighbouring agents meet, the method explained under leader election by agents.",
+    "intro": "Imagine $n$ **agents** (small mobile computers), one in each room of a building, who want to know how tightly the rooms are connected: for each room, how many pairs of the rooms next to it are also next to each other. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. The **degree** of a node is the number of edges at it, and $\\Delta$ is the maximum degree. Nodes have no names, but the edges at a node are numbered $1, 2, \\dots$; these numbers are **ports**. A **triangle** is three nodes all joined to each other. Agents have distinct **identifiers** (IDs) between $1$ and $L$, can talk only to agents on the same node, and move in synchronous **rounds** (in each round: talk, then move along at most one edge). For the basic version the agents start anywhere and know nothing about the graph; at the end the agent on each node $v$ must know the number of triangles containing $v$. We count rounds and bits of memory per agent. Like all problems in this family, the work starts by making the agents **dispersed** (one agent on each node, which becomes the agent's **home**) and letting neighbouring agents meet, the method explained under leader election by agents.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Learn your neighbours, then compare lists",
         "variant": "triangles",
         "ref": "Chand2026Triangle",
-        "idea": "1. **Get organised.** The agents spread out (one per node), elect a leader and build a spanning tree, learning $\\Delta$ on the way.\n2. **Meet your neighbours.** Write IDs with $\\log L$ bits. In block $i$ (of $2\\Delta$ rounds), agents whose $i$-th bit is $1$ visit their neighbours one by one, and agents whose bit is $0$ stay home. Every pair of neighbours meets in some block, and each agent writes down the IDs of all its neighbours.\n3. **Compare lists.** Repeat the meetings. When the agents on neighbouring nodes $v$ and $u$ meet, they count the IDs that appear on both lists: that is the number of triangles that contain the edge $\\{v, u\\}$.\n4. **Add up.** The agent on $v$ adds these counts over all its neighbours and divides by 2: each triangle $\\{v, u, w\\}$ was counted once through $u$ and once through $w$.",
+        "idea": "1. **Get organised.** The agents disperse (one per node), elect a leader and build a spanning tree, learning $\\Delta$ on the way.\n2. **Meet your neighbours.** Write IDs with $\\log L$ bits and follow the **ID-bit schedule**: in block $i$ (of $2\\Delta$ rounds), agents whose $i$-th bit is $1$ visit their neighbours one by one, and agents whose bit is $0$ stay at home. Every pair of neighbouring agents meets in some block, and each agent writes down the IDs of all its neighbours.\n3. **Compare lists.** Repeat the meetings. When the agents on neighbouring nodes $v$ and $u$ meet, they count the IDs that appear on both lists: that is the number of triangles that contain the edge $\\{v, u\\}$.\n4. **Add up.** The agent on $v$ adds these counts over all its neighbours and divides by 2: each triangle $\\{v, u, w\\}$ was counted once through $u$ and once through $w$.",
         "analysis": "Step 2 and step 3 each take $\\log L$ blocks of $2\\Delta$ rounds, i.e. $O(\\Delta\\log L)$ rounds, and each agent stores up to $\\Delta$ IDs, i.e. $O(\\Delta\\log L)$ bits. Step 1 costs $O(n\\log^2 n)$ rounds, and it dominates the total $O(n\\log^2 n + \\Delta\\log L)$ [Chand2026Triangle]. The same counts per edge give truss decomposition and local clustering coefficients. No lower bound is proved.",
         "why_it_matters": "It shows that once agents are organised, local graph statistics cost only $O(\\Delta\\log L)$ rounds, so the bottleneck is getting organised, not counting."
       },
@@ -25,7 +25,7 @@
         "kind": "lower-bound",
         "title": "The total count needs information from both ends of the graph",
         "variant": "triangles",
-        "idea": "Besides the per-node counts, the algorithm also lets the agents learn the total number of triangles. Information moves at most one edge per round, because it travels only inside agents and a agent walks at most one edge per round. So after $t$ rounds, what a agent standing on node $y$ knows depends only on the part of the graph within distance $t$ of $y$. Take a long path and, at each end, attach two extra nodes $a$ and $b$ to the end node; adding the edge $\\{a, b\\}$ closes a triangle. If a agent announces the total after fewer than about $D/2$ rounds, where $D$ is the *diameter* (largest distance between two nodes), one end lies outside what it can know about. Adding or removing the edge $\\{a, b\\}$ there changes the true total but not what this agent knows, so in one of the two graphs its answer is wrong.",
+        "idea": "Besides the per-node counts, the algorithm also lets the agents learn the total number of triangles. Information moves at most one edge per round, because it travels only inside agents and an agent moves along at most one edge per round. So after $t$ rounds, what an agent standing on node $y$ knows depends only on the part of the graph within distance $t$ of $y$. Take a long path and, at each end, attach two extra nodes $a$ and $b$ to the end node; adding the edge $\\{a, b\\}$ closes a triangle. If an agent announces the total after fewer than about $D/2$ rounds, where $D$ is the *diameter* (largest distance between two nodes), one end lies outside what it can know about. Adding or removing the edge $\\{a, b\\}$ there changes the true total but not what this agent knows, so in one of the two graphs its answer is wrong.",
         "analysis": "So computing the total needs $\\Omega(D)$ rounds. This is our own short argument, not a result recorded in the catalogue; the known algorithm needs $O(n + \\Delta\\log L)$ rounds for the total after the set-up, and on a path $D$ is about $n$, so it is optimal there up to a constant factor. For the per-node counts this argument gives nothing, because they depend only on nearby nodes.",
         "why_it_matters": "This \"information moves one edge per round\" argument is the simplest lower-bound tool for agents, and it separates local tasks (per-node counts) from global ones (totals)."
       },
@@ -34,12 +34,107 @@
         "title": "Bipartite graphs: one side walks while the other waits",
         "variant": "butterflies",
         "ref": "Chand2025Butterfly",
-        "idea": "In a *bipartite* graph the nodes split into two sides $V_1$ and $V_2$ and every edge joins the two sides. A *butterfly* is a 4-cycle: two nodes $a, a'$ on one side with two common neighbours on the other.\n\n1. The agents, starting one per node, elect a leader, build a spanning tree and learn which side they are on.\n2. In odd rounds the agents on one side visit their neighbours while the other side waits at home; in even rounds the roles swap. Within $2\\Delta$ rounds every agent knows its neighbours' IDs.\n3. The agent on $a$ visits its neighbours again and reads their lists, so it learns, for every $a'$ on its side, the number $c$ of common neighbours of $a$ and $a'$.\n4. Each such pair lies on $\\binom{c}{2}$ butterflies (choose two of the common neighbours); summing over $a'$ gives the number of butterflies through $a$.",
+        "idea": "In a *bipartite* graph the nodes split into two sides $V_1$ and $V_2$ and every edge joins the two sides. A *butterfly* is a 4-cycle: two nodes $a, a'$ on one side with two common neighbours on the other.\n\n1. The agents, starting dispersed (one per node), elect a leader, build a spanning tree and learn which side they are on.\n2. In odd rounds the agents on one side visit their neighbours while the other side waits at home; in even rounds the roles swap. Within $2\\Delta$ rounds every agent knows its neighbours' IDs.\n3. The agent on $a$ visits its neighbours again and reads their lists, so it learns, for every $a'$ on its side, the number $c$ of common neighbours of $a$ and $a'$.\n4. Each such pair lies on $\\binom{c}{2}$ butterflies (choose two of the common neighbours); summing over $a'$ gives the number of butterflies through $a$.",
         "analysis": "Because the two sides take turns, no ID-bit schedule is needed: neighbours meet within $2\\Delta$ rounds rather than $O(\\Delta\\log L)$, and the per-node counts take $O(\\Delta)$ rounds. The set-up takes $O(n\\log L)$ rounds, for a total of $O(n\\log L + \\Delta)$ rounds with $O(\\Delta\\log L)$ bits per agent [Chand2025Butterfly].",
         "why_it_matters": "Knowing more structure (here, a 2-colouring of the graph) can remove the $\\log L$ cost of making neighbours meet."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "dispersed",
+      "definition": "with exactly one agent on every node; a dispersed start begins so, and to disperse is to reach this configuration",
+      "avoid": [
+        "spread out"
+      ]
+    },
+    {
+      "term": "home",
+      "definition": "the node on which an agent of a dispersed configuration stays, and to which it returns after each visit to a neighbour",
+      "avoid": []
+    },
+    {
+      "term": "ID-bit schedule",
+      "definition": "the meeting schedule in which every agent writes its ID with the same number of bits and time is cut into blocks of $2\\Delta$ rounds; in block $i$ the agents whose $i$-th bit is $1$ visit their neighbours one by one (out along one edge, back along it) and the agents whose $i$-th bit is $0$ wait on their nodes, so any two neighbouring agents meet",
+      "avoid": [
+        "bit-by-bit meeting schedule"
+      ]
+    },
+    {
+      "term": "triangle",
+      "definition": "a set of three nodes $\\{u, v, w\\}$ any two of which are joined by an edge; the count asked at $v$ is the number of triangles containing $v$",
+      "avoid": []
+    },
+    {
+      "term": "bipartite graph",
+      "definition": "a graph whose nodes split into two sides $V_1$ and $V_2$ such that every edge joins a node of $V_1$ to a node of $V_2$",
+      "avoid": []
+    },
+    {
+      "term": "butterfly",
+      "definition": "a cycle of four nodes in a bipartite graph: two nodes $a, a'$ of one side together with two of their common neighbours",
+      "avoid": []
+    }
+  ],
   "history": "Counting problems extend agent-based computing from symmetry breaking to **graph analytics**: triangle counting and its applications [Chand2026Triangle], and butterfly counting in bipartite graphs [Chand2025Butterfly].",
   "measures": [
     {
@@ -172,7 +267,7 @@
     }
   ],
   "figure": {
-    "caption": "Triangle counting [Chand2026Triangle] on a triangle: after dispersing (one agent per node), electing a leader and learning $\\Delta$ (not shown), the agents write their IDs in 2 bits. In block $i$ (of $2\\Delta = 4$ rounds) agents whose $i$-th bit is 1 walk to each neighbour and back, one edge per round, while the others wait. In the first pass a visit to a waiting neighbour records both IDs (green edges); in the second pass, round by round with the same walks, the two ends of each edge count the IDs on both lists (blue numbers). Each agent adds its edges' counts and halves the sum: the number of triangles at its node.",
+    "caption": "Triangle counting [Chand2026Triangle] on a triangle: after dispersing (one agent per node), electing a leader and learning $\\Delta$ (not shown), the agents write their IDs in 2 bits and follow the ID-bit schedule: in block $i$ (of $2\\Delta = 4$ rounds) agents whose $i$-th bit is 1 visit each neighbour and come back, one edge per round, while the others wait at home. In the first pass a visit to a waiting neighbour records both IDs (green edges); in the second pass, round by round with the same walks, the two ends of each edge count the IDs on both lists (blue numbers). Each agent adds its edges' counts and halves the sum: the number of triangles at its node.",
     "view": [
       100,
       46

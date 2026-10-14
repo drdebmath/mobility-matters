@@ -13,18 +13,18 @@
       "relation": "Both elect a leader among anonymous entities from geometry alone; particles on the lattice can also move and talk to neighbours, robots in the plane only see [Dufoulon2021Efficient]."
     }
   ],
-  "summary": "Anonymous constant-memory particles must elect exactly one leader, which most shape algorithms need first.",
-  "statement": "A connected configuration of $n$ anonymous particles (initially contracted) must reach a state in which exactly one particle is the leader and all others know they are not. **Time** is in asynchronous rounds; $L_{out}$ is the length of the outer boundary and $D$ the diameter of the configuration.",
+  "summary": "Anonymous constant-memory particles must elect exactly one leader, which most shape-formation algorithms need first.",
+  "statement": "A connected **configuration** (the set of nodes occupied by particles) of $n$ anonymous particles (initially contracted) must reach a state in which exactly one particle is the leader and all others know they are not. **Time** is in asynchronous rounds; $L_{out}$ is the length of the outer boundary and $D$ the diameter of the configuration.",
   "primer": {
-    "intro": "Imagine a swarm of identical tiny robots, packed together on a floor tiled with triangles, that must pick one boss without any name tags. Each robot, called a *particle*, occupies one node of the triangular grid, remembers only a few bits, and can read and write the memory of the particles touching it. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. In the standard version there are $n$ particles forming one connected group, possibly with *holes* (empty regions enclosed by particles); all particles agree on what clockwise means (*chirality*), but not on a common north. An *adversary*, a scheduler that we assume chooses the worst order, decides when each particle acts; a *round* is a stretch of time in which every particle has acted at least once. The goal: exactly one particle ends in state *leader*, every other particle knows it is not, and we count the rounds this takes.",
+    "intro": "Imagine a swarm of identical tiny machines, packed together on a floor tiled with triangles, that must pick one boss without any name tags. Each machine is a **particle**. It occupies one **node** of the **triangular lattice**, the infinite tiling of the plane by equilateral triangles whose corners are the nodes; particles on adjacent nodes are **neighbours**. A particle remembers only a few bits, and can read and write the memory of its neighbours. It moves in two steps: an **expansion** into an empty adjacent node, after which it briefly occupies both nodes, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. In the standard version there are $n$ particles whose nodes form one connected **configuration**, possibly with **holes** (empty regions enclosed by particles); all particles agree on what clockwise means (**chirality**), but not on a common north. An adversary, a scheduler that we assume chooses the worst order, decides when each particle acts; each time a particle acts is an **activation**, and a **round** is a stretch of time in which every particle has been activated at least once. The goal: exactly one particle ends in state **leader**, every other particle knows it is not, and we count the rounds this takes.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Erosion: peel the shape from the outside",
+        "title": "Erosion: peel the configuration from the outside",
         "variant": "silbot",
         "ref": "DAngelo2020Silent",
-        "idea": "This works on shapes **without holes**. It is the erosion of [DiLuna2020Shape], which [DAngelo2020Silent] showed can be run even by particles with no memory and no messages. No particle changes its node (in the memoryless version, expansions serve as signals).\\n\\n1. Every particle starts as *eligible*.\\n2. An eligible particle is a *corner* if its eligible neighbours are few and sit next to each other: none, one, two that touch, or three in a row.\\n3. A corner particle drops out (becomes ineligible). Corners keep dropping out round after round, so the shape is eaten from its rim inwards, like a coastline eroded by the sea.\\n4. A few special cases stop the peeling: a lone eligible particle, two eligible particles that are each other's only eligible neighbour, or a triangle of three, become *candidates* instead of dropping out.\\n5. At the end, 1, 2 or 3 mutually touching candidates remain.",
-        "analysis": "A hole-free shape always has a corner, and removing corners never splits the eligible group or creates a hole, so erosion never gets stuck. Each removal makes the group smaller, and [DAngelo2020Silent] show the process ends in $O(n)$ rounds. It cannot always leave a single leader: three particles in a triangle look exactly alike (see the next idea). It also fails with holes: in a ring of particles around a hole, each particle has two eligible neighbours that do not touch, so nobody is a corner. The best known result elects exactly one leader, holes allowed, deterministically in $O(L_{out}+D)$ rounds, where $L_{out}$ is the length of the outer boundary and $D$ the diameter [Dufoulon2021Efficient].",
+        "idea": "This works on configurations **without holes**. It is the erosion of [DiLuna2020Shape], which [DAngelo2020Silent] showed can be run even by particles with no memory and no messages. No particle changes its node (in the memoryless version, expansions serve as signals).\n\n1. Every particle starts as *eligible*.\n2. An eligible particle is a *corner* if its eligible neighbours are few and sit next to each other: none, one, two that are neighbours of each other, or three in a row.\n3. A corner drops out (becomes ineligible). Corners keep dropping out round after round, so the configuration is eaten from its outer **boundary** (the particles next to the empty outside; a hole has a boundary too) inwards, like a coastline eroded by the sea.\n4. A few special cases stop the peeling: a lone eligible particle, two eligible particles that are each other's only eligible neighbour, or a triangle of three, become **candidates** (for leader) instead of dropping out.\n5. At the end, 1, 2 or 3 candidates remain, each a neighbour of the others.",
+        "analysis": "A hole-free configuration always has a corner, and removing corners never splits the eligible particles into parts or creates a hole, so erosion never gets stuck. Each removal leaves fewer eligible particles, and [DAngelo2020Silent] show the process ends in $O(n)$ rounds. It cannot always leave a single leader: three particles in a triangle look exactly alike (see the next idea). It also fails with holes: in a ring of particles around a hole, each particle has two eligible neighbours that are not neighbours of each other, so nobody is a corner. The best known result elects exactly one leader, holes allowed, deterministically in $O(L_{out}+D)$ rounds, where $L_{out}$ is the length of the outer boundary and $D$ the diameter of the configuration [Dufoulon2021Efficient].",
         "why_it_matters": "Erosion is the first step of the deterministic shape-formation algorithm and is reused whenever a few candidate leaders are good enough."
       },
       {
@@ -32,7 +32,7 @@
         "title": "Three identical particles in a triangle",
         "variant": "stationary-chirality",
         "ref": "Chalopin2026Stationary",
-        "idea": "Take three particles forming a small triangle, and suppose particles never move and the scheduler may let all three act at the same moment. Each particle sees the same picture: two neighbours, one to its left and one to its right (they agree on clockwise, so 'left' means the same to all). They start in the same state, so in the first step they compute the same thing and write the same thing. After that step they are again in identical states with identical views, and so on forever. Whatever a deterministic algorithm (one that flips no coins) does, either all three become leader or none does [Chalopin2026Stationary].",
+        "idea": "Take three particles forming a small triangle, and suppose particles never move and the scheduler may activate all three at the same moment. Each particle sees the same picture: two neighbours, one to its left and one to its right (they have chirality, so 'left' means the same to all). They start in the same state, so in their first activation they compute the same thing and write the same thing. After that activation they are again in identical states with identical views, and so on forever. Whatever a deterministic algorithm (one that flips no coins) does, either all three become leader or none does [Chalopin2026Stationary].",
         "analysis": "The argument only uses symmetry: an algorithm cannot tell apart particles whose surroundings are rotated copies of each other. The same reasoning shows that a configuration with six-fold symmetry may end with six leaders, which is why stationary particles with chirality elect up to six leaders [Bazzi2019Stationary]. To get exactly one leader, papers add something that breaks the symmetry: coin flips [Derakhshandeh2015Leader], a scheduler that activates one particle at a time [Briones2023Asynchronous], or a common direction [Chalopin2026Stationary].",
         "why_it_matters": "Symmetry is the basic obstacle in all of programmable matter; it explains why results say 'at most three' or 'at most six' leaders."
       },
@@ -41,12 +41,102 @@
         "title": "Coin flips along the boundaries",
         "variant": "randomized-chirality",
         "ref": "Derakhshandeh2015Leader",
-        "idea": "Only particles on a boundary (the outer rim, or the rim of a hole) take part. Each boundary is a closed loop, and with chirality everyone walks it in the same direction.\\n\\n1. Every boundary particle starts as a *candidate*. Between two consecutive candidates lies a *segment* of non-candidates.\\n2. Compare segments: a candidate whose segment ahead is shorter than the segment behind it gives up (particles compare lengths by passing tokens, one per particle).\\n3. If all segments are equal, every candidate flips a coin. On heads it passes its candidacy forward to the next candidate's spot; when it does and the next candidate keeps its own, two candidacies land on one spot and merge.\\n4. A candidate that is alone on its loop checks whether the loop is the outer boundary (by adding up the turns along the loop; the outer loop turns one full circle one way, a hole the other way). Alone on the outer loop: it is the leader. Alone around a hole: it gives up.",
-        "analysis": "There is always at least one candidate on the outer loop, and while there are two or more, each phase removes one with probability at least $1/4$, so the number of candidates keeps shrinking. Holes are no problem, because a hole's loop eventually loses all its candidates. The expected time is $O(L_{max})$ rounds, $L_{max}$ the longest boundary [Derakhshandeh2015Leader]; this was improved to $O(n)$ rounds with high probability [Daymude2017Improved], and later matched without coins [Dufoulon2021Efficient].",
-        "why_it_matters": "Working on boundaries instead of the whole shape is the idea behind the fast algorithms that followed."
+        "idea": "Only particles on a boundary (the outer boundary, or the boundary of a hole) take part. Each boundary closes on itself, and with chirality everyone walks it in the same direction.\n\n1. Every boundary particle starts as a candidate. Between two consecutive candidates lies a *segment* of non-candidates.\n2. Compare segments: a candidate whose segment ahead is shorter than the segment behind it gives up (particles compare lengths by passing tokens, one per particle).\n3. If all segments are equal, every candidate flips a coin. On heads it passes its candidacy forward to the next candidate's spot; when it does and the next candidate keeps its own, two candidacies land on one spot and merge.\n4. A candidate that is alone on its boundary checks whether it is the outer boundary (by adding up the turns along it; the outer boundary turns one full circle one way, the boundary of a hole the other way). Alone on the outer boundary: it is the leader. Alone on the boundary of a hole: it gives up.",
+        "analysis": "There is always at least one candidate on the outer boundary, and while there are two or more, each phase removes one with probability at least $1/4$, so the number of candidates keeps shrinking. Holes are no problem, because the boundary of a hole eventually loses all its candidates. The expected time is $O(L_{max})$ rounds, $L_{max}$ the length of the longest boundary [Derakhshandeh2015Leader]; this was improved to $O(n)$ rounds with high probability [Daymude2017Improved], and later matched without coins [Dufoulon2021Efficient].",
+        "why_it_matters": "Working on boundaries instead of the whole configuration is the idea behind the fast algorithms that followed."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous entity with constant memory that occupies one node of the triangular lattice (contracted) or two adjacent nodes (expanded), and reads and writes only its own memory and its neighbours'",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph whose nodes are the corners of the tiling of the plane by equilateral triangles; each node has six adjacent nodes",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; a contracted particle occupies one node, an expanded particle two adjacent nodes",
+      "avoid": [
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a particle that occupies a node adjacent to a node of the given particle",
+      "avoid": [
+        "touching",
+        "touch"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the set of nodes occupied by the particles; it is connected when every particle can be reached from every other through neighbours",
+      "avoid": [
+        "shape",
+        "group"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the move in which a contracted particle extends into an empty adjacent node and then occupies both nodes",
+      "avoid": []
+    },
+    {
+      "term": "contraction",
+      "definition": "the move in which an expanded particle withdraws into one of its two nodes",
+      "avoid": []
+    },
+    {
+      "term": "hole",
+      "definition": "a finite connected set of empty nodes enclosed by the configuration",
+      "avoid": []
+    },
+    {
+      "term": "boundary",
+      "definition": "the closed sequence of particles adjacent to one connected region of empty nodes: the outer boundary (towards the infinite empty region, of length $L_{out}$) or the boundary of a hole; $L_{max}$ is the length of the longest boundary",
+      "avoid": [
+        "rim",
+        "loop"
+      ]
+    },
+    {
+      "term": "chirality",
+      "definition": "a common sense of clockwise shared by all particles (but no common north)",
+      "avoid": []
+    },
+    {
+      "term": "activation",
+      "definition": "one step of a particle, at a time chosen by the scheduler: it reads its memory and its neighbours', computes, writes, and may perform one expansion or contraction",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "an asynchronous round: an interval of time in which every particle is activated at least once; a bound holds for every division of the execution into consecutive rounds",
+      "avoid": [
+        "epoch"
+      ]
+    },
+    {
+      "term": "candidate",
+      "definition": "a particle that may still become the leader; erosion ends with 1, 2 or 3 candidates, each a neighbour of the others",
+      "avoid": []
+    },
+    {
+      "term": "leader",
+      "definition": "the one particle that ends in state leader; every other particle ends knowing that it is not the leader",
+      "avoid": []
+    }
+  ],
   "history": "Leader election was the first task studied, because shape formation needs a leader [Derakhshandeh2015Leader]. The first question was **feasibility with constant memory**, then **rounds**: randomized algorithms came first [Derakhshandeh2015Leader] [Daymude2017Improved], then deterministic ones without chirality [Emek2019Deterministic] and in linear time [Dufoulon2021Efficient]. Later work weakened the model in three directions: **stationary** particles [Bazzi2019Stationary] [Chalopin2026Stationary], **asynchronous** adversaries [Briones2023Asynchronous], and **silent, oblivious** particles [DAngelo2020Silent]; self-stabilising election with constant memory followed [Chalopin2025SelfStab] [Chalopin2026Holes].",
   "variants": [
     {
@@ -217,7 +307,7 @@
           "bottleneck": "symmetry breaking",
           "preconditions": [
             "a connected configuration with a hole in which groups of particles have identical 2-hop views",
-            "the adversary activates each group simultaneously, each particle twice in a row",
+            "the adversary activates each such set simultaneously, each particle twice in a row",
             "the system must stay connected",
             "holds even with unlimited memory and chirality"
           ],
@@ -559,7 +649,7 @@
     }
   ],
   "figure": {
-    "caption": "Leader election by erosion on a configuration without holes: no particle moves. An eligible particle (blue) whose eligible neighbours are few and consecutive (none, one, two touching, three in a row) is a corner and drops out (grey); corners drop out round after round, peeling the shape from its rim, until a single candidate remains and becomes the leader [DiLuna2020Shape] [DAngelo2020Silent]. Configurations with holes need other algorithms [Derakhshandeh2015Leader].",
+    "caption": "Leader election by erosion on a configuration without holes: no particle moves. An eligible particle (blue) whose eligible neighbours are few and consecutive (none, one, two that are neighbours of each other, three in a row) is a corner and drops out (grey); corners drop out round after round, peeling the configuration from its boundary, until a single candidate remains and becomes the leader [DiLuna2020Shape] [DAngelo2020Silent]. Configurations with holes need other algorithms [Derakhshandeh2015Leader].",
     "view": [
       100,
       56

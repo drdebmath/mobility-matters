@@ -8,16 +8,16 @@
     "note": "MST in the agent-based model appeared together with leader election (DISC 2024)."
   },
   "summary": "$n$ agents in an anonymous weighted graph must build a minimum spanning tree.",
-  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must build a minimum spanning tree of the edge-weighted graph, each agent knowing which incident edges belong to it: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must build a minimum spanning tree of the edge-weighted graph, each agent knowing which incident edges belong to it: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
   "primer": {
-    "intro": "Imagine $n$ agents, one in each room of a building, who must choose which corridors to keep open so that every room can still reach every other, using the cheapest possible total length. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$; each edge has a weight (its cost), which the agents on its two ends can see, and the doors of a room are numbered (*ports*). A *spanning tree* is a set of $n-1$ edges that connects all nodes without forming a cycle, and a *minimum spanning tree* (MST) is one with the smallest total weight. In the basic version the agents start one per node (a *dispersed* start), have distinct IDs, move in synchronous *rounds* (talk to agents in the same room, then walk at most one corridor), and at the end every agent must know which of its own edges belong to the MST. We count rounds and bits of memory per agent. As for all problems in this family, the agents can imitate a message-passing algorithm by walking to their neighbours, the method explained under leader election by agents.",
+    "intro": "Imagine $n$ **agents** (small mobile computers), one in each room of a building, who must choose which corridors to keep open so that every room can still reach every other, using the cheapest possible total length. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. Every edge has a **weight** (its cost), which the agents on its two ends can see; $\\Delta$ is the maximum degree (the largest number of edges at one node). Nodes have no names, but the edges at a node are numbered $1, 2, \\dots$; these numbers are **ports**. A *spanning tree* is a set of $n-1$ edges that connects all nodes without forming a cycle, and a **minimum spanning tree** (MST) is one with the smallest total weight. In the basic version the agents start one per node (a **dispersed** start), have distinct **identifiers** (IDs), move in synchronous **rounds** (talk to the agents on the same node, then move along at most one edge), and at the end every agent must know which of the edges at its node belong to the MST. We count rounds and bits of memory per agent. As for all problems in this family, the agents can imitate a message-passing algorithm by visiting their neighbours, the method explained under leader election by agents.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Grow fragments along their lightest outgoing edges",
         "variant": "dispersed",
         "ref": "Chand2025Trees",
-        "idea": "This is the classic Borůvka / Gallager-Humblet-Spira idea, carried out by agents. Assume all edge weights differ (agents can break ties using their IDs and port numbers).\n\n1. At the start every node is its own *fragment* (a small tree).\n2. In each phase, every agent meets its neighbours (using the ID-bit schedule, see leader election by agents) and learns which of its edges leave its fragment and how heavy they are.\n3. The agents of each fragment pass the lightest such edge up their tree to the fragment's leader, which picks the lightest outgoing edge of the whole fragment.\n4. Every fragment adds its lightest outgoing edge; fragments joined by these edges merge into one, with one leader.\n5. Repeat until one fragment remains: it is the MST, and its leader is also an elected leader for all agents.",
+        "idea": "This is the classic Borůvka / Gallager-Humblet-Spira idea, carried out by agents. Assume all edge weights differ (agents can break ties using their IDs and ports).\n\n1. At the start every node is its own **fragment**: a set of nodes joined by edges already chosen for the tree, so a small tree.\n2. In each phase, every agent meets its neighbours by the **ID-bit schedule** (in block $i$ of $2\\Delta$ rounds, agents whose $i$-th ID bit is $1$ visit their neighbours one by one while the others wait; see leader election by agents) and learns which of the edges at its node leave its fragment and how heavy they are.\n3. The agents of each fragment pass the lightest such edge up their tree to the fragment's **leader** (one agent of the fragment that decides for it), which picks the **lightest outgoing edge** of the whole fragment: the edge of smallest weight with one end in the fragment and the other outside.\n4. Every fragment adds its lightest outgoing edge; fragments joined by these edges merge into one, with one leader.\n5. Repeat until one fragment remains: it is the MST, and its leader is also an elected leader for all agents.",
         "analysis": "Step 4 is safe because of the *cut property*: the lightest edge leaving any group of nodes always belongs to the MST. Every fragment merges with at least one other in each phase, so the number of fragments at least halves, and $O(\\log n)$ phases suffice. In total this gives $O(n\\log n + \\Delta\\log^2 n)$ rounds with $O(\\log n)$ bits per agent, assuming the agents know $L$, the largest ID [Chand2025Trees]. The first agent algorithm handled the fragments one at a time and needed $O(m + n\\log n)$ rounds and $O(n\\log n)$ bits [Kshemkalyani2024AgentLE].",
         "why_it_matters": "Halving the number of fragments in every phase is the standard way to build spanning trees in parallel, and the resulting tree gives agents a root and a structure for broadcasting, used afterwards for BFS and counting problems."
       },
@@ -25,12 +25,109 @@
         "kind": "lower-bound",
         "title": "On a ring, the heaviest edge is far away",
         "variant": "dispersed",
-        "idea": "Information moves at most one edge per round, because it travels only inside agents and each agent walks at most one edge per round. So after $t$ rounds, what the agent on node $y$ knows depends only on the part of the graph within distance $t$ of $y$.\n\nTake a ring of $n$ nodes with distinct weights. The MST of a ring is the ring minus its heaviest edge. Look at an edge $e = \\{u, v\\}$ and an edge $f$ on the opposite side of the ring, at distance about $n/2$ from $u$ and $v$. Give every edge other than $e$ and $f$ a weight below the weight of $e$. If $f$ is lighter than $e$, then $e$ is the heaviest edge and is not in the MST; if $f$ is heavier, $e$ is in the MST.",
+        "idea": "Information moves at most one edge per round, because it travels only inside agents and each agent moves along at most one edge per round. So after $t$ rounds, what the agent on node $y$ knows depends only on the part of the graph within distance $t$ of $y$.\n\nTake a ring of $n$ nodes with distinct weights. The MST of a ring is the ring minus its heaviest edge. Look at an edge $e = \\{u, v\\}$ and an edge $f$ on the opposite side of the ring, at distance about $n/2$ from $u$ and $v$. Give every edge other than $e$ and $f$ a weight below the weight of $e$. If $f$ is lighter than $e$, then $e$ is the heaviest edge and is not in the MST; if $f$ is heavier, $e$ is in the MST.",
         "analysis": "Within fewer than about $n/2 - 1$ rounds the agents on $u$ and $v$ cannot tell these two rings apart, so they answer the same way and one answer is wrong. Hence any algorithm needs $\\Omega(n)$ rounds on a ring, and $\\Omega(D)$ rounds in general, where $D$ is the diameter (largest distance between two nodes). This is our own short argument; the catalogue records no lower bound. On a ring $\\Delta = 2$, so the best algorithm, $O(n\\log n + \\Delta\\log^2 n)$, is within a $\\log n$ factor of it there.",
         "why_it_matters": "It shows that an MST is a global object: an edge's membership can depend on an edge at the other end of the graph."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "weight",
+      "definition": "the cost of an edge, a number visible to the agents on both of its ends; ties are broken with IDs and ports so that all weights can be taken distinct",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "dispersed",
+      "definition": "with exactly one agent on every node; a dispersed start begins so, and to disperse is to reach this configuration",
+      "avoid": [
+        "spread out"
+      ]
+    },
+    {
+      "term": "ID-bit schedule",
+      "definition": "the meeting schedule in which every agent writes its ID with the same number of bits and time is cut into blocks of $2\\Delta$ rounds; in block $i$ the agents whose $i$-th bit is $1$ visit their neighbours one by one (out along one edge, back along it) and the agents whose $i$-th bit is $0$ wait on their nodes, so any two neighbouring agents meet",
+      "avoid": [
+        "bit-by-bit meeting schedule"
+      ]
+    },
+    {
+      "term": "leader",
+      "definition": "the one agent that ends knowing it is elected, while every other agent ends knowing it is not",
+      "avoid": []
+    },
+    {
+      "term": "fragment",
+      "definition": "a set of nodes connected by edges already chosen for the minimum spanning tree, with one leader; initially every node is a fragment of its own",
+      "avoid": [
+        "component"
+      ]
+    },
+    {
+      "term": "lightest outgoing edge",
+      "definition": "of a fragment $F$, the edge of smallest weight with exactly one end in $F$",
+      "avoid": []
+    },
+    {
+      "term": "minimum spanning tree",
+      "definition": "a set of $n-1$ edges that connects all nodes, contains no cycle, and has the smallest total weight among all such sets; written MST",
+      "avoid": []
+    }
+  ],
   "history": "Spanning trees were the first application of agent-based leader election [Kshemkalyani2024AgentLE]; the question since has been **rounds, then memory**, without knowledge of graph parameters [Chand2025Trees].",
   "measures": [
     {
@@ -132,7 +229,7 @@
     }
   ],
   "figure": {
-    "caption": "MST by growing fragments along their lightest outgoing edges (Borůvka, Gallager-Humblet-Spira) [Chand2025Trees]: agents dispersed on a weighted cycle meet their neighbours with the ID-bit schedule (in each block of $2\\Delta = 4$ rounds, agents whose current ID bit is 1 walk to each neighbour and back, one edge per round). Each one-node fragment adds its lightest edge (weights 1 and 2), giving two fragments (colours) with leaders 3 and 2 (circled). In phase 2 the agents meet again with the same walks (shown round by round) and find the edges that leave their fragment (red); 5 and 6 walk to their leaders to report the lightest outgoing edge, both fragments pick weight 3 and merge into the minimum spanning tree (thick).",
+    "caption": "MST by growing fragments along their lightest outgoing edges (Borůvka, Gallager-Humblet-Spira) [Chand2025Trees]: agents dispersed on a weighted cycle meet their neighbours with the ID-bit schedule (in each block of $2\\Delta = 4$ rounds, agents whose current ID bit is 1 visit each neighbour and come back, one edge per round). Each one-node fragment adds its lightest edge (weights 1 and 2), giving two fragments (colours) with leaders 3 and 2 (circled). In phase 2 the agents meet again with the same walks (shown round by round) and find the edges that leave their fragment (red); 5 and 6 walk to their leaders to report the lightest outgoing edge, both fragments pick weight 3 and merge into the minimum spanning tree (thick).",
     "view": [
       100,
       46
@@ -2240,10 +2337,10 @@
             "w": 1.0
           }
         ],
-        "label": "Phase 2: edges 3 and 4 leave the fragments"
+        "label": "Phase 2: edges of weight 3, 4 leave fragments"
       },
       {
-        "label": "5 reports 3 to leader 3; 6 reports 4 to 2",
+        "label": "5 reports weight 3 to leader 3, 6 weight 4 to 2",
         "ents": [
           {
             "id": "2",
@@ -2358,7 +2455,7 @@
         ]
       },
       {
-        "label": "Final: both pick edge 3; one fragment, the MST",
+        "label": "Final: both pick weight 3; one fragment, the MST",
         "ents": [
           {
             "id": "2",

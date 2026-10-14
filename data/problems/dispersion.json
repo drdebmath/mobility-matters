@@ -12,25 +12,25 @@
     "note": "Posed at ICDCN 2018, fourteen years after collaborative exploration; the introductory paper already relates dispersion to $n$-robot collaborative exploration and takes its tree lower bound from it."
   },
   "summary": "Spread $k \\le n$ agents over the nodes of an $n$-node anonymous graph so that no node hosts more than one agent, as fast as possible and with as little memory per agent as possible.",
-  "statement": "Given a connected graph $G$ with $n$ nodes and $m$ edges, and $k \\le n$ agents placed on the nodes of $G$ in any initial configuration (several agents may share a node), the agents must reach a configuration in which **every node hosts at most one agent**, and stay there.\n\n**Time** is the number of rounds (synchronous) or epochs (asynchronous) until the dispersed configuration is reached; where a result also makes every agent terminate explicitly, the notes say so. **Memory** is the number of bits of persistent memory each agent needs, counting its $O(\\log k)$-bit identifier. Unless a variant or a result says otherwise, agents know nothing about $n$, $m$, $k$, $\\Delta$ or $D$.\n\nDispersion is the natural \"one agent per node\" problem: it is equivalent to leaving one agent at every node of a DFS tree of $k$ nodes, which is why DFS traversal bounds such as $\\min(m, k\\Delta)$ appear throughout, and it is a building block for exploration, leader election and self-deployment of agents.",
+  "statement": "Given a connected graph $G$ with $n$ nodes and $m$ edges, and $k \\le n$ agents placed on the nodes of $G$ in any initial **configuration** (the node of each agent; several agents may share a node), the agents must reach a configuration in which **every node hosts at most one agent**, and stay there.\n\n**Time** is the number of rounds (synchronous) or epochs (asynchronous; an **epoch** is an interval in which every agent completes at least one full Communicate–Compute–Move step, not necessarily the shortest one) until the dispersed configuration is reached; where a result also makes every agent terminate explicitly, the notes say so. **Memory** is the number of bits of persistent memory each agent needs, counting its $O(\\log k)$-bit identifier. Unless a variant or a result says otherwise, agents know nothing about $n$, $m$, $k$, $\\Delta$ or $D$.\n\nDispersion is the natural \"one agent per node\" problem: it is equivalent to leaving one agent at every node of a depth-first search (DFS) tree of $k$ nodes, which is why depth-first search bounds such as $\\min(m, k\\Delta)$ appear throughout, and it is a building block for exploration, leader election and self-deployment of agents.",
   "primer": {
-    "intro": "Think of $k$ electric cars arriving in a town where each charging point (a node) can serve only one car, and no car has a map. The town is a connected graph with $n$ nodes and $m$ edges, and $k \\le n$ agents with distinct identifiers (ID numbers) start on nodes, several possibly on the same node. Time passes in synchronous **rounds**: in each round, agents at the same node can read each other's memory (**local communication**), and then each agent may move along one edge, choosing it by its port number (the local number of that edge at the node). The agents know nothing about the graph, not even $n$. They must reach a configuration in which **every node holds at most one agent**; we measure the number of rounds and the number of bits of memory each agent needs.",
+    "intro": "Think of $k$ electric cars arriving in a town where each charging point can serve only one car, and no car has a map. We model the town as a **graph**: charging points are **nodes**, roads between them are **edges**, and each car is an **agent**. The graph is connected and has $n$ nodes and $m$ edges; the nodes are **anonymous** (they have no names and nothing can be written on them). The $k \\le n$ agents have distinct **identifiers** (ID numbers) and start on nodes, several possibly on the same node. Time passes in synchronous **rounds**: in each round, agents at the same node can read each other's memory (**local communication**), and then each agent may move along one edge, choosing it by its **port** (the local number of that edge at the node). The agents know nothing about the graph, not even $n$. They must reach a **configuration** (the node of each agent) in which **every node holds at most one agent**; we measure the number of rounds and the number of bits of **memory** each agent needs.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Depth-first search with a settled agent per node",
         "variant": "rooted",
         "ref": "Augustine2018Tradeoffs",
-        "idea": "When all $k$ agents start on one node (the **rooted** case), the agents move as one group and use settled agents as markers, as in [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient].\n1. At the start node, the agent with the smallest ID **settles**: it stays there for good and remembers by which port the group arrived (its **parent port**; none at the start).\n2. The rest of the group leaves by the next port not yet tried at this node.\n3. If the node it reaches already has a settled agent, it has been visited: the group goes back by the port it came in and tries the next port there.\n4. If the node is empty, the smallest ID in the group settles there and records the parent port; go to step 2.\n5. When every port of a node has been tried, the group goes back through that node's parent port, which the settled agent tells it.\n6. The group shrinks by one at each new node, and the procedure ends when the last agent settles.",
+        "idea": "When all $k$ agents start on one node (the **rooted** case), the agents move as one group and run a **depth-first search** (DFS: go forward through an untried port while there is one, go back otherwise), using agents that stay behind on nodes (**settled agents**) as markers, as in [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient].\n1. At the start node, the agent with the smallest ID **settles**: it stays there for good and remembers by which port the group arrived (its **parent port**; none at the start).\n2. The rest of the group leaves by the next port not yet tried at this node.\n3. If the node the group reaches already has a settled agent, it has been visited: the group goes back by the port it came in and tries the next port there.\n4. If the node is empty, the smallest ID in the group settles there and records the parent port; go to step 2.\n5. When every port of a node has been tried, the group goes back through that node's parent port, which the settled agent tells it.\n6. The group shrinks by one at each new node, and the procedure ends when the last agent settles.",
         "analysis": "This is a depth-first search in which the settled agents replace the \"visited\" marks that anonymous nodes cannot hold. Each edge is tried at most once from each of its two endpoints, and each try costs two moves (there and back) or turns into a tree edge, so the time is $O(m)$ rounds; tries happen only at the at most $k$ nodes that receive an agent, each with at most $\\Delta$ ports, which gives $O(\\min(m, k\\Delta))$, where $\\Delta$ is the maximum degree. A settled agent remembers its ID and a few port numbers, $O(\\log(k+\\Delta))$ bits. The current best is $O(k)$ rounds with $O(\\log(k+\\Delta))$ bits, from any start [Kshemkalyani2025Almost]: it gets rid of the cost of checking every port, which held the field at $O(\\min(m,k\\Delta))$ until [Sudo2024NearLinear].",
-        "why_it_matters": "Using the agents themselves as markers is the idea every dispersion algorithm builds on, and it links dispersion to collaborative exploration with anonymous nodes."
+        "why_it_matters": "Using the agents themselves as markers is the idea every dispersion algorithm builds on, and it ties dispersion to collaborative exploration with anonymous nodes."
       },
       {
         "kind": "lower-bound",
         "title": "Distance: Omega(k) rounds",
         "variant": "base",
         "ref": "Kshemkalyani2019Efficient",
-        "idea": "Put all $k$ agents on one end of a path (dots in a row). In the end the $k$ agents must stand on $k$ different nodes of the path, so one of them stands at least $k-1$ edges from the end where they all started. An agent crosses at most one edge per round.",
+        "idea": "Put all $k$ agents on one end of a path (nodes in a row, each joined by an edge to the next). In the end the $k$ agents must stand on $k$ different nodes of the path, so one of them stands at least $k-1$ edges from the end where they all started. An agent crosses at most one edge per round.",
         "analysis": "So some agent needs at least $k-1$ rounds, whatever the algorithm: $\\Omega(k)$ [Kshemkalyani2019Efficient]. The argument uses only distance, so it holds even for randomised algorithms, unlimited memory and global communication. The $O(k)$ algorithm of [Kshemkalyani2025Almost] matches it, so the time question is settled up to a constant factor.",
         "why_it_matters": "It fixed the target: after it, every dispersion algorithm was measured by how far it is from $k$ rounds."
       },
@@ -45,6 +45,102 @@
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected graph $G=(V,E)$ on which the agents move, with $n$ nodes and $m$ edges",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; a node can host any number of agents",
+      "avoid": [
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; an agent crosses at most one edge per round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "nodes have no names an agent can read and no storage on which it can leave marks",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "one of the $k \\le n$ mobile entities, each with a distinct identifier and its own memory",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct number (ID) of an agent, of $O(\\log k)$ bits",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the node on which each agent stands at a given time",
+      "avoid": [
+        "placement"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step: agents at the same node read each other's memory, then each agent moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "epoch",
+      "definition": "in the asynchronous setting, an interval of time in which every agent completes at least one full Communicate–Compute–Move step; it need not be the shortest such interval",
+      "avoid": []
+    },
+    {
+      "term": "memory",
+      "definition": "the bits an agent keeps between rounds, counting its identifier",
+      "avoid": []
+    },
+    {
+      "term": "local communication",
+      "definition": "agents at the same node can read each other's memory; agents at different nodes cannot communicate",
+      "avoid": []
+    },
+    {
+      "term": "rooted",
+      "definition": "the start in which all $k$ agents are on one node",
+      "avoid": []
+    },
+    {
+      "term": "settled agent",
+      "definition": "an agent that has stopped on a node for good; it stands for the visited mark that an anonymous node cannot hold",
+      "avoid": []
+    },
+    {
+      "term": "parent port",
+      "definition": "the port through which the group arrived at the node where an agent settled; none at the start node",
+      "avoid": []
+    },
+    {
+      "term": "depth-first search",
+      "definition": "a traversal that goes forward through an untried port as long as there is one and goes back through the parent port otherwise",
+      "avoid": []
+    }
+  ],
   "history": "Augustine and Moses Jr. posed dispersion as **a study of memory–time trade-offs** [Augustine2018Tradeoffs]: the primary aim was to **minimise the number of rounds**, and then the **memory per agent**, with $\\Omega(k)$ rounds and $\\Omega(\\log k)$ bits as the targets. Most of the later work closes these two gaps under weaker assumptions (arbitrary start, asynchrony, faults, dynamic graphs); the time-optimal $O(k)$ algorithm with $O(\\log(k+\\Delta))$ bits came in 2025 [Kshemkalyani2025Almost]. Its roots are in $n$-agent collaborative exploration, which a dispersion with $k = n$ solves.",
   "measures": [
     {
@@ -445,7 +541,7 @@
         "timing": "sync"
       },
       "title": "More agents than nodes",
-      "summary": "With $k > n$ the target is a balanced placement: at most $\\lceil k/n\\rceil$ agents per node. Only randomized anonymous results exist.",
+      "summary": "With $k > n$ the target is a balanced configuration: at most $\\lceil k/n\\rceil$ agents per node. Only randomized anonymous results exist.",
       "statement": "$k > n$ agents must reach a configuration in which every node hosts at most $\\lceil k/n \\rceil$ agents (sometimes called $k$-dispersion). Agents do not know $n$.",
       "lower_bounds": [
         {
@@ -1906,7 +2002,7 @@
     }
   ],
   "figure": {
-    "caption": "Dispersion from a rooted start, by the depth-first search of [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient]: $k = 5$ agents start on one node of an anonymous port-labelled graph and move as one group. At each new node the smallest ID settles (green) and records its parent port; the group tries the ports in order, goes back when a node is occupied, and returns through the parent port when no port is left. One frame per round; the green edges form the depth-first tree.",
+    "caption": "Dispersion from a rooted start, by the depth-first search of [Augustine2018Tradeoffs] and [Kshemkalyani2019Efficient]: $k = 5$ agents start on one node of an anonymous port-labelled graph and move as one group. At each new node the agent with the smallest ID settles (green) and records its parent port; the group tries the ports in order, goes back when a node is occupied, and returns through the parent port when no port is left. One frame per round; the green edges form the depth-first tree.",
     "view": [
       100,
       56

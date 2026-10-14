@@ -14,17 +14,17 @@
     }
   ],
   "summary": "Robots that may start at shared points must move to pairwise distinct points.",
-  "statement": "$n$ robots start at points of the plane, several possibly at the same point. They must reach a configuration in which all positions are distinct, and stay there.",
+  "statement": "$n$ robots start at points of the plane, several possibly at the same point (a **multiplicity**). They must reach a configuration in which all positions are distinct, and stay there.",
   "primer": {
-    "intro": "Picture a box of marbles that were all tipped onto the same spot of a table, and you want them to roll apart so that no two touch the same point. In the scattering problem $n$ robots start in the plane, several possibly at the same point, and must reach positions that are all distinct and then stay distinct. Robots are *oblivious* (they forget everything after each move), work in *Look-Compute-Move* cycles (look at everyone, compute a destination, move), and in each *round* an adversary (an opponent who controls everything the algorithm does not) chooses which robots act; this is the SSYNC scheduler. In the basic catalogued version robots may flip coins (*randomized*), and a robot can see how many robots share each point (*strong multiplicity detection*).",
+    "intro": "Imagine a box of marbles that were all tipped onto the same spot of a table, and you want them to roll apart so that no two touch the same point. In the scattering problem the marbles are $n$ **robots**: they start in the plane, several possibly at the same point (a **multiplicity**), and must reach a **configuration** (the positions of all robots) in which all positions are distinct, and then stay distinct. Robots are **oblivious** (they forget everything after each move) and work in **Look–Compute–Move cycles**: take a **snapshot** of everyone, compute a destination, move. In each **round** an **adversary** (an opponent who controls everything the algorithm does not) chooses which robots act, and each of them performs one full cycle; this is the SSYNC **scheduler**. In the basic catalogued version robots may flip coins (**randomized**), and a robot can see how many robots share each point (**strong multiplicity detection**).",
     "ideas": [
       {
         "kind": "impossibility",
         "title": "Two robots on one spot can never be told apart",
         "variant": "ssync-randomized",
         "ref": "Dieudonne2009Scatter",
-        "idea": "Start with all robots on the same point, give them all the same coordinate system, and let the adversary activate all of them in every round. Each robot sees exactly the same snapshot, so a deterministic rule sends every robot to the same destination. After the move they are again all on one point, with identical snapshots, and so on forever.",
-        "analysis": "By induction, there is an execution in which the robots never separate, so no deterministic algorithm solves scattering [Dieudonne2009Scatter]. The argument does not care whether robots remember the past or can count robots at a point: the robots' memories are equal as well, so their histories never differ. Only randomness can make two co-located robots behave differently.",
+        "idea": "Start with all robots on the same point, give them all the same **local coordinate system** (the axes, unit and handedness in which a robot reads its snapshot), and let the adversary activate all of them in every round. Each robot sees exactly the same snapshot, so a **deterministic** rule (one without coin flips) sends every robot to the same destination. After the move they are again all on one point, with identical snapshots, and so on forever.",
+        "analysis": "By induction, there is an execution in which the robots never separate, so no deterministic algorithm solves scattering [Dieudonne2009Scatter]. The argument does not care whether robots remember the past or can count robots at a point: the robots' memories are equal as well, so their histories never differ. Only randomness can make two robots on the same point behave differently.",
         "why_it_matters": "It is the cleanest example of why some robot problems need randomness at all, and it explains why scattering is studied only with coin flips."
       },
       {
@@ -32,12 +32,88 @@
         "title": "Flip a coin, then move inside your own Voronoi cell",
         "variant": "ssync-randomized",
         "ref": "Dieudonne2009Scatter",
-        "idea": "Each time a robot is activated:\n1. Look at the occupied points and compute the *Voronoi diagram*: the cell of an occupied point is the set of places strictly closer to it than to any other occupied point.\n2. Flip a fair coin.\n3. Heads: move to some point of your own cell other than where you stand. Tails: stay.",
-        "analysis": "Robots on different points never collide again, because each moves only inside its own cell and the cells do not overlap. Two robots on the same point are separated in a round where exactly one of them moves; if both are active this happens with probability $1/2$, so with probability 1 they eventually separate [Dieudonne2009Scatter]. If all movers from a point pick the same destination, a crowd of $m$ robots is at best split in two per round, so about $\\log_2 m$ rounds are needed; robots that can count the robots on their point scatter in $O(1)$ expected rounds [Clement2010Cost], and with weaker counting $O(\\log\\log n)$ rounds, which is optimal for algorithms that use the fewest random bits [Bramas2017RandomBit].",
+        "idea": "Each time a robot is activated:\n1. Look at the occupied points and compute the *Voronoi diagram*: the **Voronoi cell** of an occupied point is the set of places strictly closer to it than to any other occupied point.\n2. Flip a fair coin.\n3. Heads: move to some point of your own cell other than where you stand. Tails: stay.",
+        "analysis": "Robots on different points never collide again, because each moves only inside its own cell and the cells do not overlap. Two robots on the same point are separated in a round where exactly one of them moves; if both are active this happens with probability $1/2$, so with probability 1 they eventually separate [Dieudonne2009Scatter]. If all movers from a point pick the same destination, a crowd of $q$ robots is at best split in two per round, so about $\\log_2 q$ rounds are needed; robots that can count the robots on their point scatter in $O(1)$ expected rounds [Clement2010Cost], and with weaker counting $O(\\log\\log n)$ rounds, which is optimal for algorithms that use the fewest random bits [Bramas2017RandomBit].",
         "why_it_matters": "Moving only inside your own Voronoi cell is a reusable trick for keeping already separated robots apart, and randomized scattering is used to break symmetry before running deterministic algorithms such as pattern formation."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "multiplicity",
+      "definition": "a point of the plane occupied by several robots",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "the repeated behaviour of a robot: Look (take a snapshot), Compute (a destination point from the snapshot), Move (towards that destination)",
+      "avoid": [
+        "Look-Compute-Move"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the positions of the robots that the robot sees, expressed in its local coordinate system",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "in FSYNC and SSYNC, one step of time in which every activated robot performs one full Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that makes every choice the algorithm does not control: activations, the duration of phases, where non-rigid moves stop, and the local coordinate systems",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "randomized",
+      "definition": "robots may use random bits (coin flips) in Compute; guarantees hold with probability 1 or in expectation",
+      "avoid": []
+    },
+    {
+      "term": "strong multiplicity detection",
+      "definition": "a snapshot gives, for every occupied point, the exact number of robots on it",
+      "avoid": []
+    },
+    {
+      "term": "deterministic",
+      "definition": "robots use no random bits: the destination is a function of the snapshot",
+      "avoid": []
+    },
+    {
+      "term": "Voronoi cell",
+      "definition": "for an occupied point $p$, the set of places of the plane strictly closer to $p$ than to any other occupied point",
+      "avoid": []
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    }
+  ],
   "history": "Scattering was first a **feasibility** question: it cannot be solved deterministically, so randomness is needed [Dieudonne2009Scatter]. The measures then became **expected rounds and random bits** [Clement2010Cost] [Bramas2017RandomBit], and keeping the swarm connected under limited visibility [Izumi2018Connectivity].",
   "measures": [
     {

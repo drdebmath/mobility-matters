@@ -12,7 +12,7 @@ Run after changing the citation, version, abstract or the list of problems:
     python3 scripts/sync-meta.py          # write both files
     python3 scripts/sync-meta.py --check  # exit 1 if they are out of date (used by validate.py)
 """
-import html, json, re, sys
+import hashlib, html, json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -122,6 +122,11 @@ def main():
         new = re.sub(r"  <!-- scholar:begin.*?<!-- scholar:end -->", lambda m: block, s, flags=re.S)
     else:
         new = s.replace("  <link rel=\"icon\"", block + "\n  <link rel=\"icon\"", 1)
+    # cache busting: the stylesheet and the renderer are linked with a hash of their content, so a browser
+    # never pairs a new stylesheet with an old renderer after an update
+    for asset in ("assets/style.css", "assets/app.js"):
+        h = hashlib.sha1((ROOT / asset).read_bytes()).hexdigest()[:10]
+        new = re.sub(r'(["\'])%s(\?v=[0-9a-f]+)?\1' % re.escape(asset), lambda m: f"{m.group(1)}{asset}?v={h}{m.group(1)}", new)
     ab = about(idx)
     old_ab = (ROOT / "about.html").read_text(encoding="utf-8") if (ROOT / "about.html").exists() else ""
     if "--check" in sys.argv:

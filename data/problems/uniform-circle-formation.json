@@ -19,17 +19,17 @@
     }
   ],
   "summary": "Robots must form a regular $n$-gon: a circle with equal spacing.",
-  "statement": "$n$ robots start at distinct points and must reach the vertices of a regular $n$-gon (in any position and size) and stay there. **Time** is in epochs (ASYNC) or rounds; **colours** count light colours in the luminous model.",
+  "statement": "$n$ robots start at distinct points and must reach the vertices of a regular $n$-gon (in any position and size) and stay there. **Time** is in epochs (ASYNC: intervals in which every robot completes at least one full Look–Compute–Move cycle) or rounds; **colours** count light colours in the luminous model.",
   "primer": {
-    "intro": "Picture guards who must stand evenly spaced around a circular fence that nobody has built: the circle and the spacing must come from the guards themselves. There are $n$ robots, points at distinct places in the plane. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), share no sense of direction or handedness, and the **scheduler** (an adversary) is ASYNC: each phase may take any finite time. Moves are **non-rigid**: a robot may be stopped after a minimum distance $\\delta$. The robots must reach the corners of a **regular $n$-gon** (all sides and angles equal), of any size and position, and stay there.",
+    "intro": "Picture guards who must stand evenly spaced around a circular fence that nobody has built: the circle and the spacing must come from the guards themselves. There are $n$ **robots**, points at distinct places in the plane; their positions form the **configuration**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent, **oblivious** (no memory between cycles), and each uses its own **local coordinate system**, so they agree on no direction and no handedness. The **scheduler** (an adversary) decides the **activation** of robots, that is, when each performs a cycle, and is ASYNC: each phase may take any finite time. Every move is a **non-rigid move**: a robot may be stopped after a minimum distance $\\delta$. The robots must reach the **vertices** of a **regular $n$-gon** (a polygon with $n$ equal sides and equal angles), one robot on each vertex, of any size and position, and stay there.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Fix the smallest enclosing circle, reach it, then let symmetric robots move as one",
         "variant": "async",
         "ref": "Flocchini2017Uniform",
-        "idea": "1. Compute the **smallest enclosing circle** (SEC) of all robots; every robot computes the same circle. All moves are chosen so that this circle does not change.\n2. Robots inside the circle move out to it, as in circle formation.\n3. With all robots on the circle, group them into **analogy classes**: two robots are analogous if some symmetry of the whole configuration maps one to the other.\n4. The scheduler could make analogous robots act identically anyway, so the algorithm makes each class always move together, deliberately and symmetrically.\n5. The robots compute the corners of a regular $n$-gon on the circle and move to them class by class. Special configurations that are already close to regular (pre-regular, biangular) get their own procedure.",
-        "analysis": "The overall plan is simple; the difficulty is that asynchronous robots act on outdated snapshots, so the analogy classes and targets that one robot sees may already be stale. Flocchini, Prencipe, Santoro and Viglietta show that oblivious, disoriented robots with non-rigid moves form a regular $n$-gon in ASYNC from every start at distinct points, for every $n$ [Flocchini2017Uniform]; the case $n = 4$ is solved in [Mamino2016Square]. Time is not analysed; for opaque robots with lights, $O(1)$ epochs and $O(1)$ colours suffice [Feletti2024Optimal].",
+        "idea": "1. Compute the **smallest enclosing circle** (SEC) of all robots; every robot computes the same circle. All moves are chosen so that this circle does not change.\n2. Robots inside the circle move out to it, as in circle formation.\n3. With all robots on the circle, group them into **analogy classes**: two robots are analogous if some symmetry of the whole configuration maps one to the other.\n4. The scheduler could make analogous robots act identically anyway, so the algorithm makes each class always move together, deliberately and symmetrically.\n5. The robots compute the vertices of a regular $n$-gon on the circle and move to them class by class. Special configurations that are already close to regular (pre-regular, biangular) get their own procedure.",
+        "analysis": "The overall plan is simple; the difficulty is that asynchronous robots act on outdated snapshots, so the analogy classes and destinations that one robot computes may already be stale. Flocchini, Prencipe, Santoro and Viglietta show that oblivious, disoriented robots with non-rigid moves form a regular $n$-gon in ASYNC from every initial configuration at distinct points, for every $n$ [Flocchini2017Uniform]; the case $n = 4$ is solved in [Mamino2016Square]. Time is not analysed; for opaque robots with lights, $O(1)$ epochs and $O(1)$ colours suffice [Feletti2024Optimal].",
         "why_it_matters": "It closed a long-standing question and showed that, for pattern formation, asynchrony, chirality and rigid moves do not add computational power."
       },
       {
@@ -37,21 +37,98 @@
         "title": "Two robots on the same point can never be separated",
         "variant": "async",
         "ref": "Flocchini2017Uniform",
-        "idea": "Suppose two robots start at the same point. They see exactly the same positions. The adversary gives them identical coordinate systems and the scheduler always wakes them together. Identical robots with identical snapshots and identical coordinates compute the same destination, so they move together and are still on one point after every round. A regular $n$-gon has $n$ distinct corners, so it is never formed.",
+        "idea": "Suppose two robots start at the same point. They get exactly the same snapshot. The adversary gives them identical local coordinate systems and the scheduler always activates them together. Identical robots with identical snapshots and identical local coordinate systems compute the same destination, so they move together and are still on one point after every cycle. A regular $n$-gon has $n$ distinct vertices, so it is never formed.",
         "analysis": "This is why the problem asks for distinct starting points; Flocchini et al. note that with two robots on one point the problem is \\\"easily seen to be unsolvable\\\" [Flocchini2017Uniform]. The same trap is the reason careful algorithms never let two robots meet while they move.",
         "why_it_matters": "It is the simplest example of a symmetry that oblivious deterministic robots can never break."
       },
       {
         "kind": "impossibility",
-        "title": "Why only the point and the regular polygon can be formed from every start",
+        "title": "Why only the point and the regular polygon can be formed from every initial configuration",
         "variant": "async",
         "ref": "Suzuki1999Formation",
-        "idea": "Start the robots on a regular $n$-gon. Give every robot a coordinate system whose $x$-axis points to the centre, all with the same unit. All robots see the same snapshot; if the scheduler wakes all of them together, they all make the same move up to rotation, so the configuration stays a regular $n$-gon (or collapses to its centre). So from this start the only formable patterns are the regular $n$-gon and the single point.",
-        "analysis": "Suzuki and Yamashita showed that the patterns formable from a start depend on its symmetricity, its amount of rotational symmetry [Suzuki1999Formation]; the regular $n$-gon has the most. Hence the point (gathering) and the regular $n$-gon (uniform circle) are the only patterns that might be formable from every start, and both are [Flocchini2017Uniform].",
+        "idea": "Start the robots on a regular $n$-gon. Give every robot a local coordinate system whose $x$-axis points to the centre, all with the same unit. All robots get the same snapshot; if the scheduler activates all of them together, they all make the same move up to rotation, so the configuration stays a regular $n$-gon (or collapses to its centre). So from this initial configuration the only formable patterns are the regular $n$-gon and the single point.",
+        "analysis": "Suzuki and Yamashita showed that the patterns formable from an initial configuration depend on its **symmetricity**, its amount of rotational symmetry [Suzuki1999Formation]; the regular $n$-gon has the most. Hence the point (gathering) and the regular $n$-gon (uniform circle) are the only patterns that might be formable from every initial configuration, and both are [Flocchini2017Uniform].",
         "why_it_matters": "It explains why the uniform circle is singled out among all patterns: it is one of only two universally formable ones."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "the origin, axes, unit of length and handedness in which a robot expresses its snapshot and its destination; robots agree on none of these unless the setting assumes chirality, one common axis or a common compass",
+      "avoid": [
+        "private coordinate system"
+      ]
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "non-rigid move",
+      "definition": "a move that the adversary may stop before the destination, but only after the robot has travelled at least the distance $\\delta$"
+    },
+    {
+      "term": "epoch",
+      "definition": "an interval of an ASYNC execution in which every robot completes at least one full Look–Compute–Move cycle; a bound of $X$ epochs holds for every division of the execution into consecutive epochs"
+    },
+    {
+      "term": "regular $n$-gon",
+      "definition": "a polygon with $n$ vertices, equal sides and equal angles; here of any position and size"
+    },
+    {
+      "term": "vertex",
+      "definition": "one of the $n$ corner points of the regular $n$-gon, each to be occupied by one robot",
+      "avoid": [
+        "corner",
+        "corners"
+      ]
+    },
+    {
+      "term": "smallest enclosing circle",
+      "definition": "the unique smallest circle that contains a given finite set of points (by default the robots of the configuration), abbreviated SEC; it does not depend on any local coordinate system"
+    },
+    {
+      "term": "analogy class",
+      "definition": "a set of robots that the symmetries of the whole configuration map onto one another; two robots in one class are analogous"
+    }
+  ],
   "history": "Uniform circle formation was first asked as **solvability**: can disoriented oblivious robots form a regular polygon? It was solved for SSYNC [Dieudonne2008Circle] and then for ASYNC without chirality or rigidity [Flocchini2017Uniform] [Mamino2016Square]. Only after feasibility was settled did the community turn to **time and colours** for luminous opaque robots [Feletti2023Schedulers] [Pattanayak2024TimeColor], reaching $O(1)$ epochs with $O(1)$ colours [Feletti2024Optimal].",
   "measures": [
     {

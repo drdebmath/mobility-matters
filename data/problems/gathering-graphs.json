@@ -13,15 +13,15 @@
     "relation": "Rendezvous is gathering of two agents; with more agents the questions become which teams can gather, and how many faulty agents a team tolerates."
   },
   "summary": "Several agents must all meet at one node of an unknown graph, possibly despite faulty agents.",
-  "statement": "$k \\ge 2$ agents start at different nodes of an unknown connected graph and must all be at the same node at the same time, and (with detection) know it. **Time** is in rounds; **team** is the number of good agents needed when some agents are Byzantine.",
+  "statement": "$k \\ge 2$ agents start at different nodes of an unknown connected graph and must all be at the same node at the same time, and (with **detection**) know it. **Time** is in rounds; **team** is the number of good agents needed when some agents are **Byzantine** (faulty agents that move arbitrarily and may lie).",
   "primer": {
-    "intro": "A group of hikers scattered over a trail network wants to get together at one spot, with no phones and no map. We have $k \\ge 2$ agents at different nodes of an unknown connected graph (dots joined by lines, with port numbers on the edges); time passes in synchronous **rounds**, and in each round an agent stays or walks along one edge. All agents must be at the same node at the same time and, in the version **with detection**, know that everyone has arrived. In the basic version the agents are **anonymous** (identical: same algorithm, no labels), there are no faults, and $n$ denotes the number of nodes; the question is which starting configurations can be gathered, and how fast.",
+    "intro": "A group of hikers scattered over a trail network wants to get together at one spot, with no phones and no map. The network is a **graph**: trail junctions are **nodes** and the trails between them are **edges**; the hikers are $k \\ge 2$ **agents** that start at different nodes of this unknown connected graph. At each node the edges at that node carry local numbers, its **ports**. Time passes in synchronous **rounds**, and in each round an agent stays or moves along one edge. All agents must be at the same node at the same time and, in the version **with detection**, know that everyone has arrived. In the basic version the agents are **anonymous** (identical: same algorithm, no **labels**, that is, no distinct integers that tell them apart), there are no faults, and $n$ denotes the number of nodes; the question is which starting **configurations** (the sets of nodes on which the agents start) can be gathered, and how fast.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Meet in pairs, then follow the largest label",
         "variant": "labelled",
-        "idea": "A standard approach for agents with distinct labels that can read each other's label when they are at the same node. It uses any rendezvous algorithm for two labelled agents that works whatever the delay between their starts, such as the one of [Dessmark2006Deterministic].\n1. Every agent starts as the **leader** of a group containing only itself, and runs the rendezvous algorithm with its own label.\n2. When groups meet at a node, everyone there adopts the largest label present; the agent with that label remains a leader and continues its own rendezvous algorithm as if nothing had happened.\n3. Every other agent stops being a leader and from now on simply follows its leader's moves.",
+        "idea": "A standard approach for agents with distinct labels that can read each other's label when they are at the same node. It uses any rendezvous algorithm for two labelled agents (an algorithm that makes two agents meet at one node) that works whatever the delay between their starts, such as the one of [Dessmark2006Deterministic].\n1. Every agent starts as the **leader** of a **group** containing only itself, and runs the rendezvous algorithm with its own label.\n2. When groups meet at a node, everyone there adopts the largest label present; the agent with that label remains a leader and continues its own rendezvous algorithm as if nothing had happened.\n3. Every other agent stops being a leader and from now on simply follows its leader's moves.",
         "analysis": "A leader's walk is exactly what it would do alone, so any two leaders are guaranteed to meet by the rendezvous algorithm, and at each such meeting one of them stops being a leader. The agent with the largest label is never absorbed, and every other leader meets its group at the latest when it meets that agent, so eventually all $k$ agents move as one group. The time is at most $k-1$ rendezvous times. This gives gathering but not detection: knowing that nobody is missing needs extra knowledge, for example of $n$; with more than $n/2$ agents and $n$ known, [Molla2023Fast] gather with detection in $O(n^3)$ rounds.",
         "why_it_matters": "Reducing gathering to repeated rendezvous with merging is the simplest way to see why distinct labels make gathering solvable."
       },
@@ -39,12 +39,101 @@
         "title": "Byzantine agents can impersonate the whole team",
         "variant": "byzantine",
         "ref": "Dieudonne2014Mischief",
-        "idea": "Some agents may be **Byzantine**: faulty agents that move arbitrarily and, in the strong version, may lie about their labels. Take $f = 2$ good agents, labelled 0 and 1, and 2 Byzantine ones, on a ring of 4 nodes $v_0, v_1, v_2, v_3$ with port 0 leading clockwise everywhere. **Run 1:** good agents 0 and 1 on $v_0, v_1$; the two Byzantine agents on $v_2, v_3$ claim labels 0 and 1 and follow the algorithm honestly. The picture is symmetric, so when the good agents gather at some node $v_i$ and stop, the fakes stop at the opposite node $v_{i+2}$. **Run 2:** the same, except good agent 0 and its fake swap starting places.",
-        "analysis": "Every agent sees in run 2 exactly what it saw in run 1, so everyone does the same thing; at the end good agent 1 stands with fake 0 on one node and good agent 0 stands with fake 1 on the opposite node, and both groups stop. The good agents are not gathered, so with $f$ strongly Byzantine agents, $f$ good agents cannot gather, even if $n$ is known [Dieudonne2014Mischief] (their Theorem 4.7, for every $f$, on a ring of $2f$ nodes). With $f+1$ good agents ($n$ known) or $f+2$ ($n$ unknown) gathering becomes possible [Bouchard2016Byzantine].",
+        "idea": "Some agents may be **Byzantine**: faulty agents that move arbitrarily and, in the strong version, may lie about their labels. Take $f = 2$ good agents, labelled 0 and 1, and 2 Byzantine ones, on a ring of 4 nodes $v_0, v_1, v_2, v_3$ with port 0 leading clockwise everywhere. **Run 1:** good agents 0 and 1 on $v_0, v_1$; the two Byzantine agents on $v_2, v_3$ claim labels 0 and 1 and follow the algorithm honestly. The configuration is symmetric, so when the good agents gather at some node $v_i$ and stop, the Byzantine agents stop at the opposite node $v_{i+2}$. **Run 2:** the same, except good agent 0 and the Byzantine agent claiming label 0 swap starting nodes.",
+        "analysis": "Every agent sees in run 2 exactly what it saw in run 1, so everyone does the same thing; at the end good agent 1 stands with the Byzantine agent claiming label 0 on one node and good agent 0 stands with the Byzantine agent claiming label 1 on the opposite node, and both groups stop. The good agents are not gathered, so with $f$ strongly Byzantine agents, $f$ good agents cannot gather, even if $n$ is known [Dieudonne2014Mischief] (their Theorem 4.7, for every $f$, on a ring of $2f$ nodes). With $f+1$ good agents ($n$ known) or $f+2$ ($n$ unknown) gathering becomes possible [Bouchard2016Byzantine].",
         "why_it_matters": "This \"two indistinguishable runs\" argument is the standard way to prove that faulty agents make a task impossible, and it shows how many good agents a fault-tolerant algorithm must assume."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the unknown connected graph $G = (V, E)$ with $n$ nodes on which the agents move",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "one of the $k \\ge 2$ mobile entities; good agents follow the algorithm",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number of an edge at a node $v$; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit",
+        "door"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous time step in which each agent stays or moves along one edge",
+      "avoid": []
+    },
+    {
+      "term": "label",
+      "definition": "a distinct integer that an agent knows about itself and that agents at the same node can read",
+      "avoid": [
+        "identifier"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "for agents: identical, with the same algorithm and no labels",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the set of nodes on which the agents stand (at the start: the starting configuration)",
+      "avoid": [
+        "placement"
+      ]
+    },
+    {
+      "term": "detection",
+      "definition": "gathering with detection: the agents also know that all of them are at the same node, and stop",
+      "avoid": []
+    },
+    {
+      "term": "leader",
+      "definition": "in gathering by merging rendezvous, the agent of a group that runs its own rendezvous algorithm; the others follow it",
+      "avoid": []
+    },
+    {
+      "term": "group",
+      "definition": "in gathering by merging rendezvous, a leader and the agents that follow it, all on the same node",
+      "avoid": []
+    },
+    {
+      "term": "Byzantine",
+      "definition": "of an agent: faulty, it moves arbitrarily and (strongly Byzantine) may lie about its label; $f$ bounds their number",
+      "avoid": [
+        "fake"
+      ]
+    },
+    {
+      "term": "team",
+      "definition": "the number of good agents an algorithm needs when $f$ agents may be Byzantine",
+      "avoid": []
+    }
+  ],
   "history": "Gathering of many agents in graphs was studied as the natural extension of rendezvous [Pelc2019Survey]: first **which configurations can gather** at all [Dieudonne2016Anonymous], then **how many faulty agents** a team can tolerate [Dieudonne2014Mischief] [Bouchard2016Byzantine], and only then time [Bouchard2022Polynomial] [Molla2023Fast].",
   "measures": [
     {
@@ -332,7 +421,7 @@
     }
   ],
   "figure": {
-    "caption": "Gathering of labelled agents by merging rendezvous [Dessmark2006Deterministic]: each leader runs the explore-or-wait rendezvous of a tree with its own label (after one tour to learn $n$, one block of $2(n-1)$ rounds per bit of its doubled label followed by $01$: explore on 1, wait at home on 0); when groups meet, the largest label stays leader and the others follow it. Colours show the leader each agent follows; one frame per round. Gathering is reached, but without detection.",
+    "caption": "Gathering of labelled agents by merging rendezvous [Dessmark2006Deterministic]: each leader runs the explore-or-wait rendezvous of a tree with its own label (after one tour to learn $n$, one block of $2(n-1)$ rounds per bit of its doubled label followed by $01$: explore on 1, wait at its start node on 0); when groups meet, the largest label stays leader and the others follow it. Colours show the leader each agent follows; one frame per round. Gathering is reached, but without detection.",
     "view": [
       100,
       56

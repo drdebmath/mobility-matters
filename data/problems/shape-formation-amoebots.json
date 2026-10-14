@@ -14,26 +14,26 @@
     }
   ],
   "summary": "Particles must rearrange into a target shape (a line, a triangle, any shape built from triangles).",
-  "statement": "From a connected initial configuration of $n$ particles, the particles must reach a configuration forming a given shape (at a scale depending on $n$). **Time** is in rounds; **moves** counts expansions and contractions.",
+  "statement": "From a connected initial **configuration** (the set of nodes occupied by particles) of $n$ particles, the particles must reach a configuration forming a given **target shape** (at a scale depending on $n$). **Time** is in rounds; **moves** counts expansions and contractions.",
   "primer": {
-    "intro": "Think of a pile of clay made of tiny identical robots that should mould itself into a triangle, a hexagon or a line. There are $n$ particles on the triangular grid, forming a connected group with no holes; each has a few bits of memory and talks only to the particles it touches. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. In the standard version the particles do not agree on clockwise or on north, and an adversarial scheduler decides who acts when. They all know a small description of the target shape, and must end up forming it, scaled up so that it uses all $n$ particles. We count *rounds* (stretches of time in which every particle acts at least once) and *moves* (expansions and contractions).",
+    "intro": "Think of a pile of clay made of tiny identical machines that should mould itself into a triangle, a hexagon or a line. Each machine is a **particle**. It occupies one **node** of the **triangular lattice**, the infinite tiling of the plane by equilateral triangles whose corners are the nodes; particles on adjacent nodes are **neighbours**. There are $n$ particles, and their nodes form a connected **configuration** with no holes (empty regions enclosed by particles); each particle has a few bits of memory and talks only to its neighbours. A particle moves in two steps: an **expansion** into an empty adjacent node, after which it briefly occupies both nodes, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. In the standard version the particles do not agree on clockwise (they have no **chirality**) or on north, and an adversarial scheduler decides when each particle acts; each time a particle acts is an **activation**. They all know a small description of the **target shape**, and must end up forming it, scaled up so that it uses all $n$ particles. We count **rounds** (stretches of time in which every particle is activated at least once) and **moves** (expansions and contractions).",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Elect, straighten into a line, rebuild",
         "variant": "deterministic",
         "ref": "DiLuna2020Shape",
-        "idea": "The universal algorithm of [DiLuna2020Shape] has seven phases; in plain words:\\n\\n1. Erosion: corners of the shape drop out one by one (no movement) until 1, 2 or 3 touching candidate leaders remain.\\n2. Each candidate becomes the root of a tree that spans part of the shape (every particle remembers a parent).\\n3. The particles agree on what clockwise means, copying it from the candidates.\\n4. The candidates try to break ties; if they cannot, the starting shape was symmetric and several leaders carry on together.\\n5. Each leader pulls its tree into a straight line; all lines get the same length.\\n6. Walking along its line, each leader works out the scale of the target and tells every particle its future role.\\n7. Each line, guided by its leader, folds into its share of the target shape.",
-        "analysis": "A line is easy to control: a leader at one end can count along it and send instructions particle by particle. The whole process takes $O(n^2)$ rounds and $O(n^2)$ moves, and the moves are optimal by the next idea. With coin flips, chirality and one particle active at a time, shapes made of a constant number of triangles are built in $\\Theta(\\sqrt n)$ rounds from a well-prepared start [Derakhshandeh2016Universal].",
+        "idea": "The universal algorithm of [DiLuna2020Shape] has seven phases; in plain words:\n\n1. Erosion: particles on corners of the configuration drop out one by one (no movement) until 1, 2 or 3 candidates remain, each a neighbour of the others; a candidate may become a **leader**, a particle that directs the others.\n2. Each candidate becomes the root of a tree that spans part of the configuration (every particle remembers a parent).\n3. The particles agree on chirality, copying it from the candidates.\n4. The candidates try to break ties; if they cannot, the starting configuration was symmetric and several leaders carry on together.\n5. Each leader pulls its tree into a straight line; all lines get the same length.\n6. Walking along its line, each leader works out the scale of the target shape and tells every particle its future role.\n7. Each line, guided by its leader, folds into its share of the target shape.",
+        "analysis": "A line is easy to control: a leader at one end can count along it and send instructions particle by particle. The whole process takes $O(n^2)$ rounds and $O(n^2)$ moves, and the moves are optimal by the next idea. With coin flips, chirality and one particle activated at a time, shapes made of a constant number of triangles are built in $\\Theta(\\sqrt n)$ rounds from a well-prepared configuration [Derakhshandeh2016Universal].",
         "why_it_matters": "Using a line as a universal halfway shape is the standard trick for shape formation, reused for tiles and modular robots too."
       },
       {
         "kind": "lower-bound",
-        "title": "A compact blob must travel far to become a line",
+        "title": "A compact configuration must travel far to become a line",
         "variant": "deterministic",
         "ref": "DiLuna2020Shape",
-        "idea": "Start with the $n$ particles packed into a hexagon; it fits inside a circle of radius about $\\sqrt n$ around its centre $c$. Ask for a straight line. A line has at most $2r+1$ of its particles within distance $r$ of $c$. Take $r = n/4$: at most about $n/2$ particles of the final line are within distance $n/4$ of $c$, so at least about $n/2$ particles end farther than $n/4$ from $c$. Each of them started within about $\\sqrt n$ of $c$, so it must travel at least $n/4 - \\sqrt n$ nodes, one node per expand-and-contract.",
-        "analysis": "Adding up gives at least about $(n/2)(n/4) = n^2/8$ node steps, so $\\Omega(n^2)$ moves for any algorithm [DiLuna2020Shape]. The algorithm above uses $O(n^2)$ moves, so it is optimal in moves. The argument says nothing about rounds, because many particles can move in the same round.",
+        "idea": "Start with the $n$ particles packed into a hexagon; it fits inside a circle of radius about $\\sqrt n$ around its centre $c$. Ask for a straight line. A line has at most $2r+1$ of its particles within distance $r$ of $c$. Take $r = n/4$: at most about $n/2$ particles of the final line are within distance $n/4$ of $c$, so at least about $n/2$ particles end farther than $n/4$ from $c$. Each of them started within about $\\sqrt n$ of $c$, so it must travel at least $n/4 - \\sqrt n$ nodes, one node per expansion and contraction.",
+        "analysis": "Adding up gives at least about $(n/2)(n/4) = n^2/8$ expansion-and-contraction pairs, so $\\Omega(n^2)$ moves for any algorithm [DiLuna2020Shape]. The algorithm above uses $O(n^2)$ moves, so it is optimal in moves. The argument says nothing about rounds, because many particles can move in the same round.",
         "why_it_matters": "The same distance-counting argument gives the quadratic lower bounds for line formation, coating and centralised transformations."
       },
       {
@@ -41,12 +41,101 @@
         "title": "Symmetry that cannot be broken",
         "variant": "deterministic",
         "ref": "DiLuna2020Shape",
-        "idea": "Take three particles in a small triangle and ask them to form a straight line of three. The triangle looks the same after a turn by a third of a circle, and its centre is the middle of a triangular face, not a node. Let the scheduler always activate the three rotated copies of a particle together, and give them rotated port labels. Then they see rotated copies of the same view and make rotated copies of the same move. Because the centre is not a node, two of them never try to enter the same node, so nothing breaks the tie: the shape stays three-fold symmetric forever. A line of three is not three-fold symmetric, so it is never formed.",
-        "analysis": "In general, a start that is symmetric under a turn of a half or a third of a circle around a point that is not a node can only reach shapes with the same symmetry [DiLuna2020Shape] (Theorem 1). The paper also proves the converse for hole-free starts: every other target can be formed, so this is the only obstacle. With coin flips the obstacle disappears and any shape can be formed once $n$ is large [DiLuna2020Shape].",
+        "idea": "Take three particles in a small triangle and ask them to form a straight line of three. The triangle looks the same after a turn by a third of a circle, and its centre is the middle of a triangular face, not a node. Each particle numbers the six directions around it; these local numbers are its **ports**. Let the scheduler always activate the three rotated copies of a particle together, and give them rotated ports. Then they see rotated copies of the same view and make rotated copies of the same move. Because the centre is not a node, two of them never try to enter the same node, so nothing breaks the tie: the configuration stays three-fold symmetric forever. A line of three is not three-fold symmetric, so it is never formed.",
+        "analysis": "In general, a configuration that is symmetric under a turn of a half or a third of a circle around a point that is not a node can only reach configurations with the same symmetry [DiLuna2020Shape] (Theorem 1). The paper also proves the converse for hole-free configurations: every other target shape can be formed, so this is the only obstacle. With coin flips the obstacle disappears and any shape can be formed once $n$ is large [DiLuna2020Shape].",
         "why_it_matters": "It shows exactly which shapes are out of reach and why, and it explains why many algorithms elect up to three leaders instead of one."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous entity with constant memory that occupies one node of the triangular lattice (contracted) or two adjacent nodes (expanded), and communicates only with its neighbours",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph whose nodes are the corners of the tiling of the plane by equilateral triangles; each node has six adjacent nodes",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; a contracted particle occupies one node, an expanded particle two adjacent nodes",
+      "avoid": [
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a particle that occupies a node adjacent to a node of the given particle",
+      "avoid": [
+        "touching",
+        "touch"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the set of nodes occupied by the particles; it is connected when every particle can be reached from every other through neighbours",
+      "avoid": [
+        "blob",
+        "group"
+      ]
+    },
+    {
+      "term": "target shape",
+      "definition": "the shape the particles must form, given by a constant-size description and scaled so that it uses all $n$ particles",
+      "avoid": []
+    },
+    {
+      "term": "expansion",
+      "definition": "the move in which a contracted particle extends into an empty adjacent node and then occupies both nodes",
+      "avoid": []
+    },
+    {
+      "term": "contraction",
+      "definition": "the move in which an expanded particle withdraws into one of its two nodes",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one expansion or one contraction; moving a particle by one node takes two moves",
+      "avoid": []
+    },
+    {
+      "term": "chirality",
+      "definition": "a common sense of clockwise shared by all particles",
+      "avoid": []
+    },
+    {
+      "term": "activation",
+      "definition": "one step of a particle, at a time chosen by the scheduler: it reads its memory and its neighbours', computes, writes, and may perform one expansion or contraction",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "an asynchronous round: an interval of time in which every particle is activated at least once; a bound holds for every division of the execution into consecutive rounds",
+      "avoid": [
+        "epoch"
+      ]
+    },
+    {
+      "term": "leader",
+      "definition": "a particle that directs the others; if the initial configuration is symmetric, up to three leaders carry on together",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number that a particle gives to one of the six directions around it; particles need not agree on these numbers",
+      "avoid": [
+        "port label"
+      ]
+    }
+  ],
   "history": "The first shapes were lines, triangles and hexagons, built after electing a leader [Derakhshandeh2015Leader]; then any shape made of triangles [Derakhshandeh2016Universal]. The deterministic question, **which shapes are formable from which starts**, mirrors pattern formation for robots [DiLuna2020Shape]. Later work formed arbitrary connected shapes with a constant number of particles acting as a mobile RAM [DiLuna2020MobileRAM], reconfigured between arbitrary shapes in a linear number of rounds without a canonical intermediate shape [Kostitsyna2023Fast], and asked which shapes **silent, oblivious** particles can form, starting with the line [Navarra2023Line]. Most tasks have a natural $\\Omega(D)$ lower bound because particles and information move one node at a time; joint movements and reconfigurable circuits are extensions proposed to break it [Padalkin2025Joint].",
   "variants": [
     {
@@ -259,7 +348,7 @@
     "connectivity"
   ],
   "figure": {
-    "caption": "Shape formation by the universal algorithm of [DiLuna2020Shape] (the problem as in [Derakhshandeh2016Universal]), here on a start with three-fold symmetry and a triangle as target. Erosion (no movement) leaves three touching candidates (green) that cannot break the symmetry, so all three lead. Each leader picks a ray (dashed; the three rays are rotations of each other) and pulls its part into a straight segment along it; then each segment folds into its third of the triangle. Every move is an expansion followed by a contraction.",
+    "caption": "Shape formation by the universal algorithm of [DiLuna2020Shape] (the problem as in [Derakhshandeh2016Universal]), here on a configuration with three-fold symmetry and a triangle as target shape. Erosion (no movement) leaves three candidates, neighbours of each other (green), that cannot break the symmetry, so all three lead. Each leader picks a ray (dashed; the three rays are rotations of each other) and pulls its part into a straight segment along it; then each segment folds into its third of the triangle. A particle moves by one node with an expansion followed by a contraction.",
     "view": [
       100,
       56

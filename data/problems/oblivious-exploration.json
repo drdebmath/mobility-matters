@@ -15,23 +15,23 @@
   "summary": "Oblivious Look–Compute–Move robots with vision must visit every node of a ring or grid and stop; how many robots are needed?",
   "statement": "$k$ anonymous, oblivious robots run Look–Compute–Move cycles on an anonymous graph: they see where all robots are, compute, and move to a neighbour. They must visit every node and then stop (or, for perpetual exploration, keep visiting). The primary measure is the **number of robots**.",
   "primer": {
-    "intro": "Imagine a few identical toy robots on a circular track of $n$ squares. They cannot talk, they have no memory at all, and they cannot tell clockwise from counterclockwise, yet together they must step on every square and then stop forever. Each robot works in cycles of **Look** (take a snapshot showing where all robots are), **Compute** (decide, from that snapshot only, whether to move and where) and **Move** (step to a neighbouring node). Robots are **oblivious**: they forget everything after each cycle. The nodes have no names, and an **adversary** (an imagined opponent) decides when each robot is activated. A robot can tell whether several robots stand on one node (such a node is called a **tower**). In the basic version $k$ robots start on distinct nodes of a ring of $n$ nodes; they must visit every node and then all stop. We count the robots needed.",
+    "intro": "Imagine a few identical toy robots on a circular track of $n$ squares. The track is a **ring**: its squares are its $n$ **nodes**, and two squares side by side are **neighbours**. The robots cannot talk, they have no memory at all, and they cannot tell clockwise from counterclockwise, yet together they must visit every node and then stop forever. Each robot works in **Look–Compute–Move cycles**: **Look** (take a **snapshot** showing where all robots are), **Compute** (decide, from that snapshot only, whether to move and where) and **Move** (move to a neighbour). Robots are **oblivious**: they forget everything after each cycle. The nodes are **anonymous** (they have no names), and an **adversary** (an imagined opponent) decides when each robot is activated. A robot can tell whether several robots stand on one node (such a node is called a **tower**). The positions of all robots form the **configuration**. In the basic version $k$ robots start on distinct nodes of a ring of $n$ nodes; they must visit every node and then all stop. We count the robots needed.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Gather in a block, build a tower, send one walker",
         "variant": "ring",
         "ref": "Lamani2010Ring",
-        "idea": "Five robots, on a ring whose size $n$ is not a multiple of $5$ [Lamani2010Ring]. The rule a robot follows depends only on the current picture, so each stage must leave a picture that announces which stage it is.\n\n1. **Block:** while the robots are not on five consecutive nodes, robots move closer together, carefully so that no two land on the same node.\n2. **Tower:** when the five robots form one block, the middle robot steps onto a neighbour. Now there is exactly one tower, and the picture is no longer symmetric: it shows a direction.\n3. **Walk:** one robot, singled out by its position relative to the tower, walks step by step around the ring, away from the tower.\n4. When the walker reaches the other side of the group, the robots form a special pattern (a *tower-chain*); this picture means the ring has been explored, and nobody moves again.",
+        "idea": "Five robots, on a ring whose size $n$ is not a multiple of $5$ [Lamani2010Ring]. The rule a robot follows depends only on its current snapshot, so each stage must leave a configuration that announces which stage it is.\n\n1. **Block:** while the robots are not on five consecutive nodes (a **block**), robots move closer together, carefully so that no two land on the same node.\n2. **Tower:** when the five robots form one block, the middle robot moves onto a neighbour. Now there is exactly one tower, and the configuration is no longer symmetric: it shows a direction.\n3. **Walk:** one robot, the **walker**, singled out by its position relative to the tower, moves node by node around the ring, away from the tower.\n4. When the walker reaches the other side of the group, the robots form a special pattern (a *tower-chain*); this configuration means the ring has been explored, and nobody moves again.",
         "analysis": "The condition that $n$ and $5$ share no common factor is what lets the robots break symmetry in the first stage (see the third idea for what goes wrong otherwise). Each stage costs $O(n)$ moves, so the total is $O(n)$, which is optimal, since the walker must cover the ring. For even $n$, four robots cannot explore deterministically [Lamani2010Ring], so five is optimal for those rings. The earlier algorithm of [Flocchini2013Ring] needed $17$ or more robots.",
         "why_it_matters": "It shows the main technique of the area: memoryless robots store their progress in the shape of their own configuration."
       },
       {
         "kind": "impossibility",
-        "title": "The final picture must contain a tower",
+        "title": "The final configuration must contain a tower",
         "variant": "grid",
         "ref": "Devismes2012Grid",
-        "idea": "An oblivious robot decides only from the current picture. Suppose that the robots stop in a picture in which every robot is on its own node. That picture could also be a starting picture, since robots start on distinct nodes. Started from it, the robots would see a picture in which they stop, so they would stop at once, after visiting only their own $k$ nodes, fewer than the $n$ nodes of the graph. So every final picture must contain a tower.",
+        "idea": "An oblivious robot decides only from its current snapshot. Suppose that the robots stop in a configuration in which every robot is on its own node. That configuration could also be a starting configuration, since robots start on distinct nodes. Started from it, the robots would see snapshots in which they stop, so they would stop at once, after visiting only their own $k$ nodes, fewer than the $n$ nodes of the graph. So every final configuration must contain a tower.",
         "analysis": "A single robot can never make a tower, so one robot can never explore and stop, on any graph with at least two nodes. With more care [Devismes2012Grid] show that two robots are not enough on a grid with at least three nodes, and they give an algorithm with three robots, which is optimal (four for the $2\\times2$ grid, five for the $3\\times3$ grid).",
         "why_it_matters": "This one-line remark is the starting point of most lower bounds for oblivious robots: termination itself must be written in the configuration."
       },
@@ -40,12 +40,90 @@
         "title": "Evenly spaced robots stay evenly spaced",
         "variant": "ring",
         "ref": "Flocchini2013Ring",
-        "idea": "Let $k$ divide $n$, with $k < n$, for example $3$ robots on a ring of $6$ nodes, one on every second node. Every robot sees exactly the same picture, the same in both directions. The adversary activates all robots together and, whenever a robot wants to move but cannot tell its two directions apart, sends every robot clockwise. Then all robots do the same thing: either nobody moves, or everybody steps clockwise and the picture is again evenly spaced. The robots will see this same picture forever, so they either stop where they are, having visited only $k$ nodes, or never stop.",
+        "idea": "Let $k$ divide $n$, with $k < n$, for example $3$ robots on a ring of $6$ nodes, one on every second node. Every robot takes exactly the same snapshot, the same in both directions. The adversary activates all robots together and, whenever a robot wants to move but cannot tell its two directions apart, sends every robot clockwise. Then all robots do the same thing: either nobody moves, or every robot moves clockwise and the configuration is again evenly spaced. The robots will take this same snapshot forever, so they either stop where they are, having visited only $k$ nodes, or never stop.",
         "analysis": "So $k$ robots cannot explore a ring whose size is a multiple of $k$. [Flocchini2013Ring] show that exploration is impossible in general whenever $n$ and $k$ share a common factor (the full argument is longer), and solvable when they share none and $k \\ge 17$; the five-robot algorithm above later lowered the team size.",
         "why_it_matters": "Symmetry that robots cannot break is the obstacle behind the number-theoretic conditions that appear throughout the oblivious-robot literature."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "an anonymous, oblivious Look–Compute–Move entity on the graph; $k$ is their number",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "the graph whose $n$ nodes are joined in one cycle; it has no orientation the robots can read",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "a node of the graph; robots stand on nodes",
+      "avoid": [
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a node joined by an edge to the given node; a robot moves only to a neighbour",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: Look (take a snapshot), Compute (apply the algorithm to it), Move (stay or move to a neighbour)",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the nodes occupied by robots, with towers, up to the symmetries the robot cannot resolve",
+      "avoid": [
+        "picture",
+        "view"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at a time, including towers",
+      "avoid": [
+        "picture"
+      ]
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps nothing from one Look–Compute–Move cycle to the next",
+      "avoid": []
+    },
+    {
+      "term": "anonymous",
+      "definition": "robots are identical and nodes carry no names",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "the scheduler that chooses which robots are activated and when, and resolves any choice the robots leave open",
+      "avoid": []
+    },
+    {
+      "term": "tower",
+      "definition": "a node with two or more robots on it",
+      "avoid": [
+        "stack"
+      ]
+    },
+    {
+      "term": "block",
+      "definition": "in the five-robot algorithm, five consecutive nodes with one robot each",
+      "avoid": []
+    },
+    {
+      "term": "walker",
+      "definition": "in the five-robot algorithm, the robot that moves around the ring away from the tower",
+      "avoid": []
+    }
+  ],
   "history": "Robots with no memory must encode progress in their positions, so the first question was **the minimum number of robots** [Flocchini2013Ring], answered exactly for rings [Lamani2010Ring] and grids [Devismes2012Grid].",
   "measures": [
     {
@@ -182,7 +260,7 @@
     }
   ],
   "figure": {
-    "caption": "Exploration of a ring by five oblivious robots [Lamani2010Ring] (the problem: [Flocchini2013Ring]): anonymous robots without memory, on distinct nodes of an anonymous ring with $n = 8$ nodes (co-prime with 5), run Look–Compute–Move cycles, one robot per step here. They first close the gaps into a block of five, then the middle robot forms a tower, which fixes a direction; one end robot walks away from the tower round the ring, and when it is back beside the group the pattern means that every node (shaded) has been visited, and no robot moves again. The rules are simplified from [Lamani2010Ring].",
+    "caption": "Exploration of a ring by five oblivious robots [Lamani2010Ring] (the problem: [Flocchini2013Ring]): anonymous robots without memory, on distinct nodes of an anonymous ring with $n = 8$ nodes (co-prime with 5), run Look–Compute–Move cycles, one robot activated per frame here. They first close the gaps into a block of five, then the middle robot forms a tower, which fixes a direction; one end robot, the walker, moves away from the tower round the ring, and when it is back beside the group the configuration means that every node (shaded) has been visited, and no robot moves again. The rules are simplified from [Lamani2010Ring].",
     "view": [
       100,
       56
@@ -833,7 +911,7 @@
             "size": 2.8
           }
         ],
-        "label": "Tower: the middle robot steps onto a neighbour"
+        "label": "Tower: the middle robot moves onto a neighbour"
       },
       {
         "ents": [

@@ -56,6 +56,16 @@
     return `<a class="cite" href="${L('references', key)}" title="${title}">${esc(shortCite(key))}</a>`;
   }
 
+  // If the Markdown library could not be loaded (CDN down), keep the page readable: paragraphs, lists, bold, italics, links.
+  function mdFallback(t) {
+    const inl = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>').replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+    return t.split(/\n{2,}/).map(b => {
+      const lines = b.split('\n');
+      if (lines.every(l => /^\s*(\d+\.|[-*])\s/.test(l))) { const ol = /^\s*\d+\./.test(lines[0]); return `<${ol ? 'ol' : 'ul'}>${lines.map(l => `<li>${inl(l.replace(/^\s*(\d+\.|[-*])\s+/, ''))}</li>`).join('')}</${ol ? 'ol' : 'ul'}>`; }
+      return `<p>${inl(b)}</p>`;
+    }).join('');
+  }
+
   // Markdown + math + [Key] citations.
   function md(text) {
     if (!text) return '';
@@ -64,7 +74,7 @@
       .replace(/\$\$([\s\S]+?)\$\$/g, (m, x) => { maths.push([x, true]); return `@@M${maths.length - 1}@@`; })
       .replace(/\$([^$\n]+?)\$/g, (m, x) => { maths.push([x, false]); return `@@M${maths.length - 1}@@`; });
     t = t.replace(/\[([A-Z][A-Za-z]*\d{4}[A-Za-z0-9]*)\]/g, (m, key) => state.refs[key] ? `@@C${key}@@` : m);
-    let html = marked.parse(t);
+    let html = typeof marked !== 'undefined' ? marked.parse(t) : mdFallback(t);
     html = html.replace(/@@M(\d+)@@/g, (m, i) => tex(maths[i][0], maths[i][1]));
     html = html.replace(/@@C([A-Za-z0-9]+)@@/g, (m, key) => citeLink(key));
     return html;
@@ -483,6 +493,12 @@
       <div class="small muted">${(o.problems || []).map(p => state.problems[p] ? esc(state.problems[p].name) : esc(p)).join(' · ')}</div></a>`).join('')}</div></section>`;
   }
 
+  function overviewList(problemId) {
+    const list = Object.values(state.overviews).filter(o => (o.problems || []).includes(problemId));
+    if (!list.length) return '';
+    return `<ul class="ovlist">${list.map(o => `<li><a href="${L('overview', o.id)}">${esc(o.title)}</a> <span class="muted">${fmt(o.summary)}</span></li>`).join('')}</ul>`;
+  }
+
   function overviewNav(o) {
     const ids = (state.index.overviews || []).filter(x => state.overviews[x]);
     const i = ids.indexOf(o.id), prev = i > 0 ? state.overviews[ids[i - 1]] : null, next = i >= 0 && i < ids.length - 1 ? state.overviews[ids[i + 1]] : null;
@@ -502,8 +518,8 @@
     if (!o) return notFound('overview', id);
     const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const toc = (o.sections || []).map(sct => `<li><a href="#" data-jump="${slug(sct.heading)}">${esc(sct.heading)}</a></li>`).join('');
-    return `<div class="crumbs"><a href="${L()}">Home</a><span class="sep">›</span><span>Perspective</span></div>
-      <article class="essay">
+    return `<article class="essay">
+        <div class="crumbs"><a href="${L()}">Home</a><span class="sep">›</span><span>Perspective</span></div>
         <header><h1>${esc(o.title)}</h1><p class="lead muted">${fmt(o.summary)}</p>
           <div class="chips">${(o.problems || []).map(p => state.problems[p] ? `<a class="chip assume" href="${L('problem', p)}">${esc(state.problems[p].name)}</a>` : '').join('')}</div>
           ${o.status ? `<span class="badge ${esc(o.status)}">${esc(o.status)}</span>` : ''}</header>
@@ -544,7 +560,7 @@
   /* ---------- problem figures: an animated scene (site) whose first and last frames are the TikZ figures (PDF) ---------- */
   // Scene format (problem.figure): view [w, h] in math coordinates (y up); optional lattice unit;
   // graph {nodes: {id: [x, y]}, edges: [[a, b]], directed}; static shapes; frames [{label, ents, marks}].
-  const FIG_COLORS = { accent: 'var(--accent)', tight: 'var(--tight)', gap: 'var(--gap)', near: 'var(--near)', muted: 'var(--muted)', fg: 'var(--fg)', disputed: 'var(--disputed)', l1: '#e4572e', l2: '#17bebb', l3: '#ffc914', l4: '#76b041', soft: 'var(--bg-sunken)', line: 'var(--line-strong)' };
+  const FIG_COLORS = { accent: 'var(--accent)', tight: 'var(--tight)', gap: 'var(--gap)', near: 'var(--near)', muted: 'var(--muted)', fg: 'var(--fg)', disputed: 'var(--disputed)', l1: '#e4572e', l2: '#17bebb', l3: '#ffc914', l4: '#76b041', soft: 'var(--bg-sunken)', line: 'var(--fig-ink)' };
   const figCol = c => FIG_COLORS[c] || c || 'var(--accent)';
   // plain-text rendering of short labels inside SVG (no HTML there): drop $, map a few TeX macros
   const TEXSYM = { varepsilon: 'ε', epsilon: 'ε', ell: 'ℓ', delta: 'δ', Delta: 'Δ', lambda: 'λ', pi: 'π', le: '≤', ge: '≥', leq: '≤', geq: '≥', infty: '∞', cdot: '·', times: '×', to: '→', rightarrow: '→', alpha: 'α', beta: 'β', varphi: 'φ', phi: 'φ', rho: 'ρ', mu: 'μ', sqrt: '√' };
@@ -556,7 +572,9 @@
   }
   function figShape(fig, sh, H) {
     const P = q => { const [x, y] = Array.isArray(q) ? q : figPoint(fig, q); return [x, H - y]; };
-    const st = `stroke="${figCol(sh.c || 'line')}" stroke-width="${sh.w || 0.6}" ${sh.dash ? 'stroke-dasharray="1.6 1.2"' : ''} fill="${sh.fill ? figCol(sh.fill) : 'none'}" ${sh.op ? `opacity="${sh.op}"` : ''}`;
+    // thin grey lines (lattices, grids) stay faint; everything else in grey is ink
+    const faint = (sh.c || 'line') === 'line' && (sh.w || 0.6) <= 0.35;
+    const st = `stroke="${faint ? 'var(--fig-faint)' : figCol(sh.c || 'line')}" stroke-width="${sh.w || 0.6}" ${sh.dash ? 'stroke-dasharray="1.6 1.2"' : ''} fill="${sh.fill ? figCol(sh.fill) : 'none'}" ${sh.op ? `opacity="${sh.op}"` : ''}`;
     if (sh.t === 'circle') { const [x, y] = P(sh.p); return `<circle cx="${x}" cy="${y}" r="${sh.r}" ${st}/>`; }
     if (sh.t === 'line' || sh.t === 'path' || sh.t === 'poly') {
       const pts = sh.p.map(P).map(q => q.join(',')).join(' ');
@@ -594,10 +612,12 @@
     const clusterOf = F.map(f => { const by = {}; (f.ents || []).forEach(e => { if (e.at || e.lat) { const key = e.at || e.lat.join(','); (by[key] = by[key] || []).push(e.id); } }); return by; });
     const P = (e, fi) => {
       let [x, y] = figPoint(fig, e);
-      if (fi !== undefined && (e.at || e.lat) && !e.p) { const grp = clusterOf[fi][e.at || e.lat.join(',')] || []; if (grp.length > 1) { const j = grp.indexOf(e.id), rad = fig.cluster || 3.2, a = Math.PI / 2 + 2 * Math.PI * j / grp.length; x += rad * Math.cos(a); y += rad * Math.sin(a); } }
+      if (fi !== undefined && (e.at || e.lat) && !e.p) { const grp = clusterOf[fi][e.at || e.lat.join(',')] || []; if (grp.length > 1) { const j = grp.indexOf(e.id), a = Math.PI / 2 + 2 * Math.PI * j / grp.length;
+        // on a graph node the ring grows with the group so that agents (radius about 2.6 with their halo) do not overlap
+        const rad = e.at ? Math.max(fig.cluster || 3.2, grp.length * 5.6 / (2 * Math.PI)) : (fig.cluster || 3.2); x += rad * Math.cos(a); y += rad * Math.sin(a); } }
       return [x, H - y];
     };
-    const graph = fig.graph ? (fig.graph.edges || []).map(([a, b]) => { const [x1, y1] = [fig.graph.nodes[a][0], H - fig.graph.nodes[a][1]], [x2, y2] = [fig.graph.nodes[b][0], H - fig.graph.nodes[b][1]]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--line-strong)" stroke-width="0.6" ${fig.graph.directed ? 'marker-end="url(#fig-arrow-s)"' : ''}/>`; }).join('') + Object.entries(fig.graph.nodes).map(([k, [x, y]]) => `<circle cx="${x}" cy="${H - y}" r="${fig.graph.r || 1.3}" fill="var(--bg-elev)" stroke="var(--muted)" stroke-width="0.5"/>`).join('') : '';
+    const graph = fig.graph ? (fig.graph.edges || []).map(([a, b]) => { const [x1, y1] = [fig.graph.nodes[a][0], H - fig.graph.nodes[a][1]], [x2, y2] = [fig.graph.nodes[b][0], H - fig.graph.nodes[b][1]]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--fig-ink)" stroke-width="0.6" ${fig.graph.directed ? 'marker-end="url(#fig-arrow-s)"' : ''}/>`; }).join('') + Object.entries(fig.graph.nodes).map(([k, [x, y]]) => `<circle cx="${x}" cy="${H - y}" r="${fig.graph.r || 1.3}" fill="var(--bg-elev)" stroke="var(--fig-ink)" stroke-width="0.5"/>`).join('') : '';
     const statics = (fig.static || []).map(sh => figShape(fig, sh, H)).join('');
     const marks = F.map((f, i) => (f.marks || []).length ? `<g opacity="${n > 1 ? 0 : 1}">${f.marks.map(sh => figShape(fig, sh, H)).join('')}${n > 1 ? `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${t0(i).toFixed(4)};${Math.min(1, t1(i) + move / T * 0.999).toFixed(4)}" values="0;1;0"/>` : ''}</g>` : '').join('');
     const ents = ids.map(id => {
@@ -614,12 +634,25 @@
       return `<g transform="translate(${filled[0][0]},${filled[0][1]})">${n > 1 ? `<animateTransform attributeName="transform" type="translate" dur="${T}s" repeatCount="indefinite" keyTimes="0;${k.kt}" values="${[k.vv[0]].concat(k.vv).join(';')}"/>` : ''}${ext}${body}${n > 1 && present.some(x => !x) ? `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${o.kt}" values="${[o.vv[0]].concat(o.vv).join(';')}"/>` : ''}</g>`;
     }).join('');
     const nextLab = i => { for (let j = i + 1; j < n; j++) if (F[j].label) return j; return n; };
-    const labels = F.map((f, i) => f.label ? `<text x="2" y="4" font-size="3.4" fill="var(--muted)" opacity="${n > 1 ? 0 : 1}">${svgText(f.label)}${n > 1 ? `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${t0(i).toFixed(4)};${(nextLab(i) < n ? t0(nextLab(i)) : 0.9999).toFixed(4)}" values="0;1;0"/>` : ''}</text>` : '').join('');
-    return `<svg class="figsvg" viewBox="-2 -2 ${W + 4} ${H + 4}" role="img" aria-label="${esc((fig.caption || '').replace(/[$*\[\]]/g, ''))}">
-      <defs><marker id="fig-arrow" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0L6,3L0,6z" fill="var(--muted)"/></marker><marker id="fig-arrow-s" viewBox="0 0 6 6" refX="9" refY="3" markerWidth="3" markerHeight="3" orient="auto"><path d="M0,0L6,3L0,6z" fill="var(--line-strong)"/></marker></defs>
+    const BAND = 7, labSize = s => Math.min(3.4, (W + 2) / (Math.max(1, svgText(s).length) * 0.52));
+    const labels = F.map((f, i) => f.label ? `<text x="-1" y="${-BAND / 2 - 1}" font-size="${labSize(f.label).toFixed(2)}" fill="var(--muted)" dominant-baseline="middle" opacity="${n > 1 ? 0 : 1}">${svgText(f.label)}${n > 1 ? `<animate attributeName="opacity" dur="${T}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;${t0(i).toFixed(4)};${(nextLab(i) < n ? t0(nextLab(i)) : 0.9999).toFixed(4)}" values="0;1;0"/>` : ''}</text>` : '').join('');
+    return `<svg class="figsvg" viewBox="-2 ${F.some(f => f.label) ? -2 - BAND : -2} ${W + 4} ${H + 4 + (F.some(f => f.label) ? BAND : 0)}" role="img" aria-label="${esc((fig.caption || '').replace(/[$*\[\]]/g, ''))}">
+      <defs><marker id="fig-arrow" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0L6,3L0,6z" fill="var(--muted)"/></marker><marker id="fig-arrow-s" viewBox="0 0 6 6" refX="9" refY="3" markerWidth="3" markerHeight="3" orient="auto"><path d="M0,0L6,3L0,6z" fill="var(--fig-ink)"/></marker></defs>
       ${statics}${graph}${marks}${ents}${labels}</svg>`;
   }
-  const figurePanel = p => p.figure ? `<figure class="pfig">${figureSvg(p.figure, p.id)}<figcaption>${mdInline(p.figure.caption || '')}</figcaption></figure>` : '';
+  // with 'reduce motion' a figure starts paused on its first frame (its label and marks shown); the button plays or pauses it
+  const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function setFigPlaying(btn, svg, on) {
+    if (!svg || !svg.pauseAnimations) return;
+    if (on) svg.unpauseAnimations(); else svg.pauseAnimations();
+    btn.textContent = on ? '❚❚' : '▶'; btn.title = on ? 'Pause' : 'Play';
+    btn.setAttribute('aria-label', on ? 'Pause the animation' : 'Play the animation');
+  }
+  function initFigures() {
+    if (!reduceMotion()) return;
+    app.querySelectorAll('.figwrap').forEach(w => { const svg = w.querySelector('svg'), b = w.querySelector('[data-figplay]'); if (svg && b) { svg.setCurrentTime && svg.setCurrentTime(0); setFigPlaying(b, svg, false); } });
+  }
+  const figurePanel = p => p.figure ? `<figure class="pfig"><div class="figwrap">${figureSvg(p.figure, p.id)}${(p.figure.frames || []).length > 1 ? '<button type="button" class="figplay" data-figplay aria-label="Pause the animation" title="Pause">❚❚</button>' : ''}</div><figcaption>${mdInline(p.figure.caption || '')}</figcaption></figure>` : '';
 
   /* ---------- model landscape: which robot model is stronger ---------- */
   const landState = { view: null, sel: null };
@@ -735,15 +768,27 @@
             ${x.why_it_matters ? `<p class="small muted"><b>Why it matters.</b> ${mdInline(x.why_it_matters)}</p>` : ''}</div>`).join('')}
         </details>` : '';
       const hist = p.history ? `<section class="panel history"><h3 class="eyebrow">What the community started looking at</h3><div class="prose">${md(p.history)}</div></section>` : '';
-      return `${head}${primer}${hist}${rel}${overviewCards(p.id)}${(p.further || []).length ? `<section class="panel further"><h3 class="eyebrow">Further reading</h3><p class="small muted">Papers on this problem that are not yet placed in a setting.</p><ul>${p.further.map(f => `<li>${citeLink(f.ref)} ${state.refs[f.ref] ? `<span class="small">${fmt(state.refs[f.ref].title)}.</span>` : ''} <span class="small muted">${mdInline(f.note || '')}</span></li>`).join('')}</ul></section>` : ''}
-        <section class="panel">
-          <div class="section-title"><h2>Assumption tree</h2>${switcher('tree')}</div>
+      // the root page reads as a chapter: a contents rail, then statement, first look, what is known, open questions,
+      // history, relations, perspectives; the full assumption tree is one click away
+      const opens = p.order.filter(n => n.variant && (n.variant.open || []).length);
+      const nOpen = opens.reduce((a, n) => a + n.variant.open.length, 0);
+      const known = `<section class="panel" id="sec-known"><h2>What is known</h2><p class="muted small">The best upper bound against the best lower bound in each catalogued setting. Open a setting for its results, proofs and notes, or see the <a href="${L('problem', p.id, 'map')}">progress map</a> with the branch points.</p>${mapView(p, true).replace('<section class="panel map">', '<div class="map">').replace(/<\/section>\s*$/, '</div>')}</section>`;
+      const openSec = nOpen ? `<section class="panel" id="sec-open"><h2>Open questions <span class="muted count">${nOpen}</span></h2>${opens.map(n => `<div class="openblock"><h3><a href="${L('problem', p.id, n.id)}">${fmt(nodeTitle(p, n))}</a></h3><ol>${n.variant.open.map(q => `<li>${mdInline(q)}</li>`).join('')}</ol></div>`).join('')}</section>` : '';
+      const persp = overviewList(p.id);
+      const further = (p.further || []).length ? `<section class="panel further" id="sec-further"><h2>Further reading</h2><p class="small muted">Papers on this problem that are not yet placed in a setting.</p><ul>${p.further.map(f => `<li>${citeLink(f.ref)} ${state.refs[f.ref] ? `<span class="small">${fmt(state.refs[f.ref].title)}.</span>` : ''} <span class="small muted">${mdInline(f.note || '')}</span></li>`).join('')}</ul></section>` : '';
+      const treeSec = `<section class="panel" id="sec-settings">
+          <div class="section-title"><h2>All settings</h2>${switcher('tree')}</div>
+          <details class="treefold" open><summary>The assumption tree <span class="muted small">(${p.order.filter(n => n.variant).length} settings, ${p.order.filter(n => !n.variant).length} branch points)</span></summary>
           <p class="muted small">The root assumes nothing. Going down, each edge adds the assumptions on its chips (<span class="chip stronger"><b>+</b>blue</span>); a grey chip names the branch that leaves that axis unassumed while a sibling assumes something. Solid nodes are catalogued variants with their status per measure (${p.measures.map(x => esc(x.name)).join(', ')}); dashed nodes are branch points with no catalogued variant, named after the axis on which their branches differ. Axis order: ${p.axes.map(a => esc(a.name)).join(' › ')}.</p>
           <div class="legend"><span><span class="dot tight"></span> tight</span><span><span class="dot near"></span> near-optimal</span><span><span class="dot gap"></span> polynomial gap</span><span><span class="dot"></span> unknown</span><span><span class="dot impossible"></span> impossible</span><span><span class="dot hollow"></span> no variant</span></div>
-          ${bigTree(p)}
-        </section>
-        ${probAxes.length ? `<h2>Axes specific to this problem</h2>${axesTable(probAxes)}` : ''}
-        ${contributeBox(p, null)}`;
+          ${bigTree(p)}</details>
+          ${probAxes.length ? `<h3>Assumptions specific to this problem</h3>${axesTable(probAxes)}` : ''}
+        </section>`;
+      const toc = [['statement', 'Statement'], p.primer && ['first-look', 'A first look'], ['known', 'What is known'], nOpen && ['open', `Open questions (${nOpen})`], hist && ['history', 'History'], rel && ['relations', 'Relations'], persp && ['perspectives', 'Perspectives'], further && ['further', 'Further reading'], ['settings', 'All settings']].filter(Boolean);
+      return `${crumbs}<div class="chapter">
+        <nav class="chapter-toc" aria-label="On this page"><h4>On this page</h4><ol>${toc.map(([k, l]) => `<li><a href="#" data-jump="${k}">${esc(l)}</a></li>`).join('')}</ol></nav>
+        <div class="chapter-body">${head.replace(crumbs, '').replace('<details class="statement"', '<details class="statement" id="sec-statement"')}${primer.replace('<details class="panel primer"', '<details class="panel primer" id="sec-first-look"')}${known}${openSec}${hist.replace('<section class="panel history">', '<section class="panel history" id="sec-history">')}${rel.replace('<section class="panel relation">', '<section class="panel relation" id="sec-relations">')}${persp ? `<section class="panel" id="sec-perspectives"><h3 class="eyebrow">Perspectives</h3>${persp}</section>` : ''}${further}${treeSec}
+        ${contributeBox(p, null)}</div></div>`;
     }
     const sel = view === 'map' ? null : n;
     const main = view === 'map' ? `<div class="section-title viewhead"><h2>Progress map</h2>${switcher('map')}</div>${mapView(p)}` : nodeView(p, n);
@@ -978,7 +1023,7 @@
     });
   }
 
-  function mapView(p) {
+  function mapView(p, compact) {
     const cell = (v, mm) => {
       if (!v) return `<div class="mini"><span class="muted small">—</span></div>`;
       const lb = lowerBound(v, mm.id), br = bestResult(v, mm.id), st = statusOf(v, mm.id);
@@ -987,11 +1032,11 @@
         ${lb && lb.bottleneck ? `<span class="small muted">${fmt(lb.bottleneck)}</span>` : ''}</div>`;
     };
     return `<section class="panel map">
-      <div class="legend"><span><span class="dot tight"></span> tight</span><span><span class="dot near"></span> near-optimal</span><span><span class="dot gap"></span> polynomial gap</span><span><span class="dot"></span> unknown</span><span><span class="dot impossible"></span> impossible</span><span class="muted">· rows follow the assumption tree; each cell: best upper bound vs lower bound, and what forces the lower bound</span></div>
+      <div class="legend"><span><span class="dot tight"></span> tight</span><span><span class="dot near"></span> near-optimal</span><span><span class="dot gap"></span> polynomial gap</span><span><span class="dot"></span> unknown</span><span><span class="dot impossible"></span> impossible</span><span class="muted">· ${compact ? 'one row per catalogued setting, in tree order' : 'rows follow the assumption tree'}; each cell: best upper bound vs lower bound, and what forces the lower bound</span></div>
       <div class="row head"><div>Setting</div>${p.measures.map(mm => `<div>${esc(mm.name)}</div>`).join('')}</div>
-      ${p.order.map(n => `<div class="row${n.variant ? '' : ' gaprow'}"><div class="name" style="padding-left:${n.depth * 0.9}rem">
-          <a href="${L('problem', p.id, n.id)}">${fmt(nodeTitle(p, n))}</a>${n.parent ? ` <span class="small muted">${fmt(edgeText(p, n))}</span>` : ''}
-          ${n.variant ? `<div class="summary">${(n.variant.open || []).length} open · ${(n.variant.results || []).length} results</div>` : ''}</div>
+      ${(compact ? p.order.filter(n => n.variant) : p.order).map(n => `<div class="row${n.variant ? '' : ' gaprow'}"><div class="name" style="padding-left:${compact ? 0 : n.depth * 0.9}rem">
+          <a href="${L('problem', p.id, n.id)}">${fmt(nodeTitle(p, n))}</a>${compact ? (n.variant.standard ? ' <span class="badge std">standard</span>' : '') : n.parent ? ` <span class="small muted">${fmt(edgeText(p, n))}</span>` : ''}
+          ${compact ? `<div class="summary">${fmt(n.variant.summary || '')}</div>` : n.variant ? `<div class="summary">${(n.variant.open || []).length} open · ${(n.variant.results || []).length} results</div>` : ''}</div>
           ${p.measures.map(mm => cell(n.variant, mm)).join('')}</div>`).join('')}
     </section>`;
   }
@@ -1347,7 +1392,7 @@
       <section id="sec-general"><h2>General conventions</h2>${symbolTable(n.general || [], false)}</section>
       ${state.index.models.map(mid => `<section id="sec-sym-${esc(mid)}"><h2>Symbols: ${esc(state.models[mid].name)}</h2>${modelSymbols(mid)}</section>`).join('')}
       <section id="sec-assumptions"><h2>Index of assumptions</h2>
-        <p class="muted small">Every assumption the atlas uses, with its formal definition: the axes of each model, then the axes specific to single problems. Level 0 assumes nothing; each higher level is a stronger assumption. Where the assumptions come from is told on each <a href="${L('model', state.index.models[0])}">model page</a>.</p>
+        <p class="muted small">Every assumption the atlas uses, with its formal definition: the axes of each model, then the assumptions specific to single problems. Level 0 assumes nothing; each higher level is a stronger assumption. Where the assumptions come from is told on each <a href="${L('model', state.index.models[0])}">model page</a>.</p>
         ${assumptionIndex()}</section>`;
   }
 
@@ -1379,6 +1424,14 @@
   }
 
   /* ---------- router ---------- */
+  // underline the top-bar link of the current section
+  function markNav(section) {
+    const links = document.querySelectorAll ? document.querySelectorAll('.topbar nav a[href^="#/"]') : [];
+    links.forEach(a => {
+      const target = a.getAttribute('href').replace(/^#\/?/, '').split('/')[0];
+      a.classList.toggle('on', target === section);
+    });
+  }
   let prevParts = null;
   function render() {
     const parts = location.hash.replace(/^#\/?/, '').split(/[\/.]/).filter(Boolean);
@@ -1401,8 +1454,11 @@
       else html = notFound('page', parts.join('/'));
     } catch (e) { console.error(e); html = `<div class="error">Render error: ${esc(e.message)}</div>`; }
     app.innerHTML = html;
+    if (app.dataset) app.dataset.page = parts[0] || 'home';
     renderCiteFooter();
+    markNav(parts[0] || '');
     fitGraph();
+    initFigures();
     if (parts[0] === 'references' && parts[1]) {
       const el = document.getElementById('ref-' + parts[1]);
       if (el) el.scrollIntoView({ block: 'start' });
@@ -1427,6 +1483,8 @@
     const sm = e.target.closest('.sidenav > summary');
     if (sm && window.innerWidth > 900 && !e.target.closest('a')) e.preventDefault();
     if (e.target.closest('[data-papers]')) { graphPapers = !graphPapers; render(); return; }
+    const fp = e.target.closest('[data-figplay]');
+    if (fp) { const svg = fp.parentElement.querySelector('svg'); setFigPlaying(fp, svg, svg.animationsPaused()); return; }
     if (e.target.closest('[data-copy-bibtex]')) { const t = app.querySelector('.bibtex'); if (t && navigator.clipboard) navigator.clipboard.writeText(t.textContent).then(() => { e.target.textContent = 'Copied'; }); return; }
     const z = e.target.closest('[data-zoom]');
     if (z) {
@@ -1449,6 +1507,28 @@
   });
   if (SEP === '.') document.querySelectorAll('a[href^="#/"]').forEach(a => { a.setAttribute('href', L(...a.getAttribute('href').replace(/^#\/?/, '').split('/').filter(Boolean))); });
   window.addEventListener('hashchange', render);
+  // light/dark switch: without a stored choice the page follows the system; a click stores the opposite of what is shown
+  const themeBtn = document.getElementById('theme-toggle');
+  const shownTheme = () => document.documentElement.dataset.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const paintThemeBtn = () => { if (!themeBtn) return; const next = shownTheme() === 'dark' ? 'light' : 'dark'; themeBtn.querySelector('span').textContent = next === 'dark' ? '☾' : '☀'; themeBtn.title = themeBtn.ariaLabel = `Switch to ${next} mode`; themeBtn.setAttribute('aria-label', `Switch to ${next} mode`); };
+  try { const t = localStorage.getItem('mm-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => { const next = shownTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; try { localStorage.setItem('mm-theme', next); } catch (e) {} paintThemeBtn(); });
+    if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', paintThemeBtn);
+    paintThemeBtn();
+  }
+  // the contents rail of a problem page marks the section being read
+  let spyQueued = false;
+  window.addEventListener('scroll', () => {
+    if (spyQueued) return; spyQueued = true;
+    requestAnimationFrame(() => {
+      spyQueued = false;
+      const links = [...app.querySelectorAll('.chapter-toc a[data-jump]')]; if (!links.length) return;
+      let cur = links[0];
+      for (const a of links) { const el = document.getElementById('sec-' + a.dataset.jump); if (el && el.getBoundingClientRect().top < 140) cur = a; }
+      links.forEach(a => a.classList.toggle('on', a === cur));
+    });
+  }, { passive: true });
   loadAll().then(render).catch(e => {
     console.error(e);
     app.innerHTML = `<div class="error"><b>Could not load the catalogue data.</b><br>${esc(e.message)}<br><br>Serve the folder over HTTP, e.g. <code>python3 -m http.server 8765</code>, then open <code>http://localhost:8765</code>.</div>`;

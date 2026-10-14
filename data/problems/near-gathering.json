@@ -13,17 +13,17 @@
     "relation": "Gathering requires a common point; near-gathering only requires being close, but forbids collisions. It is used as a first phase before forming patterns."
   },
   "summary": "Robots must get within a small distance of each other without ever colliding.",
-  "statement": "Robots with limited visibility, starting from a connected configuration at distinct points, must reach a configuration in which every robot sees all others, without two robots ever being at the same point.",
+  "statement": "Robots with limited visibility, each seeing only the robots within its **visibility radius** $V$, start at distinct points whose **visibility graph** (two robots joined by an edge when they are within distance $V$) is connected. They must reach a configuration in which every robot sees all others, without a **collision** (two robots at the same point) ever happening.",
   "primer": {
-    "intro": "Picture short-sighted people in fog who must come close enough that everybody can see everybody, without bumping into each other. There are $n$ robots, points at distinct places in the plane, and each sees only the robots within distance $V$ (its **visibility radius**). Draw a line between two robots when they are within distance $V$: at the start this picture is **connected** (every robot can be reached from every other along lines). Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles); in the basic version they agree on the direction of one axis, and the scheduler is ASYNC (each phase may take any finite time). The robots must reach a configuration in which every robot sees all others, and two robots may never be at the same point.",
+    "intro": "Imagine short-sighted people in fog who must come close enough that everybody can see everybody, without bumping into each other. In the problem the people are $n$ **robots**, points at distinct places in the plane, and each sees only the robots within distance $V$ (its **visibility radius**). Join two robots by an **edge** when they are within distance $V$, and call them **neighbours**; the robots and these edges form the **visibility graph**, and at the start it is **connected** (every robot can be reached from every other along edges). Each robot reads positions in its own **local coordinate system** (its private axes and unit of length) and repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the robots it sees are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles); in the basic version their local coordinate systems agree on the direction of one axis, and the **scheduler**, controlled by an **adversary** (an imagined opponent) that decides when each robot acts and how long each phase takes, is ASYNC (each phase may take any finite time). The robots must reach a **configuration** (the positions of all robots) in which every robot sees all others, and two robots may never be at the same point (a **collision**).",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Go to the centre of what you see, in small steps, keeping your neighbours",
         "variant": "ssync-disoriented",
         "ref": "Castenow2022Unifying",
-        "idea": "1. Compute the **smallest enclosing circle** of the robots you can see, and aim for its centre (the **Go-To-the-Center** rule).\n2. For every robot you see, stay inside the disc of radius $V/2$ around the midpoint between you and it. Your neighbour obeys the same rule, so the two of you stay within distance $V$ and the picture stays connected.\n3. To avoid collisions, move only a short distance and only part of the way to your target. Robots see a little farther than the connection distance, so a robot can also compute where its nearby neighbours are heading and keep clear of them.\n4. Stop when everyone you see is very close: since the picture is connected, then everyone is close.",
-        "analysis": "Collisions are the new difficulty compared with gathering. Even for two robots, the simple rule \\\"move half-way to the centre of gravity\\\" can collide in ASYNC: robot $r$ at $(0,0)$ heads for $(781, 0)$; the scheduler pauses it at $(52, 0)$ while robot $s$, starting at $(3124, 0)$ and always seeing $r$ at $(52, 0)$, makes five cycles and arrives at $(781, 0)$; then $r$ finishes its move onto $s$ [Pagli2015Near]. Castenow, Harbig, Jung, Kling, Knollmann and Meyer auf der Heide show that any gathering rule of a broad class, including Go-To-the-Center, can be made collision-free and solves near-gathering for disoriented robots in $O(\\Delta_0^2)$ epochs in SSYNC, where $\\Delta_0$ is the initial diameter (largest distance between two robots) and $V$ is the unit (Theorem 18 of [Castenow2022Unifying]). The steps above simplify their construction.",
+        "idea": "1. Compute the **smallest enclosing circle** of the robots you can see, and aim for its centre (the **Go-To-the-Center** rule).\n2. For every robot you see (every neighbour), stay inside the disc of radius $V/2$ around the midpoint between you and it. Your neighbour obeys the same rule, so the two of you stay within distance $V$, your edge is kept, and the visibility graph stays connected.\n3. To avoid collisions, move only a short distance and only part of the way to your target. Here robots see a little farther than $V$: edges still join robots within distance $V$ (the **connectivity range**), but each robot sees every robot within distance $V + \\tau$ (its **viewing range**), for a constant $0 < \\tau \\le 2V/3$ [Castenow2022Unifying]. So a robot can also compute where its nearby neighbours are heading and keep clear of them.\n4. Stop when everyone you see is very close: since the visibility graph is connected, then everyone is close.",
+        "analysis": "Collisions are the new difficulty compared with gathering. Even for two robots, the simple rule \"move half-way to the centre of gravity\" can collide in ASYNC: robot $r$ at $(0,0)$ heads for $(781, 0)$; the scheduler pauses it at $(52, 0)$ while robot $s$, starting at $(3124, 0)$ and always seeing $r$ at $(52, 0)$, makes five cycles and arrives at $(781, 0)$; then $r$ finishes its move onto $s$ [Pagli2015Near]. Castenow, Harbig, Jung, Kling, Knollmann and Meyer auf der Heide show that any gathering rule of a broad class, including Go-To-the-Center, can be made collision-free and solves near-gathering for disoriented robots in $O(\\Delta_0^2)$ **epochs** (an epoch is an interval of time in which every robot completes at least one full cycle) in SSYNC, where $\\Delta_0$ is the initial diameter (largest distance between two robots) and $V$ is the unit (Theorem 18 of [Castenow2022Unifying]). The steps above simplify their construction.",
         "why_it_matters": "It lets short-sighted robots reach a state where they all see each other, after which any algorithm for robots with unlimited visibility can take over."
       },
       {
@@ -31,7 +31,7 @@
         "title": "A big regular polygon shrinks slowly",
         "variant": "ssync-disoriented",
         "ref": "Castenow2022Unifying",
-        "idea": "Place $n$ robots on a regular $n$-gon with sides of length 1, the visibility radius, so each robot sees only its two neighbours. The adversary chooses coordinate systems so that all robots see the same thing and the polygon stays regular forever. Each robot sees itself and two neighbours nearly on a straight line: the triangle they form has height at most about $\\pi/n$. If a robot always moves inside the triangle of what it sees, it moves towards the centre by at most about $\\pi/n$ per round. The polygon's radius is about $n/(2\\pi)$, so shrinking it to two thirds of its size takes about $n^2$ rounds.",
+        "idea": "Place $n$ robots on a regular $n$-gon with sides of length 1, the visibility radius, so each robot sees only its two neighbours. The adversary chooses local coordinate systems so that all robots see the same thing and the polygon stays regular forever. Each robot sees itself and two neighbours nearly on a straight line: the triangle they form has height at most about $\\pi/n$. If a robot always moves inside the triangle of what it sees, it moves towards the centre by at most about $\\pi/n$ per round (a step of time in which each robot that the scheduler activates performs one full cycle). The polygon's radius is about $n/(2\\pi)$, so shrinking it to two thirds of its size takes about $n^2$ rounds.",
         "analysis": "The diameter of this start is $\\Delta_0 \\approx n/\\pi$, so $\\Omega(\\Delta_0^2)$ rounds are needed by every protocol whose robots always move inside the region spanned by what they see (Theorem 4 of [Castenow2022Unifying]); Go-To-the-Center and its collision-free version are of this kind, so their $O(\\Delta_0^2)$ bound is tight for them. Whether moving outside that region can be faster is open.",
         "why_it_matters": "It shows that local rules pay quadratically in the size of the swarm, and points to where a faster algorithm would have to do something different."
       },
@@ -41,11 +41,101 @@
         "variant": "async-one-axis",
         "ref": "Pagli2015Near",
         "idea": "Why must the start be connected? Take two robots farther apart than $V$. Each sees only itself, in every cycle. A deterministic oblivious robot with the same snapshot always computes the same move in its own coordinates. The adversary gives both robots the same orientation and unit and wakes them together: they make exactly the same move in the plane, so their distance never changes. They never see each other.",
-        "analysis": "So near-gathering cannot be solved from a disconnected start, which Pagli, Prencipe and Viglietta note is \\\"easily seen\\\" [Pagli2015Near]; the same holds for gathering [Flocchini2005Limited]. From a connected start, Pagli et al. solve near-gathering in ASYNC, without collisions and with termination, for robots that agree on one axis [Pagli2015Near].",
+        "analysis": "So near-gathering cannot be solved from a disconnected start, which Pagli, Prencipe and Viglietta note is \"easily seen\" [Pagli2015Near]; the same holds for gathering [Flocchini2005Limited]. From a connected start, Pagli et al. solve near-gathering in ASYNC, without collisions and with termination, for robots that agree on one axis [Pagli2015Near].",
         "why_it_matters": "It is the reason every limited-visibility algorithm assumes a connected start and works hard to keep it connected."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": []
+    },
+    {
+      "term": "visibility radius",
+      "definition": "the distance $V$ within which a robot sees the other robots",
+      "avoid": []
+    },
+    {
+      "term": "edge",
+      "definition": "a pair of robots within distance $V$ of each other, an edge of the visibility graph",
+      "avoid": [
+        "link"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a robot joined to the given robot by an edge, that is, within distance $V$ of it",
+      "avoid": []
+    },
+    {
+      "term": "visibility graph",
+      "definition": "the graph whose nodes are the robots and whose edges join two robots within distance $V$; near-gathering requires it to be connected at the start",
+      "avoid": [
+        "picture"
+      ]
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "the repeated behaviour of a robot: Look (take a snapshot), Compute (a destination point from the snapshot), Move (towards that destination)",
+      "avoid": [
+        "Look-Compute-Move"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the positions of the robots that the robot sees, expressed in its local coordinate system",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that makes every choice the algorithm does not control: activations, the duration of phases, where non-rigid moves stop, and the local coordinate systems",
+      "avoid": []
+    },
+    {
+      "term": "collision",
+      "definition": "two robots at the same point at the same time",
+      "avoid": []
+    },
+    {
+      "term": "epoch",
+      "definition": "in ASYNC (and used as the time unit in SSYNC too), an interval of time in which every robot completes at least one full Look–Compute–Move cycle; it need not be the shortest such interval",
+      "avoid": []
+    },
+    {
+      "term": "connectivity range",
+      "definition": "in [Castenow2022Unifying], the distance $V$ that defines the edges of the visibility graph; it is smaller than the viewing range",
+      "avoid": []
+    },
+    {
+      "term": "viewing range",
+      "definition": "in [Castenow2022Unifying], the distance $V + \\tau$, for a constant $0 < \\tau \\le 2V/3$, within which a robot sees other robots",
+      "avoid": []
+    }
+  ],
   "history": "Near-gathering was introduced to **get robots close without collisions**, a safe first phase for other tasks [Pagli2015Near]; later work asked how fast disoriented robots can do it [Castenow2022Unifying].",
   "measures": [
     {
@@ -159,7 +249,7 @@
     }
   ],
   "figure": {
-    "caption": "Near-gathering: robots with limited visibility, starting at distinct points whose visibility graph is connected, must come close enough that every robot sees all others, without two robots ever occupying the same point [Pagli2015Near]. Shown in FSYNC rounds: the Go-To-the-Center rule of [Castenow2022Unifying]: each robot moves part of the way towards the centre of the smallest circle enclosing the robots it sees, staying within $V/2$ of the midpoint with each neighbour, so links (lines) are never lost.",
+    "caption": "Near-gathering: robots with limited visibility, starting at distinct points whose visibility graph is connected, must come close enough that every robot sees all others, without two robots ever occupying the same point [Pagli2015Near]. Shown in FSYNC rounds: the Go-To-the-Center rule of [Castenow2022Unifying]: each robot moves part of the way towards the centre of the smallest circle enclosing the robots it sees, staying within $V/2$ of the midpoint with each neighbour, so edges of the visibility graph are never lost.",
     "view": [
       100,
       56
@@ -324,7 +414,7 @@
             "w": 0.4
           }
         ],
-        "label": "Start: neighbours within $V$ are linked"
+        "label": "Start: neighbours within $V$ share an edge"
       },
       {
         "ents": [

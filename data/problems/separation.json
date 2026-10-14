@@ -14,17 +14,17 @@
     }
   ],
   "summary": "Robots of different (hidden) colours must separate so that each colour class occupies its own region.",
-  "statement": "Each robot has a fixed colour that the others can see but it cannot (an *unconscious* robot). The robots must arrange themselves so that the colour classes are separated (into points, lines or circles, depending on the variant).",
+  "statement": "Each robot has a fixed **colour** that the others can see but it cannot (an **unconscious** robot). The robots must arrange themselves so that the **colour classes** (the sets of robots of one colour) are separated (into points, lines or circles, depending on the variant).",
   "primer": {
-    "intro": "Imagine a party where each guest wears a coloured hat they cannot see, but they can see everybody else's hat, and nobody may speak. The guests must sort themselves so that all red hats stand on one line, all blue hats on another, and so on. In the separation problem $n$ point robots in the plane each have a fixed colour that the others see but they cannot (an *unconscious* robot). In the basic version robots are oblivious (they forget everything after each move), see everybody, agree on the direction of one axis, and are activated by an asynchronous (ASYNC) adversary: a robot may look while others are still moving. They must end up separated into parallel lines, one colour class per line.",
+    "intro": "Imagine a party where each guest wears a coloured hat they cannot see, but they can see everybody else's hat, and nobody may speak. The guests must sort themselves so that all red hats stand on one line, all blue hats on another, and so on. In the separation problem the guests are $n$ point **robots** in the plane, and a hat is a robot's **colour**: fixed, seen by the others but not by the robot itself (an **unconscious** robot). Each robot repeats a **Look–Compute–Move cycle**: it looks at the others, computes a destination and moves there. In the basic version robots are **oblivious** (they forget everything after each move), see everybody, and their **local coordinate systems** (each robot's private axes and unit of length) agree on the direction of one axis; the **scheduler**, an adversary that decides when each robot acts, is asynchronous (ASYNC): a robot may look while others are still moving. They must end up separated into parallel lines, one **colour class** (all robots of one colour) per line.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Others tell you where to go",
         "variant": "opaque",
         "ref": "Pyati2026Separation",
-        "idea": "The key difficulty is that a robot does not know its own colour, but every other robot does. One way out, used with opaque robots (robots that block the view of robots behind them) under SSYNC:\n1. Bring all robots to the lower half of a circle, where everybody can see everybody.\n2. Divide this semicircle into sectors, one per colour.\n3. A few chosen robots act as signallers: by moving to a carefully chosen point they encode \"the robot of colour $c$ at this position should go to sector $j$\".\n4. The robot addressed reads the signal and moves to its sector, without ever learning its colour directly.\n5. Finally each sector is moved onto its own semicircle, so colour classes lie on concentric semicircles.",
-        "analysis": "Positions are the only way robots can pass information, so the algorithm turns positions into messages. [Pyati2026Separation] reach concentric semicircles in $O(n)$ epochs (an epoch is a stretch of time in which every robot completes at least one cycle) without collisions and without knowing $n$. We read only a summary of this paper's arXiv version, so the steps above give the idea, not its details. The algorithms for the standard ASYNC variant are different and are not described here.",
+        "idea": "The key difficulty is that a robot does not know its own colour, but every other robot does. One way out, used with **opaque** robots (robots that block the view of robots behind them) under SSYNC (time is divided into **rounds**, and in each round some robots each perform one full cycle):\n1. Bring all robots to the lower half of a circle, where everybody can see everybody.\n2. Divide this semicircle into **sectors**, one per colour.\n3. A few chosen robots act as **signallers**: by moving to a carefully chosen point they encode \"the robot of colour $c$ at this position should go to sector $j$\".\n4. The robot addressed reads the signal and moves to its sector, without ever learning its colour directly.\n5. Finally each sector is moved onto its own semicircle, so colour classes lie on concentric semicircles.",
+        "analysis": "Positions are the only way robots can pass information, so the algorithm turns positions into messages. [Pyati2026Separation] reach concentric semicircles in $O(n)$ epochs (an **epoch** is an interval of time in which every robot completes at least one full cycle) without collisions and without knowing $n$. We read only a summary of this paper's arXiv version, so the steps above give the idea, not its details. The algorithms for the standard ASYNC variant are different and are not described here.",
         "why_it_matters": "Using movement as a message channel is how silent robots share information they cannot sense themselves, the same idea behind signalling with lights."
       },
       {
@@ -38,6 +38,77 @@
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "colour",
+      "definition": "a fixed label of each robot, visible to the other robots but not to the robot itself",
+      "avoid": []
+    },
+    {
+      "term": "unconscious",
+      "definition": "a robot that cannot see its own colour",
+      "avoid": []
+    },
+    {
+      "term": "colour class",
+      "definition": "the set of all robots of one colour",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "the repeated behaviour of a robot: Look (take a snapshot), Compute (a destination point from the snapshot), Move (towards that destination)",
+      "avoid": [
+        "Look-Compute-Move"
+      ]
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "opaque",
+      "definition": "robots block sight: a robot sees another only if no third robot lies on the open segment between them",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "in FSYNC and SSYNC, one step of time in which every activated robot performs one full Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "sector",
+      "definition": "in the algorithm for opaque robots, one of the arcs of the lower semicircle, one per colour, into which the robots of that colour are guided",
+      "avoid": []
+    },
+    {
+      "term": "signaller",
+      "definition": "in the algorithm for opaque robots, a robot that moves to a chosen point to tell another robot which sector to go to",
+      "avoid": []
+    },
+    {
+      "term": "epoch",
+      "definition": "in ASYNC (and used as the time unit in SSYNC too), an interval of time in which every robot completes at least one full Look–Compute–Move cycle; it need not be the shortest such interval",
+      "avoid": []
+    }
+  ],
   "history": "Separation of unconscious coloured robots asked whether robots that **cannot see their own colour** can still sort themselves by colour, first synchronously [Seike2023Separation], then asynchronously [Flocchini2025Separation] and with opaque robots [Pyati2026Separation].",
   "measures": [
     {

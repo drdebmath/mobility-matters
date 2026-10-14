@@ -8,17 +8,17 @@
     "note": "arXiv 2018; ICDCN 2020."
   },
   "summary": "Particles must enclose an object in its convex hull, sensing only locally.",
-  "statement": "Particles must form the convex hull (and the weak $\\mathcal{O}_\\Delta$-hull) of a fixed object on the lattice. $B$ is the length of the object's boundary.",
+  "statement": "Particles must form the **convex hull** (and the weak $\\mathcal{O}_\\Delta$-hull) of a fixed **object**, a connected set of nodes of the triangular lattice that particles cannot enter. $B$ is the length of the object's **boundary**.",
   "primer": {
-    "intro": "Imagine robots asked to seal an oddly shaped object inside the tightest convex 'fence', like a rubber band stretched around it. A fixed object occupies a connected set of nodes of the triangular grid, and particles sit next to it; $B$ is the length of the object's boundary. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. The particles must occupy exactly the nodes of the object's *convex hull*, taken one layer outside the object: on the triangular grid, the smallest region bounded by six straight sides in the grid's three directions that contains the object. Particles have constant memory, no common compass, and an adversarial scheduler; one particle starts as a leader on the object's boundary. Time is counted in rounds (every particle acts at least once per round).",
+    "intro": "Imagine sealing an oddly shaped object inside the tightest convex 'fence', like a rubber band stretched around it. The floor is the **triangular lattice**: the endless graph whose **nodes** are the corners of a tiling of the plane by equal triangles; each node is joined by an edge to six others, its **neighbours**. A **particle** occupies one node and moves in two actions: an **expansion** into an empty neighbouring node, after which it occupies both, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. A fixed **object** occupies a connected set of nodes that particles cannot enter, and particles sit next to it; $B$ is the length of the object's **boundary** (the walk around its outside). The particles must occupy exactly the nodes of the object's **convex hull**, taken one layer outside the object: on the triangular lattice, the smallest region bounded by six straight sides in the lattice's three directions that contains the object. Particles have constant memory, no **compass** (no agreement on the six directions of the lattice), and an adversarial scheduler; one particle starts as the **leader** on the object's boundary. Time is counted in **rounds** (intervals of time in which every particle is activated at least once).",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Walk around the object and push six walls outwards",
         "variant": "basic",
         "ref": "Daymude2020Hull",
-        "idea": "1. Using its own compass, the leader names six directions and imagines six walls (half-planes), one per side of the future hull. It keeps six counters: its distance to each wall, all starting at 0.\\n2. The leader walks clockwise around the object's boundary. Each step brings it closer to two walls and farther from two others, and it updates the counters.\\n3. If a step would take it beyond a wall (a counter already at 0 must go down), that wall is *pushed* one step outwards: the estimate of the hull grows.\\n4. The leader also remembers, for each wall, whether it has touched that wall since its last push. Once it has touched all six without pushing any, the walls are in their final places.\\n5. The counters can be as large as $B$, too big for one particle, so the followers trailing the leader each store one bit of a binary counter.\\n6. Finally the particles fill the nodes along the six walls.",
-        "analysis": "The walls only move outwards and stop at the true hull, so the walk ends with the correct hull. The paper proves that the whole process, including the distributed counters, takes $O(B)$ rounds [Daymude2020Hull]. The same algorithm can be extended to a tighter fence (the weak $\\mathcal{O}_\\Delta$-hull) in the same time; if there are too few particles, it forms as much of the hull as it can.",
+        "idea": "1. Using its own local names for the six directions, the leader imagines six **walls** (half-planes), one per side of the future hull. It keeps six **counters**: its distance to each wall, all starting at 0.\n2. The leader walks clockwise around the object's boundary. Each step brings it closer to two walls and farther from two others, and it updates the counters.\n3. If a step would take it beyond a wall (a counter already at 0 must go down), that wall is *pushed* one step outwards: the estimate of the hull grows.\n4. The leader also remembers, for each wall, whether it has touched that wall since its last push. Once it has touched all six without pushing any, the walls are in their final places.\n5. The counters can be as large as $B$, too big for one particle, so the followers trailing the leader each store one bit of a binary counter.\n6. Finally the particles fill the nodes along the six walls.",
+        "analysis": "The walls only move outwards and stop at the true hull, so the walk ends with the correct hull. The paper proves that the whole process, including the distributed counters, takes $O(B)$ rounds [Daymude2020Hull]. The same algorithm can be extended to a tighter hull (the weak $\\mathcal{O}_\\Delta$-hull) in the same time; if there are too few particles, it forms as much of the hull as it can.",
         "why_it_matters": "Distributed binary counters let constant-memory particles count up to large numbers, a tool other algorithms reuse."
       },
       {
@@ -31,6 +31,82 @@
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous computing unit of constant size that occupies one node of the triangular lattice, or two neighbouring nodes while it moves",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph $G_\\Delta$ whose nodes are the corners of a tiling of the plane by equilateral triangles; every node has six neighbours",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; it is empty or occupied by a particle (an expanded particle occupies two)",
+      "avoid": [
+        "spot",
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "two nodes are neighbours when an edge of the triangular lattice joins them; two particles are neighbours when they occupy neighbouring nodes",
+      "avoid": [
+        "adjacent",
+        "touching"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the action in which a particle that occupies one node extends into an empty neighbouring node and then occupies both"
+    },
+    {
+      "term": "contraction",
+      "definition": "the action in which a particle that occupies two nodes withdraws into one of them"
+    },
+    {
+      "term": "object",
+      "definition": "a fixed connected set of nodes of the triangular lattice that particles cannot enter"
+    },
+    {
+      "term": "boundary",
+      "definition": "the closed walk around the outside of the object; $B$ is its length"
+    },
+    {
+      "term": "convex hull",
+      "definition": "the smallest region of the triangular lattice that contains the object and is bounded by six straight sides parallel to the lattice's three directions; the particles must occupy the nodes one layer outside it"
+    },
+    {
+      "term": "leader",
+      "definition": "the one particle that starts on the object's boundary in a distinguished state, walks around the object and keeps the counters; its role can be handed to a neighbour (a role swap)"
+    },
+    {
+      "term": "wall",
+      "definition": "one of six half-planes, one per side of the current estimate of the convex hull; a wall is pushed outwards when the leader would step beyond it"
+    },
+    {
+      "term": "counter",
+      "definition": "the leader's distance to one wall, a number up to $B$, stored in binary with one bit per particle in the chain behind the leader"
+    },
+    {
+      "term": "round",
+      "definition": "an interval of time in which every particle is activated at least once (an asynchronous round); a bound holds for every division of the execution into consecutive rounds",
+      "avoid": [
+        "epoch"
+      ]
+    },
+    {
+      "term": "compass",
+      "definition": "agreement of all particles on the six directions of the triangular lattice (full common orientation)"
+    }
+  ],
   "history": "Convex hull formation asked whether particles **without shared orientation** can compute a global geometric property, and how fast [Daymude2020Hull].",
   "variants": [
     {
@@ -87,7 +163,7 @@
     "connectivity"
   ],
   "figure": {
-    "caption": "Convex hull formation, following [Daymude2020Hull]: a leader (L) walks clockwise around the object (black) and keeps its distance to six walls, one per side of a hexagon with lattice-parallel sides; a step beyond a wall pushes that wall outwards (dashed: the current estimate). Here the particles already surround the object, so the leader advances by role swaps, handing its role and counters to the particle ahead, and nobody moves. Once the leader has touched all six walls since its last push, the hull is known, and the particle in the bay steps out (expansion, contraction), so that the particles occupy exactly the nodes adjacent to the hull.",
+    "caption": "Convex hull formation, following [Daymude2020Hull]: a leader (L) walks clockwise around the object (black) and keeps its distance to six walls, one per side of a hexagon with lattice-parallel sides; a step beyond a wall pushes that wall outwards (dashed: the current estimate). Here the particles already surround the object, so the leader advances by role swaps, handing its role and counters to the particle ahead, and nobody moves. Once the leader has touched all six walls since its last push, the hull is known, and the particle in the bay steps out (expansion, contraction), so that the particles occupy exactly the nodes that neighbour the hull.",
     "view": [
       100,
       56

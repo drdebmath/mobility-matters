@@ -8,16 +8,16 @@
     "note": "Boundary patrolling by agents with distinct speeds (ESA 2011)."
   },
   "summary": "Robots move forever so that no point of a fence (a segment, a circle, or the edges of a graph) stays unvisited for long.",
-  "statement": "$k$ robots with maximum speeds $v_1,\\dots,v_k$ move forever along a fence. The **idle time** is the largest time interval during which some point is not visited. The aim is to minimise it, or, equivalently, to find the longest fence that can be patrolled with idle time 1.",
+  "statement": "$k$ robots with maximum speeds $v_1,\\dots,v_k$ move forever along a **fence**: a segment, a circle, or the edges of a graph. The **idle time** is the largest time interval during which some point is not visited. The aim is to minimise it, or, equivalently, to find the longest fence that can be patrolled with idle time 1.",
   "primer": {
-    "intro": "Security guards with different walking speeds must watch a long straight fence so that no point is left unvisited for too long. In fence patrolling, $k$ robots with maximum speeds $v_1, \\dots, v_k$ move forever along a segment; the *idle time* is the longest stretch of time during which some point of the fence is not visited by any robot. Equivalently, fixing the idle time to 1, we ask for the longest fence, of length $\\ell$, that the robots can patrol. Robots may pass each other, and the schedule is planned in advance.",
+    "intro": "Security guards with different walking speeds must watch a long straight fence so that no point is left unvisited for too long. In fence patrolling the guards are $k$ **robots** with maximum speeds $v_1, \\dots, v_k$ that move forever along the **fence**, here a segment; a point is **visited** when some robot is at it. The **idle time** is the longest stretch of time during which some point of the fence is not visited by any robot. Equivalently, fixing the idle time to 1, we ask for the longest fence, of length $\\ell$, that the robots can patrol. Robots may pass each other, and the **schedule**, the motion of every robot over time, is planned in advance.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Partition: give each guard its own piece",
+        "title": "Partition: give each robot its own piece",
         "variant": "segment",
         "ref": "Czyzowicz2011Patrolling",
-        "idea": "1. Cut the fence into $k$ pieces, piece $i$ of length $v_i/2$.\n2. Robot $i$ walks back and forth over its own piece at full speed, forever.",
+        "idea": "The **partition** strategy:\n1. Cut the fence into $k$ **pieces**, piece $i$ of length $v_i/2$.\n2. Robot $i$ walks back and forth over its own piece at full speed, forever.",
         "analysis": "A round trip over piece $i$ takes $2 \\cdot (v_i/2)/v_i = 1$, so every point of the piece is visited at least once in every unit of time, and the fence has length $\\ell = (v_1 + \\dots + v_k)/2$. On the other hand, in any unit of time robot $i$ visits a stretch of at most $v_i$, so no schedule patrols more than $v_1 + \\dots + v_k$: partition is within a factor 2 of optimal. [Czyzowicz2011Patrolling] proved it optimal for $k = 2$ and conjectured it optimal for all $k$; [Kawamura2015Fence] confirmed $k = 3$.",
         "why_it_matters": "Partition is the natural first answer, and it is used as a building block in most patrolling strategies."
       },
@@ -26,21 +26,106 @@
         "title": "Every point needs $f+1$ visitors: a counting bound",
         "variant": "graph-faulty",
         "ref": "Czyzowicz2017Patrolmen",
-        "idea": "Now patrol a graph (dots joined by lines, here of total edge length $|E|$) with $k$ robots of speed 1, of which up to $f$ are unreliable: their visits do not count, and the adversary picks them knowing the plan. Take any window of length $T$ equal to the idle time. If some point is visited in that window by only $f$ distinct robots or fewer, the adversary declares those robots unreliable and the point is unwatched. So every point must be passed by at least $f+1$ different robots in the window.",
-        "analysis": "Together the robots walk at most $kT$ in the window, and they must cover every point of every edge $f+1$ times, which needs at least $(f+1)|E|$. Hence $T \\ge (f+1)|E|/k$. [Czyzowicz2017Patrolmen] match it on graphs where a closed walk uses every edge exactly once: spread the robots evenly along that walk, $|E|/k$ apart, so every point sees a new robot every $|E|/k$ time units; in general they use a shortest closed walk through all edges and show that finding the optimum is NP-hard.",
+        "idea": "Now patrol a **graph**: **nodes** joined by **edges**, where each edge is a segment with a length; the fence is the union of the edges, of total length $|E|$. There are $k$ robots of speed 1, of which up to $f$ are **unreliable**: their visits do not count, and the **adversary**, an opponent who knows the schedule, picks them. Take any **window**, an interval of time of length $T$ equal to the idle time. If some point is visited in that window by only $f$ distinct robots or fewer, the adversary declares those robots unreliable and the point counts as not visited. So every point must be visited by at least $f+1$ different robots in the window.",
+        "analysis": "Together the robots walk at most $kT$ in the window, and they must cover every point of every edge $f+1$ times, which needs at least $(f+1)|E|$. Hence $T \\ge (f+1)|E|/k$. [Czyzowicz2017Patrolmen] match it on graphs where a **closed walk** (a route along edges that ends where it starts) uses every edge exactly once: spread the robots evenly along that walk, $|E|/k$ apart, so every point is visited by a new robot every $|E|/k$ time units; in general they use a shortest closed walk through all edges and show that finding the optimum is NP-hard.",
         "why_it_matters": "Counting total work against what must be covered is the simplest lower-bound technique in patrolling, and it is tight here."
       },
       {
         "kind": "algorithm",
-        "title": "Six guards beat the partition",
+        "title": "Six robots beat the partition",
         "variant": "segment",
         "ref": "Kawamura2015Fence",
-        "idea": "Take six robots with speeds $1, 1, 1, 1, 7/3, 1/2$. Partition patrols $(1+1+1+1+7/3+1/2)/2 = 41/12$. [Kawamura2015Fence] patrol a longer fence, of length $7/2$:\n1. The four robots of speed 1 walk end to end, covering most of the fence in a staggered pattern.\n2. The fast robot covers most of what they leave uncovered.\n3. The slowest robot fills the last small gaps.",
+        "idea": "Take six robots with speeds $1, 1, 1, 1, 7/3, 1/2$. Partition patrols a fence of length $(1+1+1+1+7/3+1/2)/2 = 41/12$. [Kawamura2015Fence] patrol a longer fence, of length $7/2$:\n1. The four robots of speed 1 walk end to end, covering most of the fence in a staggered pattern.\n2. The fast robot covers most of what they leave uncovered.\n3. The slowest robot fills the last small gaps.",
         "analysis": "Since $7/2 = 42/12 > 41/12$, the conjecture that partition is always optimal is false; adding further robots shows it fails for every $k \\ge 6$. Later schedules patrol fences up to $4/3$ times longer than partition [Kawamura2020Simple], and on a circle simple strategies can be beaten by a factor $21/20$. The optimal schedule for general speeds is unknown.",
-        "why_it_matters": "It shows that sharing territory can beat dividing it, which is why even this one-dimensional problem is still open."
+        "why_it_matters": "It shows that sharing pieces of the fence can beat dividing it, which is why even this one-dimensional problem is still open."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point that moves along the fence, robot $i$ at speed at most $v_i$; robots may pass each other",
+      "avoid": [
+        "agent",
+        "guard"
+      ]
+    },
+    {
+      "term": "fence",
+      "definition": "the set of points to be patrolled: a segment of length $\\ell$, a circle, or the union of the edges of a graph",
+      "avoid": []
+    },
+    {
+      "term": "visit",
+      "definition": "a point is visited at time $t$ when some robot is at that point at time $t$",
+      "avoid": []
+    },
+    {
+      "term": "idle time",
+      "definition": "the largest length of a time interval during which some point of the fence is not visited by any (reliable) robot",
+      "avoid": [
+        "idleness"
+      ]
+    },
+    {
+      "term": "schedule",
+      "definition": "the motion of every robot over all time, fixed in advance",
+      "avoid": [
+        "plan"
+      ]
+    },
+    {
+      "term": "partition",
+      "definition": "the strategy that cuts the fence into $k$ pieces, piece $i$ of length $v_i/2$, and lets robot $i$ walk back and forth over piece $i$ at full speed",
+      "avoid": []
+    },
+    {
+      "term": "piece",
+      "definition": "a segment of the fence assigned to one robot by the partition strategy",
+      "avoid": []
+    },
+    {
+      "term": "graph",
+      "definition": "a set of nodes joined by edges, each edge a segment with a length; patrolling a graph means patrolling every point of every edge",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an endpoint of edges of the graph",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a segment of the graph between two nodes; $|E|$ denotes the total length of the edges",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "closed walk",
+      "definition": "a route along edges of the graph that ends at the node where it starts",
+      "avoid": []
+    },
+    {
+      "term": "unreliable",
+      "definition": "said of one of the at most $f$ robots, chosen by the adversary, whose visits do not count",
+      "avoid": []
+    },
+    {
+      "term": "window",
+      "definition": "an interval of time whose length $T$ equals the idle time",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an opponent that knows the schedule and chooses which robots are unreliable",
+      "avoid": []
+    }
+  ],
   "history": "Patrolling asked first for **optimal strategies** and whether the simple ones, partitioning the fence or cycling around it, are optimal [Czyzowicz2011Patrolling]. They are not in general [Kawamura2015Fence] [Kawamura2020Simple]; faults later changed the question to the idle time a graph admits when up to $f$ patrollers are unreliable [Czyzowicz2017Patrolmen].",
   "measures": [
     {
@@ -222,7 +307,7 @@
     }
   ],
   "figure": {
-    "caption": "Fence patrolling: robots with maximum speeds $v_1, \\dots, v_k$ move forever along a segment so as to minimise the idle time, the longest interval during which some point is unvisited. The animation runs the partition strategy [Czyzowicz2011Patrolling] with speeds $1, 2, 1$: robot $i$ sweeps its own piece, of length $v_i/2$, back and forth at full speed (bars: the part swept on the way out, then on the way back), so every point is revisited within time 1 and a fence of length $(v_1 + \\dots + v_k)/2$ is patrolled; this is not always optimal [Kawamura2015Fence].",
+    "caption": "Fence patrolling: robots with maximum speeds $v_1, \\dots, v_k$ move forever along a segment so as to minimise the idle time, the longest interval during which some point is not visited. The animation runs the partition strategy [Czyzowicz2011Patrolling] with speeds $1, 2, 1$: robot $i$ sweeps its own piece, of length $v_i/2$, back and forth at full speed (bars: the part swept on the way out, then on the way back), so every point is visited again within time 1 and a fence of length $(v_1 + \\dots + v_k)/2$ is patrolled; this is not always optimal [Kawamura2015Fence].",
     "view": [
       100,
       36
@@ -929,7 +1014,7 @@
             "w": 0.8
           }
         ],
-        "label": "Final: back after time 1; every point revisited"
+        "label": "Final: back after time 1; every point visited again"
       }
     ]
   }

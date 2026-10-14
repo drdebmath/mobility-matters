@@ -8,25 +8,25 @@
     "note": "Introduced at ICDCN 2024."
   },
   "summary": "$n$ agents in an anonymous graph must mark a maximal independent set of nodes.",
-  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must settle on the nodes of a maximal independent set, every other agent knowing it is not in the set: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must settle on the nodes of a maximal independent set, every other agent knowing it is not in the set: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
   "primer": {
-    "intro": "Imagine $n$ guards, one for each room of a building with unnamed rooms, who must choose some rooms to stand in so that no two chosen rooms are next to each other, yet every room is either chosen or next to a chosen room. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$ (most corridors at one room); doors in a room are numbered (*ports*), and each agent-guard has a distinct ID. Such a set of nodes is a *maximal independent set* (MIS): *independent* because no two chosen nodes are joined, *maximal* because no further node can be added. The agents move in synchronous *rounds* (in each round every agent may talk to agents in the same room, then walk along one corridor), and at the end every agent must know whether it stands on a chosen node. We count rounds and bits of memory per agent. As for all problems in this family, a general method is to spread out one agent per node and then let the agents imitate a classical message-passing algorithm by walking to their neighbours (explained under leader election by agents).",
+    "intro": "Imagine a building with $n$ rooms that carry no names, and $n$ **agents** (small mobile computers) who must choose some rooms to stand in so that no two chosen rooms are next to each other, yet every room is either chosen or next to a chosen room. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. The **degree** $\\deg(v)$ of a node $v$ is the number of edges at it, and $\\Delta$ is the maximum degree. Nodes have no names, but the edges at a node are numbered $1, 2, \\dots$; these numbers are **ports**. Each agent has a distinct **identifier** (ID). A set of nodes in which no two nodes are neighbours is *independent*; it is a **maximal independent set** (MIS) if no further node can be added to it without losing this. The agents move in synchronous **rounds** (in each round every agent may talk to the agents on its node, then move along at most one edge), and at the end every agent must know whether it stands on a chosen node. We count rounds and bits of memory per agent. As for all problems in this family, a general method is to make the agents **dispersed** (one agent on each node) and then let them imitate a classical message-passing algorithm by visiting their neighbours (explained under leader election by agents).",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Depth-first search that colours as it settles",
+        "title": "Depth-first walk that colours as it settles",
         "variant": "no-knowledge",
         "ref": "Chand2023Cover",
-        "idea": "All $n$ agents start together on one node (a *rooted* start) and know nothing about the graph.\n\n1. The group walks the graph in depth-first order. Whenever it reaches an empty node, the agent with the smallest ID among those still walking stays there for good (it *settles*) and remembers the door it came in by, so the group can later walk back.\n2. Before the group moves on, the new settler checks its neighbours. If its parent (the node it was reached from) is *black*, it colours itself *grey*. Otherwise it visits every neighbour and comes back: if some neighbour is black it becomes grey, else black.\n3. The rest of the group continues the depth-first walk; finding an occupied node tells it that the node was visited before, so it turns back.\n4. When every agent has settled, the black agents form the answer.",
-        "analysis": "A black agent never has a black neighbour, so the black nodes are independent; every grey agent has a black neighbour, so no node can be added: the set is maximal. The depth-first walk crosses each edge a constant number of times, and the neighbour checks cost $2\\deg(v)$ rounds at each node $v$ (where $\\deg(v)$ is the number of corridors at $v$), which sums to $4m$; so the total is $O(m)$ rounds with $O(\\log n)$ bits per agent [Chand2023Cover]. The current best without knowledge, from any start, is $O(\\max\\{n\\log^2 n, m\\})$ rounds with $O(\\log n)$ bits [Kaur2026MIS].",
+        "idea": "All $n$ agents start together on one node (a *rooted* start) and know nothing about the graph.\n\n1. The group moves through the graph in a **depth-first walk**: it leaves its current node by a port not tried yet when there is one, and otherwise goes back to the node from which it reached the current node. Whenever it reaches an empty node, the agent with the smallest ID among those still walking stays there for good: it becomes a **settled agent**, and it remembers the port by which the group came in, so the group can later walk back.\n2. Before the group moves on, the new settled agent checks its neighbours. If its **parent** (the node from which the walk reached it) holds a *black* agent, it colours itself *grey*. Otherwise it visits every neighbour and comes back: if some neighbour is black it becomes grey, else black.\n3. The rest of the group continues the depth-first walk; finding a settled agent on a node tells it that the node was visited before, so it turns back.\n4. When every agent has settled, the black agents form the answer.",
+        "analysis": "A black agent never has a black neighbour, so the black nodes are independent; every grey agent has a black neighbour, so no node can be added: the set is maximal. The depth-first walk crosses each edge a constant number of times, and the neighbour checks cost $2\\deg(v)$ rounds at each node $v$, which sums to $4m$; so the total is $O(m)$ rounds with $O(\\log n)$ bits per agent [Chand2023Cover]. The current best without knowledge, from any start, is $O(\\max\\{n\\log^2 n, m\\})$ rounds with $O(\\log n)$ bits [Kaur2026MIS].",
         "why_it_matters": "It shows that settling agents one at a time along a depth-first walk gives a greedy algorithm for free, the same pattern as dispersion."
       },
       {
         "kind": "lower-bound",
         "title": "Some agent must walk almost the whole diameter",
         "variant": "no-knowledge",
-        "idea": "Let all agents start on the end $s$ of a path with $D+1$ nodes, so the *diameter* $D$ (largest distance between two nodes) is the length of the path. Maximality says that the far end $u$ or its only neighbour must be chosen, and a chosen node needs a agent standing on it. Both nodes are at distance at least $D-1$ from $s$.",
-        "analysis": "A agent moves along one edge per round, so no agent reaches distance $D-1$ before round $D-1$: from a rooted start every algorithm needs at least $D-1$ rounds. This simple argument is our own, not from the papers; no better lower bound is recorded in the catalogue, so the gap to the known $O(\\max\\{n\\log^2 n, m\\})$ rounds is wide open.",
+        "idea": "Let all agents start on the end $s$ of a path with $D+1$ nodes, so the *diameter* $D$ (largest distance between two nodes) is the length of the path. Maximality says that the far end $u$ or its only neighbour must be chosen, and a chosen node needs an agent standing on it. Both nodes are at distance at least $D-1$ from $s$.",
+        "analysis": "An agent moves along at most one edge per round, so no agent reaches distance $D-1$ before round $D-1$: from a rooted start every algorithm needs at least $D-1$ rounds. This simple argument is our own, not from the papers; no better lower bound is recorded in the catalogue, so the gap to the known $O(\\max\\{n\\log^2 n, m\\})$ rounds is wide open.",
         "why_it_matters": "Distance is the most basic obstacle for moving agents, and the gap between this bound and the known algorithms shows how little is known about the optimal time."
       },
       {
@@ -34,12 +34,114 @@
         "title": "Greedy by identifiers, simulated after dispersion",
         "variant": "known-n-delta",
         "ref": "Kshemkalyani2024AgentLE",
-        "idea": "Here the agents know $n$ and $\\Delta$, which lets them use the disperse-and-simulate method.\n\n1. Spread out so that every node holds one agent.\n2. Repeat simulated message-passing rounds, each made of $O(\\log n)$ blocks of $2\\Delta$ rounds in which neighbours meet (see leader election by agents).\n3. A agent joins the set as soon as every neighbour with a larger ID has decided and none of them joined; it stays out as soon as some neighbour with a larger ID joined.\n4. Each agent tells its neighbours its decision at the next meetings.",
-        "analysis": "The agent with the largest ID decides at once, and a agent waits only for neighbours with larger IDs, so a chain of waiting agents has decreasing IDs and at most $n$ members: at most $n$ simulated rounds. Each costs $O(\\Delta\\log n)$ real rounds, so the total is $O(n\\Delta\\log n)$ plus the time to disperse, the same order as the introductory $O(n\\Delta\\log n)$ bound of [Pattanayak2024MIS] (whose algorithm may differ). With $n$ and $\\Delta$ known the current best is $O(n\\log^2 n + D\\Delta\\log n)$ rounds with $O(\\log n)$ bits [Kshemkalyani2026Leader].",
+        "idea": "Here the agents know $n$ and $\\Delta$, which lets them use the disperse-and-simulate method.\n\n1. Disperse, so that every node holds one agent.\n2. Repeat simulated message-passing rounds, each made of $O(\\log n)$ blocks of $2\\Delta$ rounds in which neighbouring agents meet by the **ID-bit schedule**: in block $i$ an agent whose $i$-th ID bit is $1$ visits its neighbours one by one and an agent whose bit is $0$ waits on its node (see leader election by agents).\n3. An agent joins the set as soon as every neighbour with a larger ID has decided and none of them joined; it stays out as soon as some neighbour with a larger ID joined.\n4. Each agent tells its neighbours its decision at the next meetings.",
+        "analysis": "The agent with the largest ID decides at once, and an agent waits only for neighbours with larger IDs, so a chain of waiting agents has decreasing IDs and at most $n$ members: at most $n$ simulated rounds. Each costs $O(\\Delta\\log n)$ real rounds, so the total is $O(n\\Delta\\log n)$ plus the time to disperse, the same order as the introductory $O(n\\Delta\\log n)$ bound of [Pattanayak2024MIS] (whose algorithm may differ). With $n$ and $\\Delta$ known the current best is $O(n\\log^2 n + D\\Delta\\log n)$ rounds with $O(\\log n)$ bits [Kshemkalyani2026Leader].",
         "why_it_matters": "It shows the cost of the generic method: a slow message-passing algorithm becomes a slow agent algorithm, which is why later work designs algorithms for agents directly."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots",
+        "guard",
+        "guards"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "dispersed",
+      "definition": "with exactly one agent on every node; a dispersed start begins so, and to disperse is to reach this configuration",
+      "avoid": [
+        "spread out"
+      ]
+    },
+    {
+      "term": "depth-first walk",
+      "definition": "a walk of the group of unsettled agents that leaves its current node by a port not tried yet when there is one, and otherwise goes back to the node from which it reached the current node",
+      "avoid": [
+        "depth-first search"
+      ]
+    },
+    {
+      "term": "settled agent",
+      "definition": "an agent that the depth-first walk has left on a node for good; a node with a settled agent is occupied, which tells the walking agents it was visited before",
+      "avoid": [
+        "settler",
+        "settlers"
+      ]
+    },
+    {
+      "term": "parent",
+      "definition": "for a node $v$ reached by the depth-first walk, the node from which the walk first reached $v$; the settled agent on $v$ remembers the port leading back to it",
+      "avoid": []
+    },
+    {
+      "term": "ID-bit schedule",
+      "definition": "the meeting schedule in which every agent writes its ID with the same number of bits and time is cut into blocks of $2\\Delta$ rounds; in block $i$ the agents whose $i$-th bit is $1$ visit their neighbours one by one (out along one edge, back along it) and the agents whose $i$-th bit is $0$ wait on their nodes, so any two neighbouring agents meet",
+      "avoid": [
+        "bit-by-bit meeting schedule"
+      ]
+    },
+    {
+      "term": "maximal independent set",
+      "definition": "a set $I \\subseteq V$ such that no two nodes of $I$ are joined by an edge and every node outside $I$ has a neighbour in $I$; written MIS",
+      "avoid": []
+    }
+  ],
   "history": "MIS by agents was posed with **time first, memory second**: rooted and arbitrary starts, trees and grids [Pattanayak2024MIS]; later work removed the knowledge of $n$ and $\\Delta$ [Kaur2026MIS].",
   "measures": [
     {
@@ -179,7 +281,7 @@
     }
   ],
   "figure": {
-    "caption": "MIS by a depth-first walk that colours as it settles [Chand2023Cover] (other algorithms, e.g. from an arbitrary start, in [Pattanayak2024MIS]): all agents start at node $a$; the group moves one edge per round in depth-first order (grey lines: the walk's tree), and at each empty node the smallest ID settles. A settler whose parent is black turns grey at once; otherwise it walks to each neighbour and back, and turns black only if none is black. The black nodes form a maximal independent set.",
+    "caption": "MIS by a depth-first walk that colours as it settles [Chand2023Cover] (other algorithms, e.g. from an arbitrary start, in [Pattanayak2024MIS]): all agents start at node $a$; the group moves one edge per round in depth-first order (the walk's tree is drawn in grey), and at each empty node the agent with the smallest ID settles. A settled agent whose parent is black turns grey at once; otherwise it visits each neighbour and comes back, and turns black only if none is black. The black nodes form a maximal independent set.",
     "view": [
       100,
       50

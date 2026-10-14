@@ -8,29 +8,115 @@
     "note": "Introduced at ALGOSENSORS 2023."
   },
   "summary": "$n$ agents in an anonymous graph must mark a minimal dominating set.",
-  "statement": "$n$ agents with distinct identifiers are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$ (rooted, dispersed, or arbitrary start). Agents compute only by moving and by talking when co-located. The agents must mark a minimal dominating set of nodes: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must mark a minimal dominating set of nodes: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
   "primer": {
-    "intro": "Imagine placing first-aid kits in some rooms of a building so that every room either has a kit or is next door to a room with one, and no kit can be removed without leaving some room uncovered. The building is a graph with $n$ nodes (rooms), $m$ edges (corridors) and maximum degree $\\Delta$; rooms have no names, but the doors in a room are numbered (*ports*). A set of nodes such that every node is in it or adjacent to it is a *dominating set*; it is *minimal* if removing any node breaks this property (it need not be the smallest possible). $n$ agents with distinct IDs move in synchronous *rounds* (in each round a agent may talk to agents in the same room, then walk along one corridor) and must mark such a set: at the end every agent knows whether its node is in the set. We count rounds and bits of memory per agent. As for all problems in this family, one general method is to spread out one agent per node and then imitate a message-passing algorithm by walking to neighbours (explained under leader election by agents).",
+    "intro": "Imagine placing first-aid kits in some rooms of a building so that every room either has a kit or is next to a room with one, and no kit can be removed without leaving some room uncovered. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. The **degree** $\\deg(v)$ of a node $v$ is the number of edges at it, and $\\Delta$ is the maximum degree. Nodes have no names, but the edges at a node are numbered $1, 2, \\dots$; these numbers are **ports**. A set of nodes is a *dominating set* if every node is in it or is a neighbour of a node in it; it is a **minimal dominating set** if removing any one node breaks this property (it need not be the smallest possible). $n$ **agents** (small mobile computers) with distinct **identifiers** (IDs) move in synchronous **rounds** (in each round an agent may talk to the agents on its node, then move along at most one edge) and must mark such a set: at the end every agent knows whether its node is in the set. We count rounds and bits of memory per agent. As for all problems in this family, one general method is to place one agent on each node and then imitate a message-passing algorithm by visiting neighbours (explained under leader election by agents).",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Depth-first search that colours as it settles",
+        "title": "Depth-first walk that colours as it settles",
         "variant": "no-knowledge",
         "ref": "Chand2023Cover",
-        "idea": "All $n$ agents start on one node and know nothing about the graph.\n\n1. The group walks the graph in depth-first order; at each empty node it reaches, the smallest-ID walking agent settles there and remembers the door back.\n2. The new settler decides its colour: if the node it was reached from holds a *black* agent it becomes *grey*; otherwise it visits all its neighbours and becomes grey if one of them is black, and black if none is.\n3. The others continue; an occupied node tells them the node was visited before.\n4. When all agents have settled, the black nodes are the dominating set.",
+        "idea": "All $n$ agents start on one node (a *rooted* start) and know nothing about the graph.\n\n1. The group moves through the graph in a **depth-first walk**: it leaves its current node by a port not tried yet when there is one, and otherwise goes back to the node from which it reached the current node. At each empty node it reaches, the walking agent with the smallest ID stays for good, becoming a **settled agent**, and remembers the port leading back.\n2. The new settled agent decides its colour: if its **parent** (the node from which the walk reached it) holds a *black* agent it becomes *grey*; otherwise it visits all its neighbours and becomes grey if one of them is black, and black if none is.\n3. The others continue; a settled agent on a node tells them the node was visited before.\n4. When all agents have settled, the black nodes are the dominating set.",
         "analysis": "Every agent ends black or grey, and grey means \"next to a black one\", so the black nodes dominate the graph. They are also minimal: a black node has no black neighbour (all its neighbours are grey or settled after it and saw it), so removing it would leave it uncovered. In fact the black nodes form a maximal independent set, and every maximal independent set is a minimal dominating set. The walk crosses each edge a constant number of times and the checks cost $2\\deg(v)$ rounds per node $v$, $4m$ in total, so the algorithm takes $O(m)$ rounds with $O(\\log n)$ bits [Chand2023Cover]. The current best takes $O(n)$ rounds, from a rooted or arbitrary start, with $O(\\log n)$ bits [Chand2026MDS], building on a faster dispersion algorithm [Kshemkalyani2025Almost].",
-        "why_it_matters": "It is the template that later dominating-set and MIS algorithms for agents refine: settle agents greedily during exploration and let each settler decide from its neighbourhood."
+        "why_it_matters": "It is the template that later dominating-set and MIS algorithms for agents refine: settle agents greedily during exploration and let each settled agent decide from its neighbourhood."
       },
       {
         "kind": "lower-bound",
         "title": "Some agent must walk almost the whole diameter",
         "variant": "no-knowledge",
-        "idea": "Let all agents start on the end $s$ of a path with $D+1$ nodes, so the *diameter* $D$ (largest distance between two nodes) is the path's length. The far end $u$ must be dominated: $u$ or its only neighbour must be marked, and a marked node holds a agent. Both are at distance at least $D-1$ from $s$.",
-        "analysis": "Agents move one edge per round, so the algorithm needs at least $D-1$ rounds on this path. This is our own short argument; the catalogue records no lower bound, so whether the $O(n)$ rounds of [Chand2026MDS] are optimal is open. On a path $D = n-1$, so on paths the $O(n)$ algorithm is optimal up to a constant factor.",
+        "idea": "Let all agents start on the end $s$ of a path with $D+1$ nodes, so the *diameter* $D$ (largest distance between two nodes) is the path's length. The far end $u$ must be dominated: $u$ or its only neighbour must be marked, and a marked node holds an agent. Both are at distance at least $D-1$ from $s$.",
+        "analysis": "Agents move along at most one edge per round, so the algorithm needs at least $D-1$ rounds on this path. This is our own short argument; the catalogue records no lower bound, so whether the $O(n)$ rounds of [Chand2026MDS] are optimal is open. On a path $D = n-1$, so on paths the $O(n)$ algorithm is optimal up to a constant factor.",
         "why_it_matters": "It shows that linear time is the right target on long, thin graphs, and that a better lower bound would need graphs with small diameter."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "depth-first walk",
+      "definition": "a walk of the group of unsettled agents that leaves its current node by a port not tried yet when there is one, and otherwise goes back to the node from which it reached the current node",
+      "avoid": [
+        "depth-first search"
+      ]
+    },
+    {
+      "term": "settled agent",
+      "definition": "an agent that the depth-first walk has left on a node for good; a node with a settled agent is occupied, which tells the walking agents it was visited before",
+      "avoid": [
+        "settler",
+        "settlers"
+      ]
+    },
+    {
+      "term": "parent",
+      "definition": "for a node $v$ reached by the depth-first walk, the node from which the walk first reached $v$; the settled agent on $v$ remembers the port leading back to it",
+      "avoid": []
+    },
+    {
+      "term": "minimal dominating set",
+      "definition": "a set $S \\subseteq V$ such that every node is in $S$ or has a neighbour in $S$, and no proper subset of $S$ has this property; it need not have the smallest possible size",
+      "avoid": []
+    }
+  ],
   "history": "Dominating sets by agents were posed with time and memory as measures [Chand2023Cover]; building on optimal dispersion, linear time without any knowledge followed [Chand2026MDS].",
   "measures": [
     {
@@ -131,7 +217,7 @@
     }
   ],
   "figure": {
-    "caption": "Minimal dominating set by a depth-first walk that colours as it settles [Chand2023Cover]: all agents start at node $a$; the group moves one edge per round in depth-first order (grey lines: the walk's tree), and at each empty node the smallest ID settles. A settler whose parent is black turns grey at once; otherwise it walks to each neighbour and back, and turns black only if none is black. Every node is black or next to a black node, and no black node can be dropped.",
+    "caption": "Minimal dominating set by a depth-first walk that colours as it settles [Chand2023Cover]: all agents start at node $a$; the group moves one edge per round in depth-first order (the walk's tree is drawn in grey), and at each empty node the agent with the smallest ID settles. A settled agent whose parent is black turns grey at once; otherwise it visits each neighbour and comes back, and turns black only if none is black. Every node is black or next to a black node, and no black node can be dropped.",
     "view": [
       100,
       50

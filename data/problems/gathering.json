@@ -43,17 +43,17 @@
     "relation": "Gathering is $k$-grouping with $k = 1$, a single group of all $n$ robots, that is, point formation: the pattern consisting of one point of multiplicity $n$ [Flocchini2017Uniform] [Flocchini2026Universal]. General pattern formation algorithms usually exclude it, because multiplicity points need detection [Bramas2016Probabilistic]."
   },
   "summary": "Robots must meet at a single point that is not fixed in advance, and stay there.",
-  "statement": "$n$ robots start at distinct points and must all reach the same point in finite time and remain there. For $n = 2$ the problem is called rendezvous. **Time** is counted in rounds or epochs; **colours** count light colours.",
+  "statement": "$n$ robots start at distinct points and must all reach the same point in finite time and remain there. For $n = 2$ the problem is called rendezvous. **Time** is counted in rounds (FSYNC, SSYNC) or in epochs (ASYNC: intervals in which every robot completes at least one full Look–Compute–Move cycle); **colours** count light colours.",
   "primer": {
-    "intro": "Imagine robots scattered over a field that must all meet at one spot, although nobody has said where. There are $n$ robots, points in the plane at distinct places. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (they remember nothing from one cycle to the next), and each uses its own private coordinate system, so they share no sense of direction. An adversary, the **scheduler**, decides when robots act: in SSYNC time runs in rounds and in each round it wakes some of the robots; in ASYNC every phase may take any finite time. The robots must all reach the same point in finite time and stay there (for $n = 2$ this is called rendezvous). In the standard version $n \\ge 3$, the scheduler is ASYNC, and robots have **weak multiplicity detection**: they can tell whether a point holds one robot or several, but not how many.",
+    "intro": "Imagine robots scattered over a field that must all meet at one spot, although nobody has said where. There are $n$ **robots**, points in the plane at distinct places; their positions form the **configuration**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (they remember nothing from one cycle to the next), and each uses its own **local coordinate system** (origin, axes, unit of length and handedness), so they agree on no direction. An adversary, the **scheduler**, decides the **activation** of robots, that is, when each performs a cycle: in SSYNC time runs in **rounds** and in each round it activates some of the robots; in ASYNC every phase may take any finite time. The robots must all reach the same point in finite time and stay there (for $n = 2$ this is called rendezvous). In the standard version $n \\ge 3$, the scheduler is ASYNC, and robots have **weak multiplicity detection**: they can tell whether a point holds one robot or several (a **multiplicity**), but not how many.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Create one crowded point, then everyone walks to it",
+        "title": "Create one multiplicity, then every robot walks to it",
         "variant": "async-weak",
         "ref": "Cieliebak2012Gathering",
-        "idea": "1. If exactly one point holds several robots (a **multiplicity point**), walk straight to it.\n2. Otherwise, look at the shape of the configuration and choose a point that every robot identifies in the same way despite their different coordinates (for example the centre of a symmetric configuration), and move so that exactly one multiplicity point appears.\n3. From then on every robot follows rule 1, along paths that never create a second crowded point.",
-        "analysis": "A multiplicity point is a landmark that no private coordinate system can hide: it looks special to every robot. Step 2 is the hard part, because the robots share no orientation and the scheduler may stop a robot partway; Cieliebak, Flocchini, Prencipe and Santoro solve it with a case analysis of configuration types and gather $n \\ge 3$ robots in ASYNC from every start [Cieliebak2012Gathering], the catalogue's introductory and current best result for this setting. Time is not analysed. The outline above is the idea of the approach and was not checked against the paper's full text.",
+        "idea": "1. If exactly one point is a multiplicity, walk straight to it.\n2. Otherwise, look at the shape of the configuration and choose a point that every robot identifies in the same way despite their different local coordinate systems (for example the centre of a symmetric configuration), and move so that exactly one multiplicity appears.\n3. From then on every robot follows rule 1, along paths that never create a second multiplicity.",
+        "analysis": "A multiplicity is a landmark that no local coordinate system can hide: it looks special to every robot. Step 2 is the hard part, because the robots agree on no direction and the scheduler may stop a robot partway; Cieliebak, Flocchini, Prencipe and Santoro solve it with a case analysis of configuration types and gather $n \\ge 3$ robots in ASYNC from every initial configuration [Cieliebak2012Gathering], the catalogue's introductory and current best result for this setting. Time is not analysed. The outline above is the idea of the approach and was not checked against the paper's full text.",
         "why_it_matters": "It shows how a tiny sensing ability, telling one robot from several, makes an unsolvable problem solvable."
       },
       {
@@ -61,16 +61,16 @@
         "title": "Two oblivious robots cannot meet in SSYNC",
         "variant": "two-ssync",
         "ref": "Suzuki1999Formation",
-        "idea": "Take two robots, $A$ and $B$, and look at the round in which they would finally meet.\n\n(a) If both moved in that round, the scheduler could have woken only one: it lands where the other was heading, not where the other is, so they miss.\n\n(b) If only $A$ moved and landed on $B$, the scheduler could have woken both; unless $B$'s rule tells it to stay put, $B$ moves away and they miss again.\n\nSo meeting needs a situation in which, when both are awake, one robot jumps onto the other while the other stays. (c) But the robots are identical and share no orientation, so the adversary can give them coordinate systems in which each sees the other at the same spot, say one unit to its east. Identical robots with identical snapshots make the same choice: both stay or both move. The lopsided situation never occurs, and they never meet.",
-        "analysis": "Suzuki and Yamashita proved this as Theorem 3.1 of [Suzuki1999Formation], even for robots with common handedness whose moves always reach their destination, so it also holds without these advantages. Natural rules fail in instructive ways: \\\"move to the midpoint\\\" brings the robots closer forever, but the scheduler wakes one robot at a time so they never coincide; \\\"move to the other robot\\\" makes them swap places forever when both are awake. Extra power fixes this: with lights that both robots see, two colours suffice even in ASYNC [Heriban2018Optimally].",
+        "idea": "Take two robots, $A$ and $B$, and look at the round in which they would finally meet.\n\n(a) If both moved in that round, the scheduler could have activated only one: it lands where the other was heading, not where the other is, so they miss.\n\n(b) If only $A$ moved and landed on $B$, the scheduler could have activated both; unless $B$'s rule tells it to stay put, $B$ moves away and they miss again.\n\nSo meeting needs a situation in which, when both are activated, one robot jumps onto the other while the other stays. (c) But the robots are identical and agree on no direction, so the adversary can give them local coordinate systems in which each sees the other at the same spot, say one unit to its east. Identical robots with identical snapshots make the same choice: both stay or both move. The lopsided situation never occurs, and they never meet.",
+        "analysis": "Suzuki and Yamashita proved this as Theorem 3.1 of [Suzuki1999Formation], even for robots with common handedness whose moves always reach their destination, so it also holds without these advantages. Natural rules fail in instructive ways: \\\"move to the midpoint\\\" brings the robots closer forever, but the scheduler activates one robot at a time so they never coincide; \\\"move to the other robot\\\" makes them swap places forever when both are activated. Extra power fixes this: with lights that both robots see, two colours suffice even in ASYNC [Heriban2018Optimally].",
         "why_it_matters": "It is the founding impossibility of the field: the scheduler keeps identical robots symmetric, and most later assumptions (multiplicity detection, lights, compasses) are ways to break that symmetry."
       },
       {
         "kind": "impossibility",
-        "title": "Without multiplicity detection, a crowd looks like one robot",
+        "title": "Without multiplicity detection, a multiplicity looks like one robot",
         "variant": "no-multiplicity",
         "ref": "Prencipe2007Impossibility",
-        "idea": "Suppose the robots stand on only two points, say $n-1$ robots on $p$ and one robot on $q$. A robot that cannot detect multiplicities sees just two dots, exactly what it would see if there were only two robots. The robots are thrown back into the two-robot situation above, and the scheduler, by waking only some of the robots on a point, can move groups around so that they never all stand together. Prencipe shows that against any algorithm the scheduler can first drive the robots into such special configurations and then keep them from ever gathering; the full proof is a longer case analysis.",
+        "idea": "Suppose the robots stand on only two points, say $n-1$ robots on $p$ and one robot on $q$. A robot that cannot detect multiplicities sees just two occupied points, exactly what it would see if there were only two robots. The robots are thrown back into the two-robot situation above, and the scheduler, by activating only some of the robots on a point, can move groups around so that they never all stand together. Prencipe shows that against any algorithm the scheduler can first drive the robots into such special configurations and then keep them from ever gathering; the full proof is a longer case analysis.",
         "analysis": "The result holds for deterministic oblivious robots without multiplicity detection, for every $n \\ge 2$, in SSYNC and ASYNC [Prencipe2007Impossibility]. In the fully synchronous model, by contrast, gathering needs no multiplicity detection [Flocchini2026Universal], and in ASYNC weak multiplicity detection is enough [Cieliebak2012Gathering].",
         "why_it_matters": "It explains why weak multiplicity detection became the standard assumption for gathering."
       },
@@ -79,12 +79,90 @@
         "title": "Short sight but a common compass: drift right, then down",
         "variant": "limited-compass",
         "ref": "Flocchini2005Limited",
-        "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**), but all robots agree on north and east.\n\n1. If you see a robot to your left, or above you on your own vertical line, do nothing.\n2. If you see robots only below you on your vertical line, move down towards the nearest one.\n3. If you see robots only to your right, move horizontally to the vertical line of the nearest one.\n4. If you see robots both below you and to your right, make a diagonal move right and down, chosen so that you lose sight of nobody.",
-        "analysis": "Robots only move right or down and never beyond the rightmost vertical line that holds a robot at the start, so they collect on that line and then at its lowest occupied point; the delicate part of the proof is that nobody is left behind out of sight. Flocchini, Prencipe, Santoro and Widmayer prove that this gathers ASYNC robots with non-rigid moves (Theorem 4.2 of [Flocchini2005Limited]), provided the start is connected (robots joined when at most $V$ apart); a disconnected start cannot be gathered at all. With agreement on one axis only, time linear in the initial diameter is achievable and optimal [Poudel2021TimeOptimal].",
+        "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**), but all robots agree on north and east (a **common compass**).\n\n1. If you see a robot to your left, or above you on your own vertical line, do nothing.\n2. If you see robots only below you on your vertical line, move down towards the nearest one.\n3. If you see robots only to your right, move horizontally to the vertical line of the nearest one.\n4. If you see robots both below you and to your right, make a diagonal move right and down, chosen so that you lose sight of nobody.",
+        "analysis": "Robots only move right or down and never beyond the rightmost vertical line that holds a robot in the initial configuration, so they collect on that line and then at its lowest occupied point; the delicate part of the proof is that nobody is left behind out of sight. Flocchini, Prencipe, Santoro and Widmayer prove that this gathers ASYNC robots with non-rigid moves (Theorem 4.2 of [Flocchini2005Limited]), provided the initial configuration is connected (robots joined when at most $V$ apart); a disconnected initial configuration cannot be gathered at all. With agreement on one axis only, time linear in the initial diameter is achievable and optimal [Poudel2021TimeOptimal].",
         "why_it_matters": "It shows how a shared direction can replace global vision: robots that see little can still agree where to go."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "the origin, axes, unit of length and handedness in which a robot expresses its snapshot and its destination; robots agree on none of these unless the setting assumes chirality, one common axis or a common compass",
+      "avoid": [
+        "private coordinate system"
+      ]
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one time step of FSYNC, SSYNC or the sequential scheduler: each activated robot performs one complete Look–Compute–Move cycle"
+    },
+    {
+      "term": "epoch",
+      "definition": "an interval of an ASYNC execution in which every robot completes at least one full Look–Compute–Move cycle; a bound of $X$ epochs holds for every division of the execution into consecutive epochs"
+    },
+    {
+      "term": "multiplicity",
+      "definition": "a point of the plane occupied by two or more robots",
+      "avoid": [
+        "crowded point",
+        "multiplicity point",
+        "crowd"
+      ]
+    },
+    {
+      "term": "weak multiplicity detection",
+      "definition": "the capability of a robot to see, for each occupied point, whether it holds one robot or more than one, but not how many"
+    },
+    {
+      "term": "common compass",
+      "definition": "agreement of all robots on the direction and orientation of both axes of their local coordinate systems (north and east), not on unit or origin"
+    },
+    {
+      "term": "visibility radius",
+      "definition": "the distance $V$ within which a robot sees other robots under limited visibility"
+    }
+  ],
   "history": "Gathering started with an impossibility: two oblivious robots cannot meet in SSYNC [Suzuki1999Formation]. The community's main question became **the weakest set of capabilities that makes gathering solvable**: multiplicity detection [Cieliebak2012Gathering], a compass under limited visibility [Flocchini2005Limited], lights for two robots [Das2016Lights] [Flocchini2016Constant] [Heriban2018Optimally], and how many faulty robots can be tolerated [Agmon2006Fault] [Pattanayak2019Crash]. Running time (rounds, epochs) became a measure mainly for limited visibility [Degener2011Tight] [Castenow2022Unifying].",
   "measures": [
     {
@@ -321,7 +399,7 @@
             "common chirality",
             "$n \\ge 3$",
             "a Look returns a multiset (multiplicities are seen)",
-            "initial configuration with at most one multiplicity point"
+            "initial configuration with at most one point with a multiplicity"
           ],
           "note": "Theorem 3.8, SSYNC, non-rigid moves of at least a fixed distance $S$; checked against the full text."
         },
@@ -1441,7 +1519,7 @@
     }
   ],
   "figure": {
-    "caption": "Gathering: anonymous oblivious robots at distinct points of the plane must meet at one point, not fixed in advance, and stay there. Shown: the strategy of [Cieliebak2012Gathering] with weak multiplicity detection, in SSYNC rounds (ringed robots are activated; a move may stop early). In a symmetric start every robot computes the same centre; once a single multiplicity point exists, every robot walks to it.",
+    "caption": "Gathering: anonymous oblivious robots at distinct points of the plane must meet at one point, not fixed in advance, and stay there. Shown: the strategy of [Cieliebak2012Gathering] with weak multiplicity detection, in SSYNC rounds (ringed robots are activated; a move may stop early). In a symmetric configuration every robot computes the same centre; once a single multiplicity exists, every robot walks to it.",
     "view": [
       100,
       56
@@ -1703,7 +1781,7 @@
         ]
       },
       {
-        "label": "A multiplicity point forms; all walk to it",
+        "label": "A multiplicity forms; all walk to it",
         "ents": [
           {
             "id": "a",

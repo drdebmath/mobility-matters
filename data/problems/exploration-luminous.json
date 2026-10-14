@@ -13,49 +13,128 @@
     "relation": "The same Look–Compute–Move robots, but each carries a light with a constant number $c$ of colours that acts both as persistent memory (the robot sees its own colour in the next cycle) and as a message (every robot within range reads it); in exchange, robots usually see only within a fixed distance $\\varphi$. An oblivious algorithm is a luminous one with $c = 1$, so algorithms of the parent problem with myopic vision carry over, and lower bounds proved here for any number of colours hold for oblivious robots too [Ooshita2022Ring]."
   },
   "summary": "Myopic Look–Compute–Move robots with a light of a few colours must visit every node of a ring, grid or torus, and stop or keep visiting; how many robots and colours are needed?",
-  "statement": "$k$ anonymous robots, each with a light that shows one of $c$ colours, are placed on an anonymous graph $G=(V,E)$ (a ring, a finite grid or a torus) in an initial configuration designated by the algorithm (positions and colours). Each robot repeats Look–Compute–Move cycles. **Look:** it sees every node within distance $\\varphi$, with the multiset of colours of the robots on each (so it sees towers), and its own colour. **Compute:** a deterministic function of this snapshot, the same for all robots, gives a new colour and a destination, its own node or a neighbour; the robot sees no identifiers, no ports, and (without chirality) no orientation. **Move:** it moves there. A fair adversarial scheduler (FSYNC, SSYNC or ASYNC) activates the robots. **Terminating exploration:** every node is visited by some robot and eventually no robot is enabled. **Perpetual exploration:** every node is visited infinitely often. With finite $\\varphi$ no algorithm works from every initial configuration, so each result names its initial configurations; some papers also require *exclusive* executions (no two robots on one node or one edge) or opaque robots, recorded under each result. **Measures:** the number of robots $k$ and the number of colours $c$.",
+  "statement": "$k$ anonymous robots, each with a **light** that shows one of $c$ colours, are placed on an anonymous graph $G=(V,E)$ (a ring, a finite grid or a torus) in an initial configuration designated by the algorithm (positions and colours). Each robot repeats Look–Compute–Move cycles. **Look:** it sees every node within distance $\\varphi$, with the multiset of colours of the robots on each (so it sees **towers**, nodes with several robots), and its own colour. **Compute:** a deterministic function of this snapshot, the same for all robots, gives a new colour and a destination, its own node or a neighbour; the robot sees no identifiers, no ports, and (without chirality) no orientation. **Move:** it moves there. A fair adversarial scheduler (FSYNC, SSYNC or ASYNC) activates the robots. **Terminating exploration:** every node is visited by some robot and eventually no robot is enabled. **Perpetual exploration:** every node is visited infinitely often. With finite $\\varphi$ no algorithm works from every initial configuration, so each result names its initial configurations; some papers also require *exclusive* executions (no two robots on one node or one edge) or opaque robots, recorded under each result. **Measures:** the number of robots $k$ and the number of colours $c$.",
   "history": "**Where it started.** Oblivious robots on graphs see every robot and remember nothing, so the configuration itself must record progress; the first question was how many robots explore a ring [Flocchini2013Ring] [Lamani2010Ring] or a grid [Devismes2012Grid]. Datta, Lamani, Larmore and Petit made the robots *myopic*: with visibility $\\varphi = 1$, five robots explore a ring and stop under FSYNC, and no number below $n$ can under SSYNC or ASYNC [Datta2013Local]. Ooshita and Tixeuil then gave each myopic robot the smallest possible light, two colours: three robots then suffice under FSYNC and four under ASYNC, and perpetual exploration needs only two and three [Ooshita2022Ring]. This showed that \"there exist some tasks that myopic luminous robots with small visibility can achieve, but that non-luminous robots with larger visibility cannot\" [Ooshita2022Ring]. The community then traded robots against colours, visibility and chirality: rings with $\\varphi \\ge 2$ [Nagahama2023Ring], perpetual exploration of grids with chirality [Bramas2023Chirality] and without [Rauch2021Chirality], terminating exploration of grids [Nagahama2022Grid], tori [Darwich2023Torus], asynchronous grids [Bramas2026AsyncGrid], and crash faults on rings [Ooshita2024Crash] [Ooshita2025Colors].\n\n**A light is a message and a memory.** Think of a light as a flag that a robot raises on its own mast. It is a *message*: every robot within sight can read it, without being addressed, and the robot that raised it does not know who has read it, so it is a broadcast to the neighbourhood that nobody acknowledges. It *persists*: it stays up until its owner changes it, so a robot that looks much later still reads it, and in ASYNC it may read a flag that is about to change. And it is a *sticky note to oneself*: an oblivious robot forgets everything at the end of a cycle, but in the next cycle it sees its own flag and so recalls $\\log_2 c$ bits. The light models separate the two roles [Flocchini2016Constant]: a flag that only its owner can see is memory without messages (FSTA, an internal light); a flag on the robot's back that only the others can see is a message without memory (FCOM, an external light); a flag that everybody, owner included, can see is both (LUMI, a full light) [Das2016Lights], which is the model of every exploration result here. Two consequences of the picture are worth keeping. First, a LUMI robot's memory is public: whatever it remembers, its neighbours know too. Second, positions are messages as well, and lights were introduced to supplement them [Peleg2005Swarms]; on a graph a myopic robot sees so little that the light is often its only memory, which is why two colours change the number of robots so much [Ooshita2022Ring].",
   "primer": {
-    "intro": "Picture a circular race track of $n$ squares and a few identical toy robots that can see only the squares right next to them, cannot talk, and forget everything after each step. Each robot carries a small lamp that can glow in one of two colours, say green (G) or white (W). The lamp stays on until its owner switches it, and everyone nearby can see it, the owner included. Each robot works in cycles: **Look** (see its own square and the two neighbouring squares, with the robots and lamp colours on them), **Compute** (decide from that picture alone a new colour and whether to step left, right or stay) and **Move**. The track has no names on its squares and no left or right, and an **adversary** (an imagined opponent) decides when each robot acts. In the basic version all robots act together in rounds (**FSYNC**, fully synchronous): $k$ robots start on neighbouring squares in a colour pattern chosen by the algorithm, and must visit every square and then all stop. We count the robots $k$ and the colours $c$.",
+    "intro": "Imagine a circular race track of $n$ squares and a few identical toy robots on it. The track is a **ring**: its squares are its $n$ **nodes**, and two squares side by side are **neighbours**. The robots are **myopic**: each sees only its own node and its two neighbours. They cannot talk, and they are **oblivious**: they forget everything after each cycle. Each robot carries a **light** (think of a small lamp) that can glow in one of two colours, say green (G) or white (W). The light stays on until its owner switches it, and every robot that sees the node, the owner included, sees the colour. Each robot works in **Look–Compute–Move cycles**: **Look** (take a **snapshot** of its own node and its two neighbours, with the robots and light colours on them), **Compute** (decide from that snapshot alone a new colour and whether to move to one neighbour, move to the other, or stay) and **Move**. The nodes have no names and the ring has no left or right, and an **adversary** (an imagined opponent) decides when each robot acts. In the basic version all robots act together in **rounds** (**FSYNC**, fully synchronous): $k$ robots start on neighbouring nodes in a colour pattern chosen by the algorithm (the initial **configuration**), and must visit every node and then all stop. We count the robots $k$ and the colours $c$.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "A coloured pair walks in step",
+        "title": "A coloured pair moves in step",
         "variant": "ring-fsync-perpetual",
         "ref": "Ooshita2022Ring",
-        "idea": "Two robots stand on neighbouring squares, one green and one white [Ooshita2022Ring].\n\n1. The green robot sees white on one side and nothing on the other: it steps away from the white robot.\n2. The white robot sees green on one side and nothing on the other: it steps towards the green robot.\n3. Both act in the same round, so after the step they are again neighbours, green in front, white behind, and the picture each sees is the same as before. They repeat forever.",
-        "analysis": "The pair moves one square per round in a fixed direction, so it passes every square once every $n$ rounds: perpetual exploration with two robots and two colours. One robot cannot do it: it sees nobody, its picture looks the same both ways, and the adversary picks its direction each time, keeping it on two squares. Two robots of the same colour cannot either: they see mirror pictures and act as mirror images. So two robots and two colours are optimal [Ooshita2022Ring].",
-        "why_it_matters": "The colours give the pair a front and a back, which the track itself does not have: the light carries the direction, both as memory and as message."
+        "idea": "Two robots stand on neighbouring nodes, one green and one white [Ooshita2022Ring].\n\n1. The green robot sees white on one side and nothing on the other: it moves away from the white robot.\n2. The white robot sees green on one side and nothing on the other: it moves towards the green robot.\n3. Both act in the same round, so after the move they are again on neighbouring nodes, green in front, white behind, and the snapshot each takes is the same as before. They repeat forever.",
+        "analysis": "The pair moves one node per round in a fixed direction, so it passes every node once every $n$ rounds: perpetual exploration with two robots and two colours. One robot cannot do it: it sees nobody, its snapshot looks the same both ways, and the adversary picks its direction each time, keeping it on two nodes. Two robots of the same colour cannot either: they take mirror-image snapshots and act as mirror images. So two robots and two colours are optimal [Ooshita2022Ring].",
+        "why_it_matters": "The colours give the pair a front and a back, which the ring itself does not have: the light carries the direction, both as memory and as message."
       },
       {
         "kind": "algorithm",
-        "title": "A walking pair and a lighthouse",
+        "title": "A moving pair and a lighthouse",
         "variant": "ring-fsync-stop",
         "ref": "Ooshita2022Ring",
-        "idea": "Three robots stand on three neighbouring squares coloured G, W, G [Ooshita2022Ring].\n\n1. The middle robot cannot tell its sides apart and steps towards one end robot (the adversary picks which); that end robot steps away from it, and the other end robot steps away too. Now a green–white pair stands on one side and a lone green robot, the *lighthouse*, on the other, with two empty squares between them.\n2. The lighthouse sees nobody and has no rule, so it waits. The pair walks away from it as in the first idea.\n3. After going round the track the pair arrives at the lighthouse from the other side. The front robot now sees a green robot ahead and stops; the white robot steps onto its square, and no rule applies any more.",
-        "analysis": "The pair visits each square on its way round, so all $n$ squares are visited in about $n$ rounds, with three robots and two colours. The lighthouse is a message that stays put: meeting it tells the pair that the trip is complete. Without lights five robots are needed [Datta2013Local].",
-        "why_it_matters": "Stopping is the hard part of exploration with little memory; here a robot that never moves plays the role of the start marker."
+        "idea": "Three robots stand on three consecutive nodes coloured G, W, G [Ooshita2022Ring].\n\n1. The middle robot cannot tell its sides apart and moves towards one end robot (the adversary picks which); that end robot moves away from it, and the other end robot moves away too. Now a green–white pair stands on one side and a lone green robot, the **lighthouse**, on the other, with two empty nodes between them.\n2. The lighthouse sees nobody and has no rule, so it waits. The pair moves away from it as in the first idea.\n3. After going round the ring the pair arrives at the lighthouse from the other side. The front robot now sees a green robot ahead and stops; the white robot moves onto its node, and no rule applies any more.",
+        "analysis": "The pair visits each node on its way round, so all $n$ nodes are visited in about $n$ rounds, with three robots and two colours. The lighthouse is a message that stays put: meeting it tells the pair that the trip is complete. Without lights five robots are needed [Datta2013Local].",
+        "why_it_matters": "Stopping is the hard part of exploration with little memory; here a robot that never moves plays the role of a marker left at the start."
       },
       {
         "kind": "impossibility",
         "title": "Robots that lose sight of each other are lost",
         "variant": "ring-async-perpetual",
         "ref": "Ooshita2022Ring",
-        "idea": "Take two robots, any number of colours, and an adversary that may activate one robot at a time (SSYNC) [Ooshita2022Ring].\n\n1. To make progress, some robot must at some moment step away from the other.\n2. The adversary activates that robot alone. Now they stand two squares apart and cannot see each other.\n3. A robot that sees nobody has a symmetric picture, so whenever it moves the adversary chooses the direction: it sends the robot back and forth between two squares, its *territory*. Each robot stays in its territory forever.",
-        "analysis": "So from then on the two robots stay on four squares, whatever their lights. Lights do not help because a robot that sees nobody reads no message, and its own colour tells it nothing about the direction. Three robots suffice in SSYNC and ASYNC [Ooshita2022Ring].",
+        "idea": "Take two robots, any number of colours, and an adversary that may activate one robot at a time (**SSYNC**, semi-synchronous) [Ooshita2022Ring].\n\n1. To make progress, some robot must at some moment move away from the other.\n2. The adversary activates that robot alone. Now they are two nodes apart and cannot see each other.\n3. A robot that sees nobody takes a symmetric snapshot, so whenever it moves the adversary chooses the direction: it sends the robot back and forth between two nodes, its *territory*. Each robot stays in its territory forever.",
+        "analysis": "So from then on the two robots stay on four nodes, whatever their lights. Lights do not help because a robot that sees nobody reads no message, and its own colour tells it nothing about the direction. Three robots suffice in SSYNC and ASYNC [Ooshita2022Ring].",
         "why_it_matters": "This territory argument is behind most lower bounds for myopic robots: a light is a message only for robots within sight."
       },
       {
         "kind": "lower-bound",
-        "title": "Two robots cannot measure the track",
+        "title": "Two robots cannot measure the ring",
         "variant": "ring-fsync-stop",
         "ref": "Ooshita2022Ring",
-        "idea": "Suppose two robots explore a small track of $n_1$ squares and stop, or separate, at round $t$ [Ooshita2022Ring]. Run the same robots on a track of more than $2(t + 1)$ squares. While they stay together they see exactly the same pictures as before, so they do exactly the same things.",
-        "analysis": "On the big track they stop (or separate, and are then stuck in their territories) after visiting at most $2(t+1)$ squares, fewer than all of them. This holds for any number of colours, so terminating exploration needs three robots even under FSYNC, one more than perpetual exploration.",
-        "why_it_matters": "A robot that sees only nearby squares cannot know how big the graph is, so stopping needs a landmark, such as the waiting robot of the second idea."
+        "idea": "Suppose two robots explore a small ring of $n_1$ nodes and stop, or separate, at round $t$ [Ooshita2022Ring]. Run the same robots on a ring of more than $2(t + 1)$ nodes. While they stay together they take exactly the same snapshots as before, so they do exactly the same things.",
+        "analysis": "On the big ring they stop (or separate, and are then stuck in their territories) after visiting at most $2(t+1)$ nodes, fewer than all of them. This holds for any number of colours, so terminating exploration needs three robots even under FSYNC, one more than perpetual exploration.",
+        "why_it_matters": "A robot that sees only nearby nodes cannot know how big the graph is, so stopping needs a landmark, such as the lighthouse of the second idea."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "an anonymous Look–Compute–Move entity on the graph, with a light; $k$ is their number",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "the graph whose $n$ nodes are joined in one cycle; it has no orientation the robots can read",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "a node of the graph $G = (V, E)$; robots stand on nodes",
+      "avoid": [
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a node joined by an edge to the given node; a robot moves only to a neighbour",
+      "avoid": []
+    },
+    {
+      "term": "light",
+      "definition": "a register of each robot that shows one of $c$ colours, visible to the robot itself and to every robot that sees its node, and kept between cycles",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: Look (take a snapshot), Compute (a new colour and a destination), Move (stay or move to a neighbour)",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the nodes within distance $\\varphi$, with the multiset of light colours of the robots on each, and the robot's own colour",
+      "avoid": [
+        "picture",
+        "view"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions and light colours of all robots at a time",
+      "avoid": []
+    },
+    {
+      "term": "myopic",
+      "definition": "a robot sees only the nodes within a finite distance $\\varphi$; in the primer $\\varphi = 1$",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps nothing from one cycle to the next except the colour of its light",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "the scheduler (FSYNC, SSYNC or ASYNC) that chooses which robots are activated and when, and resolves any choice the robots leave open",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "in FSYNC and SSYNC, one step in which every activated robot performs one full Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "tower",
+      "definition": "a node with two or more robots on it",
+      "avoid": []
+    },
+    {
+      "term": "lighthouse",
+      "definition": "in the three-robot algorithm of [Ooshita2022Ring], the lone green robot that waits; reaching it tells the moving pair that the ring has been explored",
+      "avoid": []
+    }
+  ],
   "measures": [
     {
       "id": "agents",
@@ -288,7 +367,7 @@
           "ref": "Ooshita2022Ring",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "one robot sees nobody, so its view is symmetric and the adversary chooses its direction (any $\\varphi$, any number of colours)",
+            "one robot sees nobody, so its snapshot is symmetric and the adversary chooses its direction (any $\\varphi$, any number of colours)",
             "stated in Section 3.1"
           ]
         },
@@ -299,7 +378,7 @@
           "bottleneck": "symmetry breaking",
           "preconditions": [
             "two robots, $n \\ge 6$ (Lemma 6)",
-            "two robots with the same colour see the same view and move symmetrically"
+            "two robots with the same colour take the same snapshot and move symmetrically"
           ]
         }
       ],
@@ -523,7 +602,7 @@
           "ref": "Ooshita2024Crash",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "one robot sees nobody, so its view is symmetric and the adversary chooses its direction (any $\\varphi$, any number of colours)",
+            "one robot sees nobody, so its snapshot is symmetric and the adversary chooses its direction (any $\\varphi$, any number of colours)",
             "as stated for every $\\varphi$ and every number of colours in [Ooshita2024Crash]"
           ]
         }
@@ -2049,7 +2128,7 @@
     }
   ],
   "figure": {
-    "caption": "Terminating ring exploration by myopic luminous robots in FSYNC, Algorithm 2 of [Ooshita2022Ring]: three robots with visibility one and two colours (G green, W white) start as W W W on an anonymous ring ($n = 8$). In the first round both end robots switch their lights to G; then the middle robot steps towards one end (the adversary picks which), forming a pair G W that walks round the ring, while the other G waits as a lighthouse. When the pair reaches it from the other side, every node has been visited; the white robot forms a tower with the front robot and no rule applies any more.",
+    "caption": "Terminating ring exploration by myopic luminous robots in FSYNC, Algorithm 2 of [Ooshita2022Ring]: three robots with visibility one and two colours (G green, W white) start as W W W on an anonymous ring ($n = 8$). In the first round both end robots switch their lights to G; then the middle robot moves towards one end (the adversary picks which), forming a pair G W that moves round the ring, while the other G waits as a lighthouse. When the pair reaches it from the other side, every node has been visited; the white robot forms a tower with the front robot and no rule applies any more.",
     "view": [
       100,
       56
@@ -2348,7 +2427,7 @@
             "w": 0.3
           }
         ],
-        "label": "Round 2: the pair G W walks one way, the other G the other way"
+        "label": "Round 2: the pair G W moves one way, the other G the other way"
       },
       {
         "ents": [
@@ -2451,7 +2530,7 @@
             "w": 0.3
           }
         ],
-        "label": "The lone G sees nobody and waits; the pair walks on"
+        "label": "The lone G sees nobody and waits; the pair moves on"
       },
       {
         "ents": [

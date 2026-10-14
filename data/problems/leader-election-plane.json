@@ -14,17 +14,17 @@
     }
   ],
   "summary": "Anonymous robots must agree on one of them, using only their positions.",
-  "statement": "$n$ anonymous robots at distinct points must agree on a single robot (the leader), each deciding from its own snapshot.",
+  "statement": "$n$ **anonymous** robots (identical, with no names) at distinct points must agree on a single robot (the **leader**), each deciding from its own snapshot.",
   "primer": {
-    "intro": "Imagine $n$ identical drones hovering at different spots in a field. They carry no name tags, they cannot talk, and each one has its own private idea of which way is north, what counts as one metre, and possibly even which way is clockwise. Each drone takes a photograph of where all the drones are (a *snapshot*) and, using the same program as everybody else, must decide \"I am the leader\" or \"I am not\", so that exactly one drone says yes. The robots are *anonymous* (they look the same and run the same program) and *disoriented* (no shared compass, unit of length or, without *chirality*, shared sense of clockwise). The question is: for which arrangements of points can this be done at all?",
+    "intro": "Imagine $n$ identical drones hovering at different spots in a field. They carry no name tags, they cannot talk, and each one has its own private idea of which way is north, what counts as one metre, and possibly even which way is clockwise. In the problem the drones are **robots**, points at distinct places in the plane, and a robot's private north, unit of length and sense of clockwise form its **local coordinate system**. Each robot takes a **snapshot**, a photograph of where all the robots are in its local coordinate system, and, using the same program as every other robot, must decide \"I am the leader\" or \"I am not\", so that exactly one robot says yes; that robot is the **leader**. The robots are **anonymous** (they look the same and run the same program) and *disoriented* (no shared compass, unit of length or, without **chirality**, shared sense of clockwise). The question is: for which **configurations** (arrangements of the robots' positions) can this be done at all?",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Read the configuration as a word around the smallest enclosing circle",
         "variant": "disoriented",
         "ref": "Dieudonne2013Geoleader",
-        "idea": "This is the version where the robots agree on clockwise (chirality).\n1. Draw the smallest circle that encloses all robots; every robot finds the same circle. Call its centre $O$. If a robot sits exactly at $O$, it is the leader; stop.\n2. Draw a ray from $O$ through every robot (several robots may share a ray).\n3. For each ray, list the distances between consecutive robots on it, starting from $O$, measured as fractions of the circle's radius (so the private unit of length does not matter).\n4. Starting at a ray and walking clockwise around the circle, write down a \"word\": the list for this ray, then the angle to the next ray, then the list for the next ray, and so on, once around.\n5. Every robot computes the word of every ray and picks the ray whose word is alphabetically smallest. If only one ray has that word, the leader is the robot on that ray nearest to $O$.",
-        "analysis": "All robots compute the same words, because everything is measured relative to the circle and the shared clockwise direction, so they all pick the same robot. The words of different rays are rotations of one another; two rays can have the same word only if turning the whole picture around $O$ moves one ray onto the other, that is, if the configuration has rotational symmetry. [Dieudonne2013Geoleader] prove that this is the exact borderline: with chirality, a leader can be elected exactly when the smallest word is unique (they phrase it with Lyndon words), and they give a similar but more delicate rule, reading in both directions, when robots do not share clockwise.",
+        "idea": "This is the version where the robots agree on clockwise (chirality).\n1. Draw the smallest circle that encloses all robots, the **smallest enclosing circle**; every robot finds the same circle. Call its centre $O$. If a robot sits exactly at $O$, it is the leader; stop.\n2. Draw a **ray** (a half-line) from $O$ through every robot (several robots may share a ray).\n3. For each ray, list the distances between consecutive robots on it, starting from $O$, measured as fractions of the circle's radius (so the private unit of length does not matter).\n4. Starting at a ray and walking clockwise around the circle, write down a **word**: the list for this ray, then the angle to the next ray, then the list for the next ray, and so on, once around.\n5. Every robot computes the word of every ray and picks the ray whose word is alphabetically smallest. If only one ray has that word, the leader is the robot on that ray nearest to $O$.",
+        "analysis": "All robots compute the same words, because everything is measured relative to the circle and the shared clockwise direction, so they all pick the same robot. The words of different rays are rotations of one another; two rays can have the same word only if turning the whole picture around $O$ moves one ray onto the other, that is, if the configuration has **rotational symmetry**. [Dieudonne2013Geoleader] prove that this is the exact borderline: with chirality, a leader can be elected exactly when the smallest word is unique (they phrase it with Lyndon words), and they give a similar but more delicate rule, reading in both directions, when robots do not share clockwise.",
         "why_it_matters": "Turning a picture into a word and comparing words is the standard way robot papers break symmetry, and electing a leader this way is the first step of arbitrary pattern formation [Dieudonne2010Leader]."
       },
       {
@@ -32,12 +32,81 @@
         "title": "Symmetric pictures look the same to everybody",
         "variant": "disoriented",
         "ref": "Dieudonne2013Geoleader",
-        "idea": "Place six robots at the corners of a regular hexagon. The adversary (an imagined opponent who chooses everything the algorithm does not control, here the robots' private coordinate systems) gives each robot a compass that points from the centre through that robot, and the same unit and handedness for all. Now every robot's snapshot is literally the same list of coordinates. The same happens for any $n = 2$: two points are always swapped by a half-turn around their midpoint.",
-        "analysis": "A deterministic program (no coin flips) that receives the same input gives the same output. So either every robot declares itself leader or none does; exactly one is impossible. The same argument works for any configuration that some rotation maps onto itself while moving robots, which is why the characterisation of [Dieudonne2013Geoleader] is phrased in terms of symmetry.",
+        "idea": "Place six robots at the corners of a regular hexagon. The **adversary** (an imagined opponent who chooses everything the algorithm does not control, here the robots' private coordinate systems) gives each robot a local coordinate system whose north points from the centre through that robot, and the same unit and handedness for all. Now every robot's snapshot is literally the same list of coordinates. The same happens for any $n = 2$: two points are always swapped by a half-turn around their midpoint.",
+        "analysis": "A **deterministic** program (no coin flips) that receives the same input gives the same output. So either every robot declares itself leader or none does; exactly one is impossible. The same argument works for any configuration that some rotation maps onto itself while moving robots, which is why the characterisation of [Dieudonne2013Geoleader] is phrased in terms of symmetry.",
         "why_it_matters": "Almost every impossibility for robots in the plane, from pattern formation to gathering, is this argument: build a symmetric start and choose coordinate systems so that symmetric robots see identical snapshots."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "robots are indistinguishable (no names or labels) and run the same program",
+      "avoid": []
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    },
+    {
+      "term": "chirality",
+      "definition": "all local coordinate systems have the same handedness, so all robots agree on which way is clockwise",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "the positions of all robots, expressed in the observing robot's local coordinate system",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": []
+    },
+    {
+      "term": "leader",
+      "definition": "the single robot that, at the end, declares itself leader while every other robot declares that it is not",
+      "avoid": []
+    },
+    {
+      "term": "smallest enclosing circle",
+      "definition": "the circle of smallest radius that contains all robots; it is unique, so every robot computes the same one",
+      "avoid": []
+    },
+    {
+      "term": "ray",
+      "definition": "a half-line from the centre $O$ of the smallest enclosing circle through a robot",
+      "avoid": []
+    },
+    {
+      "term": "word",
+      "definition": "the sequence read clockwise from a ray: the distances between consecutive robots on each ray, as fractions of the radius, alternating with the angles between consecutive rays",
+      "avoid": []
+    },
+    {
+      "term": "rotational symmetry",
+      "definition": "a rotation around $O$, other than the identity, that maps the configuration onto itself",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that makes every choice the algorithm does not control: activations, the duration of phases, where non-rigid moves stop, and the local coordinate systems",
+      "avoid": []
+    },
+    {
+      "term": "deterministic",
+      "definition": "the program uses no random bits: the same snapshot always gives the same decision",
+      "avoid": []
+    }
+  ],
   "history": "Leader election in the plane was asked as **a characterisation of the configurations from which anonymous robots can agree on one of them** [Dieudonne2013Geoleader]; its importance comes from its equivalence with arbitrary pattern formation [Dieudonne2010Leader] [Cicerone2019Asynchronous].",
   "measures": [
     {

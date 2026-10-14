@@ -12,31 +12,92 @@
     "kind": "variant of",
     "relation": "Evacuation where one robot has crashed inside the disk: the active robot must first find it, then carry it, more slowly, to an exit."
   },
-  "summary": "An active robot must find a crashed robot inside a disk and carry it, at reduced speed, to one of $k$ exits on the boundary.",
-  "statement": "A unit disk has $k\\ge1$ exits at unknown points of its boundary. An active robot starts at the centre and moves at speed $v$; a crashed robot lies at an unknown point inside the disk. The active robot must find it and carry it, at speed $v'<v$, to an exit; it learns the exits' positions once it reaches the boundary. **Ratio** is the competitive ratio of the evacuation time against the optimum.",
+  "summary": "An active robot must find a crashed robot inside a disk and carry it, at reduced speed, to one of $e$ exits on the boundary.",
+  "statement": "A unit disk has $e\\ge1$ exits at unknown points of its boundary. An active robot starts at the centre and moves at speed $v$; a crashed robot lies at an unknown point inside the disk. The active robot must find it and carry it, at speed $v'<v$, to an exit; it learns the exits' positions once it reaches the boundary. **Ratio** is the competitive ratio of the **evacuation time** (the time until every robot has reached an exit) against the optimum.",
   "primer": {
-    "intro": "A rescue robot in a round room must carry a broken robot to a door; carrying it slows the rescuer down. In chauffeuring, the room is a unit disk with one or more exits at unknown points of its boundary; an active robot starts at the centre and moves at speed $v$, a crashed robot (one that has stopped moving and communicating) lies somewhere inside the disk, and the active robot must bring it to an exit, moving at the slower speed $v' < v$ while carrying it. Performance is the *competitive ratio*: the evacuation time divided by the best time possible if everything were known. The catalogue's bounds for this formulation (ratio at most $4 + 2\\pi$ for any number of exits) were supplied by the catalogue owner and have not been checked against a published text; the ideas below come from the setting of the arXiv version of [Pattanayak2019Chauffeuring], where two robots start together at the centre, one exit is hidden on the boundary, and one robot may crash at some time $w$.",
+    "intro": "A rescue robot in a round room must carry a broken robot to a door; carrying it slows the rescuer down. In chauffeuring the room is a unit **disk**, the points at distance at most 1 from its centre; the edge of the room is the **boundary**, the circle of radius 1; and the doors are one or more **exits** at unknown points of the boundary. The rescuer is the **active robot**: it starts at the centre and moves at speed $v$. The broken robot is a **crashed robot**, one that has stopped moving and communicating; it lies somewhere inside the disk. The active robot must **carry** the crashed robot to an exit, that is, move together with it, at the slower speed $v' < v$. Performance is the **competitive ratio**: the **evacuation time** (the time until every robot has reached an exit) divided by the best time possible if everything were known. The catalogue's bounds for this formulation (competitive ratio at most $4 + 2\\pi$ for any number of exits) were supplied by the catalogue owner and have not been checked against a published text; the ideas below come from the setting of the arXiv version of [Pattanayak2019Chauffeuring], where two robots start together at the centre, one exit is hidden on the boundary, and one robot may crash at some time $w$.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Move together, so nobody is far from the crash",
         "variant": "one",
         "ref": "Pattanayak2019Chauffeuring",
-        "idea": "Take speed $v = 1$; carrying a robot one unit of distance takes time $1/v'$.\n1. Both robots walk together from the centre to the wall.\n2. They walk together along the wall until they find the exit, then leave.\n3. If one crashes on the way, the other picks it up on the spot and continues the same route, now at speed $v'$.",
-        "analysis": "Without a crash the robots reach the wall in time 1 and walk at most the whole circumference $2\\pi$, so they leave by time $1 + 2\\pi$. If one crashes at time $w$, the rest of the route, of length at most $1 + 2\\pi - w$, is walked at the slow speed, so the time is at most $w + (1 + 2\\pi - w)/v'$ [Pattanayak2019Chauffeuring]. It wastes the second robot as a searcher; [Pattanayak2019Chauffeuring] give better algorithms in which the robots search in opposite directions, as in two-robot evacuation.",
+        "idea": "Take speed $v = 1$; carrying a robot one unit of distance takes time $1/v'$.\n1. Both robots walk together from the centre to the boundary.\n2. They walk together along the boundary until they find the exit, then leave.\n3. If one crashes on the way, the other picks it up on the spot and continues the same route, carrying it at speed $v'$.",
+        "analysis": "Without a crash the robots reach the boundary in time 1 and walk at most the whole boundary, of length $2\\pi$, so they leave by time $1 + 2\\pi$. If one crashes at time $w$, the rest of the route, of length at most $1 + 2\\pi - w$, is walked at the slow speed, so the time is at most $w + (1 + 2\\pi - w)/v'$ [Pattanayak2019Chauffeuring]. It does not use the second robot to search elsewhere; [Pattanayak2019Chauffeuring] give better algorithms in which the robots search in opposite directions, as in two-robot evacuation.",
         "why_it_matters": "It is the baseline every chauffeuring algorithm must beat, and it shows the trade-off: staying together makes a crash cheap but makes the search slow."
       },
       {
         "kind": "lower-bound",
-        "title": "Explore the whole wall and carry from the centre",
+        "title": "Explore the whole boundary and carry from the centre",
         "variant": "one",
         "ref": "Pattanayak2019Chauffeuring",
-        "idea": "Let one robot crash immediately, at the centre. The healthy robot alone must search the boundary, and the adversary keeps the exit at a point it has not yet visited, so it must walk the whole circumference, length $2\\pi$. In addition, the crashed robot has to be carried at least the radius, from the centre to the wall, which takes time at least $1/v'$.",
-        "analysis": "Carrying from the centre to the wall and walking around the wall are separate stretches of time, so every algorithm needs at least $2\\pi + 1/v'$ in this case [Pattanayak2019Chauffeuring] (Theorem 1 there, which writes the slowdown as a factor). Compared with the fault-free optimum $1 + 2\\pi/3 + \\sqrt3 \\approx 4.826$ [Czyzowicz2014Evacuating], a crash can cost a lot.",
+        "idea": "Let one robot crash immediately, at the centre. The active robot alone must search the boundary, and the **adversary**, an opponent who chooses the exit position, keeps the exit at a point the active robot has not yet visited, so it must walk the whole boundary, of length $2\\pi$. In addition, the crashed robot has to be carried at least the radius, from the centre to the boundary, which takes time at least $1/v'$.",
+        "analysis": "Carrying from the centre to the boundary and walking around the boundary are separate stretches of time, so every algorithm needs at least $2\\pi + 1/v'$ in this case [Pattanayak2019Chauffeuring] (Theorem 1 there, which writes the slowdown as a factor). Compared with the fault-free optimum $1 + 2\\pi/3 + \\sqrt3 \\approx 4.826$ [Czyzowicz2014Evacuating], a crash can cost a lot.",
         "why_it_matters": "It isolates the two unavoidable costs, searching alone and carrying slowly, that every chauffeuring bound balances."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point that moves in the disk; a robot is either active or crashed",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "active robot",
+      "definition": "a robot that has not crashed: it moves at speed at most $v$ on its own and at speed $v' < v$ while it carries a crashed robot",
+      "avoid": [
+        "healthy robot"
+      ]
+    },
+    {
+      "term": "crashed robot",
+      "definition": "a robot that has stopped moving and communicating; it lies at a point of the disk until an active robot carries it",
+      "avoid": []
+    },
+    {
+      "term": "carry",
+      "definition": "to move together with a crashed robot, at speed at most $v'$; a crashed robot moves only when it is carried",
+      "avoid": []
+    },
+    {
+      "term": "disk",
+      "definition": "the unit disk: the points at distance at most $1$ from its centre, where the robots start",
+      "avoid": []
+    },
+    {
+      "term": "boundary",
+      "definition": "the circle of radius $1$ that bounds the disk",
+      "avoid": [
+        "wall",
+        "circumference"
+      ]
+    },
+    {
+      "term": "exit",
+      "definition": "an unknown point of the boundary through which the robots leave the disk",
+      "avoid": [
+        "target"
+      ]
+    },
+    {
+      "term": "evacuation time",
+      "definition": "the time until every robot, the crashed one carried, has reached an exit",
+      "avoid": []
+    },
+    {
+      "term": "competitive ratio",
+      "definition": "the worst case, over the positions of the exits and of the crashed robot (and the crash time), of the evacuation time divided by the optimal evacuation time when these are known",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an opponent that knows the algorithm and chooses the exit position (and which robot crashes, and when) to make the evacuation time largest",
+      "avoid": []
+    }
+  ],
   "history": "Chauffeuring asked how the cost of evacuation changes when a robot **must be carried** rather than merely informed, and how the number of exits affects the competitive ratio [Pattanayak2019Chauffeuring].",
   "measures": [
     {
@@ -53,9 +114,9 @@
         {
           "id": "any",
           "level": 0,
-          "label": "$k \\ge 1$ exits",
-          "short": "$k$ exits",
-          "definition": "$k\\ge1$ exits at unknown boundary points."
+          "label": "$e \\ge 1$ exits",
+          "short": "$e$ exits",
+          "definition": "$e\\ge1$ exits at unknown boundary points."
         },
         {
           "id": "one",
@@ -72,7 +133,7 @@
           "definition": "Exactly two exits."
         }
       ],
-      "origin": "Pattanayak, Ramesh and Mandal introduced chauffeuring at ALGOSENSORS 2019: a crashed robot \"stops moving and sending messages altogether\", and instead of abandoning it the non-faulty robot carries it to the exit at a reduced speed [Pattanayak2019Chauffeuring]. That paper has two robots, wireless communication and a single exit on the boundary of the disk [Pattanayak2019Chauffeuring]. Two exits at unknown boundary points come from the two-exit evacuation problem of Pattanayak et al. [Pattanayak2018TwoExits]. The catalogue's statement with $k \\ge 1$ exits, and its bounds for one, two and any number of exits, were supplied by the catalogue owner; they have not been checked against a published text."
+      "origin": "Pattanayak, Ramesh and Mandal introduced chauffeuring at ALGOSENSORS 2019: a crashed robot \"stops moving and sending messages altogether\", and instead of abandoning it the non-faulty robot carries it to the exit at a reduced speed [Pattanayak2019Chauffeuring]. That paper has two robots, wireless communication and a single exit on the boundary of the disk [Pattanayak2019Chauffeuring]. Two exits at unknown boundary points come from the two-exit evacuation problem of Pattanayak et al. [Pattanayak2018TwoExits]. The catalogue's statement with $e \\ge 1$ exits, and its bounds for one, two and any number of exits, were supplied by the catalogue owner; they have not been checked against a published text."
     }
   ],
   "axis_order": [
@@ -85,7 +146,7 @@
   "variants": [
     {
       "id": "any",
-      "title": "$k$ exits",
+      "title": "$e$ exits",
       "standard": true,
       "assumptions": {
         "speeds": "distinct"
@@ -164,7 +225,7 @@
     }
   ],
   "figure": {
-    "caption": "Chauffeuring: a robot must find a crashed robot inside a unit disk and carry it, at a lower speed $v' < v$, to an exit on the boundary [Pattanayak2019Chauffeuring]. The animation runs the simplest algorithm in the setting of the arXiv version: two robots walk together from the centre to the wall and along it; when one crashes (at time $w$), the other picks it up on the spot and carries it along the same route at speed $v' = v/2$ (red) until it finds the exit, within time $w + (1 + 2\\pi - w)/v'$.",
+    "caption": "Chauffeuring: an active robot must find a crashed robot inside a unit disk and carry it, at a lower speed $v' < v$, to an exit on the boundary [Pattanayak2019Chauffeuring]. The animation runs the simplest algorithm in the setting of the arXiv version: two robots walk together from the centre to the boundary and along it; when one crashes (at time $w$), the other picks it up on the spot and carries it along the same route at speed $v' = v/2$ (red) until it finds the exit, within time $w + (1 + 2\\pi - w)/v'$.",
     "view": [
       100,
       54
@@ -404,7 +465,7 @@
             "w": 0.6
           }
         ],
-        "label": "Together to the wall, then along it"
+        "label": "Together to the boundary, then along it"
       },
       {
         "ents": [

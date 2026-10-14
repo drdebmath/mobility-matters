@@ -7,27 +7,27 @@
     "year": 1951,
     "note": "Shannon's maze-solving mouse Theseus (first prototype 1950) explored a $5\\times5$ grid with constant memory per cell [Disser2019Pebbles]; the first impossibility theorem for finite automata is Budach's [Budach1978Labyrinths]."
   },
-  "summary": "One agent starts at a node of an unknown anonymous graph and must visit every node; how much memory does it need, which markers or knowledge make it possible, and how fast can it be?",
-  "statement": "A single deterministic agent is placed at a node $s$ of a connected graph $G$ with $n$ nodes, $m$ edges and maximum degree $\\Delta$. Nodes are anonymous and ports are locally labelled; the agent sees the degree of its node and the port by which it entered. It must **visit every node of $G$**. Three termination requirements are standard:\n\n* **perpetual exploration**: every node is eventually visited; the agent never has to stop;\n* **exploration with stop**: every node is visited and the agent then stops, anywhere;\n* **exploration with return**: every node is visited and the agent stops at $s$.\n\nReturn implies stop, and stop implies perpetual exploration. **Memory** is the number of bits of the agent's state; when the agent carries pebbles (markers it can drop and pick up) their number is reported with the memory. **Time** is the number of edge traversals (moves) until exploration is complete; for periodic exploration it is the period. Unless a variant says otherwise the agent knows nothing about $G$, not even $n$.\n\nExploration is the oldest problem of the mobile-agent literature: it started as maze search by finite automata, and the question of how little memory suffices runs from Budach's impossibility (1978) to Reingold's log-space algorithm (2005). Several agents exploring together form the sibling problem, collaborative exploration.",
+  "summary": "One agent starts at a node of an unknown anonymous graph and must visit every node; how much memory does it need, which pebbles or knowledge make it possible, and how fast can it be?",
+  "statement": "A single deterministic agent is placed at a node $s$ of a connected graph $G$ with $n$ nodes, $m$ edges and maximum degree $\\Delta$. Nodes are anonymous (they carry no names the agent can read), and the edges at each node are numbered locally; these numbers are the node's **ports**. The agent sees the degree of its node and the port by which it entered. It must **visit every node of $G$**. Three termination requirements are standard:\n\n* **perpetual exploration**: every node is eventually visited; the agent never has to stop;\n* **exploration with stop**: every node is visited and the agent then stops, anywhere;\n* **exploration with return**: every node is visited and the agent stops at $s$.\n\nReturn implies stop, and stop implies perpetual exploration. **Memory** is the number of bits of the agent's state; when the agent carries **pebbles** (objects it can drop on a node and pick up again) their number is reported with the memory. **Time** is the number of moves (edge traversals) until exploration is complete; for periodic exploration it is the period. Unless a variant says otherwise the agent knows nothing about $G$, not even $n$.\n\nExploration is the oldest problem of the mobile-agent literature: it started as maze search by finite automata, and the question of how little memory suffices runs from Budach's impossibility (1978) to Reingold's log-space algorithm (2005). Several agents exploring together form the sibling problem, collaborative exploration.",
   "primer": {
-    "intro": "Picture a robot vacuum put down in a large building with no map, where every room looks the same. We model the building as a graph: rooms are **nodes** (dots) and corridors are **edges** (lines joining two dots); $n$ is the number of nodes, $m$ the number of edges, and $\\Delta$ the largest number of corridors leaving one room (the maximum **degree**). At each node the exits are numbered $0, 1, \\dots$; these numbers are called **ports**, and the numbering at one node has nothing to do with the numbering at the next. The agent sees only how many exits its current node has and the port by which it came in; nodes have no names, so it cannot tell a room it has seen before from a new one. In the basic version (**perpetual exploration**) it must eventually visit every node of every connected graph, without ever having to stop, and the question is how few bits of memory make this possible.",
+    "intro": "Imagine a small cleaning machine put down in a large building with no map, where every room looks the same. We model the building as a **graph**: rooms are **nodes** and corridors are **edges** (each edge joins two nodes), and the machine is an **agent** that walks from node to node along edges; one crossing of one edge is a **move**. $n$ is the number of nodes and $m$ the number of edges; the **degree** of a node is the number of edges at it, and $\\Delta$ is the largest degree. At each node the edges are numbered $0, 1, \\dots$; these numbers are called **ports**, and the numbering at one node has nothing to do with the numbering at the next. The agent sees only the degree of its current node and the port by which it came in; nodes are **anonymous** (they have no names), so it cannot tell a node it has seen before from a new one. In the basic version (**perpetual exploration**) it must eventually visit every node of every connected graph, without ever having to stop, and the question is how few bits of **memory** (what the agent keeps from one move to the next) make this possible.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Leave by the next port (trees)",
         "variant": "trees-perpetual",
         "ref": "Diks2004Tree",
-        "idea": "This is the algorithm Choose-Next of [Diks2004Tree], for graphs without cycles (trees); here the ports of a node of degree $d$ are numbered $1, \\dots, d$.\n1. Leave the start node by port 1.\n2. When you enter a node of degree $d$ by port $i$, leave it by port $(i \\bmod d) + 1$, the next port in cyclic order (at a node of degree 1 this sends you straight back).\n3. Repeat forever.",
+        "idea": "This is the algorithm Choose-Next of [Diks2004Tree], for graphs without cycles (trees); here the ports of a node of degree $d$ are numbered $1, \\dots, d$.\n1. Leave the **start node** (the node where you are placed) by port 1.\n2. When you enter a node of degree $d$ by port $i$, leave it by port $(i \\bmod d) + 1$, the next port in cyclic order (at a node of degree 1 this sends you straight back).\n3. Repeat forever.",
         "analysis": "On a tree this is the rule \"keep your right hand on the wall\": the agent walks around the tree, and every edge is walked once in each direction before the walk repeats, so all $n$ nodes are visited within $2(n-1)$ moves. The agent only has to remember one port number, which [Diks2004Tree] count as $O(\\log\\Delta)$ bits, and they show that $\\Omega(\\log\\Delta)$ bits are needed on trees, so this is optimal. On graphs with cycles the same rule can go round a cycle forever and miss nodes; there the right amount of memory is $\\Theta(D\\log\\Delta)$ bits, with $D$ the diameter (the largest distance between two nodes) [Fraigniaud2005Automaton].",
-        "why_it_matters": "Choosing the next exit from the entry port alone is the basic move of almost every memory-efficient exploration algorithm, and the universal exploration sequences used for general graphs are a generalisation of it."
+        "why_it_matters": "Choosing the next port from the entry port alone is the basic move of almost every memory-efficient exploration algorithm, and the universal exploration sequences used for general graphs are a generalisation of it."
       },
       {
         "kind": "impossibility",
-        "title": "No stopping on a ring without a marker",
+        "title": "No stopping on a ring without a pebble",
         "variant": "stop",
         "ref": "Dieudonne2012Tokens",
-        "idea": "Ask for more: the agent must visit every node **and then stop**, without knowing $n$ and without being able to mark a node. Take rings (cycles) of every size, numbered so that at every node port 0 leads clockwise and port 1 counterclockwise. In such a ring every node has degree 2 and every arrival looks the same, so what the agent sees never depends on the size of the ring. A deterministic agent (one with no random choices) therefore makes the same sequence of moves in every such ring. Since it explores and stops in, say, the ring of 3 nodes, it stops after some fixed number $T$ of moves, and it does the same in the ring of $T+2$ nodes.",
-        "analysis": "In $T$ moves the agent can visit at most $T+1$ different nodes, so in the ring of $T+2$ nodes at least one node is never visited: the agent stopped too early. Extra memory does not help, because the problem is not remembering but recognising: the agent can never tell \"I am back where I started\" from \"this is a new node that looks the same\". This is why every stopping variant in the catalogue adds a marker (a pebble the agent can drop) or knowledge of a bound $N \\ge n$ [Dieudonne2012Tokens].",
+        "idea": "Ask for more: the agent must visit every node **and then stop**, without knowing $n$ and without a **pebble** (an object it could drop on a node to recognise that node later). Take rings (cycles) of every size, numbered so that at every node port 0 leads clockwise and port 1 counterclockwise. In such a ring every node has degree 2 and every arrival looks the same, so what the agent sees never depends on the size of the ring. A deterministic agent (one with no random choices) therefore makes the same sequence of moves in every such ring. Since it explores and stops in, say, the ring of 3 nodes, it stops after some fixed number $T$ of moves, and it does the same in the ring of $T+2$ nodes.",
+        "analysis": "In $T$ moves the agent can visit at most $T+1$ different nodes, so in the ring of $T+2$ nodes at least one node is never visited: the agent stopped too early. Extra memory does not help, because the problem is not remembering but recognising: the agent can never tell \"I am back where I started\" from \"this is a new node that looks the same\". This is why every stopping variant in the catalogue adds a pebble or knowledge of a bound $N \\ge n$ [Dieudonne2012Tokens].",
         "why_it_matters": "It shows that the hard part of exploration is often knowing when you are done, a theme that returns in dispersion, rendezvous and gathering."
       },
       {
@@ -35,12 +35,97 @@
         "title": "Random walk",
         "variant": "randomized",
         "ref": "Aleliunas1979Random",
-        "idea": "Allow the agent to flip coins, and tell it a number $N \\ge n$.\n1. At each node, pick one of the exits uniformly at random and take it.\n2. Count the moves; stop after $2N^3$ moves.",
+        "idea": "Allow the agent to flip coins, and tell it a number $N \\ge n$.\n1. At each node, pick one of the ports uniformly at random and take its edge.\n2. Count the moves; stop after $2N^3$ moves.",
         "analysis": "[Aleliunas1979Random] proved that a random walk visits every node of a connected graph within $2m(n-1)$ moves on average. Since $m \\le N^2/2$ and $n - 1 < N$, this average is below $N^3$; a walk that runs twice as long as its average cover time fails to cover the graph with probability at most $1/2$ (Markov's inequality), and repeating the walk lowers the failure probability further. The agent needs only a counter, $O(\\log N)$ bits. A deterministic agent with the same memory also exists, but its algorithm (Reingold's log-space construction) is much harder [Reingold2008Undirected].",
         "why_it_matters": "The random-walk bound was the starting point for universal traversal and exploration sequences, which turn the random walk into a fixed list of port choices that works on every graph."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected graph $G = (V, E)$ to be explored, with $n$ nodes, $m$ edges, maximum degree $\\Delta$ and diameter $D$",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "the single mobile entity that walks along edges and computes; deterministic unless a variant says otherwise",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "nodes carry no names the agent can read",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number of an edge at a node $v$ ($0, \\dots, \\deg(v)-1$ or $1, \\dots, \\deg(v)$ as each text says); the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit",
+        "door"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by the agent; time is the number of moves",
+      "avoid": []
+    },
+    {
+      "term": "memory",
+      "definition": "the number of bits of the agent's state, kept from one move to the next",
+      "avoid": []
+    },
+    {
+      "term": "pebble",
+      "definition": "an object the agent carries and can drop on a node and pick up again",
+      "avoid": [
+        "marker"
+      ]
+    },
+    {
+      "term": "perpetual exploration",
+      "definition": "every node is eventually visited; the agent need not stop",
+      "avoid": []
+    },
+    {
+      "term": "exploration with stop",
+      "definition": "every node is visited and the agent then stops, at any node",
+      "avoid": []
+    },
+    {
+      "term": "exploration with return",
+      "definition": "every node is visited and the agent then stops at its start node $s$",
+      "avoid": []
+    },
+    {
+      "term": "start node",
+      "definition": "the node $s$ where the agent is placed",
+      "avoid": []
+    }
+  ],
   "history": "Exploration began as **maze search by finite automata**. The first question was whether a machine with bounded memory can visit every node at all: Budach showed it cannot for mazes [Budach1978Labyrinths], Blum and Kozen showed that two pebbles or two automata are enough in mazes [Blum1978Compass], and Rollik showed that every finite team has a planar trap [Rollik1980Planar].\n\nFrom there the community turned to **how much memory** an agent needs as a function of the graph: $\\Theta(D\\log\\Delta)$ bits in general [Fraigniaud2005Automaton], $O(\\log n)$ once $n$ is known [Reingold2008Undirected], and the effect of the termination requirement on trees [Diks2004Tree] [Ambuhl2011Tree]. Markers came next: what one pebble buys [Fraigniaud2006Reduced], and the exact exchange rate between pebbles and memory [Disser2019Pebbles]. Time was a secondary measure throughout.",
   "measures": [
     {
@@ -236,7 +321,7 @@
       "open": [
         "What is the time of memory-optimal perpetual exploration, and is there a trade-off between memory and time?"
       ],
-      "notes": "In [Fraigniaud2005Automaton] exploring means traversing every edge, not only visiting every node. The model goes back to maze search: Shannon's maze-solving mouse, Budach's theorem that no finite automaton explores all mazes [Budach1978Labyrinths], Blum and Kozen [Blum1978Compass], and Rollik's result that no finite team of automata explores all cubic planar graphs [Rollik1980Planar]. Blum and Kozen proved that a finite automaton with two pebbles, or two automata together, search every maze, and that no three finite automata together can search all finite planar cubic graphs (Theorem 6.1; also one automaton, Theorem 4.1, and two, Theorem 4.6), so mazes, which come with a compass, are strictly easier than graphs; whether any finite team suffices for planar cubic graphs was left open [Blum1978Compass]. Their automata need not halt. This confirms the account of [Fraigniaud2005Automaton]; the reading in [Cohen2008Label] that one robot with three pebbles cannot explore all graphs is not a result of [Blum1978Compass]. Fraigniaud, Ilcinkas and Pelc showed that a polynomial increase in the number of states strictly enlarges the class of explorable regular graphs (DAM 2008, not in the bibliography yet). Checked against the full text.",
+      "notes": "In [Fraigniaud2005Automaton] exploring means traversing every edge, not only visiting every node. The model goes back to maze search: Shannon's maze-solving mouse, Budach's theorem that no finite automaton explores all mazes [Budach1978Labyrinths], Blum and Kozen [Blum1978Compass], and Rollik's result that no finite team of automata explores all cubic planar graphs [Rollik1980Planar]. Blum and Kozen proved that a finite automaton with two pebbles, or two automata together, search every maze, and that no three finite automata together can search all finite planar cubic graphs (Theorem 6.1; also one automaton, Theorem 4.1, and two, Theorem 4.6), so mazes, which come with a compass, are strictly easier than graphs; whether any finite team suffices for planar cubic graphs was left open [Blum1978Compass]. Their automata need not halt. This confirms the account of [Fraigniaud2005Automaton]; the reading in [Cohen2008Label] that one agent with three pebbles cannot explore all graphs is not a result of [Blum1978Compass]. Fraigniaud, Ilcinkas and Pelc showed that a polynomial increase in the number of states strictly enlarges the class of explorable regular graphs (DAM 2008, not in the bibliography yet). Checked against the full text.",
       "status": "verified"
     },
     {
@@ -257,7 +342,7 @@
           "preconditions": [
             "deterministic agent, no upper bound on $n$, no marking of nodes",
             "unbounded memory does not help",
-            "even cycles cannot be explored with stop without a marker [Fraigniaud2006Reduced]"
+            "even cycles cannot be explored with stop without a way to mark a node [Fraigniaud2006Reduced]"
           ]
         },
         {
@@ -282,7 +367,7 @@
         }
       },
       "open": [],
-      "notes": "The impossibility is why every stopping variant below adds either knowledge (a bound on $n$) or a marker. Dieudonné and Pelc also study Byzantine tokens: identical unmovable tokens, some of which may be faulty; exploration is feasible in polynomial cost if a bound on the number of tokens is known and at least one is fault-free [Dieudonne2012Tokens].",
+      "notes": "The impossibility is why every stopping variant below adds either knowledge (a bound on $n$) or a way to mark a node (a pebble or a token). Dieudonné and Pelc also study Byzantine tokens: identical unmovable tokens, some of which may be faulty; exploration is feasible in polynomial cost if a bound on the number of tokens is known and at least one is fault-free [Dieudonne2012Tokens].",
       "status": "verified"
     },
     {
@@ -781,7 +866,7 @@
         "Close the constant gaps: $2n-2$ versus $3.5n-2$ for constant memory, $2.8n-2$ versus $4n-2$ for oblivious agents [Czyzowicz2012Periodic].",
         "Trade-offs between period and memory: the only lower bound for agents with memory does not depend on memory."
       ],
-      "notes": "Without the designer's help, periodic exploration by a finite automaton is impossible (Budach, as cited by [Czyzowicz2012Periodic]). The line began with Dobrev, Jansson, Sadakane and Sung (SIROCCO 2005; period $10n$, as cited by [Czyzowicz2012Periodic]). Computing the shortest witness cycle for an oblivious agent is NP-hard. The period is defined differently: Ilcinkas counts returns to a node in the same state through the same port, Czyzowicz et al. returns to a node through the same port. **Unverified:** the oblivious $4n-2$ of [Kosowski2012Decomposition], known only from [Czyzowicz2012Periodic].",
+      "notes": "Without the designer's help, periodic exploration by a finite automaton is impossible (Budach, as cited by [Czyzowicz2012Periodic]). These papers began with Dobrev, Jansson, Sadakane and Sung (SIROCCO 2005; period $10n$, as cited by [Czyzowicz2012Periodic]). Computing the shortest witness cycle for an oblivious agent is NP-hard. The period is defined differently: Ilcinkas counts returns to a node in the same state through the same port, Czyzowicz et al. returns to a node through the same port. **Unverified:** the oblivious $4n-2$ of [Kosowski2012Decomposition], known only from [Czyzowicz2012Periodic].",
       "status": "draft"
     },
     {
@@ -861,13 +946,13 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [
         "Improve the $O(N^2 n^6 \\Delta_{out}^2)$ running time (Section 5 of [Bender2002Pebble])."
       ],
-      "notes": "Checked against the full text of [Bender2002Pebble]. The robot must output a graph isomorphic to $G$; it sees out-ports numbered $1,\\dots,\\Delta_{out}$ but not in-degrees, and cannot retrace an arc to fetch its pebble. Bender and Slonim had shown that a constant number of pebbles does not suffice for polynomial time when no bound on $n$ is known (as cited in [Bender2002Pebble]). With labelled nodes a greedy search takes $O(nm)$ moves.",
+      "notes": "Checked against the full text of [Bender2002Pebble]. The agent must output a graph isomorphic to $G$; it sees out-ports numbered $1,\\dots,\\Delta_{out}$ but not in-degrees, and cannot retrace an arc to fetch its pebble. Bender and Slonim had shown that a constant number of pebbles does not suffice for polynomial time when no bound on $n$ is known (as cited in [Bender2002Pebble]). With labelled nodes a greedy search takes $O(nm)$ moves.",
       "status": "verified"
     },
     {
@@ -930,7 +1015,7 @@
         },
         "memory": {
           "status": "unknown",
-          "note": "Memory is not bounded in this line of work."
+          "note": "Memory is not bounded in these papers."
         }
       },
       "open": [

@@ -13,30 +13,121 @@
     "relation": "An agent that explores the graph finds any treasure, so every exploration algorithm solves treasure hunt; the question is how much cheaper it can be when the treasure is close, measured against its distance $d$ (or a weight of the path to it) rather than the size of the graph."
   },
   "summary": "One agent must find a static treasure at an unknown node; the cost should depend on how far the treasure is, not on the size of the graph.",
-  "statement": "A single deterministic agent starts at a node $s$ of an unknown connected graph with port labels; a **treasure** sits at an unknown node $v^*$ at distance $d$ from $s$. The agent must reach $v^*$ (it recognises the treasure when it arrives). **Cost** is the number of edge traversals until the treasure is found, measured against $d$, against $e(d)$ (the number of edges with an endpoint at distance less than $d$ from $s$) or against a path weight defined per paper. **Help** counts any external help the agent receives: bits of advice from an oracle that knows the instance, or pebbles placed by it. Unless a variant says otherwise the agent knows nothing about the graph, $d$ or $v^*$.",
+  "statement": "A single deterministic agent starts at a node $s$ of an unknown connected graph whose edges carry **ports** (at each node, local numbers of the edges at that node); a **treasure** sits at an unknown node $v^*$ at distance $d$ from $s$. The agent must reach $v^*$ (it recognises the treasure when it arrives). **Cost** is the number of moves (edge traversals) until the treasure is found, measured against $d$, against $e(d)$ (the number of edges with an endpoint at distance less than $d$ from $s$) or against a path weight defined per paper. **Help** counts any external help the agent receives: bits of **advice** from an oracle that knows the instance, or **pebbles** (objects left on nodes) placed by it. Unless a variant says otherwise the agent knows nothing about the graph, $d$ or $v^*$.",
   "primer": {
-    "intro": "A hiker is lost in a park whose paths form a graph, and a rescuer walks from the trailhead looking for her, without a map and without knowing which direction to take. The rescuer is a single agent at a node $s$ of an unknown connected graph whose edges carry port numbers (local numbers of the edges at each node); the **treasure** is at an unknown node $v^*$ at distance $d$ from $s$ (the distance is the fewest edges on a route). The agent recognises the treasure only when it stands on it. In the basic version the graph is finite, with $n$ nodes, and the agent knows nothing about it; it must reach $v^*$, and the cost is the number of edges it walks.",
+    "intro": "A hiker is lost in a park whose trails form a network, and a rescuer walks from the trailhead looking for her, without a map and without knowing which direction to take. The network is a **graph**: trail junctions are **nodes** and the trails between them are **edges**; the rescuer is a single **agent** that starts at a node $s$ and walks along edges, and one crossing of one edge is a **move**. The graph is unknown and connected, and at each node the edges at that node carry local numbers, its **ports**. The hiker is the **treasure**, at an unknown node $v^*$ at **distance** $d$ from $s$ (the distance is the fewest edges on a path between two nodes). The agent recognises the treasure only when it stands on it. In the basic version the graph is finite, with $n$ nodes, and the agent knows nothing about it; it must reach $v^*$, and the **cost** is the number of moves it makes.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Universal exploration sequences of doubling size",
         "variant": "finite",
         "ref": "TaShma2014Deterministic",
-        "idea": "An **exploration sequence** is a list of numbers $x_1, x_2, \\dots$; following it means: at the $i$-th step, if you entered the current node (of degree $\\deg$) by port $p$, leave by port $(p + x_i) \\bmod \\deg$. A sequence is **universal for size $N$** if following it visits every node of every connected graph with at most $N$ nodes, from any start. Such sequences exist and can be computed [Reingold2008Undirected].\n1. For $N = 1, 2, 4, 8, \\dots$:\n2. follow the universal sequence for size $N$ from wherever you are;\n3. stop as soon as you stand on the treasure.",
-        "analysis": "Once $N \\ge n$, the sequence for size $N$ visits every node, including $v^*$, so the search ends during that round of the loop [TaShma2014Deterministic]. Each sequence has length polynomial in $N$, the lengths grow geometrically, and the loop never goes past $N < 2n$, so the total cost is polynomial in $n$. It ignores $d$: a treasure next door may cost as much as one far away. With node labels, a treasure at distance $d$ is found at cost $O(e(d)\\log d)$ [Bouchard2023Almost], where $e(d)$ is the number of edges with an endpoint at distance less than $d$ from $s$.",
+        "idea": "An **exploration sequence** is a list of numbers $x_1, x_2, \\dots$; following it means: at the $i$-th move, if you entered the current node (of **degree** $\\deg$, the number of edges at it) by port $p$, leave by port $(p + x_i) \\bmod \\deg$. A sequence is **universal for size $N$** if following it visits every node of every connected graph with at most $N$ nodes, from any start. Such sequences exist and can be computed [Reingold2008Undirected].\n1. For $N = 1, 2, 4, 8, \\dots$ (one **phase** per value of $N$):\n2. follow the universal sequence for size $N$ from wherever you are;\n3. stop as soon as you stand on the treasure.",
+        "analysis": "Once $N \\ge n$, the sequence for size $N$ visits every node, including $v^*$, so the search ends during that phase [TaShma2014Deterministic]. Each sequence has length polynomial in $N$, the lengths grow geometrically, and the loop never goes past $N < 2n$, so the total cost is polynomial in $n$. It ignores $d$: a treasure next door may cost as much as one far away. With node labels, a treasure at distance $d$ is found at cost $O(e(d)\\log d)$ [Bouchard2023Almost], where $e(d)$ is the number of edges with an endpoint at distance less than $d$ from $s$.",
         "why_it_matters": "Doubling a guess you do not know (here $n$) is the standard way to remove knowledge from an algorithm; it reappears in rendezvous and gathering."
       },
       {
         "kind": "lower-bound",
-        "title": "The treasure is behind the last door",
+        "title": "The treasure is behind the last port",
         "variant": "labelled",
         "ref": "Bouchard2023Almost",
-        "idea": "Let $s$ have many neighbours, say 20, and put the treasure on one of them, so $d = 1$. The agent cannot see what is behind a port without walking through it. An adversary watches the agent and puts the treasure behind whichever of the 20 ports the agent tries last; since every node looks the same from $s$, the agent cannot avoid this.",
+        "idea": "Let $s$ have many neighbours, say 20, and put the treasure on one of them, so $d = 1$. The agent cannot see what is at the other end of an edge without crossing it. An adversary watches the agent and puts the treasure behind whichever of the 20 ports the agent tries last; since every node looks the same from $s$, the agent cannot avoid this.",
         "analysis": "The agent walks out and back along at least 19 edges before it tries the last one, so it pays about twice the degree of $s$. Here $e(1)$, the number of edges with an endpoint at distance less than 1 from $s$, is exactly the degree of $s$, and the same idea applied layer by layer gives the general bound $\\Omega(e(d))$ of [Bouchard2023Almost], which holds even when nodes carry labels. Their algorithm costs $O(e(d)\\log d)$, so the gap is a factor $\\log d$. Trivially the agent also needs at least $d$ moves.",
         "why_it_matters": "It shows that the right measure of cost is the number of edges near the start, not the distance, which is why later work states bounds in terms of $e(d)$ or path weights."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the unknown connected graph $G = (V, E)$ in which the agent searches; finite with $n$ nodes unless a variant says otherwise",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "the single deterministic mobile entity that searches, starting at node $s$",
+      "avoid": [
+        "robot",
+        "searcher"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number of an edge at a node $v$; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by the agent",
+      "avoid": []
+    },
+    {
+      "term": "treasure",
+      "definition": "the static object at the unknown node $v^*$ that the agent must reach; it is recognised only on arrival",
+      "avoid": [
+        "target"
+      ]
+    },
+    {
+      "term": "distance",
+      "definition": "the number of edges of a shortest path between two nodes; $d$ is the distance from $s$ to $v^*$",
+      "avoid": []
+    },
+    {
+      "term": "cost",
+      "definition": "the number of moves until the agent stands on the treasure",
+      "avoid": []
+    },
+    {
+      "term": "exploration sequence",
+      "definition": "a list $x_1, x_2, \\dots$ of integers; at the $i$-th move an agent that entered a node of degree $\\deg$ by port $p$ leaves by port $(p + x_i) \\bmod \\deg$; universal for size $N$ if it visits every node of every connected graph with at most $N$ nodes from any start",
+      "avoid": []
+    },
+    {
+      "term": "phase",
+      "definition": "one pass of the doubling loop: following the universal exploration sequence for one value of $N$",
+      "avoid": [
+        "round",
+        "iteration"
+      ]
+    },
+    {
+      "term": "advice",
+      "definition": "bits given to the agent before the start by an oracle that knows the instance",
+      "avoid": []
+    },
+    {
+      "term": "pebble",
+      "definition": "an object placed on a node (by the oracle) that the agent can see when it stands there",
+      "avoid": [
+        "marker",
+        "token"
+      ]
+    }
+  ],
   "history": "Ta-Shma and Zwick introduced deterministic treasure hunt as the variant of rendezvous in which one agent never moves [TaShma2014Deterministic]. The question from the start was **cost as a function of how far the treasure is**, not of the size of the graph, which led to strongly universal exploration sequences. Later work asked how much **external help** (advice bits, pebbles) reduces the cost [Miller2015Tradeoffs] [Gorain2022Pebble], and what is possible in graphs with infinite degrees [Pattanayak2024Treasure].",
   "measures": [
     {
@@ -303,7 +394,7 @@
       "optimality": {
         "time": {
           "status": "tight",
-          "note": "Cost $C$ is the target."
+          "note": "Cost $C$ is the measure to minimise."
         },
         "memory": {
           "status": "near",
@@ -361,7 +452,7 @@
     }
   ],
   "figure": {
-    "caption": "Treasure hunt by exploration sequences of doubling size [TaShma2014Deterministic]: for $N = 1, 2, 4, 8, \\dots$ the agent follows the sequence for size $N$ from where it stands (entering by port $p$ with term $x$, it leaves by port $(p + x) \\bmod \\deg$; ports are numbered from 0) and stops on the treasure $v^*$. The short sequences drawn here are illustrative, not actual universal sequences, which are much longer. One frame per move.",
+    "caption": "Treasure hunt by exploration sequences of doubling size [TaShma2014Deterministic]: in the phases $N = 1, 2, 4, 8, \\dots$ the agent follows the sequence for size $N$ from where it stands (entering by port $p$ with term $x$, it leaves by port $(p + x) \\bmod \\deg$; ports are numbered from 0) and stops on the treasure $v^*$. The short sequences drawn here are illustrative, not actual universal sequences, which are much longer. One frame per move.",
     "view": [
       100,
       56

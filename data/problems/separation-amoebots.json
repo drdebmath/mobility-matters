@@ -19,30 +19,110 @@
     }
   ],
   "summary": "Particles of two colours, following a local stochastic rule, must cluster by colour (or mix).",
-  "statement": "Each particle has one of two colours. Particles run a local Markov chain with a bias $\\lambda$ towards more neighbours and a bias $\\gamma$ towards neighbours of the same colour. The system should be compressed and **separated** (few edges between colours), or **integrated** (colours mixed), with high probability in the stationary distribution.",
+  "statement": "Each particle has one of two colours. Particles run a local **Markov chain** with a **bias** $\\lambda$ towards more neighbours and a bias $\\gamma$ towards neighbours of the same colour. The system should be **compressed** and **separated** (few pairs of neighbours of different colours), or **integrated** (colours mixed), with high probability in the stationary distribution.",
   "primer": {
-    "intro": "Think of a mixed crowd of red and blue marbles in a tray that, when shaken, sorts itself into a red patch and a blue patch, or stays mixed, depending on how 'sticky' same-coloured marbles are. Here $n$ particles on the triangular grid each carry a fixed colour, one of two; they start connected, have constant memory and no compass, and one randomly chosen particle acts at a time. A particle sits on one node of an endless triangular grid and moves in two steps: it *expands* into an empty neighbouring node, briefly occupying both, then *contracts* into one of the two; so one expansion and one contraction move it by one node. The group should become compressed (short perimeter, as in compression) and either *separated* (each colour mostly in one region, with few touching pairs of different colours) or *integrated* (colours mixed), whichever is asked for. As for compression, the question is what the group looks like after running for a long time, with high probability.",
+    "intro": "Think of a mixed crowd of red and blue marbles in a tray that, when shaken, sorts itself into a red patch and a blue patch, or stays mixed, depending on how 'sticky' same-coloured marbles are. The floor is the **triangular lattice**: the endless graph whose **nodes** are the corners of a tiling of the plane by equal triangles; each node is joined by an edge to six others, its **neighbours**. A **particle** occupies one node and moves in two actions: an **expansion** into an empty neighbouring node, after which it occupies both, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. The **system** of $n$ particles starts connected; each particle carries a fixed colour, one of two, has constant memory and no compass, and one randomly chosen particle acts at a time. The system should become **compressed** (its **perimeter**, the length of the walk around its outside, is at most a constant times the smallest possible, as in compression) and either **separated** (each colour mostly in one region, with few pairs of neighbours of different colours) or **integrated** (colours mixed), whichever is asked for. As for compression, the question is what the system looks like after running for a long time, with high probability.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "The compression rule with a second bias for colour",
         "variant": "stochastic",
         "ref": "Cannon2019Separation",
-        "idea": "There are two biases: $\\lambda$ rewards neighbours of any colour, and $\\gamma$ rewards neighbours of one's own colour. A randomly chosen particle does one of two things.\\n\\n1. **Step.** As in compression: pick a random empty neighbouring node; check locally that moving there neither splits the group nor encloses a hole; then move with probability $\\lambda^{\\text{(gain in neighbours)}}\\cdot\\gamma^{\\text{(gain in same-coloured neighbours)}}$ (certainly, if this number exceeds 1).\\n2. **Swap.** Pick a neighbour of the other colour and exchange places with it, with probability $\\gamma^{\\text{(gain in same-coloured neighbours of the two)}}$ (certainly, if above 1). Swaps let colours move through the middle of the group.",
-        "analysis": "With only one colour the rule is exactly the compression rule [Cannon2016Compression]. For a strong colour bias, $\\gamma > 4^{5/4} \\approx 5.66$ together with $\\lambda\\gamma > 6.83$ (and $\\lambda > 1$), the group is compressed and separated with high probability [Cannon2019Separation]. For $\\gamma$ very close to 1, between $79/81$ and $81/79$, and $\\lambda$ large enough, it is compressed but integrated. So one rule does both jobs, and a single number set by the environment decides which.",
+        "idea": "There are two **biases**: $\\lambda$ rewards neighbours of any colour, and $\\gamma$ rewards neighbours of one's own colour. A randomly chosen particle does one of two things.\n\n1. **Step.** As in compression: pick a random empty neighbouring node; check locally that moving there neither splits the system nor encloses a **hole** (a region of empty nodes surrounded by particles); then move with probability $\\lambda^{\\text{(gain in neighbours)}}\\cdot\\gamma^{\\text{(gain in same-coloured neighbours)}}$ (certainly, if this number exceeds 1).\n2. **Swap.** Pick a neighbour of the other colour and exchange nodes with it, with probability $\\gamma^{\\text{(gain in same-coloured neighbours of the two)}}$ (certainly, if above 1). Swaps let colours move through the middle of the system.",
+        "analysis": "With only one colour the rule is exactly the compression rule [Cannon2016Compression]. For a strong colour bias, $\\gamma > 4^{5/4} \\approx 5.66$ together with $\\lambda\\gamma > 6.83$ (and $\\lambda > 1$), the system is compressed and separated with high probability [Cannon2019Separation]. For $\\gamma$ very close to 1, between $79/81$ and $81/79$, and $\\lambda$ large enough, it is compressed but integrated. So one rule does both jobs, and a single number set by the environment decides which.",
         "why_it_matters": "It showed that the biased-rule recipe extends from shape to internal organisation, here the arrangement of types."
       },
       {
         "kind": "lower-bound",
-        "title": "A mild colour preference does not sort the colours",
+        "title": "A mild colour preference does not separate the colours",
         "variant": "stochastic",
         "ref": "Cannon2019Separation",
-        "idea": "One might expect any preference $\\gamma > 1$ for same-coloured neighbours to sort the colours eventually. It does not. There are vastly more mixed arrangements of the colours inside a compressed blob than sorted ones: sorting means fixing a short border between the colours, while mixing leaves almost every particle free to be either colour. A slight preference gives each sorted arrangement only a slightly larger weight, which cannot make up for the huge number of mixed ones.",
-        "analysis": "[Cannon2019Separation] prove that for $\\gamma$ between $79/81$ and $81/79$, which includes values slightly above 1, the group fails to separate with high probability: the number of touching pairs of different colours stays large. Separation needs the colour bias to beat this counting, which is why the positive result asks for $\\gamma > 5.66$. What happens for $\\gamma$ between these ranges is not settled by the paper.",
+        "idea": "One might expect any preference $\\gamma > 1$ for same-coloured neighbours to separate the colours eventually. It does not. There are vastly more mixed arrangements of the colours inside a compressed system than separated ones: separation means fixing a short border between the colours, while mixing leaves almost every particle free to be either colour. A slight preference gives each separated arrangement only a slightly larger weight, which cannot make up for the huge number of mixed ones.",
+        "analysis": "[Cannon2019Separation] prove that for $\\gamma$ between $79/81$ and $81/79$, which includes values slightly above 1, the system fails to separate with high probability: the number of pairs of neighbours of different colours stays large. Separation needs the colour bias to beat this counting, which is why the positive result asks for $\\gamma > 5.66$. What happens for $\\gamma$ between these ranges is not settled by the paper.",
         "why_it_matters": "It is the colour version of the compression lesson: a preference must be strong enough to beat the number of disordered states."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous computing unit of constant size that occupies one node of the triangular lattice, or two neighbouring nodes while it moves",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph $G_\\Delta$ whose nodes are the corners of a tiling of the plane by equilateral triangles; every node has six neighbours",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; it is empty or occupied by a particle (an expanded particle occupies two)",
+      "avoid": [
+        "spot",
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "two nodes are neighbours when an edge of the triangular lattice joins them; two particles are neighbours when they occupy neighbouring nodes",
+      "avoid": [
+        "adjacent",
+        "touching"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the action in which a particle that occupies one node extends into an empty neighbouring node and then occupies both"
+    },
+    {
+      "term": "contraction",
+      "definition": "the action in which a particle that occupies two nodes withdraws into one of them"
+    },
+    {
+      "term": "system",
+      "definition": "the set of all $n$ particles",
+      "avoid": [
+        "group",
+        "swarm"
+      ]
+    },
+    {
+      "term": "hole",
+      "definition": "a finite set of empty nodes enclosed by particles"
+    },
+    {
+      "term": "perimeter",
+      "definition": "the length of the closed walk around the outside of the system"
+    },
+    {
+      "term": "compressed",
+      "definition": "having perimeter at most a constant times the minimum possible perimeter of $n$ particles"
+    },
+    {
+      "term": "Markov chain",
+      "definition": "the random process in which, at each step, one particle chosen uniformly at random proposes an action and accepts it with a probability set by the biases and its neighbourhood; results describe its stationary distribution"
+    },
+    {
+      "term": "bias",
+      "definition": "a parameter of the Markov chain: $\\lambda > 0$ weights each gained neighbour and $\\gamma > 0$ each gained neighbour of the same colour; a proposed action is accepted with probability $\\min(1, \\lambda^{\\Delta e}\\gamma^{\\Delta h})$ for a step and $\\min(1, \\gamma^{\\Delta h})$ for a swap"
+    },
+    {
+      "term": "separated",
+      "definition": "compressed, with few pairs of neighbours of different colours (each colour mostly in one region)",
+      "avoid": [
+        "sorted"
+      ]
+    },
+    {
+      "term": "integrated",
+      "definition": "compressed, with the colours mixed: many pairs of neighbours of different colours"
+    }
+  ],
   "history": "Separation extended the stochastic approach of compression to **heterogeneous** systems; the question is which bias parameters give which emergent behaviour [Cannon2019Separation].",
   "variants": [
     {

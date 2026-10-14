@@ -13,17 +13,17 @@
     "relation": "Evacuation is a form of search with an extra requirement: \"optimality in evacuation is measured by the time it takes for the last robot to reach the exit, whereas in traditional search, optimality is measured by the time it takes the first robot to reach the exit\" [Czyzowicz2017Faulty]. The introductory paper notes its similarity with the cow-path problem, and that evacuating uniform agents on a line \"is as hard as the cow-path problem\" [Czyzowicz2014Evacuating]."
   },
   "summary": "Robots start at the centre of a disk (or a polygon) and must all leave through an exit at an unknown point of the boundary, as fast as possible.",
-  "statement": "$k$ unit-speed robots start together at the centre of a unit disk (or the centroid of a unit equilateral triangle or square). An exit lies at an unknown point of the boundary; a robot recognises it only on reaching it. **Time** is the worst case, over exit positions, of the time until the last robot reaches the exit (in priority evacuation: until the queen does).",
+  "statement": "$k$ unit-speed robots start together at the centre of a unit disk (or the centroid of a unit equilateral triangle or square). An exit lies at an unknown point of the boundary; a robot recognises it only on reaching it. **Time** is the worst case, over exit positions, of the time until the last robot reaches the exit (in priority evacuation, where one robot is the **queen**: until the queen does).",
   "primer": {
-    "intro": "Two people are in a dark round room of radius 1 and know there is one door somewhere on the wall, but not where; they can talk by walkie-talkie. In evacuation, $k$ robots of speed 1 start at the centre of a unit disk, one exit lies at an unknown point of the boundary circle, and a robot recognises the exit only when it stands on it. The goal is to minimise, in the worst case over exit positions, the time until the **last** robot reaches the exit. In the basic version there are two robots with *wireless* communication: a robot that finds the exit tells the other instantly, wherever it is.",
+    "intro": "Two people stand in the middle of a dark round room of radius 1 and know there is one door somewhere along its edge, but not where; they can talk by walkie-talkie. In evacuation the people are **robots**, points that move at unit speed; the room is a unit **disk**, the points at distance at most 1 from its centre; its edge is the **boundary**, the circle of radius 1; and the door is the **exit**, a point of the boundary that a robot recognises only when it stands on it. $k$ robots start at the centre of the disk. The goal is to minimise, in the worst case over exit positions, the time until the **last** robot reaches the exit. In the basic version there are two robots with **wireless** communication: a robot that finds the exit tells the other instantly, wherever it is.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Go to the wall together, then split",
+        "title": "Go to the boundary together, then split",
         "variant": "disk-two-wireless",
         "ref": "Czyzowicz2014Evacuating",
-        "idea": "1. Both robots walk together from the centre to the same point $A$ of the wall (time 1).\n2. One walks clockwise along the wall, the other counter-clockwise, at full speed.\n3. The robot that finds the exit radios the other.\n4. The other walks straight across the disk (along a chord) to the exit.",
-        "analysis": "If the exit is found after each robot has walked an arc of length $x$ (so $x \\le \\pi$), the robots are $2x$ apart along the circle, and the chord between them has length $2\\sin x$. The total time is $1 + x + 2\\sin x$. Its derivative $1 + 2\\cos x$ is zero at $x = 2\\pi/3$, so the worst case is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.826$ [Czyzowicz2014Evacuating]. This is exactly optimal (next idea).",
+        "idea": "1. Both robots walk together from the centre to the same point $A$ of the boundary (time 1).\n2. One walks clockwise along the boundary, the other counter-clockwise, at full speed.\n3. The robot that finds the exit tells the other by wireless communication.\n4. The other walks straight across the disk to the exit, along a **chord** (the straight segment between two points of the boundary).",
+        "analysis": "If the exit is found after each robot has walked an **arc** (a piece of the boundary) of length $x$ (so $x \\le \\pi$), the robots are $2x$ apart along the boundary, and the chord between them has length $2\\sin x$. The total time is $1 + x + 2\\sin x$. Its derivative $1 + 2\\cos x$ is zero at $x = 2\\pi/3$, so the worst case is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.826$ [Czyzowicz2014Evacuating]. This is exactly optimal (next idea).",
         "why_it_matters": "Searching the boundary in opposite directions and cutting across on a chord is the template for almost every later disk evacuation algorithm."
       },
       {
@@ -31,21 +31,85 @@
         "title": "Two unexplored points far apart",
         "variant": "disk-two-wireless",
         "ref": "Czyzowicz2014Evacuating",
-        "idea": "Look at time $1 + 2\\pi/3$. Each robot needed time 1 just to reach the wall, so together they have walked at most $4\\pi/3$ of the boundary, and at least $2\\pi/3$ of the circle (minus a tiny $\\varepsilon$) is unexplored. [Czyzowicz2014Evacuating] show that then there are two unexplored points at arc distance about $2\\pi/3$, so the chord between them has length $\\sqrt3$. The adversary waits until some robot first reaches one of these two points and places the exit at the other one.",
+        "idea": "Look at time $1 + 2\\pi/3$. Each robot needed time 1 just to reach the boundary, so together they have walked at most $4\\pi/3$ of the boundary, and at least $2\\pi/3$ of the boundary (minus a tiny $\\varepsilon$) is unexplored. [Czyzowicz2014Evacuating] show that then there are two unexplored points at arc distance about $2\\pi/3$ (measured along the boundary), so the chord between them has length $\\sqrt3$. The **adversary**, an opponent who watches the robots and chooses the exit position, waits until some robot first reaches one of these two points and places the exit at the other one.",
         "analysis": "That robot is then at least $\\sqrt3$ away from the exit and must still get there, and this happens no earlier than time $1 + 2\\pi/3$. So every algorithm needs at least $1 + 2\\pi/3 + \\sqrt3$ in the worst case, which matches the algorithm above [Czyzowicz2014Evacuating].",
         "why_it_matters": "Counting how much of the boundary can be explored by a given time, then hiding the exit at the far end of an unexplored chord, is the basic lower-bound tool for evacuation."
       },
       {
         "kind": "algorithm",
-        "title": "Without radios: chase your partner",
+        "title": "Without wireless communication: catch the other robot",
         "variant": "disk-two-f2f",
         "ref": "Czyzowicz2014Evacuating",
-        "idea": "If robots exchange information only when they meet (*face-to-face*):\n1. Go to the wall together and split in opposite directions, as before.\n2. The robot that finds the exit cannot call; it walks along a chord to the point where its partner will be, meets it,\n3. and both walk back along a chord to the exit.",
-        "analysis": "The finder must cover the distance to the partner and back, so the cost is larger: about $5.74$ for this simple version [Czyzowicz2014Evacuating]. Cleverer paths that leave the wall and come back improved it to about $5.6234$ [Disser2019Second], while the best lower bound is $3 + \\pi/6 + \\sqrt3 \\approx 5.255$ [Czyzowicz2020FaceToFace]. This gap has been open since 2019.",
+        "idea": "If robots exchange information only when they meet (**face-to-face** communication):\n1. Go to the boundary together and split in opposite directions, as before.\n2. The robot that finds the exit cannot call; it walks along a chord to the point where the other robot will be, meets it,\n3. and both walk back along a chord to the exit.",
+        "analysis": "The robot that finds the exit must cover the distance to the other robot and back, so the cost is larger: about $5.74$ for this simple version [Czyzowicz2014Evacuating]. Cleverer paths that leave the boundary and come back improved it to about $5.6234$ [Disser2019Second], while the best lower bound is $3 + \\pi/6 + \\sqrt3 \\approx 5.255$ [Czyzowicz2020FaceToFace]. This gap has been open since 2019.",
         "why_it_matters": "It shows how much communication is worth, and it is one of the simplest-to-state geometric questions still open in the area."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point that moves at unit speed and recognises the exit only when it stands on it",
+      "avoid": [
+        "agent",
+        "partner",
+        "searcher"
+      ]
+    },
+    {
+      "term": "disk",
+      "definition": "the unit disk: the points at distance at most $1$ from its centre, where the robots start (results are stated for $R = 1$)",
+      "avoid": []
+    },
+    {
+      "term": "boundary",
+      "definition": "the circle of radius $1$ that bounds the disk (for polygons, the perimeter of the triangle or square)",
+      "avoid": [
+        "wall",
+        "circumference"
+      ]
+    },
+    {
+      "term": "exit",
+      "definition": "the unknown point of the boundary that every robot (in priority evacuation, the queen) must reach",
+      "avoid": [
+        "target"
+      ]
+    },
+    {
+      "term": "arc",
+      "definition": "a connected piece of the boundary; the arc distance of two points is the length of the shorter arc between them",
+      "avoid": []
+    },
+    {
+      "term": "chord",
+      "definition": "the straight segment between two points of the boundary; a chord across arc distance $x$ has length $2\\sin(x/2)$",
+      "avoid": []
+    },
+    {
+      "term": "wireless",
+      "definition": "communication in which a message sent by a robot reaches every other robot instantly, wherever it is",
+      "avoid": [
+        "radio",
+        "radios"
+      ]
+    },
+    {
+      "term": "face-to-face",
+      "definition": "communication in which robots exchange information only when they are at the same point",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an opponent that knows the algorithm, watches the robots, and places the exit where the evacuation time is largest",
+      "avoid": []
+    },
+    {
+      "term": "queen",
+      "definition": "in priority evacuation, the one robot whose arrival at the exit ends the task; the other $\\sigma$ robots are servants",
+      "avoid": []
+    }
+  ],
   "history": "Evacuation was introduced to capture the tension between **spreading the robots** to find the exit fast and **keeping them close** so that the others can reach it quickly [Czyzowicz2014Evacuating]. The first results already separated wireless from face-to-face communication. The community then tightened the two-robot face-to-face constants [Czyzowicz2020FaceToFace] [Brandt2017Collaboration] [Disser2019Second] and added faults [Czyzowicz2017Faulty], priority (one robot must leave) [Czyzowicz2018Priority], asymmetric communication [Georgiou2022Asymmetric], other domains [Chuangpishit2020Triangles] and several exits [Pattanayak2018TwoExits]. Beyond disks, triangles and squares, the question was asked on the line and on rays [Chrobak2015GroupSearch] [Brandt2020Rays], in regular polygons with priority [Georgiou2025Polygons], on known trees as a planning problem that is NP-hard to solve exactly [Devillez2021Tree], and in the plane for an unknown shoreline [Acharjee2019Shoreline] or an unknown convex region to escape [Wei2016Competitive].",
   "measures": [
     {
@@ -1458,7 +1522,7 @@
     }
   ],
   "figure": {
-    "caption": "Evacuation from a disk: two robots start at the centre of a unit disk and must both reach an exit at an unknown point of the boundary. The animation runs the wireless algorithm of [Czyzowicz2014Evacuating] at unit speed: both walk to the wall together, then search it in opposite directions; the one that finds the exit radios the other, which walks straight across the disk along the chord. With the exit placed at arc distance $2\\pi/3$ (the worst case) the time is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.83$.",
+    "caption": "Evacuation from a disk: two robots start at the centre of a unit disk and must both reach an exit at an unknown point of the boundary. The animation runs the wireless algorithm of [Czyzowicz2014Evacuating] at unit speed: both walk to the boundary together, then search it in opposite directions; the one that finds the exit tells the other by wireless communication, and the other walks straight across the disk along the chord. With the exit placed at arc distance $2\\pi/3$ (the worst case) the time is $1 + 2\\pi/3 + \\sqrt3 \\approx 4.83$.",
     "view": [
       100,
       54
@@ -1703,7 +1767,7 @@
             "w": 0.6
           }
         ],
-        "label": "Time 1: at the wall together; they split"
+        "label": "Time 1: at the boundary together; they split"
       },
       {
         "ents": [
@@ -4012,7 +4076,7 @@
             "w": 0.5
           }
         ],
-        "label": "Robot 1 finds the exit, radios robot 2"
+        "label": "Robot 1 finds the exit, tells robot 2"
       },
       {
         "ents": [

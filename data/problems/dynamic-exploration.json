@@ -13,17 +13,17 @@
     "relation": "When an adversary removes edges, a single agent can be blocked forever; the question shifts from speed to **how many agents** are needed to visit every node."
   },
   "summary": "An adversary changes the graph over time; how many agents are needed to explore it?",
-  "statement": "Agents must visit every node of a dynamic graph whose edges are removed by an adversary subject to a connectivity constraint (1-interval connectivity, temporal connectivity). The primary measure is the **number of agents**; the secondary is time in rounds.",
+  "statement": "Agents must visit every node of a **dynamic graph**: a sequence of graphs $G_t = (V, E_t)$ on one node set, whose edges are removed round by round by an adversary subject to a connectivity constraint (**1-interval connectivity**: every $G_t$ is connected; **temporal connectivity**: every node can reach every other through edges present at non-decreasing times). The primary measure is the **number of agents**; the secondary is time in rounds.",
   "primer": {
-    "intro": "Imagine guards who must check every station on a circular railway line, while the operator closes some piece of track at any moment without warning. In the basic version the network is a ring of $n$ nodes (dots joined in a circle by lines). Time runs in **rounds**: in each round every agent may cross one line or wait. An **adversary** (an imagined opponent) chooses, in every round, which lines are missing, with one rule: the graph must stay connected in every round (*1-interval connectivity*); in a ring this means that at most one line is missing per round. The agents must together visit every node; in the version recorded here they also know an upper bound $N \\ge n$ and must stop. We count the agents needed and the rounds.",
+    "intro": "Imagine guards who must check every station on a circular railway, while the operator closes some piece of track at any moment without warning. We model the railway as a graph: stations are **nodes**, the pieces of track between neighbouring stations are **edges**, and each guard is an **agent**. In the basic version the graph is a **ring** of $n$ nodes (the nodes form one cycle, each joined by an edge to its two neighbours). Time runs in **rounds**: in each round every agent may cross one edge or wait. An **adversary** (an imagined opponent, the operator of the picture) chooses, in every round, which edges are **missing** (removed for that round), with one rule: the graph must stay connected in every round (**1-interval connectivity**); in a ring this means that at most one edge is missing per round. A graph that changes like this is a **dynamic graph**. The agents must together visit every node; in the version recorded here they also know an upper bound $N \\ge n$ and must stop. We count the agents needed and the rounds.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Two agents walking in opposite directions",
         "variant": "ring",
         "ref": "DiLuna2020Dynamic",
-        "idea": "The simplest case: two agents start on the same node and know $N \\ge n$.\n\n1. The two agents set off in opposite directions around the ring (the paper shows how two identical agents can agree on this).\n2. In every round each agent tries to cross the next line in its direction; if the line is missing, it waits and tries again in the next round.\n3. After $N - 1$ rounds both agents stop.",
-        "analysis": "At most one line is missing per round, and until the two agents have between them covered the whole ring they are trying to cross two different lines, so at least one of them moves forward, onto a node that nobody has visited. Each round therefore visits at least one new node, and the $n - 1$ other nodes are all visited within $n - 1 \\le N - 1$ rounds. [DiLuna2020Dynamic] handle the harder cases (different starting nodes, no common sense of left and right) with one extra rule, turning back after being blocked for long, and both agents stop after $3N - 6$ rounds.",
+        "idea": "The simplest case: two agents start on the same node and know $N \\ge n$.\n\n1. The two agents set off in opposite directions around the ring (the paper shows how two identical agents can agree on this).\n2. In every round each agent tries to cross the next edge in its direction; if the edge is missing, it waits (it is **blocked**) and tries again in the next round.\n3. After $N - 1$ rounds both agents stop.",
+        "analysis": "At most one edge is missing per round, and until the two agents have between them covered the whole ring they are trying to cross two different edges, so at least one of them moves forward, onto a node that nobody has visited. Each round therefore visits at least one new node, and the $n - 1$ other nodes are all visited within $n - 1 \\le N - 1$ rounds. [DiLuna2020Dynamic] handle the harder cases (different starting nodes, no common sense of left and right) with one extra rule, turning back after being blocked for long, and both agents stop after $3N - 6$ rounds.",
         "why_it_matters": "It shows that a second agent turns an impossible task into an easy one, because the adversary can only block one of them at a time."
       },
       {
@@ -31,12 +31,82 @@
         "title": "One agent can always be blocked",
         "variant": "ring",
         "ref": "DiLuna2020Dynamic",
-        "idea": "A single agent stands on a node of the ring and, in some round, decides to cross one of the two lines next to it. The adversary removes exactly that line in that round. Removing one line from a ring leaves a path, which is still connected, so this is allowed. The adversary can do this in every round, so the agent never leaves its starting node.",
-        "analysis": "So at least two agents are needed [DiLuna2020Dynamic]. The same paper also shows that the adversary can prevent two agents that start on different nodes from ever meeting, by removing a line only at the moment the two would otherwise meet: the agents cannot rely on meeting to coordinate.",
+        "idea": "A single agent stands on a node of the ring and, in some round, decides to cross one of the two edges at its node. The adversary removes exactly that edge in that round. Removing one edge from a ring leaves a path, which is still connected, so this is allowed. The adversary can do this in every round, so the agent never leaves its starting node.",
+        "analysis": "So at least two agents are needed [DiLuna2020Dynamic]. The same paper also shows that the adversary can prevent two agents that start on different nodes from ever meeting, by removing an edge only at the moment the two would otherwise meet: the agents cannot rely on meeting to coordinate.",
         "why_it_matters": "The number of agents becomes the main measure on dynamic graphs, because a few agents may be unable to explore at all, whatever time they are given."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of the fixed node set $V$; there are $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a pair of nodes that may be present or missing in a given round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that, in each round, crosses one present edge at its node or waits",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "dynamic graph",
+      "definition": "a sequence $(G_t)_{t \\ge 0}$ of graphs $G_t = (V, E_t)$ on one node set, $E_t$ being the edges present in round $t$",
+      "avoid": []
+    },
+    {
+      "term": "ring",
+      "definition": "the graph in which the $n$ nodes form one cycle, each node joined by an edge to its two neighbours",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step: the adversary fixes the edges present, then every agent crosses at most one of them or waits",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that chooses, in every round, which edges are missing, within the connectivity constraint",
+      "avoid": []
+    },
+    {
+      "term": "missing edge",
+      "definition": "an edge that the adversary has removed for the current round; it cannot be crossed in that round",
+      "avoid": []
+    },
+    {
+      "term": "1-interval connectivity",
+      "definition": "the constraint that every $G_t$ is connected; on a ring, at most one edge is missing per round",
+      "avoid": []
+    },
+    {
+      "term": "temporal connectivity",
+      "definition": "the constraint that for all nodes $u, v$ and every time $t$ there is a journey (a path whose edges are present at non-decreasing times $\\ge t$) from $u$ to $v$; no single $G_t$ need be connected",
+      "avoid": []
+    },
+    {
+      "term": "blocked",
+      "definition": "an agent is blocked in a round when the edge it tries to cross is missing, so it waits",
+      "avoid": []
+    }
+  ],
   "history": "In dynamic graphs the community first asked **how many agents** make exploration possible at all, under each connectivity assumption [DiLuna2020Dynamic] [Gotoh2021Dynamic] [Saxena2026Highly]; time came second.",
   "measures": [
     {

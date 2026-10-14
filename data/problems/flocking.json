@@ -8,15 +8,15 @@
     "note": "Coordination without communication: the flocking problem."
   },
   "summary": "Robots must move together as a group, following a leader while roughly keeping a formation.",
-  "statement": "Robots follow a designated leader whose path is not known in advance, while keeping (approximately) a given formation and avoiding collisions.",
+  "statement": "Robots, the **followers**, follow a designated robot, the **leader**, whose path is not known in advance, while keeping (approximately) a given **formation** (a shape the robots must hold, placed relative to the leader) and avoiding **collisions** (two robots at the same position).",
   "primer": {
-    "intro": "Think of a flock of birds following a leader whose route nobody knows in advance, keeping roughly the same shape and never bumping into each other. In the flocking problem, robots in the plane must follow a designated leader robot along an unpredictable path while keeping approximately a given formation (for example, a V shape) and avoiding collisions. The robots are oblivious (they forget everything after each move) and silent: they coordinate only by looking at each other's positions. The catalogue records only the first formal treatment [Gervasi2004Flocking] and has not checked its exact assumptions, so this page describes the problem and the simplest reasoning about it.",
+    "intro": "Think of a flock of birds following a leader whose route nobody knows in advance, keeping roughly the same shape and never bumping into each other. In the flocking problem the birds are **robots** in the plane: the **followers** must follow a designated **leader** robot along an unpredictable path while keeping approximately a given **formation**, a shape placed relative to the leader (for example, a V shape), and avoiding **collisions** (two robots at the same position). The robots are **oblivious** (they forget everything after each move) and silent: they coordinate only by looking at each other's positions. The catalogue records only the first formal treatment [Gervasi2004Flocking] and has not checked its exact assumptions, so this page describes the problem and the simplest reasoning about it.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Keep your slot relative to the leader",
         "variant": "basic",
-        "idea": "A standard approach, assuming the followers can recognise the leader and know the target formation:\n1. Look at all robots and find the leader.\n2. Place the target formation with the leader at its tip, oriented, say, along the leader's last observed direction of motion.\n3. Choose the free slot of the formation that is closest to you (with a fixed tie-break rule).\n4. Move towards that slot, but never closer to another robot than a safety distance.",
+        "idea": "A standard approach, assuming the followers can recognise the leader and know the target formation:\n1. Look at all robots and find the leader.\n2. Place the target formation with the leader at its tip, oriented, say, along the leader's last observed direction of motion.\n3. Choose the free **slot** of the formation (a position in it reserved for one follower) that is closest to you (with a fixed tie-break rule).\n4. Move towards that slot, but never closer to another robot than a safety distance.",
         "analysis": "Each follower chases a target that moves with the leader, so if followers are fast enough they stay within a bounded distance of their slots. The details that make this hard are exactly those the model hides: an oblivious follower cannot remember the leader's past direction, and slot assignment must not change from look to look. We do not attribute this sketch to [Gervasi2004Flocking], whose method we have not read.",
         "why_it_matters": "Reducing a moving formation to \"chase your slot\" is the basic design idea of leader-follower formation control."
       },
@@ -24,12 +24,51 @@
         "kind": "lower-bound",
         "title": "Followers must be faster than the leader",
         "variant": "basic",
-        "idea": "Suppose followers can move no faster than the leader. Let the leader run at full speed in a straight line. A follower that is a distance $\\delta > 0$ behind its slot moves at most as fast as the slot moves, so the gap never shrinks.",
+        "idea": "Suppose followers can move no faster than the leader. Let the leader run at full speed in a straight line. A follower that is a distance $\\eta > 0$ behind its slot moves at most as fast as the slot moves, so the gap never shrinks.",
         "analysis": "So exact formation keeping is impossible in general with equal top speeds; a follower can only stay within the error it started with. This simple observation, our own and not taken from a paper, is why flocking asks for approximate formations or gives followers extra speed.",
         "why_it_matters": "It explains why \"approximately\" in the problem statement is not a detail but a necessity."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "leader",
+      "definition": "the designated robot whose path, not known in advance, the other robots must follow",
+      "avoid": []
+    },
+    {
+      "term": "follower",
+      "definition": "every robot other than the leader",
+      "avoid": []
+    },
+    {
+      "term": "formation",
+      "definition": "the shape, placed relative to the leader, that the robots must keep approximately",
+      "avoid": []
+    },
+    {
+      "term": "slot",
+      "definition": "a position of the formation reserved for one follower",
+      "avoid": []
+    },
+    {
+      "term": "collision",
+      "definition": "two robots at the same position at the same time",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    }
+  ],
   "history": "Flocking was posed as a **coordination problem without communication** for oblivious robots [Gervasi2004Flocking]; the questions were feasibility and, later, fault tolerance and self-stabilisation.",
   "measures": [
     {

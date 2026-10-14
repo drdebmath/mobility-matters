@@ -10,38 +10,99 @@
   "derived_from": {
     "problem": "pattern-formation",
     "kind": "special case of",
-    "relation": "A partition into groups of size $k$ at points is a pattern of $n/k$ points, each of multiplicity $k$."
+    "relation": "A partition into $k$ groups at points is a pattern of $k$ points, each of multiplicity $n/k$."
   },
   "related": [
     {
       "problem": "k-grouping",
-      "relation": "Partitioning fixes the size of each group; $k$-grouping fixes the number of groups. They coincide for equal-sized groups [Efrima2009Partition]."
+      "relation": "Partitioning fixes the points, and so the number $k$ of groups and their size $n/k$; $k$-grouping fixes only the number of groups. They coincide for equal-sized groups [Efrima2009Partition]."
     }
   ],
-  "summary": "Robots must partition themselves into distinct groups of exactly $k$ robots each, each group at its own point.",
-  "statement": "$n$ robots, with $k$ dividing $n$, must partition themselves into $n/k$ groups of exactly $k$ robots, each group gathered at its own point, and stay there. The group size $k$ is given; the number of groups follows from it.",
+  "summary": "Robots must partition themselves into $k$ groups of exactly $n/k$ robots each, each group at its own point.",
+  "statement": "$n$ robots, with $k$ dividing $n$, must partition themselves into $k$ groups of exactly $n/k$ robots, each group gathered at its own point, and stay there. The $k$ points, and so the group size $n/k$, are given (the papers' $k$-EPF and $k$-circle formation name the group size $k$, which is $n/k$ here).",
   "primer": {
-    "intro": "Picture robot cars that must park in groups of exactly $k$ at a few marked charging stations. There are $n$ robots, points in the plane, and $n/k$ **fixed points** that every robot can see; $k$ divides $n$. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles); in the basic version they agree on the direction of one axis (say north), all robots see everything, and the scheduler is ASYNC (each phase may take any finite time). The robots must end with exactly $k$ robots on each fixed point, and stay there. The question is for which starting configurations and values of $k$ this is possible.",
+    "intro": "Imagine cars that must park in equal groups at a few marked charging stations. In the problem the cars are $n$ **robots**, points in the plane, and the stations are $k$ **fixed points** that every robot can see; $k$ divides $n$. Each robot reads positions in its own **local coordinate system** (its private axes, unit of length and handedness) and repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots and the fixed points are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles); in the basic version their local coordinate systems agree on the direction of one axis (say north), all robots see everything, and the **scheduler**, which decides when each robot acts and how long each phase takes, is ASYNC (each phase may take any finite time). The robots must end with exactly $n/k$ robots, a **group**, on each fixed point, and stay there. The question is for which starting **configurations** (positions of all robots) and numbers $k$ of fixed points this is possible.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "The easy extreme: one station for everybody",
+        "title": "The easy extreme: one fixed point for everybody",
         "variant": "k-epf",
-        "idea": "A standard approach for the simplest case, $k = n$, where there is only one fixed point:\n\n1. Look for the fixed point.\n2. Move straight towards it.\n3. Once on it, stay.",
-        "analysis": "No coordination is needed, because the fixed point is a landmark all robots recognise: every move either reaches the point or covers at least a minimum distance, so each robot arrives after finitely many cycles. With more than one fixed point the robots must agree who goes where, and robots that look alike may be unable to choose differently; Bhagat, Das, Chakraborty and Mukhopadhyaya characterise the configurations and values of $k$ for which the problem is solvable with one common axis [Bhagat2021kCircle], the catalogue's introductory and current best result (not described in detail here). The opposite extreme, $k = 1$, asks for one robot per fixed point.",
+        "idea": "A standard approach for the simplest case, $k = 1$, where there is only one fixed point:\n\n1. Look for the fixed point.\n2. Move straight towards it.\n3. Once on it, stay.",
+        "analysis": "No coordination is needed, because the fixed point is a landmark all robots recognise: every move either reaches the point or covers at least a minimum distance, so each robot arrives after finitely many cycles. With more than one fixed point the robots must agree who goes where, and robots that look alike may be unable to choose differently; Bhagat, Das, Chakraborty and Mukhopadhyaya characterise the configurations and numbers $k$ of fixed points for which the problem is solvable with one common axis [Bhagat2021kCircle], the catalogue's introductory and current best result (not described in detail here). The opposite extreme, $k = n$, asks for one robot per fixed point.",
         "why_it_matters": "It shows the role of fixed points: they are landmarks that break much of the symmetry robots cannot break themselves."
       },
       {
         "kind": "impossibility",
         "title": "Mirror twins arrive in pairs",
         "variant": "k-epf",
-        "idea": "A standard symmetry argument, for robots that cannot tell left from right. Let $n = 6$ and $k = 3$, and put both fixed points on a vertical line $L$. Place three robots left of $L$ and their three mirror images to the right, none on $L$. Give each pair of mirror twins mirror-image coordinate systems and always wake them together. Twins see mirror-image snapshots, so they make mirror-image moves and stay mirror images forever. A robot can reach a point of $L$ only together with its twin, so every point of $L$ always holds an even number of robots. It can never hold exactly 3.",
-        "analysis": "The same parity argument rules out every odd $k$ whenever all fixed points lie on a line of symmetry of the start that holds no robot. This is why the catalogue's setting assumes a common axis, and why the answer depends on the start; the exact characterisation is in [Bhagat2021kCircle].",
+        "idea": "A standard symmetry argument, for robots that cannot tell left from right. Let $n = 6$ and $k = 2$ (groups of $3$), and put both fixed points on a vertical line $L$. Place three robots left of $L$ and their three mirror images to the right, none on $L$; a robot and its mirror image are **mirror twins**. The **adversary**, an imagined opponent that chooses the local coordinate systems and when robots act, gives each pair of mirror twins mirror-image local coordinate systems and always activates them together. Twins see mirror-image snapshots, so they make mirror-image moves and stay mirror images forever. A robot can reach a point of $L$ only together with its twin, so every point of $L$ always holds an even number of robots. It can never hold exactly 3.",
+        "analysis": "The same parity argument rules out every odd group size $n/k$ whenever all fixed points lie on a line of symmetry of the start that holds no robot. This is why the catalogue's setting assumes a common axis, and why the answer depends on the start; the exact characterisation is in [Bhagat2021kCircle].",
         "why_it_matters": "It is a compact example of how symmetry and counting combine to make a placement task impossible."
       }
     ]
   },
-  "history": "Partitioning into groups of a **given size** was first studied with the group locations fixed in advance ($k$-EPF), together with $k$-circle formation; the question was **for which configurations and values of $k$ it is solvable** when robots share only one axis [Bhagat2021kCircle].",
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "fixed point",
+      "definition": "one of the $k$ points of the plane, given in advance and visible to every robot, that must each receive one group",
+      "avoid": []
+    },
+    {
+      "term": "group",
+      "definition": "a set of exactly $n/k$ robots gathered at one fixed point",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": []
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "the repeated behaviour of a robot: Look (take a snapshot), Compute (a destination point from the snapshot), Move (towards that destination)",
+      "avoid": [
+        "Look-Compute-Move"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the positions of the robots that the robot sees, expressed in its local coordinate system",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that makes every choice the algorithm does not control: activations, the duration of phases, where non-rigid moves stop, and the local coordinate systems",
+      "avoid": []
+    },
+    {
+      "term": "mirror twin",
+      "definition": "in the impossibility argument, the robot placed at the mirror image of a given robot across the line $L$, given the mirror-image local coordinate system and activated together with it",
+      "avoid": []
+    }
+  ],
+  "history": "Partitioning into groups of a **given size** ($n/k$ here; the papers write $k$) was first studied with the group locations fixed in advance ($k$-EPF), together with $k$-circle formation; the question was **for which configurations and group sizes it is solvable** when robots share only one axis [Bhagat2021kCircle].",
   "measures": [
     {
       "id": "time",
@@ -71,7 +132,7 @@
   "variants": [
     {
       "id": "k-epf",
-      "title": "Exactly $k$ robots at each fixed point",
+      "title": "Exactly $n/k$ robots at each fixed point",
       "standard": true,
       "assumptions": {
         "visibility": "unlimited",
@@ -80,7 +141,7 @@
         "frames": "one-axis",
         "body": "point"
       },
-      "summary": "With one common axis, the configurations and values of $k$ for which exactly $k$ robots can gather at each of given fixed points are characterised.",
+      "summary": "With one common axis, the configurations and numbers $k$ of fixed points for which exactly $n/k$ robots can gather at each of given fixed points are characterised.",
       "lower_bounds": [],
       "results": [
         {
@@ -88,7 +149,7 @@
           "role": "best",
           "time": "\\text{finite}",
           "colours": "0",
-          "note": "Introductory and current best. Also $k$-circle formation: disjoint circles of $k$ robots each, centred at the fixed points."
+          "note": "Introductory and current best. Also $k$-circle formation: disjoint circles of $n/k$ robots each, centred at the fixed points."
         }
       ],
       "optimality": {
@@ -102,21 +163,21 @@
         }
       },
       "open": [
-        "Partitioning into groups of size $k$ at points chosen by the robots (no fixed points given)."
+        "Partitioning into $k$ groups of size $n/k$ at points chosen by the robots (no fixed points given)."
       ],
-      "notes": "The $k$-EPF problem generalises embedded pattern formation: the fixed points are visible to all robots and each must end with exactly $k$ robots [Bhagat2021kCircle].",
+      "notes": "The $k$-EPF problem generalises embedded pattern formation: the fixed points are visible to all robots and each must end with exactly $n/k$ robots (their $k$ is $n/k$ here) [Bhagat2021kCircle].",
       "status": "verified"
     }
   ],
   "figure": {
-    "caption": "Partitioning ($k$-EPF): $n$ robots, $k$ dividing $n$, must gather in groups of exactly $k$ robots at the $n/k$ given fixed points, each point receiving one group [Bhagat2021kCircle]. Shown: the simplest case $k = n$, one fixed point (dashed square), in SSYNC rounds; ringed robots are activated and move straight towards the point, a move possibly stopping early, until all are on it.",
+    "caption": "Partitioning ($k$-EPF): $n$ robots, $k$ dividing $n$, must gather in groups of exactly $n/k$ robots at the $k$ given fixed points, each point receiving one group [Bhagat2021kCircle]. Shown: the simplest case $k = 1$, one fixed point (dashed square), in SSYNC rounds; ringed robots are activated and move straight towards the point, a move possibly stopping early, until all are on it.",
     "view": [
       100,
       56
     ],
     "frames": [
       {
-        "label": "Start: $n=5$, $k=n$: one fixed point",
+        "label": "Start: $n=5$, $k=1$: one fixed point",
         "ents": [
           {
             "id": "0",
@@ -639,7 +700,7 @@
         ]
       },
       {
-        "label": "Final: all $k=5$ robots on the fixed point",
+        "label": "Final: all $n=5$ robots on the fixed point",
         "ents": [
           {
             "id": "0",

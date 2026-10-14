@@ -13,18 +13,18 @@
       "relation": "Both are security problems for agents in a hostile network: in black hole search the network destroys agents, in decontamination agents must clear a network that an arbitrarily fast intruder (or contamination) can re-enter."
     }
   ],
-  "summary": "A team of agents must clear a contaminated network, or equivalently capture an invisible, arbitrarily fast intruder, using as few agents as possible.",
-  "statement": "All nodes are initially contaminated. A node is cleaned when an agent visits it and is recontaminated when it has a contaminated neighbour and no agent guards it. Agents move along edges from a home base; the cleared part must stay connected. **Agents** is the number needed (the primary measure); **moves** and time are secondary.",
+  "summary": "A team of agents must clean a contaminated network, or equivalently capture an invisible, arbitrarily fast intruder, using as few agents as possible.",
+  "statement": "All nodes are initially **contaminated**. A node is **cleaned** when an agent visits it and is **recontaminated** when it has a contaminated neighbour and no agent **guards** it (stands on it). Agents move along edges from a **home base** $s$, the node where they all start; the clean part must stay connected. **Agents** is the number needed (the primary measure); **moves** (edge traversals) and time are secondary.",
   "primer": {
-    "intro": "Imagine a network of pipes filled with a contaminating gas: cleaners must clean every junction, but gas flows back into any clean junction that is left unguarded next to a dirty one. Here the network is a graph (dots joined by lines). At the start every node is **contaminated**. An agent cleans a node by standing on it; a clean node with no agent on it becomes contaminated again as soon as one of its neighbours is contaminated (*recontamination*). All agents start at one node $s$, the *home base*, move along lines, and the clean part must always be connected. In the basic version the graph is a tree (a graph without cycles) whose map the agents know. The task: clean every node; we count the agents needed first, and moves and time second.",
+    "intro": "Imagine a network of pipes filled with a contaminating gas: cleaners must clean every junction, but gas flows back into any clean junction that is left unguarded next to one still full of gas. We model the network as a graph: junctions are **nodes**, pipes are **edges**, and each cleaner is an **agent**. At the start every node is **contaminated**. An agent makes a node **clean** by standing on it; a clean node with no agent on it becomes contaminated again as soon as one of its neighbours is contaminated (**recontamination**). An agent that stays on a clean node to prevent this is a **guard**. All agents start at one node $s$, the **home base**, and **move** along edges (one move is one traversal of one edge), and the clean part must always be connected. In the basic version the graph is a **tree** (a graph without cycles) whose map the agents know. The task: clean every node; we count the agents needed first, and moves and time second.",
     "ideas": [
       {
         "kind": "algorithm",
-        "title": "Guard the junction, clean the branches one by one",
+        "title": "Guard the node, clean its branches one by one",
         "variant": "trees",
-        "idea": "A standard approach on a tree, rooted at the home base $s$. Write $a(v)$ for the number of agents this method uses on the branch below node $v$.\n\n1. A node with no children (a *leaf*) needs one agent: $a(v) = 1$.\n2. At a node $v$, sort its child branches so that the first one needs the most agents.\n3. Keep one agent on $v$ as a guard. Clean the other branches one after another, each with its own team; when a branch is clean, its team comes back to $v$ to clean the next one.\n4. Finally the guard is no longer needed at $v$ (all its other neighbours are clean), so it joins the team for the first, largest branch.\n5. This gives $a(v) = \\max\\big(a(c_1),\\ a(c_2) + 1\\big)$, where $c_1$ and $c_2$ are the children with the largest and second-largest needs.",
+        "idea": "A standard approach on a tree, rooted at the home base $s$. Write $a(v)$ for the number of agents this method uses to clean the **branch** of node $v$: $v$ together with all nodes below it.\n\n1. A node with no children (a **leaf**) needs one agent: $a(v) = 1$.\n2. At a node $v$, sort the branches of its children so that the first one needs the most agents.\n3. Keep one agent on $v$ as a guard. Clean the other branches one after another, each with its own team; when a branch is clean, its team comes back to $v$ to clean the next one.\n4. Finally the guard is no longer needed at $v$ (all its other neighbours are clean), so it joins the team for the first, largest branch.\n5. This gives $a(v) = \\max\\big(a(c_1),\\ a(c_2) + 1\\big)$, where $c_1$ and $c_2$ are the children with the largest and second-largest needs.",
         "analysis": "No clean node is ever left unguarded next to a contaminated one, so nothing gets recontaminated, and the clean part always contains $s$ and stays connected. A path needs one agent; a star centred at $s$ needs two; a complete binary tree of height $h$ needs $h + 1$ with this rule, so about $\\log n$ agents for $n$ nodes. [Barriere2002Capture] compute the smallest possible team for any tree, and a strategy for it, in linear time; this primer does not claim that the simple rule above always matches it.",
-        "why_it_matters": "The idea of a guard that waits at a junction until its last branch is clean underlies decontamination strategies on trees and on many structured networks."
+        "why_it_matters": "The idea of a guard that waits at a node until its last branch is clean underlies decontamination strategies on trees and on many structured networks."
       },
       {
         "kind": "lower-bound",
@@ -32,19 +32,113 @@
         "variant": "unknown-monotone",
         "idea": "A standard argument. Let the graph be a ring and let one agent start at $s$. As soon as the agent steps to a neighbour, $s$ is unguarded, and its other neighbour is still contaminated, so $s$ becomes contaminated again. The agent can never have more than its current node clean.",
         "analysis": "So any graph containing a cycle needs at least two agents: one guards while the other advances. More generally, the team must be large enough to guard every clean node that touches a contaminated node at every moment, which is why the answer depends on the shape of the graph (for the hypercube, $\\Theta(n/\\sqrt{\\log n})$ agents for $n$ nodes [Flocchini2008Hypercubes]).",
-        "why_it_matters": "It shows the basic counting idea of the problem: count the boundary between clean and dirty parts that must be guarded."
+        "why_it_matters": "It shows the basic counting idea of the problem: count the boundary between clean and contaminated parts that must be guarded."
       },
       {
         "kind": "lower-bound",
         "title": "The adversary grows the tree as you clean it",
         "variant": "unknown-monotone",
         "ref": "Ilcinkas2009Monotonicity",
-        "idea": "Now the agents do not know the graph, and they must never let a clean part become contaminated again (the strategy is *monotone*). The adversary builds the graph while the agents clean it [Ilcinkas2009Monotonicity]. Whenever an agent crosses a line into the unknown, the adversary attaches at the far end a new node with two more unexplored lines. Every clean node that still has an unexplored line must be guarded, because the line may lead to contamination. When the graph has reached $n$ nodes, the adversary stops adding lines: the result is a tree in which each node has at most three lines.",
+        "idea": "Now the agents do not know the graph, and they must never let a clean part become contaminated again (the strategy is **monotone**). An **adversary** (an imagined opponent) builds the graph while the agents clean it [Ilcinkas2009Monotonicity]. Whenever an agent crosses an edge into the unknown, the adversary attaches at the far end a new node with two more unexplored edges. Every clean node that still has an unexplored edge must be guarded, because the edge may lead to contamination. When the graph has reached $n$ nodes, the adversary stops adding edges: the result is a tree in which each node has at most three edges.",
         "analysis": "At the end, every parent of a leaf in this tree has had to be guarded, and there are at least about $n/4$ such nodes, so the protocol used at least about $n/4$ agents. A team that knew the tree in advance could clean it with only $O(\\log n)$ agents. So not knowing the graph costs a factor $\\Omega(n/\\log n)$ in team size, and [Ilcinkas2009Monotonicity] give an algorithm that achieves this factor, even for asynchronous agents.",
         "why_it_matters": "It is a clean example of a *competitive* lower bound: comparing a distributed team without a map to the best team with a map."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of $V$; the graph has $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; agents move only along edges",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that moves along edges and cleans the node it stands on",
+      "avoid": [
+        "robot",
+        "robots",
+        "searcher",
+        "searchers"
+      ]
+    },
+    {
+      "term": "contaminated",
+      "definition": "the state of every node at the start, and of a node that has been recontaminated",
+      "avoid": [
+        "dirty"
+      ]
+    },
+    {
+      "term": "clean",
+      "definition": "a node is clean when it is not contaminated; it becomes clean when an agent visits it",
+      "avoid": [
+        "cleared",
+        "clear"
+      ]
+    },
+    {
+      "term": "guard",
+      "definition": "an agent standing on a clean node; a guarded node cannot be recontaminated",
+      "avoid": []
+    },
+    {
+      "term": "recontamination",
+      "definition": "a clean node with no agent on it becomes contaminated again as soon as one of its neighbours is contaminated",
+      "avoid": []
+    },
+    {
+      "term": "home base",
+      "definition": "the node $s$ at which all agents start",
+      "avoid": []
+    },
+    {
+      "term": "tree",
+      "definition": "a connected graph without cycles",
+      "avoid": []
+    },
+    {
+      "term": "leaf",
+      "definition": "a node of a tree with no children (a node of degree 1 other than the root)",
+      "avoid": []
+    },
+    {
+      "term": "branch",
+      "definition": "in a tree rooted at $s$, a node $v$ together with all nodes below it",
+      "avoid": [
+        "subtree"
+      ]
+    },
+    {
+      "term": "monotone",
+      "definition": "a strategy is monotone if no clean node ever becomes contaminated again",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by one agent",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that builds the graph while the agents clean it",
+      "avoid": []
+    }
+  ],
   "history": "From the start the objective was the **minimum number of agents** [Barriere2002Capture], first on special topologies [Flocchini2008Hypercubes] and then on unknown graphs, where the question becomes the competitive ratio against the optimal team [Ilcinkas2009Monotonicity].",
   "measures": [
     {
@@ -221,7 +315,7 @@
     }
   ],
   "figure": {
-    "caption": "Decontamination of a tree [Barriere2002Capture] with the guard-the-junction rule: every node is contaminated (red) and agents start at the home base $s$; a node is clean (green) once visited and would be recontaminated if left unguarded next to a red node. One agent guards $s$ while the other cleans the smaller branch and comes back; then the guard is free, both enter the other branch, and the same rule is applied at $a$. Nothing is ever recontaminated, the clean part stays connected, and two agents suffice.",
+    "caption": "Decontamination of a tree [Barriere2002Capture] with the rule \"guard the node, clean its branches one by one\": every node is contaminated (red) and agents start at the home base $s$; a node is clean (green) once visited and would be recontaminated if left unguarded next to a red node. One agent guards $s$ while the other cleans the smaller branch and comes back; then the guard is free, both enter the other branch, and the same rule is applied at $a$. Nothing is ever recontaminated, the clean part stays connected, and two agents suffice.",
     "view": [
       100,
       56

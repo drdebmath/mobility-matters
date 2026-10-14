@@ -13,17 +13,17 @@
     "relation": "Locating the black hole means exploring every other node safely, so black hole search is exploration of a dangerous graph by a team, where agents can be lost."
   },
   "summary": "A black hole destroys every agent that enters it, without trace; a team must locate it, losing as few agents as possible.",
-  "statement": "A connected graph contains one **black hole**: a node that destroys any agent arriving there, leaving no trace. All other nodes are safe. Agents start at a safe node (the home base) and must determine the location of the black hole; at least one agent must survive and know it. The primary measure is the **team size** (number of agents needed); the secondary measure is the **cost** (total moves) or, for synchronous agents, the time. Some papers also start the agents **scattered**, at distinct safe nodes; those results are recorded in the notes, because every catalogued variant starts at a home base.",
+  "statement": "A connected graph contains one **black hole**: a node that destroys any agent arriving there, leaving no trace. All other nodes are **safe**. Agents start at a safe node $s$ (the **home base**) and must determine the location of the black hole; at least one agent must survive and know it. The primary measure is the **team size** (number of agents needed); the secondary measure is the **cost** (total number of moves, a move being one traversal of one edge) or, for synchronous agents, the time. Some papers also start the agents **scattered**, at distinct safe nodes; those results are recorded in the notes, because every catalogued variant starts at a home base.",
   "primer": {
-    "intro": "Imagine a computer network in which one machine has been taken over: every software robot that arrives there is deleted without a trace, and nobody outside can tell. Find that machine by sending robots, while losing as few of them as possible. In the basic version the network is a graph (dots joined by lines) with $n$ nodes; it contains exactly one **black hole**, a node that destroys every agent that enters it. A team of identical agents starts at a safe node $s$, the *home base*; they have no map, but they know $n$. At each node the lines leaving it are numbered $1, 2, \\dots$ (these numbers are called **ports**), each node has a **whiteboard** (a small memory on which agents can read and write notes), and the agents are **asynchronous**: every move takes a finite but unpredictable time, chosen by an *adversary* (an imagined opponent who picks the worst timing). The task: at least one agent must survive and know exactly which node is the black hole. We count the agents needed and the total number of moves.",
+    "intro": "Imagine a computer network in which one computer has been taken over: every travelling program that arrives there is deleted without a trace, and nobody outside can tell. Find that computer by sending such programs, while losing as few of them as possible. We model the network as a graph: computers are **nodes**, cables between them are **edges**, and each travelling program is an **agent**. In the basic version the graph has $n$ nodes and contains exactly one **black hole**, a node that destroys every agent that enters it; every other node is **safe**. A team of identical agents starts at a safe node $s$, the **home base**; they have no map, but they know $n$. At each node the edges leaving it are numbered $1, 2, \\dots$ (these numbers are called **ports**), each node has a **whiteboard** (a small memory on which agents can read and write notes), and the agents are **asynchronous**: every **move** (one traversal of one edge) takes a finite but unpredictable time, chosen by an **adversary** (an imagined opponent who picks the worst timing). The task: at least one agent must survive and know exactly which node is the black hole. We count the agents needed and the total number of moves.",
     "ideas": [
       {
         "kind": "algorithm",
         "title": "Cautious walk and halving the unexplored ring",
         "variant": "async-ring",
         "ref": "Dobrev2007Ring",
-        "idea": "Two agents start together at $s$ on a ring of $n$ nodes; they know $n$.\n\n1. **Cautious walk** (used for every step into the unknown): an agent that crosses a line nobody has crossed before first writes *\\\"I am trying this line\\\"* on the whiteboard where it starts. If it arrives safely, it immediately goes back and changes the note to *\\\"this line is safe\\\"*, and only then continues. Nobody else ever enters a line marked *\\\"trying\\\"*.\n2. The unexplored nodes form one stretch of the ring. Cut it into two halves of almost equal length; one agent explores the left half, the other the right half, both by cautious walk.\n3. The black hole lies in at most one half, so one agent finishes its half. It walks through the explored part to the last safe line of the other agent.\n4. What is still unexplored is again one stretch, at most about half as long. The finishing agent cuts it in two again, writes the new plan on the whiteboard there for its partner (in case the partner is only slow and comes back), and takes the half on the far side, away from the line its partner is trying.\n5. When only one unexplored node remains, that node is the black hole.",
-        "analysis": "Under cautious walk an agent that does not come back has died on the very first node beyond its last safe line, so the black hole, if it has killed the partner, lies in the near half; the finishing agent always takes the far half and never enters a line marked *\\\"trying\\\"*, so exactly one agent dies and the other survives. Each round at least halves the unexplored stretch, so there are about $\\log n$ rounds, and each round costs $O(n)$ moves (walking around the explored part and exploring), giving $O(n\\log n)$ moves. [Dobrev2007Ring] show the exact cost $2n\\log n + O(n)$, and they prove that any algorithm, with any number of agents, needs at least $(n-1)\\log(n-1) + O(n)$ moves, so this simple plan is optimal up to a factor of two.",
+        "idea": "Two agents start together at $s$ on a ring of $n$ nodes (a cycle in which every node has two neighbours); they know $n$.\n\n1. **Cautious walk** (used for every step into the unknown): an agent that crosses an edge nobody has crossed before first writes *\\\"I am trying this edge\\\"* on the whiteboard where it starts. If it arrives safely, it immediately goes back and changes the note to *\\\"this edge is safe\\\"*, and only then continues. Nobody else ever enters an edge marked *\\\"trying\\\"*.\n2. The unexplored nodes form one stretch of the ring. A **phase** starts: cut it into two halves of almost equal length; one agent explores the left half, the other the right half, both by cautious walk.\n3. The black hole lies in at most one half, so one agent finishes its half. It walks through the explored part to the last safe edge of the other agent.\n4. What is still unexplored is again one stretch, at most about half as long. A new phase starts: the finishing agent cuts it in two again, writes the new plan on the whiteboard there for its partner (in case the partner is only slow and comes back), and takes the half on the far side, away from the edge its partner is trying.\n5. When only one unexplored node remains, that node is the black hole.",
+        "analysis": "Under cautious walk an agent that does not come back has died on the very first node beyond its last safe edge, so the black hole, if it has killed the partner, lies in the near half; the finishing agent always takes the far half and never enters an edge marked *\\\"trying\\\"*, so exactly one agent dies and the other survives. Each phase at least halves the unexplored stretch, so there are about $\\log n$ phases, and each phase costs $O(n)$ moves (walking around the explored part and exploring), giving $O(n\\log n)$ moves. [Dobrev2007Ring] show the exact cost $2n\\log n + O(n)$, and they prove that any algorithm, with any number of agents, needs at least $(n-1)\\log(n-1) + O(n)$ moves, so this simple plan is optimal up to a factor of two.",
         "why_it_matters": "Cautious walk is the basic safety tool of almost every later black hole search algorithm, in rings and in arbitrary graphs."
       },
       {
@@ -32,7 +32,7 @@
         "variant": "async-whiteboards",
         "ref": "Dobrev2006Searching",
         "idea": "Without a map, the agents do not know where a port leads. The adversary may therefore decide, as the algorithm runs, that the **first** port tried out of a node is the one that leads to the black hole. Take a graph in which the black hole is a neighbour of many nodes, for example the black hole $0$ joined to every other node, with the home base at node $1$. The first agent leaving node $1$ through a new port is sent into the black hole. Some other agent must then reach node $2$; the first agent that leaves node $2$ through a new port is again sent into the black hole, and so on, node after node. Each such node costs one agent, and the search is not finished while two or more nodes are still unexplored, because a node that nobody has returned from may be the black hole or may simply be slow to reach.",
-        "analysis": "In this example the algorithm loses an agent at almost every node adjacent to the black hole, and the black hole can have up to $\\Delta$ neighbours, where $\\Delta$ is the largest number of lines at any node (the *maximum degree*). With a cleverer graph (a ring of nodes all joined to a central black hole, which the adversary later replaces by a graph of maximum degree $\\Delta$ that looks the same to the agents) [Dobrev2006Searching] prove that $\\Delta + 1$ agents are needed; the full proof is longer. The same paper gives an algorithm with exactly $\\Delta + 1$ agents and $O(n^2)$ moves, and shows that $\\Omega(n^2)$ moves are necessary for a team of this size, so both bounds are tight.",
+        "analysis": "In this example the algorithm loses an agent at almost every node adjacent to the black hole, and the black hole can have up to $\\Delta$ neighbours, where $\\Delta$ is the largest number of edges at any node (the **maximum degree**). With a cleverer graph (a ring of nodes all joined to a central black hole, which the adversary later replaces by a graph of maximum degree $\\Delta$ that looks the same to the agents) [Dobrev2006Searching] prove that $\\Delta + 1$ agents are needed; the full proof is longer. The same paper gives an algorithm with exactly $\\Delta + 1$ agents and $O(n^2)$ moves, and shows that $\\Omega(n^2)$ moves are necessary for a team of this size, so both bounds are tight.",
         "why_it_matters": "It shows that what limits a team without a map is the number of ports that can lead to the black hole, which is why a map or a sense of direction lowers the team to two agents."
       },
       {
@@ -40,12 +40,97 @@
         "title": "Without knowing $n$, slow and dead look the same",
         "variant": "async-whiteboards",
         "ref": "Dobrev2006Searching",
-        "idea": "Because moves take unpredictable time, an agent that has not come back may be dead or just slow. Suppose the agents do not know $n$. Take a graph $G$ with the black hole at node $v$, and a second graph $G'$ in which $v$ is replaced by two nodes $v_1$ and $v_2$ joined to each other, sharing the lines that went to $v$. In $G'$ the adversary makes every line into $v_1$ or $v_2$ extremely slow. Up to the moment the algorithm stops, the agents see exactly the same things in $G$ and in $G'$, so they stop in $G'$ too, with both $v_1$ and $v_2$ unexplored: they cannot know which one is the black hole.",
+        "idea": "Because moves take unpredictable time, an agent that has not come back may be dead or just slow. Suppose the agents do not know $n$. Take a graph $G$ with the black hole at node $v$, and a second graph $G'$ in which $v$ is replaced by two nodes $v_1$ and $v_2$ joined to each other, sharing the edges that went to $v$. In $G'$ the adversary makes every edge into $v_1$ or $v_2$ extremely slow. Up to the moment the algorithm stops, the agents see exactly the same things in $G$ and in $G'$, so they stop in $G'$ too, with both $v_1$ and $v_2$ unexplored: they cannot know which one is the black hole.",
         "analysis": "The same reasoning shows that the agents can never stop while two nodes are unexplored, and that the problem is unsolvable when the graph has a node (other than $s$) whose removal disconnects it: if that node is the black hole, everything behind it stays unexplored [Dobrev2006Searching]. This is why the basic version assumes that $n$ is known and that the graph stays connected after removing any one node (it is *2-connected*).",
         "why_it_matters": "The indistinguishability of slow and dead agents is the reason asynchronous black hole search needs knowledge of $n$, and it reappears in every asynchronous lower bound for the problem."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of $V$; the graph has $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; agents move only along edges",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that moves along edges; the agents of a team are identical and run the same algorithm",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "black hole",
+      "definition": "the one node that destroys every agent arriving there, leaving no trace",
+      "avoid": []
+    },
+    {
+      "term": "safe node",
+      "definition": "a node other than the black hole",
+      "avoid": []
+    },
+    {
+      "term": "home base",
+      "definition": "the safe node $s$ at which all agents start",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it",
+      "avoid": []
+    },
+    {
+      "term": "whiteboard",
+      "definition": "a small memory at each node on which agents there can read and write",
+      "avoid": []
+    },
+    {
+      "term": "asynchronous",
+      "definition": "every move of an agent takes a finite but unpredictable time, chosen by the adversary",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that picks the timing of moves and, where the agents have no map, where unexplored ports lead",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by one agent; the cost of an algorithm is its total number of moves",
+      "avoid": []
+    },
+    {
+      "term": "cautious walk",
+      "definition": "the rule that an agent crossing an edge nobody has crossed before first marks it as being tried on the whiteboard, and after arriving safely returns to mark it safe before going on; no agent enters an edge marked as being tried",
+      "avoid": []
+    },
+    {
+      "term": "phase",
+      "definition": "in the ring algorithm, one split of the unexplored nodes into two halves and the exploration that follows",
+      "avoid": []
+    },
+    {
+      "term": "maximum degree",
+      "definition": "$\\Delta$, the largest number of edges at any node",
+      "avoid": []
+    }
+  ],
   "history": "From the start the objective was the **minimum number of agents** that guarantees success, since every agent that enters the black hole is lost; the number of moves came second [Dobrev2006Searching]. Later work replaced whiteboards by tokens [Dobrev2013Tokens] [Flocchini2012PingPong] [Balamohan2016Tokens], turned to synchronous agents where time can be optimised [Czyzowicz2006Complexity] [Klasing2007Hardness], to dynamic graphs [DiLuna2025DynamicBHS], and to Byzantine companions [DiLuna2025Byzantine].",
   "measures": [
     {
@@ -228,7 +313,7 @@
           "bottleneck": "asynchrony",
           "preconditions": [
             "Theorem 1: $(n-1)\\log(n-1)+O(n)$ moves, whatever the number of agents",
-            "an adversarial scheduler delays links",
+            "an adversarial scheduler delays moves along edges",
             "holds also for dispersed agents in oriented rings (Theorem 8)"
           ]
         },
@@ -370,7 +455,7 @@
         "knowledge": "map",
         "faults": "none"
       },
-      "summary": "Whiteboards can be replaced by one pebble per agent: two agents, $\\Theta(n\\log n)$ moves, even on non-FIFO links.",
+      "summary": "Whiteboards can be replaced by one pebble per agent: two agents, $\\Theta(n\\log n)$ moves, even on non-FIFO edges.",
       "lower_bounds": [
         {
           "measure": "agents",

@@ -48,7 +48,7 @@ def katex_css_inlined():
 def body_markup():
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     body = re.search(r"<body>(.*)</body>", html, re.S).group(1)
-    body = re.sub(r'\s*<script src="assets/app\.js"></script>', "", body)
+    body = re.sub(r'\s*<script src="assets/app\.js(?:\?v=[0-9a-f]+)?"></script>', "", body)
     return body.strip()
 
 

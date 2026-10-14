@@ -19,9 +19,9 @@
     }
   ],
   "summary": "Robots must form $k$ distinct groups, each group at its own point.",
-  "statement": "$n$ robots must form exactly $k$ distinct groups, each group gathered at its own point or converging towards one, and stay apart. The number of groups $k$ is given; the group sizes are free unless the variant fixes them. With $k = 1$ this is gathering (or convergence).",
+  "statement": "$n$ robots must form exactly $k$ distinct **groups**, each group gathered at its own point or converging towards one, and stay apart. The number of groups $k$ is given; the group sizes are free unless the variant fixes them. With $k = 1$ this is gathering (or convergence).",
   "primer": {
-    "intro": "Imagine a swarm that must split into $k$ teams of equal size, each team clustering in its own place, far from the others. There are $n$ robots, points at distinct places in the plane, and $k$ divides $n$. Each robot repeats a **Look-Compute-Move cycle**: it takes a snapshot of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). They are identical, silent and **oblivious** (no memory between cycles). In the basic version robots share a **compass** (all agree on north and east, though not on origin or unit of length), the scheduler is ASYNC (each phase may take any finite time), and some robots may **crash** (stop forever). The robots must split into $k$ groups of $n/k$ robots each, every group converging towards its own point, with the groups staying a fixed distance apart; with $k = 1$ this is just convergence.",
+    "intro": "Imagine a swarm that must split into $k$ teams of equal size, each team clustering in its own place, far from the others. In the problem the members of the swarm are $n$ **robots**, points at distinct places in the plane, and the teams are **groups**; $k$ divides $n$. The positions of all robots form the **configuration**. Each robot reads positions in its own **local coordinate system** (its private axes, unit of length and handedness) and repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). Robots are identical, silent and **oblivious** (no memory between cycles). In the basic version robots share a **compass** (all local coordinate systems agree on north and east, though not on origin or unit of length); the **scheduler**, which decides the **activation** of robots (when each starts a cycle) and how long each phase takes, is ASYNC (each phase may take any finite time); and some robots may **crash** (stop forever). The robots must split into $k$ groups of $n/k$ robots each, every group converging towards its own point, with the groups staying a fixed distance apart; with $k = 1$ this is just convergence.",
     "ideas": [
       {
         "kind": "algorithm",
@@ -29,7 +29,7 @@
         "variant": "equal-groups",
         "ref": "Efrima2009Partition",
         "idea": "1. Sort the robots from west to east, and robots on one north-south line from south to north. All robots get the same order, because they share north and east.\n2. Cut the order into $k$ consecutive blocks of $n/k$ robots: the first $n/k$ robots, the next $n/k$, and so on. Each robot finds its own block.\n3. Move towards the **centre of gravity** of your block, the average of the positions of its robots.",
-        "analysis": "The region spanned by a block's robots and their destinations never grows when they move to their centre of gravity (Lemma 2.5 of [Efrima2009Partition], from Cohen and Peleg). The blocks start in disjoint regions ordered from west to east, so two robots of different blocks can never swap order, and the blocks computed in step 1 stay the same forever, even though robots forget them. Each block therefore converges on its own, and a crashed robot simply stays inside its block's region, so any number of crashes is tolerated (Proposition 2.7 of [Efrima2009Partition]). This is the catalogue's introductory and current best result.",
+        "analysis": "The region spanned by a block's robots and their destinations never grows when they move to their centre of gravity (Lemma 2.5 of [Efrima2009Partition], from Cohen and Peleg). The blocks start in disjoint regions ordered from west to east, so two robots of different blocks can never swap order, and the blocks cut in step 2 stay the same forever, even though robots forget them. Each block therefore converges on its own, and a crashed robot simply stays inside its block's region, so any number of crashes is tolerated (Proposition 2.7 of [Efrima2009Partition]). This is the catalogue's introductory and current best result.",
         "why_it_matters": "It shows a clean way to make oblivious robots keep an agreement forever: choose it so that the motion itself preserves it."
       },
       {
@@ -37,7 +37,7 @@
         "title": "No compass: the regular polygon cannot be split",
         "variant": "no-compass",
         "ref": "Efrima2009Partition",
-        "idea": "Start the $n$ robots on the corners of a regular $n$-gon, with coordinate systems that are copies of each other turned around the centre. Every robot sees the same snapshot, so in every round of the fully synchronous scheduler all robots make the same move up to rotation, and the configuration stays a regular polygon (or a single point). But $k \\ge 2$ groups of several robots each, far apart, never look like a regular polygon or a point. So the groups never form.",
+        "idea": "Start the $n$ robots on the corners of a regular $n$-gon, with local coordinate systems that are copies of each other turned around the centre. Every robot sees the same snapshot, so in every **round** of the fully synchronous scheduler FSYNC (a step of time in which every robot performs one full cycle) all robots make the same move up to rotation, and the configuration stays a regular polygon (or a single point). But $k \\ge 2$ groups of several robots each, far apart, never look like a regular polygon or a point. So the groups never form.",
         "analysis": "This is Proposition 3.3 of [Efrima2009Partition]: deterministic robots without a compass cannot partition themselves into $k > 1$ groups, already in FSYNC and therefore in SSYNC and ASYNC. Agreeing only on the axis lines but not their directions is still not enough for some $n$ and $k$ (a symmetric square with $n = 4$, $k = 2$; Proposition 3.4).",
         "why_it_matters": "It shows that partitioning, unlike gathering, needs a way to break symmetry."
       },
@@ -46,12 +46,88 @@
         "title": "A coin flip breaks the tie",
         "variant": "randomized-ssync",
         "ref": "Efrima2009Partition",
-        "idea": "Without a compass, the trouble is groups of robots that look exactly alike. Randomness helps: a robot in such a tied group chooses its direction of motion at random. Two robots that would otherwise mirror each other forever now choose differently with probability at least $1/2$ in each attempt, so the tie is broken after a few attempts on average, and the robots then proceed with the deterministic method.",
+        "idea": "Without a compass, the trouble is sets of robots that look exactly alike. Randomness helps: a robot in such a tied set chooses its direction of motion at random. Two robots that would otherwise mirror each other forever now choose differently with probability at least $1/2$ in each attempt, so the tie is broken after a few attempts on average, and the robots then proceed with the deterministic method.",
         "analysis": "Efrima and Peleg give a randomized algorithm, of the kind that always ends correctly and is only random in its running time, that partitions robots without any common orientation in FSYNC and SSYNC and tolerates crashes [Efrima2009Partition]. The description above is simplified: in the paper the random choice is used only to separate robots that lie on the same line.",
         "why_it_matters": "It is the standard illustration that randomness breaks the symmetry that defeats deterministic robots."
       }
     ]
   },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point of the plane that repeatedly observes the other robots and moves; all robots are identical and run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at one time (a multiset of points when several robots may share one)",
+      "avoid": []
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "each robot's own origin (its position), axes, unit of length and handedness, in which it reads its snapshot and computes its destination",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "the repeated behaviour of a robot: Look (take a snapshot), Compute (a destination point from the snapshot), Move (towards that destination)",
+      "avoid": [
+        "Look-Compute-Move"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the positions of the robots that the robot sees, expressed in its local coordinate system",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory between cycles: each Compute depends only on the current snapshot",
+      "avoid": []
+    },
+    {
+      "term": "compass",
+      "definition": "all local coordinate systems agree on the directions and orientations of both axes (north and east), though not necessarily on origin or unit of length",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the rule, controlled by the adversary, that decides the activation of robots and the duration of their phases: FSYNC, SSYNC or ASYNC as defined in the model",
+      "avoid": []
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice that a robot starts a Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "in FSYNC and SSYNC, one step of time in which every activated robot performs one full Look–Compute–Move cycle",
+      "avoid": []
+    },
+    {
+      "term": "crash",
+      "definition": "a crashed robot stops forever, at a time the adversary chooses, and stays visible at its last position",
+      "avoid": []
+    },
+    {
+      "term": "group",
+      "definition": "a set of robots gathered at, or converging towards, one point that is distinct from and kept apart from the points of the other groups",
+      "avoid": []
+    },
+    {
+      "term": "block",
+      "definition": "one of the $k$ sets of $n/k$ consecutive robots in the common west-to-east (then south-to-north) order",
+      "avoid": []
+    },
+    {
+      "term": "centre of gravity",
+      "definition": "the average of the positions of a set of robots",
+      "avoid": []
+    }
+  ],
   "history": "Splitting a swarm into a given number of groups was asked as **solvability under each timing model and amount of orientation** [Efrima2009Partition], who called it partitioning and required equal group sizes. Team assembling of heterogeneous robots, where the composition of each team is prescribed, is a related task [Liu2018Team].",
   "measures": [
     {
@@ -116,7 +192,7 @@
         }
       },
       "open": [],
-      "notes": "Efrima and Peleg call this partitioning; the catalogue's partitioning fixes the group size instead, and the two coincide for equal groups. Convergence is Partition$(n,1)$. Checked against the full text.",
+      "notes": "Efrima and Peleg call this partitioning; the catalogue's partitioning also fixes, in advance, the $k$ points at which the groups of $n/k$ robots gather. Convergence is Partition$(n,1)$. Checked against the full text.",
       "status": "verified",
       "statement": "Partition$(n,k)$ of Efrima and Peleg: $k$ is given to the robots, every group has exactly $n/k$ robots ($\\lfloor n/k\\rfloor$ or $\\lfloor n/k\\rfloor + 1$ when $k$ does not divide $n$), robots in one group **converge** (for every $\\varepsilon$ they are eventually within $\\varepsilon$ of each other) and groups stay more than $2\\eta$ apart, for some fixed $\\eta > 0$. Robots start at distinct points and can count the robots at a point."
     },
