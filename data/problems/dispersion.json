@@ -142,6 +142,44 @@
     }
   ],
   "history": "Augustine and Moses Jr. posed dispersion as **a study of memory–time trade-offs** [Augustine2018Tradeoffs]: the primary aim was to **minimise the number of rounds**, and then the **memory per agent**, with $\\Omega(k)$ rounds and $\\Omega(\\log k)$ bits as the targets. Most of the later work closes these two gaps under weaker assumptions (arbitrary start, asynchrony, faults, dynamic graphs); the time-optimal $O(k)$ algorithm with $O(\\log(k+\\Delta))$ bits came in 2025 [Kshemkalyani2025Almost]. Its roots are in $n$-agent collaborative exploration, which a dispersion with $k = n$ solves.",
+  "axes": [
+    {
+      "id": "orientation",
+      "name": "Grid orientation",
+      "values": [
+        {
+          "id": "unoriented",
+          "level": 0,
+          "label": "unoriented (no consistent compass)",
+          "short": "unoriented",
+          "definition": "Port labels carry no global meaning: at every node $v$ the $\\delta_v$ incident edges get the labels $1,\\dots,\\delta_v$ in an arbitrary order, chosen independently at each node, so an agent that enters $v$ cannot tell from the labels which port continues in the same row or column. This is the default on every graph; on a grid it is called an *unoriented* grid."
+        },
+        {
+          "id": "oriented",
+          "level": 1,
+          "label": "oriented grid (consistent North, East, South, West ports)",
+          "short": "oriented",
+          "definition": "The graph is a grid with nodes $(x,y)$, and every node labels its ports North, East, South and West consistently: the port North of $(x,y)$ leads to $(x,y+1)$, East to $(x+1,y)$, South to $(x,y-1)$ and West to $(x-1,y)$, whenever that neighbour exists. The same direction carries the same label at every node, so an agent can keep moving along a row or column; a boundary node is recognised by its missing ports."
+        }
+      ],
+      "origin": "In the graph model of dispersion the port labels at a node are local and independent of those at its neighbours [Augustine2018Tradeoffs]. Kshemkalyani, Molla and Sharma posed dispersion on grids [Kshemkalyani2020Grids]; later papers describe their setting as an oriented (\"planar\") grid [Banerjee2024UnorientedGrids] [Banerjee2025OrientedGridsFT] [Kumar2026Grid], although the arXiv version of [Kshemkalyani2020Grids] says the agents have no consistent compass (see the grid settings). Banerjee, Kumar and Molla made the distinction explicit and studied both kinds of grid, with and without crash faults [Banerjee2024UnorientedGrids]. Orientation matters because a grid is symmetric and the known algorithms steer by its geometry: they walk straight to the boundary, follow it to a corner and sweep rows. In an unoriented grid, in their words, \"robots cannot distinguish whether they are moving in the same direction (i.e., along a row or column) or traversing in a cycle or zigzag manner across the unoriented grid\" [Banerjee2024UnorientedGrids]. With a consistent compass, sweeps can start where the agents are, which gives $O(\\sqrt k)$ rounds with local communication [Kumar2026Grid]."
+    }
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "count",
+    "ids",
+    "algorithm",
+    "topology",
+    "orientation",
+    "faults",
+    "communication",
+    "timing",
+    "node-memory",
+    "node-ids",
+    "initial"
+  ],
   "measures": [
     {
       "id": "time",
@@ -836,11 +874,12 @@
         "faults": "none",
         "communication": "local",
         "timing": "sync",
-        "topology": "grid"
+        "topology": "grid",
+        "orientation": "unoriented"
       },
-      "title": "Grids",
-      "summary": "A $\\sqrt n \\times \\sqrt n$ anonymous grid; the diameter gives an $\\Omega(\\sqrt k)$ bound and the question is whether local communication can reach it for small $k$.",
-      "statement": "The graph is a $\\sqrt n\\times\\sqrt n$ grid with $\\Delta = 4$. Whether an agent can tell the four directions apart consistently (an **oriented** grid) or only sees locally labelled ports (an **unoriented** grid) is stated on each result.",
+      "title": "Unoriented grids",
+      "summary": "A $\\sqrt n \\times \\sqrt n$ anonymous grid without a consistent compass; the diameter gives an $\\Omega(\\sqrt k)$ bound, and whether local communication reaches it for small $k$ is open here, while on oriented grids it does.",
+      "statement": "The graph is a $\\sqrt n\\times\\sqrt n$ grid with $\\Delta = 4$, and the ports at each node are labelled arbitrarily: an agent has no consistent compass (an **unoriented** grid). Grids with consistent North, East, South and West ports are the setting *Oriented grids*.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -850,7 +889,8 @@
           "bottleneck": "distance",
           "preconditions": [
             "$k$ agents on one node: a grid ball of radius $r$ holds $O(r^2)$ nodes",
-            "any algorithm"
+            "any algorithm",
+            "holds on oriented and unoriented grids: the argument does not use port labels"
           ]
         },
         {
@@ -875,7 +915,7 @@
           "assumes": [
             "knows $n$ and $k$ (arXiv version)"
           ],
-          "note": "Introductory and current best for square grids with local communication; optimal in both measures when $k = \\Omega(n)$. With global communication: $O(\\sqrt k)$ rounds and $O(\\log k)$ bits for every $k$, optimal."
+          "note": "Introductory and current best for square grids with local communication; optimal in both measures when $k = \\Omega(n)$. Placed on unoriented grids following the arXiv text, which says the agents have no consistent compass; later papers call the setting oriented (see notes). With global communication: $O(\\sqrt k)$ rounds and $O(\\log k)$ bits for every $k$, as reported by [Banerjee2024UnorientedGrids] and [Kumar2026Grid]; that result is not in the arXiv version."
         },
         {
           "ref": "Banerjee2024UnorientedGrids",
@@ -883,10 +923,9 @@
           "time": "O(\\sqrt n)",
           "memory": "O(\\log n)",
           "assumes": [
-            "unoriented grid",
             "knows $n$"
           ],
-          "note": "First result without a sense of direction; the authors note the algorithm can be adapted to unknown $n$. Crash-tolerant versions are under the crash-fault branch."
+          "note": "The first paper to state an unoriented grid explicitly (its Theorem 6); no knowledge of $k$, and the authors note the algorithm can be adapted to unknown $n$. If [Kshemkalyani2020Grids] assumes an oriented grid, this is the best result on unoriented grids. Crash-tolerant versions are under the crash-fault branch."
         },
         {
           "ref": "Himani2025TriangularGrids",
@@ -894,7 +933,7 @@
           "time": "O(\\sqrt n)",
           "memory": "O(\\log n)",
           "assumes": [
-            "unoriented triangular grid"
+            "triangular grid"
           ],
           "note": "No knowledge of $n$; the agents compute $\\sqrt n$ themselves."
         }
@@ -902,19 +941,89 @@
       "optimality": {
         "time": {
           "status": "gap",
-          "note": "$O(\\min(k,\\sqrt n))$ versus $\\Omega(\\sqrt k)$: tight for $k = \\Omega(n)$, a factor $\\sqrt k$ apart for $k \\le \\sqrt n$ under local communication."
+          "note": "$O(\\min(k,\\sqrt n))$ [Kshemkalyani2020Grids] versus $\\Omega(\\sqrt k)$: tight for $k = \\Omega(n)$; a factor $\\sqrt k$ apart for $k \\le \\sqrt n$ and $\\sqrt{n/k}$ above, at most $n^{1/4}$. If [Kshemkalyani2020Grids] is read as oriented, the best here is $O(\\sqrt n)$ [Banerjee2024UnorientedGrids], a factor $\\sqrt{n/k}$ apart. On oriented grids the gap is closed [Kumar2026Grid]."
         },
         "memory": {
           "status": "tight",
-          "note": "$\\Theta(\\log k)$."
+          "note": "$\\Theta(\\log k)$ with [Kshemkalyani2020Grids]; $O(\\log n)$ bits with [Banerjee2024UnorientedGrids]."
         }
       },
       "open": [
-        "Can $k \\le n$ agents disperse on a grid in $O(\\sqrt k)$ rounds with **local** communication? Global communication achieves it [Kshemkalyani2020Grids]; asked again in [Banerjee2025OrientedGridsFT].",
+        "Can $k \\le n$ agents disperse on an **unoriented** grid in $O(\\sqrt k)$ rounds with **local** communication? On oriented grids $O(\\sqrt k)$ rounds are reached with local communication [Kumar2026Grid] (preprint), and with global communication by [Kshemkalyani2020Grids] (as reported); asked in [Banerjee2025OrientedGridsFT], and for unoriented grids in [Kumar2026Grid].",
         "A lower bound in terms of $k$ for $k = o(\\sqrt n)$ with $O(\\log n)$ memory on unoriented grids [Banerjee2024UnorientedGrids].",
         "Unoriented grids with no knowledge of $n$ and with faults, matching the fault-free bounds [Banerjee2024UnorientedGrids]."
       ],
-      "notes": "Grids are the one class where global communication is known to help: $O(\\sqrt k)$ versus $O(\\min(k,\\sqrt n))$. Rectangular $x\\times y$ grids with $x, y$ known: $O(\\min(k, \\max(x,y)))$ rounds with $\\Theta(\\log k)$ bits (arXiv version of [Kshemkalyani2020Grids]).",
+      "notes": "With global communication $O(\\sqrt k)$ rounds were known on grids, against $O(\\min(k,\\sqrt n))$ with local communication [Kshemkalyani2020Grids]. On oriented grids Kumar, Molla, Pattanayak and Pramanick reach $O(\\sqrt k)$ rounds with local communication [Kumar2026Grid] (preprint), so there global communication is no longer known to help; on unoriented grids the question is open. **Orientation of [Kshemkalyani2020Grids].** The arXiv version (1812.05352v3) says \"robots do not have access to a consistent compass to determine which direction to follow to reach boundary nodes\", and its port labels at different nodes are uncorrelated; the result is placed here on that text. Banerjee, Kumar and Molla [Banerjee2024UnorientedGrids] [Banerjee2025OrientedGridsFT] and Kumar et al. [Kumar2026Grid] describe the same setting as an oriented (\"planar\") grid. The WALCOM 2020 text was not checked. If it assumes an oriented grid, the result belongs to *Oriented grids*, where [Kumar2026Grid] supersedes it, and the best result here is $O(\\sqrt n)$ rounds with $O(\\log n)$ bits [Banerjee2024UnorientedGrids]. Rectangular $x\\times y$ grids with $x, y$ known: $O(\\min(k, \\max(x,y)))$ rounds with $\\Theta(\\log k)$ bits (arXiv version of [Kshemkalyani2020Grids]).",
+      "status": "verified"
+    },
+    {
+      "id": "grid-oriented",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "none",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "grid",
+        "orientation": "oriented"
+      },
+      "title": "Oriented grids",
+      "summary": "A $\\sqrt n \\times \\sqrt n$ grid with consistent North, East, South and West ports: $\\Theta(\\sqrt k)$ rounds and $\\Theta(\\log k)$ bits with local communication, by a 2026 preprint.",
+      "statement": "The graph is a $\\sqrt n\\times\\sqrt n$ grid with $\\Delta = 4$ whose ports are labelled North, East, South and West consistently at every node (an **oriented** grid); a boundary node is recognised by its missing ports. Otherwise as on unoriented grids: $k \\le n$ agents with unique identifiers start in an arbitrary configuration, communicate locally and move synchronously.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt k)",
+          "ref": "Kshemkalyani2020Grids",
+          "note": "All $k$ agents on one node $v$: after $t$ rounds they occupy at most $2t^2+2t+1$ nodes, so $t \\ge \\frac12(\\sqrt{2k-1}-1)$ (restated as Theorem 1 of [Kumar2026Grid]); $\\Omega(\\sqrt n)$ when $k = \\Omega(n)$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k$ agents on one node: a grid ball of radius $r$ holds at most $2r^2+2r+1$ nodes",
+            "any algorithm",
+            "holds on oriented grids, hence also on unoriented ones"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2020Grids",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kumar2026Grid",
+          "role": "best",
+          "time": "O(\\sqrt k)",
+          "memory": "O(\\log k)",
+          "assumes": [],
+          "note": "Preprint, not peer reviewed. Spread–Reverse–Collect: each group of $m$ co-located agents sweeps a square of side $2\\lceil\\sqrt m\\rceil$ from its own position and reflects it at the boundary; groups merge by label priority and at least double in size from level to level. Any initial configuration, no knowledge of $n$, $k$ or the diameter, no detection of agents crossing on an edge; the authors state it runs unchanged on the infinite oriented grid. Optimal in both measures for every $k \\le n$; matches with local communication the global-communication bound of [Kshemkalyani2020Grids]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\sqrt k)$ for every $k \\le n$ [Kumar2026Grid] (preprint; proofs not independently checked, see notes). On unoriented grids a gap remains."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log k)$ [Kumar2026Grid]."
+        }
+      },
+      "open": [
+        "Rectangular $W \\times H$ oriented grids with $W \\le H$: from a corner at most $W(t+1)$ nodes are reachable in $t$ rounds, so $\\lceil k/W\\rceil - 1$ rounds are needed; an algorithm matching a bound that depends on $W$ and $H$, with local communication and no knowledge of $W$ and $H$, is open [Kumar2026Grid].",
+        "$O(\\sqrt k)$ rounds on oriented grids with asynchronous agents, or on the oriented torus [Kumar2026Grid].",
+        "Dispersion in $O(\\sqrt k)$ rounds on oriented grids with explicit termination: every agent knows when it may stop (see notes)."
+      ],
+      "notes": "Kshemkalyani, Molla and Sharma left a gap between $O(\\min(k,\\sqrt n))$ rounds with local communication and $O(\\sqrt k)$ rounds with global communication [Kshemkalyani2020Grids]; Banerjee, Kumar and Molla asked again whether local communication suffices [Banerjee2025OrientedGridsFT]. Kumar, Molla, Pattanayak and Pramanick answer it on oriented grids: $O(\\sqrt k)$ rounds and $O(\\log k)$ bits [Kumar2026Grid] (arXiv preprint, v1, October 2026, not peer reviewed). Earlier grid algorithms gather the agents at the boundary or at a corner and spread from there; Spread–Reverse–Collect starts each sweep where its agents are and reflects it at the boundary, so no knowledge of $n$ is needed. [Kshemkalyani2020Grids] is placed on unoriented grids (see that setting for the dispute about its orientation); its algorithm carries over here, and so do the crash-tolerant $O(\\sqrt n)$ algorithms for oriented grids [Banerjee2024UnorientedGrids] [Banerjee2025OrientedGridsFT]. **Not independently checked.** The model, theorem statements and algorithm were read in full, but the proofs were not checked step by step, and three points need care. (1) Theorem 2 bounds the number of rounds in which each agent is active and concludes $T(k) = O(\\sqrt k)$; a settled agent can be recruited again by a later Collect, so the step from active rounds to total time needs an argument along the chain of recruiters, which is not written out. (2) The proof of Lemma 7 assumes that same-labelled settled agents stay in place during the next Spread, while Section 3.5 lets a Collect un-settle every settled agent of equal or lower label that it reaches. (3) Theorem 3 says every agent terminates, but the paper does not say how a settled agent, which may be recruited again, knows that it may stop, and on the infinite grid no whole-grid sweep happens; the result is read here as reaching a dispersed configuration that no agent leaves afterwards. The infinite-grid claim (Section 5) has no separate proof.",
       "status": "verified"
     },
     {
@@ -1514,10 +1623,78 @@
         "faults": "crash",
         "communication": "local",
         "timing": "sync",
-        "topology": "grid"
+        "topology": "grid",
+        "orientation": "unoriented"
       },
-      "title": "Crash faults on grids",
-      "summary": "On oriented grids crashes are free: the fault-free $\\Theta(\\sqrt n)$ bound survives any number of crashes.",
+      "title": "Crash faults on unoriented grids",
+      "summary": "Without a consistent compass the only crash-tolerant grid algorithm takes $O(\\sqrt n\\log n)$ rounds and $O(\\sqrt n\\log n)$ bits, against $O(\\sqrt n)$ rounds and $O(\\log n)$ bits on oriented grids.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\sqrt k)",
+          "ref": "Kshemkalyani2020Grids",
+          "note": "$\\Omega(\\sqrt n)$ when $k = \\Omega(n)$.",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$k$ agents on one node: a grid ball of radius $r$ holds $O(r^2)$ nodes",
+            "any algorithm"
+          ]
+        },
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Kshemkalyani2020Grids",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic",
+            "all agents have the same memory bound",
+            "an initial configuration with co-located agents (rooted suffices)",
+            "memory counts the identifier"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Banerjee2024UnorientedGrids",
+          "role": "best",
+          "time": "O(\\sqrt n\\log n)",
+          "memory": "O(\\sqrt n\\log n)",
+          "assumes": [
+            "knows $n$"
+          ],
+          "note": "Introductory and current best (its Theorem 12, Section 6): any number of crashed agents."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(\\sqrt n\\log n)$ versus $\\Omega(\\sqrt k)$: a $\\log n$ factor for $k = \\Omega(n)$, a factor $\\sqrt{n/k}\\,\\log n$ for smaller $k$."
+        },
+        "memory": {
+          "status": "gap",
+          "note": "$O(\\sqrt n\\log n)$ versus $\\Omega(\\log k)$, a factor $\\sqrt n$."
+        }
+      },
+      "open": [
+        "Unoriented grids with crashes: close the gap between $O(\\sqrt n\\log n)$ rounds with $O(\\sqrt n\\log n)$ bits and the fault-free $O(\\sqrt n)$ rounds with $O(\\log n)$ bits [Banerjee2024UnorientedGrids]."
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "crash-grid-oriented",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "count": "k-le-n",
+        "ids": "unique",
+        "faults": "crash",
+        "communication": "local",
+        "timing": "sync",
+        "topology": "grid",
+        "orientation": "oriented"
+      },
+      "title": "Crash faults on oriented grids",
+      "summary": "On oriented grids crashes are free for $k = \\Omega(n)$: the fault-free $\\Theta(\\sqrt n)$ bound survives any number of crashes.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -1550,34 +1727,31 @@
           "time": "O(\\sqrt n)",
           "memory": "O(\\log n)",
           "assumes": [
-            "oriented grid",
             "knows $n$"
           ],
-          "note": "Unoriented grid with crashes: $O(\\sqrt n\\log n)$ rounds with $O(\\sqrt n\\log n)$ bits."
+          "note": "Its Theorem 1 (Section 4): $f \\le k \\le n$ crashed agents; the authors remark that the algorithm can be modified to work without knowing $n$. The same paper treats unoriented grids with crashes (that setting)."
         },
         {
           "ref": "Banerjee2025OrientedGridsFT",
           "role": "best",
           "time": "O(\\sqrt n)",
           "memory": "O(\\log n)",
-          "assumes": [
-            "oriented grid"
-          ],
-          "note": "Any $f \\le n$, no knowledge of $n$; optimal in both measures for $k = \\Omega(n)$."
+          "assumes": [],
+          "note": "Any $f \\le n$, no knowledge of $n$; stated for $k = n$ and, by its Remark 2, for every $k \\le n$; optimal in both measures for $k = \\Omega(n)$."
         }
       ],
       "optimality": {
         "time": {
-          "status": "tight",
-          "note": "$\\Theta(\\sqrt n)$ on oriented grids for $k = \\Omega(n)$; the small-$k$ question is the same as in the fault-free case."
+          "status": "gap",
+          "note": "$\\Theta(\\sqrt n)$ for $k = \\Omega(n)$; for $k = o(n)$, $O(\\sqrt n)$ versus $\\Omega(\\sqrt k)$, a factor $\\sqrt{n/k}$. Without faults $O(\\sqrt k)$ is known on oriented grids [Kumar2026Grid] (preprint)."
         },
         "memory": {
           "status": "tight",
-          "note": "$\\Theta(\\log n)$."
+          "note": "$O(\\log n)$ versus $\\Omega(\\log k)$: $\\Theta(\\log n)$ when $k = n^{\\Omega(1)}$."
         }
       },
       "open": [
-        "Unoriented grids with crashes: close the gap between $O(\\sqrt n\\log n)$ rounds with $O(\\sqrt n\\log n)$ bits and the fault-free $O(\\sqrt n)$, $O(\\log n)$ [Banerjee2024UnorientedGrids]."
+        "Crash-tolerant dispersion in $O(\\sqrt k)$ rounds on oriented grids for $k = o(n)$; the fault-free case is solved by [Kumar2026Grid] (preprint), which names fault tolerance as future work."
       ],
       "status": "verified"
     },
@@ -1743,9 +1917,10 @@
         "faults": "weak-byzantine",
         "communication": "local",
         "timing": "sync",
-        "topology": "grid"
+        "topology": "grid",
+        "orientation": "oriented"
       },
-      "title": "Weak Byzantine agents on grids",
+      "title": "Weak Byzantine agents on oriented grids",
       "summary": "Time-optimal $O(\\sqrt n)$ rounds on oriented grids for any number of weak Byzantine agents, at the price of $O(n\\log n)$ bits.",
       "lower_bounds": [
         {
@@ -1778,7 +1953,6 @@
           "time": "O(\\sqrt n)",
           "memory": "O(n\\log n)",
           "assumes": [
-            "oriented grid",
             "$k = n$",
             "$f \\le n$"
           ],
@@ -1797,8 +1971,10 @@
       },
       "open": [
         "Reduce the memory below $O(n\\log n)$ bits on grids with weak Byzantine agents.",
-        "Strong Byzantine agents (able to fake identifiers) on grids [Banerjee2025OrientedGridsFT]."
+        "Strong Byzantine agents (able to fake identifiers) on grids [Banerjee2025OrientedGridsFT].",
+        "Weak Byzantine agents on unoriented grids, and on oriented grids with $k = o(n)$ agents in $O(\\sqrt k)$ rounds; fault tolerance is named as future work in [Kumar2026Grid]."
       ],
+      "notes": "Every known grid result with Byzantine agents assumes an oriented grid [Banerjee2025OrientedGridsFT], so this setting carries the orientation assumption; no result is known on unoriented grids.",
       "status": "verified"
     },
     {

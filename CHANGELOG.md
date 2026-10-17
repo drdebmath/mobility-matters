@@ -2,6 +2,19 @@
 
 Versions are dated; the website footer and the book's title page show the current one.
 
+## 2026-10-17 — ring exploration, oriented grids and two-robot models
+
+- **Exploration by oblivious robots.** Ring results corrected and completed: separate
+  lower bounds with their scope (4 robots, 5 for even $n$, impossible when $k \mid n$,
+  $\Omega(\log n)$), new axes for the scheduler, randomness and goal, and new settings for
+  SSYNC rings, probabilistic SSYNC rings and exclusive perpetual ring exploration.
+- **Dispersion.** A grid orientation axis; oriented grids reach $O(\sqrt k)$ time with
+  $O(\log k)$ memory (preprint), and the crash and Byzantine grid settings are placed by
+  orientation. The tree now splits by topology and orientation before faults.
+- **Robots in the plane.** The two-robot landscape is complete: 29 new relations, three
+  new separating tasks, and incomparability now carries over to equivalent models.
+- 20 new references.
+
 ## 2026-10-14 — redesign, glossaries and a reorganised book
 
 - **Reading.** Problem pages read as chapters: a contents rail, then statement, first

@@ -688,6 +688,10 @@
       if (!ge[i][j]) { ge[i][j] = 1; how[i][j] = 'derived'; }
       if (st && !gt[i][j]) gt[i][j] = 1;
     }
+    // incomparability carries over to equivalent settings: a ⊥ b, x ≡ a, y ≡ b give x ⊥ y
+    const eqv = (i, j) => ge[i][j] && ge[j][i], incDer = new Set();
+    [...inc].forEach(k => { const [a, b] = k.split('|'), i = ix.get(a), j = ix.get(b); if (i === undefined || j === undefined) return;
+      ids.forEach((x, p) => { if (eqv(p, i)) ids.forEach((y, q) => { if (eqv(q, j) && !inc.has(x + '|' + y)) incDer.add(x + '|' + y); }); }); });
     const rel = (x, y) => { // relation of x to y
       const i = ix.get(x), j = ix.get(y);
       if (i === undefined || j === undefined) return { r: '?' };
@@ -696,6 +700,7 @@
       if (ge[i][j]) return { r: gt[i][j] ? '>' : '≥', how: how[i][j] };
       if (ge[j][i]) return { r: gt[j][i] ? '<' : '≤', how: how[j][i] };
       if (inc.has(x + '|' + y)) return { r: '⊥', how: 'proved' };
+      if (incDer.has(x + '|' + y)) return { r: '⊥', how: 'derived' };
       return { r: '?' };
     };
     return { ids, rel };

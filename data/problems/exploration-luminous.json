@@ -2953,6 +2953,10 @@
     {
       "ref": "Das2025MISGrid",
       "note": "Maximum independent set formation on a finite grid from an arbitrary placement, SSYNC, $\\varphi = 2$, three colours. Abstract read."
+    },
+    {
+      "ref": "Datta2015Enabling",
+      "note": "Full version of the $\\varphi = 2, 3$ results for oblivious myopic robots under ASYNC: with $\\varphi = 3$, five robots are necessary and suffice from consecutive nodes, seven from any configuration connected by vision; with $\\varphi = 2$, seven robots. Abstract read; not checked against the paper."
     }
   ]
 }

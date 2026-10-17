@@ -742,7 +742,7 @@ def landscape_section(m):
     REL = {">": r"$>$", "≡": r"$\equiv$", "⊥": r"$\perp$", "≥": r"$\geq$"}
     seps = {q["abbrev"]: q for q in L.get("problems", [])}
     out = [r"\section*{%s}\addcontentsline{toc}{section}{%s}" % (esc_plain(L["title"]), esc_plain(L["title"])), block(L["intro"]), block(L["trivial"])]
-    out.append(r"\noindent The website shows the same relations as an interactive grid: choosing a model colours every other model as stronger, weaker, equivalent, incomparable or unknown, including relations that follow by transitivity.")
+    out.append(r"\noindent The website shows the same relations as an interactive grid: choosing a model colours every other model as stronger, weaker, equivalent, incomparable or unknown, including relations that follow by transitivity and incomparabilities that carry over to equivalent models.")
     for v in L["views"]:
         rows = []
         for r in v["relations"]:

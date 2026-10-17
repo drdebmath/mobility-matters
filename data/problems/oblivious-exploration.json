@@ -12,8 +12,8 @@
     "kind": "variant of",
     "relation": "The robots follow the Look–Compute–Move model of the plane, moved to graphs: they see the positions of all robots but remember nothing, so the configuration itself must encode the progress of the exploration."
   },
-  "summary": "Oblivious Look–Compute–Move robots with vision must visit every node of a ring or grid and stop; how many robots are needed?",
-  "statement": "$k$ anonymous, oblivious robots run Look–Compute–Move cycles on an anonymous graph: they see where all robots are, compute, and move to a neighbour. They must visit every node and then stop (or, for perpetual exploration, keep visiting). The primary measure is the **number of robots**.",
+  "summary": "Oblivious Look–Compute–Move robots that see all robots must visit every node of a ring or grid and stop, or keep visiting every node forever without two robots ever meeting; how many robots are needed?",
+  "statement": "$k$ anonymous, oblivious robots run Look–Compute–Move cycles on an anonymous graph with $n$ nodes: in a Look a robot takes a snapshot showing which nodes hold no robot, one robot or a tower, it computes from that snapshot only, and it stays or moves to a neighbour. The robots start on distinct nodes (no tower). Two goals are studied. In **terminating exploration** every node must be visited by at least one robot and the robots must reach a configuration in which no robot ever moves again. In **exclusive perpetual exploration** every robot must visit every node infinitely often, no two robots may ever be on the same node, and no two robots may ever cross the same edge in opposite directions. The setting fixes the goal, the scheduler (ASYNC, SSYNC or FSYNC) and whether robots may flip coins; which initial configurations an algorithm must handle (every configuration without towers, or only some) is stated with each result. The primary measure is the **number of robots**; the second is the total number of moves.",
   "primer": {
     "intro": "Imagine a few identical toy robots on a circular track of $n$ squares. The track is a **ring**: its squares are its $n$ **nodes**, and two squares side by side are **neighbours**. The robots cannot talk, they have no memory at all, and they cannot tell clockwise from counterclockwise, yet together they must visit every node and then stop forever. Each robot works in **Look–Compute–Move cycles**: **Look** (take a **snapshot** showing where all robots are), **Compute** (decide, from that snapshot only, whether to move and where) and **Move** (move to a neighbour). Robots are **oblivious**: they forget everything after each cycle. The nodes are **anonymous** (they have no names), and an **adversary** (an imagined opponent) decides when each robot is activated. A robot can tell whether several robots stand on one node (such a node is called a **tower**). The positions of all robots form the **configuration**. In the basic version $k$ robots start on distinct nodes of a ring of $n$ nodes; they must visit every node and then all stop. We count the robots needed.",
     "ideas": [
@@ -23,7 +23,7 @@
         "variant": "ring",
         "ref": "Lamani2010Ring",
         "idea": "Five robots, on a ring whose size $n$ is not a multiple of $5$ [Lamani2010Ring]. The rule a robot follows depends only on its current snapshot, so each stage must leave a configuration that announces which stage it is.\n\n1. **Block:** while the robots are not on five consecutive nodes (a **block**), robots move closer together, carefully so that no two land on the same node.\n2. **Tower:** when the five robots form one block, the middle robot moves onto a neighbour. Now there is exactly one tower, and the configuration is no longer symmetric: it shows a direction.\n3. **Walk:** one robot, the **walker**, singled out by its position relative to the tower, moves node by node around the ring, away from the tower.\n4. When the walker reaches the other side of the group, the robots form a special pattern (a *tower-chain*); this configuration means the ring has been explored, and nobody moves again.",
-        "analysis": "The condition that $n$ and $5$ share no common factor is what lets the robots break symmetry in the first stage (see the third idea for what goes wrong otherwise). Each stage costs $O(n)$ moves, so the total is $O(n)$, which is optimal, since the walker must cover the ring. For even $n$, four robots cannot explore deterministically [Lamani2010Ring], so five is optimal for those rings. The earlier algorithm of [Flocchini2013Ring] needed $17$ or more robots.",
+        "analysis": "The condition that $n$ and $5$ share no common factor is what lets the robots break symmetry in the first stage (see the third idea for what goes wrong otherwise). Each stage costs $O(n)$ moves, so the total is $O(n)$, which is optimal, since the walker must cover the ring. Three robots never suffice, even if robots may flip coins [Devismes2013Probabilistic]. For even $n$, four robots cannot explore without coins [Lamani2010Ring] (the proof uses an adversary that activates robots with the same snapshot at the same moment), so five is optimal for those rings; for odd $n$ it is open whether four robots suffice when the adversary may also interleave the three phases of different robots. The earlier algorithm of [Flocchini2013Ring] needed $17$ or more robots.",
         "why_it_matters": "It shows the main technique of the area: memoryless robots store their progress in the shape of their own configuration."
       },
       {
@@ -41,7 +41,7 @@
         "variant": "ring",
         "ref": "Flocchini2013Ring",
         "idea": "Let $k$ divide $n$, with $k < n$, for example $3$ robots on a ring of $6$ nodes, one on every second node. Every robot takes exactly the same snapshot, the same in both directions. The adversary activates all robots together and, whenever a robot wants to move but cannot tell its two directions apart, sends every robot clockwise. Then all robots do the same thing: either nobody moves, or every robot moves clockwise and the configuration is again evenly spaced. The robots will take this same snapshot forever, so they either stop where they are, having visited only $k$ nodes, or never stop.",
-        "analysis": "So $k$ robots cannot explore a ring whose size is a multiple of $k$. [Flocchini2013Ring] show that exploration is impossible in general whenever $n$ and $k$ share a common factor (the full argument is longer), and solvable when they share none and $k \\ge 17$; the five-robot algorithm above later lowered the team size.",
+        "analysis": "So $k$ robots cannot explore a ring whose size is a multiple of $k$ [Flocchini2013Ring]. Whether exploration is also impossible when $n$ and $k$ share a smaller common factor is open: it was conjectured [Lamani2010Ring], and a computer check found the algorithm of [Flocchini2013Ring] correct for five robots on rings of 10 and 15 nodes from starts with at most one axis of symmetry [Berard2016Formal]. When $n$ and $k$ share no factor and $k \\ge 17$, exploration is solvable [Flocchini2013Ring]; the five-robot algorithm above later lowered the team size.",
         "why_it_matters": "Symmetry that robots cannot break is the obstacle behind the number-theoretic conditions that appear throughout the oblivious-robot literature."
       }
     ]
@@ -124,7 +124,7 @@
       "avoid": []
     }
   ],
-  "history": "Robots with no memory must encode progress in their positions, so the first question was **the minimum number of robots** [Flocchini2013Ring], answered exactly for rings [Lamani2010Ring] and grids [Devismes2012Grid].",
+  "history": "Robots with no memory must encode progress in their positions, so the first question was **the minimum number of robots**. On rings, $k$ robots cannot explore when $k$ divides $n$, which forces $\\Omega(\\log n)$ robots for infinitely many $n$, and $O(\\log n)$ robots always suffice [Flocchini2013Ring]. Three robots never suffice, even with coin flips; four robots that flip coins suffice under SSYNC [Devismes2013Probabilistic]. Without coins, five robots suffice whenever $n$ is not a multiple of 5, four do not when $n$ is even, and four suffice for odd $n > 7$ under SSYNC [Lamani2010Ring]; the exact minimum for every $n$ is still open. On grids three robots suffice and are optimal [Devismes2012Grid]. Exclusive perpetual exploration of rings needs three robots when $n \\ge 10$ and $3 \\nmid n$ [Blin2010Exclusive] [Berard2016Formal].",
   "measures": [
     {
       "id": "agents",
@@ -143,44 +143,145 @@
     "communication",
     "node-memory",
     "node-ids",
-    "algorithm",
-    "initial"
+    "initial",
+    "timing"
   ],
   "axis_order": [
     "dynamics",
     "direction",
     "ids",
-    "timing",
+    "algorithm",
+    "scheduler",
+    "goal",
     "topology"
+  ],
+  "axes": [
+    {
+      "id": "scheduler",
+      "name": "Scheduler",
+      "values": [
+        {
+          "id": "async",
+          "level": 0,
+          "label": "asynchronous (ASYNC)",
+          "short": "ASYNC",
+          "definition": "**ASYNC**: each robot's Look, Compute and Move phases take finite but unbounded, adversarially chosen time; a robot may Look while others are between phases, so it may move on an outdated snapshot. A robot is always seen on a node (moves are instantaneous). The scheduler is fair: every robot is activated infinitely often. Called *CORDA* (with instantaneous moves) in [Lamani2010Ring] and [Blin2010Exclusive]."
+        },
+        {
+          "id": "ssync",
+          "level": 1,
+          "label": "semi-synchronous (SSYNC)",
+          "short": "SSYNC",
+          "definition": "**SSYNC**: time is divided into rounds; in each round a fair adversary chooses a non-empty subset of robots, which execute one atomic Look–Compute–Move cycle together. Called *ATOM* in [Lamani2010Ring]."
+        },
+        {
+          "id": "fsync",
+          "level": 2,
+          "label": "fully synchronous (FSYNC)",
+          "short": "FSYNC",
+          "definition": "**FSYNC**: in every round every robot executes one atomic Look–Compute–Move cycle."
+        }
+      ],
+      "origin": "Ring exploration by oblivious robots on graphs began under ASYNC with instantaneous moves [Flocchini2013Ring]. Devismes, Petit and Tixeuil proved their bounds for probabilistic robots with atomic cycles (SSYNC) [Devismes2013Probabilistic], and Lamani, Potop-Butucaru and Tixeuil wrote their four-robot lower bound for SSYNC (it carries over to ASYNC) and gave a four-robot algorithm for odd $n$ only under SSYNC [Lamani2010Ring]. The scheduler changes the answer: with coin flips, a constant number of robots suffices under SSYNC, while $\\Omega(\\log n)$ robots are needed under ASYNC for infinitely many $n$, as reported by the survey of Ilcinkas, which compares the three schedulers for this problem [Ilcinkas2019Exploration]."
+    },
+    {
+      "id": "goal",
+      "name": "Exploration goal",
+      "values": [
+        {
+          "id": "both",
+          "level": 0,
+          "label": "both goals: terminating and exclusive perpetual",
+          "short": "both goals",
+          "definition": "Solve both terminating and exclusive perpetual exploration with the stated resources (possibly with two algorithms). A lower bound for either goal holds here, and a result here gives both. No variant is catalogued here; the value exists because the two goals do not imply each other."
+        },
+        {
+          "id": "terminating",
+          "level": 1,
+          "label": "terminating exploration (explore, then stop)",
+          "short": "terminating",
+          "definition": "From every allowed initial configuration, every node is visited by at least one robot and the robots reach a configuration in which no robot ever moves again. With coin flips, this must happen with probability 1."
+        },
+        {
+          "id": "exclusive-perpetual",
+          "level": 1,
+          "label": "exclusive perpetual exploration",
+          "short": "exclusive perpetual",
+          "definition": "Every robot visits every node infinitely often, no two robots are ever on the same node, and no two robots ever cross the same edge in opposite directions."
+        }
+      ],
+      "origin": "Terminating exploration of rings by oblivious robots was posed by Flocchini, Ilcinkas, Pelc and Santoro [Flocchini2013Ring]. Exclusive perpetual exploration was posed for robots with memory on partial grids by Baldoni, Bonnet, Milani and Raynal (as reported by [Blin2010Exclusive]) and for oblivious robots on rings without chirality by Blin, Milani, Potop-Butucaru and Tixeuil [Blin2010Exclusive]; it models patrolling by physical robots that must not collide. The two goals do not imply each other: a terminating algorithm stops, and an exclusive perpetual one never stops but must avoid towers, which terminating algorithms use to mark the end. The survey of Ilcinkas treats the two goals side by side [Ilcinkas2019Exploration]."
+    }
   ],
   "variants": [
     {
       "id": "ring",
-      "title": "Rings, exploration with stop",
+      "title": "Rings, ASYNC, terminating",
       "standard": true,
       "assumptions": {
         "dynamics": "static",
         "direction": "undirected",
+        "algorithm": "deterministic",
+        "scheduler": "async",
+        "goal": "terminating",
         "topology": "ring"
       },
-      "summary": "Five robots explore any ring whose size is co-prime with 5; fewer than five cannot for even $n$.",
+      "summary": "Five asynchronous robots explore and stop from any configuration without towers when $n$ is not a multiple of 5; three never suffice, four never suffice for even $n$, and $k$ never suffices when $k$ divides $n$.",
+      "statement": "The algorithm must work from **every** initial configuration in which each node holds at most one robot; the robots know neither $n$ nor any orientation of the ring. Each Look shows the whole ring and, for each node, whether it holds no robot, one robot or several (global weak multiplicity detection). When a robot whose snapshot is symmetric chooses to move, the adversary chooses the direction [Flocchini2013Ring].",
       "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "4",
+          "ref": "Devismes2013Probabilistic",
+          "bottleneck": "memory",
+          "preconditions": [
+            "$k \\le 3$ and every $n > k$ (Corollary 2 of the 2009 report)",
+            "holds for probabilistic algorithms too",
+            "proved under SSYNC, so it holds under ASYNC; a sequential scheduler suffices except for $k = 3$, $n = 4$, settled by enumerating all protocols (Theorem 2)",
+            "an execution must pass through at least $n - k + 1$ pairwise distinguishable configurations that contain a tower of fewer than $k$ robots (Corollary 1); three robots have only $\\lfloor n/2 \\rfloor$ such configurations (Lemma 5)"
+          ]
+        },
         {
           "measure": "agents",
           "bound": "5",
           "ref": "Lamani2010Ring",
-          "bottleneck": "symmetry",
+          "bottleneck": "symmetry breaking",
           "preconditions": [
-            "even $n$, deterministic"
+            "$k = 4$ and even $n$, deterministic (Lemma 1)",
+            "initial configuration: four robots with two axes of symmetry",
+            "proved under SSYNC: robots with the same snapshot are activated together, so the four robots act as two",
+            "for odd $n$ the bound is 4"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2013Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k$ divides $n$, $k < n$ (Lemma 2.1)",
+            "initial configuration: the $k$ robots evenly spaced",
+            "holds even under FSYNC: the adversary activates all robots and sends them the same way, so every configuration is evenly spaced and none is terminal",
+            "deterministic"
           ]
         },
         {
           "measure": "agents",
           "bound": "\\Omega(\\log n)",
           "ref": "Flocchini2013Ring",
-          "bottleneck": "symmetry",
+          "bottleneck": "symmetry breaking",
           "preconditions": [
-            "for infinitely many $n$, when the algorithm must work from every configuration"
+            "for infinitely many $n$: $n = \\mathrm{lcm}(1, \\dots, m)$, which every $k \\le m$ divides (Theorem 4.1)",
+            "consequence of the $k \\mid n$ impossibility; deterministic; holds even under FSYNC"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Lamani2010Ring",
+          "bottleneck": "every node visited",
+          "preconditions": [
+            "each of the $n - k$ initially empty nodes must be entered by some robot; stated as trivial in [Lamani2010Ring]"
           ]
         }
       ],
@@ -189,7 +290,11 @@
           "ref": "Flocchini2013Ring",
           "role": "introductory",
           "agents": "O(\\log n)",
-          "note": "Solvable for co-prime $n$ and $k \\ge 17$; unsolvable in general if $n$ and $k$ are not co-prime."
+          "assumes": [
+            "$17 \\le k < n$ and $\\gcd(n, k) = 1$ (Theorem 3.4)",
+            "every initial configuration without towers"
+          ],
+          "note": "Theorem 4.1: taking the least $k \\ge 17$ co-prime with $n$ gives $O(\\log n)$ robots for every $n$; for prime $n > 17$, 17 robots suffice. Moves are not analysed."
         },
         {
           "ref": "Lamani2010Ring",
@@ -197,31 +302,271 @@
           "agents": "5",
           "time": "O(n)",
           "assumes": [
-            "$\\gcd(n,5)=1$"
+            "$\\gcd(n, 5) = 1$",
+            "every initial configuration without towers"
           ],
-          "note": "Optimal moves; 4 robots suffice probabilistically."
+          "note": "Introductory and current best for five robots; $O(n)$ moves, which is optimal. Read in the arXiv version (October 2009); the SIROCCO 2010 version was not read."
         }
       ],
       "optimality": {
         "agents": {
           "status": "tight",
-          "note": "Five, for $n$ co-prime with 5 and even."
+          "note": "Tight only in the worst case over $n$: $\\Theta(\\log n)$ [Flocchini2013Ring]. For a given $n$: exactly 5 when $n$ is even and not a multiple of 5; 4 or 5 when $n$ is odd and not a multiple of 5 (gap of one robot); for multiples of 5 (five robots impossible) the best algorithm uses the least $k \\ge 17$ co-prime with $n$, against at least 4 robots (at least 6 when $10 \\mid n$)."
         },
         "time": {
           "status": "tight",
-          "note": "$O(n)$ moves."
+          "note": "$\\Theta(n)$ moves with five robots; moves of the $k \\ge 17$ algorithm are not analysed."
         }
       },
-      "open": [],
-      "notes": "",
+      "open": [
+        "Can four robots explore and stop on every ring of odd size $n$ under ASYNC? Four suffice under SSYNC for odd $n > 7$; the question is posed in [Lamani2010Ring].",
+        "For which pairs $(n, k)$ can $k$ robots explore an $n$-node ring [Flocchini2013Ring]? In particular, is exploration impossible whenever $\\gcd(n, k) > 1$ and $k < n$, as conjectured in [Lamani2010Ring]? Impossibility is proved only when $k$ divides $n$ [Flocchini2013Ring], and for $k = 4$ with even $n$ [Lamani2010Ring].",
+        "What is the minimum number of robots when $n$ is a multiple of 5? From model checking on rings of fewer than 18 nodes, Bérard et al. conjecture that the algorithm of [Flocchini2013Ring] is correct for every odd $k$ with $5 \\le k < 17$ from initial configurations with at most one axis of symmetry [Berard2016Formal]; the lower bounds use more symmetric starts."
+      ],
+      "notes": "Flocchini, Ilcinkas, Pelc and Santoro posed the problem and showed that robots without memory or communication can still explore a ring: the configuration itself records the phase (set-up, tower creation, exploration) [Flocchini2013Ring]. Lamani, Potop-Butucaru and Tixeuil reduced the team to five robots with the same three-phase idea (a block of five, one tower, one walker) [Lamani2010Ring]. The lower bounds are proved under SSYNC (fewer than five robots) or FSYNC ($k \\mid n$), so they hold here; all of them use a symmetric or evenly spaced start, which the problem allows. The four-robot probabilistic algorithm sometimes attributed to [Lamani2010Ring] is due to Devismes, Petit and Tixeuil and needs atomic cycles (see the probabilistic SSYNC setting) [Devismes2013Probabilistic]. Ilcinkas reports that the lower bounds hold even with global strong multiplicity detection, while the algorithms use only weak detection [Ilcinkas2019Exploration]. As reported by [Ilcinkas2019Exploration], the $\\Omega(\\log n)$ bound remains true for probabilistic algorithms under ASYNC, citing the journal version of [Devismes2013Probabilistic]; this is unverified here (the journal version was not read, and the 2009 report read does not contain it). Bérard et al. model-checked the set-up phase of the $k \\ge 17$ algorithm for $17 \\le k \\le 21$, $n \\le 22$ and found it correct [Berard2016Formal].",
+      "status": "verified"
+    },
+    {
+      "id": "ring-ssync",
+      "title": "Rings, SSYNC, terminating",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "algorithm": "deterministic",
+        "scheduler": "ssync",
+        "goal": "terminating",
+        "topology": "ring"
+      },
+      "summary": "With atomic cycles, four robots explore every ring of odd size $n > 7$ and stop; fewer than four never suffice, and four do not suffice for even $n$.",
+      "statement": "As the ASYNC setting, from every initial configuration without towers and with global weak multiplicity detection, but each activated robot executes its whole Look–Compute–Move cycle atomically.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "4",
+          "ref": "Devismes2013Probabilistic",
+          "bottleneck": "memory",
+          "preconditions": [
+            "$k \\le 3$, every $n > k$, even for probabilistic algorithms (Corollary 2 of the 2009 report)"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "5",
+          "ref": "Lamani2010Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "even $n$, $k = 4$ (Lemma 1)",
+            "initial configuration with two axes of symmetry"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2013Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k$ divides $n$, $k < n$ (Lemma 2.1)",
+            "initial configuration: the $k$ robots evenly spaced",
+            "holds even under FSYNC"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Flocchini2013Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "for infinitely many $n$ (Theorem 4.1); consequence of the $k \\mid n$ impossibility, which holds even under FSYNC"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Lamani2010Ring",
+          "role": "best",
+          "agents": "4",
+          "assumes": [
+            "odd $n > 7$",
+            "every initial configuration without towers"
+          ],
+          "note": "Algorithm Exploration-odd, in the appendix of the arXiv version (Lemma 14); [Ilcinkas2019Exploration] also cites it from there. Introductory and current best. Whether the appendix is in the SIROCCO 2010 version is not known (not read)."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Worst case over $n$: $\\Theta(\\log n)$, as in the ASYNC setting. For a given $n$: exactly four for odd $n > 7$; exactly five for even $n$ not a multiple of 5 (the ASYNC algorithm of [Lamani2010Ring]); for $10 \\mid n$ at least six, against the least $k \\ge 17$ co-prime with $n$ [Flocchini2013Ring]."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Moves of the four-robot SSYNC algorithm are not analysed; $\\Omega(n)$ moves are needed, and five robots use $O(n)$ moves when $n$ is not a multiple of 5 [Lamani2010Ring]."
+        }
+      },
+      "open": [
+        "What is the minimum number of robots under SSYNC when $n$ is a multiple of 10 (four and five robots are impossible)? This is the SSYNC case of the characterisation of solvable pairs $(n, k)$ asked for in [Flocchini2013Ring]."
+      ],
+      "notes": "The appendix algorithm of [Lamani2010Ring] forms one tower from a symmetric or asymmetric configuration and lets one or two robots walk until a terminal pattern appears. Moves of this algorithm are not analysed. Under FSYNC, Ilcinkas reports that only three robots are a clear lower bound for every $n$, in particular for odd $n$ [Ilcinkas2019Exploration].",
+      "status": "verified"
+    },
+    {
+      "id": "ring-randomized-ssync",
+      "title": "Rings, probabilistic, SSYNC, terminating",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "algorithm": "randomized",
+        "scheduler": "ssync",
+        "goal": "terminating",
+        "topology": "ring"
+      },
+      "summary": "Four robots that flip coins explore any ring of more than eight nodes and stop with probability 1; three never suffice, whatever $n$.",
+      "statement": "As the SSYNC setting, but a robot may flip coins in Compute. From every initial configuration without towers, every execution must visit every node, and the robots must reach a configuration in which no robot moves again with probability 1 [Devismes2013Probabilistic].",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "4",
+          "ref": "Devismes2013Probabilistic",
+          "bottleneck": "memory",
+          "preconditions": [
+            "$k \\le 3$, every $n > k$ (Corollary 2 of the 2009 report)",
+            "proved with a sequential scheduler, except $k = 3$, $n = 4$ (Theorem 2)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Devismes2013Probabilistic",
+          "role": "best",
+          "agents": "4",
+          "assumes": [
+            "$n > 8$ (Theorem 3 of the 2009 report)",
+            "every initial configuration without towers",
+            "no condition linking $n$ and $k$"
+          ],
+          "note": "Introductory and current best. Read in INRIA report RR-6838 (2009), which calls the robots asynchronous but defines atomic cycles; the TCS 2013 version was not read. Ilcinkas reports four probabilistic robots for every $n > 4$ [Ilcinkas2019Exploration]; rings of five to eight nodes are treated in [Devismes2010Small] (not read)."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Four, for $n > 8$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Only finite expected termination is proved; no bound on moves or rounds is given [Devismes2013Probabilistic]."
+        }
+      },
+      "open": [
+        "How many moves (or rounds) do four probabilistic robots need to explore a ring of $n$ nodes and stop, and how does the time decrease when more robots are used? Posed in [Devismes2013Probabilistic], where termination is only shown to be finite."
+      ],
+      "notes": "Randomization removes the number-theoretic conditions of the deterministic setting: four robots suffice for every $n > 8$, whereas deterministic robots need $\\Omega(\\log n)$ for infinitely many $n$ even under FSYNC [Flocchini2013Ring]. The robots first gather on four consecutive nodes, using coin flips to break symmetry, then build an *arrow* (a tower next to the block) whose tail robot walks around the ring [Devismes2013Probabilistic]. Under ASYNC, coin flips do not help in the worst case: $\\Omega(\\log n)$ robots are needed for infinitely many $n$, as reported by [Ilcinkas2019Exploration] (not verified; see the ASYNC setting).",
+      "status": "verified"
+    },
+    {
+      "id": "ring-exclusive-perpetual",
+      "title": "Rings, ASYNC, exclusive perpetual",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "algorithm": "deterministic",
+        "scheduler": "async",
+        "goal": "exclusive-perpetual",
+        "topology": "ring"
+      },
+      "summary": "Three asynchronous robots explore a ring of $n \\ge 10$ nodes perpetually without collisions when $3 \\nmid n$; one or two robots never can, and three cannot when $n < 10$.",
+      "statement": "From every initial configuration without towers, every robot must visit every node infinitely often, no two robots may ever be on one node, and no two robots may ever cross one edge in opposite directions. Robots have no common chirality (no common sense of clockwise) [Blin2010Exclusive].",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Blin2010Exclusive",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k \\le 2$, $n \\ge 3$: one robot (Lemma 12) and two robots (Corollary 1) in the 2010 report",
+            "a single robot always has a symmetric snapshot, so the adversary moves it back and forth between two nodes"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Blin2010Exclusive",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k = 3$ and $n < 10$ (Theorem 1); in the 2010 report the proof is given for $n = 4, 5$, the cases $n = 7, 8$ are omitted, and $n = 3, 6, 9$ are referred to the $k \\mid n$ case",
+            "$(n - k) \\mid n$ with $n - k > 2$ (evenly spaced empty nodes, Lemma 5), and $k \\in \\{n - 4, n - 3, n - 2\\}$ from specific symmetric starts (Lemmas 4, 6, 7)"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Ilcinkas2019Exploration",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k$ divides $n$ and $k < n/2$, $n \\ge 3$ (Lemma 1 of the survey, inspired by Lemma 2.1 of [Flocchini2013Ring])",
+            "initial configuration: the $k$ robots evenly spaced",
+            "holds even under FSYNC, with global strong multiplicity detection and for robots with memory; deterministic"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Blin2010Exclusive",
+          "role": "introductory",
+          "agents": "3",
+          "assumes": [
+            "$n \\ge 10$, $3 \\nmid n$",
+            "every initial configuration without towers"
+          ],
+          "note": "Not correct as published: model checking found a collision under ASYNC for $n = 10$ [Berard2016Formal], also found by Doan, Bonnet and Ogata [Doan2017Perpetual] (as reported by [Ilcinkas2019Exploration]); under FSYNC the algorithm was verified collision-free for $n > 10$ [Sangnier2020Verification]. Read in the 2010 research report; the DISC 2010 version was not read."
+        },
+        {
+          "ref": "Berard2016Formal",
+          "role": "best",
+          "agents": "3",
+          "assumes": [
+            "$n \\ge 10$, $\\gcd(n, 3) = 1$",
+            "every initial configuration without towers"
+          ],
+          "note": "Corrects rule RC5 of [Blin2010Exclusive]; model-checked under ASYNC for $n \\in \\{10, 11, 13, 14, 16\\}$ and proved for every such $n$ (Theorems 2 and 3: from a legitimate configuration the ring is explored perpetually, and a legitimate configuration is always reached). The inductive proof was read for its statements only."
+        },
+        {
+          "ref": "DAngelo2015Unified",
+          "role": "other",
+          "agents": "5 \\le k \\le n - 3",
+          "assumes": [
+            "rigid initial configuration (no non-trivial symmetry), without towers",
+            "$n \\ge 10$, $(k, n) \\ne (5, 10)$"
+          ],
+          "note": "Theorems 6 and 7: the same algorithm also clears the ring perpetually (graph searching). Large teams are possible from rigid starts, so the impossibilities for $k \\ge n - 4$ in [Blin2010Exclusive] come from symmetric starts."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Three, for $n \\ge 10$ with $3 \\nmid n$ (two robots never suffice). Three robots are impossible for $n < 10$ (claimed; proofs for $n = 7, 8$ omitted in the report read) and for $3 \\mid n$ when $n > 6$ (Lemma 1 of [Ilcinkas2019Exploration])."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not a measure of perpetual exploration in these papers; no bound on the time between visits is catalogued."
+        }
+      },
+      "open": [
+        "What is the minimum number of robots for exclusive perpetual exploration of a ring whose size is a multiple of 3, from every configuration without towers?",
+        "Would coin flips help in the cases where deterministic exclusive perpetual exploration is impossible? Posed in [Blin2010Exclusive].",
+        "What is the largest team that can explore exclusively and perpetually from every configuration without towers? [Blin2010Exclusive] claim $n - 5$ robots for odd $k \\ge 7$ with $k \\nmid n$, but an SMT check found collisions in their algorithm for 7 and 9 robots on rings of $k + 5$ nodes under FSYNC [Sangnier2020Verification]."
+      ],
+      "notes": "Blin, Milani, Potop-Butucaru and Tixeuil posed the problem for oblivious robots without chirality; their three robots cycle through three legitimate configurations, each round shifting all robots one node [Blin2010Exclusive]. Bérard et al. found a collision in that algorithm by model checking under ASYNC: a move computed from an outdated snapshot meets a later move [Berard2016Formal]. Ilcinkas reports, from the DISC version of [Blin2010Exclusive], that the problem cannot be solved with an even number of robots, even under FSYNC [Ilcinkas2019Exploration]; this claim was not found in the 2010 report and is unverified. From rigid starts, D'Angelo et al. handle every $5 \\le k \\le n - 3$ for $n \\ge 10$ except $(k, n) = (5, 10)$ [DAngelo2015Unified]; Bonnet et al. enumerated all SSYNC protocols for five robots on a ring of 10 nodes and found none (as reported by [Ilcinkas2019Exploration]; abstract of [Bonnet2014Metrics] read). In the text extraction of [DAngelo2015Unified] the relation symbol in the range of $n$ in Theorem 6 is lost; $n \\ge 10$ is taken from its contribution paragraph and Theorem 7.",
       "status": "verified"
     },
     {
       "id": "grid",
-      "title": "Grids, exploration with stop",
+      "title": "Grids, ASYNC, terminating",
       "assumptions": {
         "dynamics": "static",
         "direction": "undirected",
+        "algorithm": "deterministic",
+        "scheduler": "async",
+        "goal": "terminating",
         "topology": "grid"
       },
       "summary": "Three robots explore any grid with at least three nodes (four for $2\\times2$, five for $3\\times3$), which is optimal.",
@@ -257,6 +602,48 @@
       "open": [],
       "notes": "",
       "status": "verified"
+    }
+  ],
+  "further": [
+    {
+      "ref": "Ilcinkas2019Exploration",
+      "note": "Survey of terminating and exclusive perpetual exploration by oblivious robots on rings, trees, lines, grids and tori, with the schedulers and multiplicity detection each bound needs. Read."
+    },
+    {
+      "ref": "Flocchini2010Tree",
+      "note": "Trees: $\\Omega(n)$ robots are needed on some trees; $O(\\log n / \\log\\log n)$ suffice and are needed when the maximum degree is 3. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Flocchini2011Line",
+      "note": "Lines: $k < n$ robots explore an $n$-node line if and only if $k = 3$, $k \\ge 5$, or $k = 4$ with $n$ odd. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Devismes2019Torus",
+      "note": "Tori: at least 5 deterministic robots; 4 probabilistic robots for large tori. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Bonnet2011Grid",
+      "note": "Exclusive perpetual exploration of grids without sense of direction under ASYNC: 3 robots, except the $2 \\times 2$ and $2 \\times 3$ grids. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Chalopin2010Silent",
+      "note": "Terminating exploration of arbitrary graphs with port numbers under ASYNC from rigid configurations: impossible with fewer than 3 robots, a characterisation of the graphs explorable by 3 robots, and every graph explorable by 4 robots and by any odd $k > 3$. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Bonnet2014Metrics",
+      "note": "Enumerates all protocols for exclusive perpetual ring exploration; five robots on a 10-node ring are impossible under SSYNC from rigid starts. Abstract read; result as reported by [Ilcinkas2019Exploration]."
+    },
+    {
+      "ref": "Doan2017Perpetual",
+      "note": "Model checking of the three-robot exclusive perpetual algorithm of [Blin2010Exclusive]; finds a collision, like [Berard2016Formal]. As reported by [Ilcinkas2019Exploration]; not read."
+    },
+    {
+      "ref": "Sangnier2020Verification",
+      "note": "Parameterized verification of ring algorithms for oblivious robots: the three-robot exclusive perpetual algorithm of [Blin2010Exclusive] is collision-free under FSYNC for $n > 10$, and its $n - 5$ algorithm has collisions for 7 and 9 robots. Section 4.5 of the 2017 report read."
+    },
+    {
+      "ref": "Balabonski2018Certified",
+      "note": "Coq framework that certifies impossibility results for robots on graphs, such as the $k \\mid n$ argument for ring exploration. Abstract read."
     }
   ],
   "figure": {

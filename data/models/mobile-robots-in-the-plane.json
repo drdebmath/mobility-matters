@@ -1223,7 +1223,7 @@
       {
         "id": "two",
         "title": "Two robots",
-        "assumptions": "Two robots, variable disorientation, chirality and rigid moves; the 14 models collapse to 13 classes [Kitamura2025TwoRobot], a preprint.",
+        "assumptions": "Two robots, variable disorientation, chirality and rigid moves; the settings collapse to 13 classes [Kitamura2025TwoRobot] [Ninomiya2026Disjunctive], both preprints. [Ninomiya2026Disjunctive] let a robot see when the two robots coincide (no general multiplicity detection); [Kitamura2025TwoRobot] assume no multiplicity detection. Relations cited to [Ninomiya2026Disjunctive] were checked against its statements and the proofs of its Appendices C and D; the auxiliary execution lemmas of its Appendix E, on which those proofs rely, were not checked.",
         "relations": [
           {
             "a": "LUMI^F",
@@ -1231,7 +1231,10 @@
             "b": "FCOM^F",
             "sep": [],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thm 2"
+            "thm": "Thm 2",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ]
           },
           {
             "a": "LUMI^F",
@@ -1239,48 +1242,64 @@
             "b": "FSTA^F",
             "sep": [],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thm 2"
+            "thm": "Thm 2",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ]
           },
           {
             "a": "FSTA^F",
             "rel": ">",
             "b": "OBLOT^F",
             "sep": [
-              "OSP"
+              "CFSM",
+              "VSS"
             ],
-            "ref": "Kitamura2025TwoRobot",
-            "thm": "",
-            "note": "as for general $n$ [Flocchini2019Synchronous]"
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(4), (5); Thm 3.5",
+            "note": "CFSM and VSS are solvable in FSTA$^A$ and FCOM$^A$, both below LUMI$^F$ ≡ FSTA$^F$, and not in OBLOT$^F$."
           },
           {
             "a": "LUMI^F",
             "rel": ">",
             "b": "LUMI^R",
             "sep": [
-              "CGE*"
+              "EPG*"
             ],
-            "ref": "Kitamura2025TwoRobot",
-            "thm": "Thm 6"
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(1) (Lemma D.11)",
+            "also": [
+              "Kitamura2025TwoRobot"
+            ],
+            "note": "[Kitamura2025TwoRobot] Thm 6 separates these with CGE*; [Ninomiya2026Disjunctive] (Remark D.9) argue that CGE*'s coordinatewise floor is not a predicate on trajectories under variable disorientation and replace it by EPG*."
           },
           {
             "a": "FCOM^F",
             "rel": ">",
             "b": "FCOM^R",
             "sep": [
-              "CGE*"
+              "EPG*"
             ],
-            "ref": "Kitamura2025TwoRobot",
-            "thm": "Thm 6"
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(1) (Lemma D.11)",
+            "also": [
+              "Kitamura2025TwoRobot"
+            ],
+            "note": "[Kitamura2025TwoRobot] Thm 6 separates these with CGE*; [Ninomiya2026Disjunctive] (Remark D.9) argue that CGE*'s coordinatewise floor is not a predicate on trajectories under variable disorientation and replace it by EPG*."
           },
           {
             "a": "FSTA^F",
             "rel": ">",
             "b": "FSTA^R",
             "sep": [
-              "CGE*"
+              "EPG*"
             ],
-            "ref": "Kitamura2025TwoRobot",
-            "thm": "Thm 6"
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(1) (Lemma D.11)",
+            "also": [
+              "Kitamura2025TwoRobot"
+            ],
+            "note": "[Kitamura2025TwoRobot] Thm 6 separates these with CGE*; [Ninomiya2026Disjunctive] (Remark D.9) argue that CGE*'s coordinatewise floor is not a predicate on trajectories under variable disorientation and replace it by EPG*."
           },
           {
             "a": "LUMI^R",
@@ -1411,7 +1430,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^S",
@@ -1422,7 +1445,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^S",
@@ -1433,7 +1460,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^S",
@@ -1444,7 +1475,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A_CM",
@@ -1455,7 +1490,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A_CM",
@@ -1466,7 +1505,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A_CM",
@@ -1477,7 +1520,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A_CM",
@@ -1488,7 +1535,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A",
@@ -1499,7 +1550,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A",
@@ -1510,7 +1565,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A",
@@ -1521,7 +1580,11 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
           },
           {
             "a": "FCOM^A",
@@ -1532,7 +1595,315 @@
               "RDAM"
             ],
             "ref": "Kitamura2025TwoRobot",
-            "thm": "Thms 10, 11"
+            "thm": "Thms 10, 11",
+            "also": [
+              "Ninomiya2026Disjunctive"
+            ],
+            "note": "Also separated by CFSM (FSTA$^A$, not FCOM$^S$) and VSS (FCOM$^A$, not FSTA$^R$) [Ninomiya2026Disjunctive] Lemma 3.4(4), (5)."
+          },
+          {
+            "a": "OBLOT^A_M",
+            "rel": "≡",
+            "b": "OBLOT^A_CM",
+            "sep": [],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Prop 3.2"
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": "≡",
+            "b": "FSTA^A_CM",
+            "sep": [],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Prop 3.2"
+          },
+          {
+            "a": "FCOM^A_M",
+            "rel": "≡",
+            "b": "FCOM^A_CM",
+            "sep": [],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "§2.2, citing [Flocchini2023Asynchrony]",
+            "unread": true,
+            "note": "The paper cites [Flocchini2023Asynchrony] for this equivalence; the theorem there was not checked."
+          },
+          {
+            "a": "OBLOT^A_LC",
+            "rel": "≡",
+            "b": "OBLOT^A",
+            "sep": [],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Prop 3.2",
+            "also": [
+              "Flocchini2023Asynchrony"
+            ]
+          },
+          {
+            "a": "FSTA^A_LC",
+            "rel": "≡",
+            "b": "FSTA^A",
+            "sep": [],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Prop 3.2",
+            "also": [
+              "Flocchini2023Asynchrony"
+            ]
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": ">",
+            "b": "OBLOT^R",
+            "sep": [
+              "EPG*"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(1); Thm 3.5"
+          },
+          {
+            "a": "LUMI^R",
+            "rel": ">",
+            "b": "FSTA^R",
+            "sep": [
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(5); Thm 3.5"
+          },
+          {
+            "a": "FSTA^R",
+            "rel": ">",
+            "b": "OBLOT^R",
+            "sep": [
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(4); Thm 3.5"
+          },
+          {
+            "a": "FCOM^S",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(5); Thm 3.5"
+          },
+          {
+            "a": "FSTA^S",
+            "rel": ">",
+            "b": "OBLOT^S",
+            "sep": [
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(4); Thm 3.5"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": ">",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(5); Thm 3.5"
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": ">",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(4); Thm 3.5"
+          },
+          {
+            "a": "FSTA^A",
+            "rel": ">",
+            "b": "OBLOT^A",
+            "sep": [
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Lemma 3.4(4); Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "LUMI^R",
+            "sep": [
+              "EPG*",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^R",
+            "sep": [
+              "EPG*",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "EPG*",
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FCOM^A",
+            "sep": [
+              "EPG*",
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "EPG*",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^A_M",
+            "sep": [
+              "EPG*",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^F",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "EPG*",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FCOM^S",
+            "sep": [
+              "SRO",
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FCOM^A",
+            "sep": [
+              "SRO",
+              "VSS"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FSTA^S",
+            "sep": [
+              "SRO",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FSTA^A_M",
+            "sep": [
+              "SRO",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "OBLOT^R",
+            "rel": "⊥",
+            "b": "FSTA^A",
+            "sep": [
+              "SRO",
+              "CFSM"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "FCOM^A",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "VSS",
+              "MCv"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "FSTA^A_M",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "CFSM",
+              "MCv"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "FSTA^A",
+            "rel": "⊥",
+            "b": "OBLOT^S",
+            "sep": [
+              "CFSM",
+              "MCv"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
+          },
+          {
+            "a": "FSTA^A",
+            "rel": "⊥",
+            "b": "OBLOT^A_M",
+            "sep": [
+              "CFSM",
+              "DMSD"
+            ],
+            "ref": "Ninomiya2026Disjunctive",
+            "thm": "Table 1; Thm 3.5"
           }
         ]
       }
@@ -1731,6 +2102,30 @@
         "refs": [
           "Das2021FiniteMemory"
         ]
+      },
+      {
+        "abbrev": "EPG*",
+        "name": "Perpetual Expansion Preserving Gravity",
+        "definition": "Two robots must forever double the segment joining them while keeping its midpoint at the initial midpoint, read at the times when neither robot moves; replaces CGE* under variable disorientation.",
+        "refs": [
+          "Ninomiya2026Disjunctive"
+        ]
+      },
+      {
+        "abbrev": "CFSM",
+        "name": "Collision-Free Single Move",
+        "definition": "Each of two robots makes exactly one non-null move, and the robots never occupy the same point, even while moving.",
+        "refs": [
+          "Ninomiya2026Disjunctive"
+        ]
+      },
+      {
+        "abbrev": "VSS",
+        "name": "Visit Swap and Stop",
+        "definition": "With $A = 2a_0 - b_0$ and $B = 2b_0 - a_0$, every move ends in $\\{A, a_0, b_0, B\\}$; the robots first form $(B, b_0)$, $(a_0, A)$ or $(B, A)$ with move counts $(1,0)$, $(0,1)$ or $(1,1)$, then stop forever in one of $(a_0,b_0)$, $(B,b_0)$, $(a_0,A)$, $(B,A)$.",
+        "refs": [
+          "Ninomiya2026Disjunctive"
+        ]
       }
     ],
     "other": [
@@ -1743,7 +2138,8 @@
     "conflicts": [
       "Rendezvous by FSTA robots in SSYNC [Flocchini2016Constant] needs each robot's unit of distance to stay fixed; several separations use it, and under variable disorientation it is impossible [Masuzawa2026Disorientation].",
       "One paper uses rendezvous by FSTA robots in ASYNC without proof, under variable disorientation where it is impossible; five FSTA-versus-OBLOT relations rest on it [Flocchini2023Asynchrony] [Masuzawa2026Disorientation]. FSTA$^A$ > OBLOT$^A$ still holds by another separator [Das2021FiniteMemory].",
-      "The Single Move problem is attributed to [Flocchini2023Asynchrony] by [Kitamura2025TwoRobot] and [Naito2025Beyond], but neither version of that paper contains it.",
+      "The Single Move problem is attributed to [Flocchini2023Asynchrony] by [Kitamura2025TwoRobot], [Naito2025Beyond] and [Ninomiya2026Disjunctive], but neither version of that paper contains it.",
+      "Center of Gravity Expansion (CGE, CGE*) prescribes landing points by a coordinatewise floor; under variable disorientation this is either not computable or not a predicate on the trajectory [Ninomiya2026Disjunctive] (Remark D.9). [Kitamura2025TwoRobot] Thm 6 uses CGE* to separate FSYNC from RSYNC for two robots; [Ninomiya2026Disjunctive] replace it by EPG*.",
       "Simulation costs disagree across papers: for LUMI under SSYNC simulated by FCOM under RSYNC, the colour counts reported for a simulated light with $c$ colours are $O(c\\cdot 2^c)$, $64c\\cdot 2^c$ and $64c^2$ [Buchin2022Energy] [Nakajima2024Simulations] [Kitamura2025TwoRobot].",
       "Two papers each claim the first separation of SSYNC from ASYNC for oblivious robots, under different assumptions: limited visibility with imprecision [Kirkpatrick2024Separating], and full visibility [Flocchini2023Asynchrony]."
     ],
@@ -1752,7 +2148,7 @@
       "The landscape without chirality and rigid moves, especially under ASYNC [Flocchini2019Synchronous] [Kitamura2025TwoRobot].",
       "Can FSTA robots solve rendezvous in ASYNC with a fixed unit of distance [Flocchini2016Constant] [Masuzawa2026Disorientation]?",
       "Is LUMI equally strong under SSYNC and ASYNC for opaque robots [Feletti2025Transparency]?",
-      "Which model classes have no problem solvable there but in no strictly weaker model (the \"white regions\") [Naito2025Beyond]?",
+      "Which model classes have no problem solvable there but in no strictly weaker model (the \"white regions\") [Naito2025Beyond]? For two robots with variable disorientation, chirality and rigid moves there are none: every upward-closed set of the 13 classes is the exact solvability set of some task [Ninomiya2026Disjunctive], a preprint (the exactness proofs, its Appendices F and G, were not checked here). The question is open for three or more robots.",
       "Schedulers beyond the atomicity-defined ones, and robots with energy constraints [Flocchini2023Asynchrony] [Buchin2022Energy]."
     ]
   }

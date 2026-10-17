@@ -246,6 +246,16 @@
       "status": "verified"
     }
   ],
+  "further": [
+    {
+      "ref": "Bournat2017Perpetual",
+      "note": "Perpetual exploration of connected-over-time rings by anonymous FSYNC robots with persistent memory and local weak multiplicity detection: $k \\ge 3$ robots for $n > k$ (Theorem III.1); two robots fail for $n > 3$ and one for $n > 2$ (Theorems IV.1, V.1), and suffice for $n = 3$ and $n = 2$ (Theorems IV.2, V.2). Read."
+    },
+    {
+      "ref": "Bournat2019Highly",
+      "note": "Self-stabilizing perpetual exploration of connected-over-time rings by FSYNC robots with distinct identifiers: three robots for rings of at least four nodes (Theorem 4.1); two robots are impossible for $n \\ge 4$ (Theorem 3.1). Read."
+    }
+  ],
   "figure": {
     "caption": "Live exploration of a dynamic ring [DiLuna2020Dynamic]: in every round an adversary removes at most one edge of the ring (1-interval connectivity; the missing edge is dashed red). Two agents start on one node, know $N = n = 8$ and walk in opposite directions, waiting while their next edge is missing; the adversary can block only one of them, so every round visits a new node, and after $N - 1$ rounds both stop. One agent alone can be blocked forever.",
     "view": [

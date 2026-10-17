@@ -2816,7 +2816,9 @@
     "venue": "Algorithmica 65(3):562–583 (OPODIS 2007)",
     "year": 2013,
     "first_year": 2007,
-    "doi": "10.1007/s00453-011-9611-5"
+    "doi": "10.1007/s00453-011-9611-5",
+    "url": "https://hal.science/hal-00912499",
+    "note": "Read in the HAL author version of the journal paper and the OPODIS 2007 version (hal-00339884)."
   },
   "Lamani2010Ring": {
     "authors": [
@@ -2825,10 +2827,11 @@
       "Sébastien Tixeuil"
     ],
     "title": "Optimal Deterministic Ring Exploration with Oblivious Asynchronous Robots",
-    "venue": "SIROCCO 2010",
+    "venue": "SIROCCO 2010, LNCS 6058, pp. 183–196",
     "year": 2010,
     "doi": "10.1007/978-3-642-13284-1_15",
-    "arxiv": "0910.0832"
+    "arxiv": "0910.0832",
+    "note": "Read in arXiv 0910.0832v1 (October 2009), which has an appendix with a four-robot SSYNC algorithm for odd n; the SIROCCO version was not read."
   },
   "Devismes2012Grid": {
     "authors": [
@@ -4962,5 +4965,283 @@
     "arxiv": "1204.2955",
     "url": "https://arxiv.org/abs/1204.2955",
     "note": "Metadata from arXiv. Abstract read."
+  },
+  "Devismes2013Probabilistic": {
+    "authors": [
+      "Stéphane Devismes",
+      "Franck Petit",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Optimal probabilistic ring exploration by semi-synchronous oblivious robots",
+    "venue": "Theoretical Computer Science 498:10–27 (SIROCCO 2009, LNCS 5869, pp. 195–208)",
+    "year": 2013,
+    "first_year": 2009,
+    "doi": "10.1016/j.tcs.2013.05.031",
+    "arxiv": "0902.1834",
+    "url": "https://inria.hal.science/inria-00360305",
+    "note": "Metadata from Crossref (SIROCCO version: doi 10.1007/978-3-642-11476-2_16). Read in INRIA research report RR-6838 (February 2009, titled 'Optimal Probabilistic Ring Exploration by Asynchronous Oblivious Robots', atomic cycles): model, Corollary 2, Theorem 3. The journal version was not read."
+  },
+  "Devismes2010Small": {
+    "authors": [
+      "Stéphane Devismes"
+    ],
+    "title": "Optimal exploration of small rings",
+    "venue": "WRAS 2010 (Third International Workshop on Reliability, Availability, and Security), 9:1–9:6",
+    "year": 2010,
+    "doi": "10.1145/1953563.1953571",
+    "note": "Metadata from Crossref. Not read: no open copy found. Described by [Flocchini2013Ring] as an optimal probabilistic algorithm for rings of size smaller than eight."
+  },
+  "Blin2010Exclusive": {
+    "authors": [
+      "Lélia Blin",
+      "Alessia Milani",
+      "Maria Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Exclusive perpetual ring exploration without chirality",
+    "venue": "DISC 2010, LNCS 6343, pp. 312–327",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-15763-9_29",
+    "url": "https://inria.hal.science/inria-00464206",
+    "note": "Metadata from Crossref. Read in the HAL research report inria-00464206 (2010): model, Lemmas 1–14, Theorem 1. The DISC version was not read."
+  },
+  "Berard2016Formal": {
+    "authors": [
+      "Béatrice Bérard",
+      "Pascal Lafourcade",
+      "Laure Millet",
+      "Maria Potop-Butucaru",
+      "Yann Thierry-Mieg",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Formal verification of mobile robot protocols",
+    "venue": "Distributed Computing 29(6):459–487",
+    "year": 2016,
+    "doi": "10.1007/s00446-016-0271-1",
+    "url": "https://hal.sorbonne-universite.fr/hal-01344903",
+    "note": "Metadata from Crossref. Read in the HAL author version: Sections 6–7, Theorems 2–3."
+  },
+  "DAngelo2015Unified": {
+    "authors": [
+      "Gianlorenzo D'Angelo",
+      "Gabriele Di Stefano",
+      "Alfredo Navarra",
+      "Nicolas Nisse",
+      "Karol Suchan"
+    ],
+    "title": "Computing on rings by oblivious robots: a unified approach for different tasks",
+    "venue": "Algorithmica 72(4):1055–1096 (IPDPS Workshops 2013, APDCM)",
+    "year": 2015,
+    "first_year": 2013,
+    "doi": "10.1007/s00453-014-9892-6",
+    "url": "https://inria.hal.science/hal-01168428",
+    "note": "Metadata from Crossref. Read in the HAL author version: contribution, Theorems 1–8."
+  },
+  "Bonnet2014Metrics": {
+    "authors": [
+      "François Bonnet",
+      "Xavier Défago",
+      "Franck Petit",
+      "Maria Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Discovering and assessing fine-grained metrics in robot networks protocols",
+    "venue": "SRDS Workshops 2014, pp. 50–59",
+    "year": 2014,
+    "doi": "10.1109/SRDSW.2014.34",
+    "note": "Metadata from Crossref. Abstract read (OpenAlex); no open copy found. A brief announcement appeared at SSS 2012 (doi 10.1007/978-3-642-33536-5_28)."
+  },
+  "Doan2017Perpetual": {
+    "authors": [
+      "Ha Thi Thu Doan",
+      "François Bonnet",
+      "Kazuhiro Ogata"
+    ],
+    "title": "Model checking of a mobile robots perpetual exploration algorithm",
+    "venue": "SOFL+MSVL 2016, LNCS 10189, pp. 201–219",
+    "year": 2017,
+    "first_year": 2016,
+    "doi": "10.1007/978-3-319-57708-1_12",
+    "note": "Metadata from Crossref. Not read: no open copy found."
+  },
+  "Sangnier2020Verification": {
+    "authors": [
+      "Arnaud Sangnier",
+      "Nathalie Sznajder",
+      "Maria Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Parameterized verification of algorithms for oblivious robots on a ring",
+    "venue": "Formal Methods in System Design 56(1–3):55–89 (FMCAD 2017, pp. 212–219)",
+    "year": 2020,
+    "first_year": 2017,
+    "doi": "10.1007/s10703-019-00335-y",
+    "arxiv": "1706.05193",
+    "url": "https://hal.sorbonne-universite.fr/hal-01540339",
+    "note": "Metadata from Crossref (FMCAD version: doi 10.23919/FMCAD.2017.8102262). Section 4.5 read in the 2017 HAL research report; the journal version was not read."
+  },
+  "Ilcinkas2019Exploration": {
+    "authors": [
+      "David Ilcinkas"
+    ],
+    "title": "Oblivious robots on graphs: exploration",
+    "venue": "Distributed Computing by Mobile Entities, LNCS 11340, pp. 218–233",
+    "year": 2019,
+    "doi": "10.1007/978-3-030-11072-7_9",
+    "url": "https://hal.science/hal-02127691",
+    "note": "Metadata from Crossref. Survey; read in the HAL author version."
+  },
+  "Datta2015Enabling": {
+    "authors": [
+      "Ajoy K. Datta",
+      "Anissa Lamani",
+      "Lawrence L. Larmore",
+      "Franck Petit"
+    ],
+    "title": "Enabling ring exploration with myopic oblivious robots",
+    "venue": "IPDPS Workshops 2015 (APDCM), pp. 490–499",
+    "year": 2015,
+    "doi": "10.1109/IPDPSW.2015.137",
+    "note": "Metadata from Crossref. Abstract read (OpenAlex); no open copy found."
+  },
+  "Bournat2017Perpetual": {
+    "authors": [
+      "Marjorie Bournat",
+      "Swan Dubois",
+      "Franck Petit"
+    ],
+    "title": "Computability of perpetual exploration in highly dynamic rings",
+    "venue": "ICDCS 2017, pp. 794–804",
+    "year": 2017,
+    "doi": "10.1109/ICDCS.2017.80",
+    "arxiv": "1612.05767",
+    "url": "https://inria.hal.science/hal-01548109",
+    "note": "Metadata from Crossref. Read in the HAL version: model, Table I, Theorems III.1–V.2."
+  },
+  "Bournat2019Highly": {
+    "authors": [
+      "Marjorie Bournat",
+      "Ajoy K. Datta",
+      "Swan Dubois"
+    ],
+    "title": "Self-stabilizing robots in highly dynamic environments",
+    "venue": "Theoretical Computer Science 772:88–110 (SSS 2016, LNCS 10083, pp. 54–69)",
+    "year": 2019,
+    "first_year": 2016,
+    "doi": "10.1016/j.tcs.2018.11.026",
+    "arxiv": "1609.06161",
+    "url": "https://inria.hal.science/hal-02413327",
+    "note": "Metadata from Crossref (SSS version: doi 10.1007/978-3-319-49259-9_5). Read in the HAL author manuscript: model, Theorems 3.1, 3.2, 4.1, 5.1."
+  },
+  "Balabonski2018Certified": {
+    "authors": [
+      "Thibaut Balabonski",
+      "Robin Pelle",
+      "Lionel Rieg",
+      "Sébastien Tixeuil"
+    ],
+    "title": "A foundational framework for certified impossibility results with mobile robots on graphs",
+    "venue": "ICDCN 2018, 5:1–5:10",
+    "year": 2018,
+    "doi": "10.1145/3154273.3154321",
+    "note": "Metadata from Crossref. Abstract read (OpenAlex)."
+  },
+  "Chalopin2010Silent": {
+    "authors": [
+      "Jérémie Chalopin",
+      "Paola Flocchini",
+      "Bernard Mans",
+      "Nicola Santoro"
+    ],
+    "title": "Network exploration by silent and oblivious robots",
+    "venue": "WG 2010, LNCS 6410, pp. 208–219",
+    "year": 2010,
+    "doi": "10.1007/978-3-642-16926-7_20",
+    "note": "Metadata from Crossref. Not read: no open copy found."
+  },
+  "Flocchini2010Tree": {
+    "authors": [
+      "Paola Flocchini",
+      "David Ilcinkas",
+      "Andrzej Pelc",
+      "Nicola Santoro"
+    ],
+    "title": "Remembering without memory: tree exploration by asynchronous oblivious robots",
+    "venue": "Theoretical Computer Science 411(14–15):1583–1598 (SIROCCO 2008)",
+    "year": 2010,
+    "first_year": 2008,
+    "doi": "10.1016/j.tcs.2010.01.007",
+    "url": "https://hal.science/hal-00464588",
+    "note": "Metadata from Crossref. Not read (open copy on HAL)."
+  },
+  "Flocchini2011Line": {
+    "authors": [
+      "Paola Flocchini",
+      "David Ilcinkas",
+      "Andrzej Pelc",
+      "Nicola Santoro"
+    ],
+    "title": "How many oblivious robots can explore a line",
+    "venue": "Information Processing Letters 111(20):1027–1031",
+    "year": 2011,
+    "doi": "10.1016/j.ipl.2011.07.018",
+    "note": "Metadata from Crossref. Not read."
+  },
+  "Devismes2019Torus": {
+    "authors": [
+      "Stéphane Devismes",
+      "Anissa Lamani",
+      "Franck Petit",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Optimal torus exploration by oblivious robots",
+    "venue": "Computing 101(9):1241–1264 (NETYS 2015)",
+    "year": 2019,
+    "first_year": 2015,
+    "doi": "10.1007/s00607-018-0595-8",
+    "url": "https://hal.science/hal-02420598",
+    "note": "Metadata from Crossref (online 2018). Not read (open copy on HAL)."
+  },
+  "Bonnet2011Grid": {
+    "authors": [
+      "François Bonnet",
+      "Alessia Milani",
+      "Maria Potop-Butucaru",
+      "Sébastien Tixeuil"
+    ],
+    "title": "Asynchronous exclusive perpetual grid exploration without sense of direction",
+    "venue": "OPODIS 2011, LNCS 7109, pp. 251–265",
+    "year": 2011,
+    "doi": "10.1007/978-3-642-25873-2_18",
+    "url": "https://hal.science/hal-00626155",
+    "note": "Metadata from Crossref. Not read (open copy on HAL)."
+  },
+  "Kumar2026Grid": {
+    "authors": [
+      "Manish Kumar",
+      "Anisur Rahaman Molla",
+      "Debasish Pattanayak",
+      "Subhajit Pramanick"
+    ],
+    "title": "Beyond the Boundary: Optimal Grid Dispersion by Spread, Reverse, and Collect",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2610.16935",
+    "url": "https://arxiv.org/abs/2610.16935",
+    "note": "Preprint (v1, 12 October 2026), not peer reviewed. Oriented square grids with local communication; the algorithm also runs on the infinite oriented grid."
+  },
+  "Ninomiya2026Disjunctive": {
+    "authors": [
+      "Tsukasa Ninomiya",
+      "Shota Naito",
+      "Naoki Kitamura",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "A Minimum Exact Disjunctive Basis for Two-Robot Solvability Profiles",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2610.17677",
+    "note": "Preprint, not peer reviewed."
   }
 }
