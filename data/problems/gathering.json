@@ -53,7 +53,7 @@
         "variant": "async-weak",
         "ref": "Cieliebak2012Gathering",
         "idea": "1. If exactly one point is a multiplicity, walk straight to it.\n2. Otherwise, look at the shape of the configuration and choose a point that every robot identifies in the same way despite their different local coordinate systems (for example the centre of a symmetric configuration), and move so that exactly one multiplicity appears.\n3. From then on every robot follows rule 1, along paths that never create a second multiplicity.",
-        "analysis": "A multiplicity is a landmark that no local coordinate system can hide: it looks special to every robot. Step 2 is the hard part, because the robots agree on no direction and the scheduler may stop a robot partway; Cieliebak, Flocchini, Prencipe and Santoro solve it with a case analysis of configuration types and gather $n \\ge 3$ robots in ASYNC from every initial configuration [Cieliebak2012Gathering], the catalogue's introductory and current best result for this setting. Time is not analysed. The outline above is the idea of the approach and was not checked against the paper's full text.",
+        "analysis": "A multiplicity is a landmark that no local coordinate system can hide: it looks special to every robot. Step 2 is the hard part, because the robots agree on no direction and the scheduler may stop a robot partway; Cieliebak, Flocchini, Prencipe and Santoro solve it with a case analysis of configuration types and gather $n \\ge 3$ robots in ASYNC from every initial configuration [Cieliebak2012Gathering], the catalogue's introductory and current best result for this setting. In their algorithm a robot first checks for a single multiplicity; otherwise it checks for one symmetric shape (biangular) and moves to its centre; otherwise the robots elect some of themselves from the angles they form around the centre of the smallest enclosing circle: a single elected robot walks onto another robot, and several elected robots walk to the centre. Collisions anywhere else are avoided. Time is not analysed.",
         "why_it_matters": "It shows how a tiny sensing ability, telling one robot from several, makes an unsolvable problem solvable."
       },
       {
@@ -80,7 +80,7 @@
         "variant": "limited-compass",
         "ref": "Flocchini2005Limited",
         "idea": "Now each robot sees only the robots within distance $V$ (its **visibility radius**), but all robots agree on north and east (a **common compass**).\n\n1. If you see a robot to your left, or above you on your own vertical line, do nothing.\n2. If you see robots only below you on your vertical line, move down towards the nearest one.\n3. If you see robots only to your right, move horizontally to the vertical line of the nearest one.\n4. If you see robots both below you and to your right, make a diagonal move right and down, chosen so that you lose sight of nobody.",
-        "analysis": "Robots only move right or down and never beyond the rightmost vertical line that holds a robot in the initial configuration, so they collect on that line and then at its lowest occupied point; the delicate part of the proof is that nobody is left behind out of sight. Flocchini, Prencipe, Santoro and Widmayer prove that this gathers ASYNC robots with non-rigid moves (Theorem 4.2 of [Flocchini2005Limited]), provided the initial configuration is connected (robots joined when at most $V$ apart); a disconnected initial configuration cannot be gathered at all. With agreement on one axis only, time linear in the initial diameter is achievable and optimal [Poudel2021TimeOptimal].",
+        "analysis": "Robots only move right or down and never beyond the rightmost vertical line that holds a robot in the initial configuration, so they collect on that line and then at its lowest occupied point; the delicate part of the proof is that nobody is left behind out of sight. Flocchini, Prencipe, Santoro and Widmayer prove that this gathers ASYNC robots with non-rigid moves (Theorem 4.2 of [Flocchini2005Limited]), provided the initial configuration is connected (robots joined when at most $V$ apart); a disconnected initial configuration cannot be gathered at all. With rigid moves, a common compass gathers the robots at a point in time linear in the initial diameter, which is optimal; with agreement on one axis only, the same time brings them onto a horizontal segment of length 1, not to a point [Poudel2021TimeOptimal].",
         "why_it_matters": "It shows how a shared direction can replace global vision: robots that see little can still agree where to go."
       }
     ]
@@ -212,7 +212,7 @@
           "role": "best",
           "time": "\\text{finite}",
           "colours": "0",
-          "note": "Introductory and current best: solvable \"for any $n > 2$ and any initial configuration\", with non-rigid moves."
+          "note": "Introductory and current best: solvable \"for any $n > 2$ and any initial configuration\", with non-rigid moves and weak multiplicity detection (a robot sees \"none, one, or more than one\" robot at a point). Theorem 5.36 covers $n \\ge 5$; for $n = 3, 4$ the paper relies on earlier work of Cieliebak and Prencipe (SIROCCO 2002)."
         }
       ],
       "optimality": {
@@ -411,9 +411,10 @@
           "assumes": [
             "strong multiplicity detection",
             "chirality",
-            "any $f < n$"
+            "any $f < n$",
+            "initial configuration not bivalent"
           ],
-          "note": "Wait-free; arbitrary initial configurations."
+          "note": "Wait-free; every initial configuration except the bivalent one (two points holding $n/2$ robots each), from which gathering is impossible."
         },
         {
           "ref": "Bramas2015WaitFree",
@@ -422,8 +423,11 @@
           "colours": "0",
           "assumes": [
             "strong multiplicity detection",
-            "no chirality"
-          ]
+            "no chirality",
+            "$f \\le n-1$",
+            "initial configuration not bivalent"
+          ],
+          "note": "Wait-free without chirality, in SSYNC with non-rigid moves (minimum distance $\\delta$), from every configuration that is not bivalent. Checked against the full text."
         },
         {
           "ref": "Pattanayak2019Crash",
@@ -581,19 +585,72 @@
         }
       },
       "open": [],
-      "notes": "Checked against the full text of [Flocchini2005Limited] (TCS 2005; preliminary version STACS 2001): robots are oblivious, anonymous, fully asynchronous (ASYNC), with non-rigid moves that cover at least a distance $\\delta_r > 0$, no multiplicity detection, and \"orientation\": agreement on the directions and orientations of both axes, but not on the unit distance or the origin. The authors conclude that \"with respect to gathering, orientation is at least as powerful as instantaneous movements\".",
+      "notes": "Checked against the full text of [Flocchini2005Limited] (TCS 2005; preliminary version STACS 2001): robots are oblivious, anonymous, fully asynchronous (ASYNC), with non-rigid moves that cover at least a distance $\\delta_r > 0$, no multiplicity detection, and \"orientation\": agreement on the directions and orientations of both axes, but not on the unit distance or the origin. The authors conclude that \"with respect to gathering, orientation is at least as powerful as instantaneous movements\". With rigid moves added (setting *Limited visibility with a compass, rigid, ASYNC*), Poudel and Sharma gather the robots at a point in $O(\\Delta_0)$ epochs, which is optimal (Theorem 3 of [Poudel2021TimeOptimal], visibility radius $V = \\sqrt{10}$).",
+      "status": "verified"
+    },
+    {
+      "id": "limited-compass-rigid",
+      "title": "Limited visibility with a compass, rigid, ASYNC",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "movement": "rigid",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "With a common compass and rigid moves, asynchronous robots with limited visibility gather at a point in time linear in the initial diameter, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\Delta_0)",
+          "ref": "Poudel2021TimeOptimal",
+          "bottleneck": "distance",
+          "preconditions": [
+            "$\\Delta_0$ = Euclidean diameter of the initial configuration",
+            "called the trivial lower bound in [Poudel2021TimeOptimal]: a robot moves at most a constant distance per cycle, inside its axis-aligned $2 \\times 2$ square"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Poudel2021TimeOptimal",
+          "role": "best",
+          "time": "O(\\Delta_0)",
+          "colours": "0",
+          "assumes": [
+            "visibility radius $V = \\sqrt{10}$",
+            "two robots are joined when each lies in the axis-aligned $2 \\times 2$ square centred at the other; the initial graph is connected"
+          ],
+          "note": "Current best (Theorem 3): all robots gather at one point in $O(\\Delta_0)$ epochs; robots that occupy one point are not merged. Finite-time gathering in this setting already follows from the non-rigid algorithm of [Flocchini2005Limited]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\Delta_0)$ epochs."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Does $O(\\Delta_0)$-epoch gathering need rigid moves, or a visibility radius larger than the connectivity range [Poudel2021TimeOptimal]?"
+      ],
+      "notes": "Poudel and Sharma conjecture that with viewing and connectivity ranges of 1 no $O(\\Delta_0)$ algorithm exists, even with a compass. Checked against the full text of [Poudel2021TimeOptimal] (Information 2021; Theorems 2 and 3, model in Section 2).",
       "status": "verified"
     },
     {
       "id": "limited-one-axis",
-      "title": "Limited visibility, one common axis, ASYNC",
+      "title": "Limited visibility, one common axis, rigid, ASYNC",
       "assumptions": {
         "opacity": "transparent",
         "faults": "none",
+        "movement": "rigid",
         "frames": "one-axis",
         "body": "point"
       },
-      "summary": "With one common axis, asynchronous robots with limited visibility gather in time linear in the initial diameter, which is optimal.",
+      "summary": "With one common axis and rigid moves, asynchronous robots with limited visibility reach a horizontal segment of length 1 in time linear in the initial diameter; gathering at a point is not shown.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -611,21 +668,27 @@
           "role": "best",
           "time": "O(\\Delta_0)",
           "colours": "0",
-          "note": "Introductory and current best; FSYNC $O(g)$, $g$ the diameter (in hops) of the initial visibility graph, was known before."
+          "note": "Introductory and current best (Theorem 1): a relaxed gathering, all robots on a horizontal segment of length 1 not fixed in advance, in $O(\\Delta_0)$ epochs; robots that occupy one point are not merged. FSYNC $O(g)$, $g$ the diameter (in hops) of the initial visibility graph, was known before.",
+          "assumes": [
+            "visibility radius $V = \\sqrt{10}$",
+            "two robots are joined when each lies in the axis-aligned $2 \\times 2$ square centred at the other; the initial graph is connected"
+          ]
         }
       ],
       "optimality": {
         "time": {
-          "status": "tight",
-          "note": "$\\Theta(\\Delta_0)$."
+          "status": "unknown",
+          "note": "$\\Theta(\\Delta_0)$ epochs for the relaxed task (a segment of length 1); no bound is recorded for gathering at a point with one common axis."
         },
         "colours": {
           "status": "tight",
           "note": "No colours."
         }
       },
-      "open": [],
-      "notes": "",
+      "open": [
+        "Can asynchronous robots with one common axis and limited visibility gather at a point, and in $O(\\Delta_0)$ epochs? [Poudel2021TimeOptimal] reach only a horizontal segment of length 1, because two robots on a horizontal line, disagreeing on east and west, may swap places forever."
+      ],
+      "notes": "Checked against the full text of [Poudel2021TimeOptimal] (Information 2021). The variant was previously recorded without rigid moves and as gathering at a point; the paper assumes rigid moves and proves only relaxed gathering for one common axis (Definition 3, Theorem 1). With a common compass the same algorithm gathers at a point in $O(\\Delta_0)$ epochs (Theorem 3), (setting *Limited visibility with a compass, rigid, ASYNC*).",
       "status": "verified"
     },
     {
@@ -656,7 +719,7 @@
           "role": "introductory",
           "time": "O(n^2)",
           "colours": "0",
-          "note": "Go-To-The-Center; $\\Theta(n^2)$ for that algorithm (as restated by [Castenow2022Unifying])."
+          "note": "The algorithm of Ando, Oasa, Suzuki and Yamashita (move towards the centre of the smallest enclosing circle of the visible robots, as far as all of them stay visible), called Go-To-The-Center in [Castenow2022Unifying]: $\\Theta(n^2)$ rounds for that algorithm (Theorems 5.1 and 6.14)."
         },
         {
           "ref": "Castenow2022Unifying",
@@ -1486,7 +1549,11 @@
           "role": "introductory",
           "time": "\\text{finite}",
           "colours": "0",
-          "note": "As described by [GanChaudhuri2015Leader]; not read."
+          "note": "A short paper with no main theorem: an algorithm for $n \\ge 5$ asynchronous oblivious transparent fat robots that gathers them \"if no symmetric configuration [is] encountered during run time\"; excluding such configurations is left open.",
+          "assumes": [
+            "$n \\ge 5$",
+            "robots start separated"
+          ]
         },
         {
           "ref": "GanChaudhuri2015Leader",
@@ -1514,7 +1581,7 @@
       "open": [
         "Gathering transparent fat robots from symmetric starts; the paper proves no general impossibility [GanChaudhuri2015Leader]."
       ],
-      "notes": "Gathering at a given point with limited visibility (dense packing around the point) is a different goal; it is studied by Cord-Landwehr et al. (SOFSEM 2011) and Sharma et al. (TAAS 2017), not yet read. Checked against the full text of [GanChaudhuri2015Leader] (arXiv 1208.4484).",
+      "notes": "Gathering at a given point with limited visibility (dense packing around the point) is a different goal; it is studied by Cord-Landwehr et al. (SOFSEM 2011) and Sharma et al. (TAAS 2017), not yet read. Checked against the full texts of [GanChaudhuri2015Leader] (arXiv 1208.4484) and [GanChaudhuri2010Transparent].",
       "status": "verified"
     }
   ],

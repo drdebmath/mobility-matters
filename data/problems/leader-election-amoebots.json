@@ -33,7 +33,7 @@
         "variant": "stationary-chirality",
         "ref": "Chalopin2026Stationary",
         "idea": "Take three particles forming a small triangle, and suppose particles never move and the scheduler may activate all three at the same moment. Each particle sees the same picture: two neighbours, one to its left and one to its right (they have chirality, so 'left' means the same to all). They start in the same state, so in their first activation they compute the same thing and write the same thing. After that activation they are again in identical states with identical views, and so on forever. Whatever a deterministic algorithm (one that flips no coins) does, either all three become leader or none does [Chalopin2026Stationary].",
-        "analysis": "The argument only uses symmetry: an algorithm cannot tell apart particles whose surroundings are rotated copies of each other. The same reasoning shows that a configuration with six-fold symmetry may end with six leaders, which is why stationary particles with chirality elect up to six leaders [Bazzi2019Stationary]. To get exactly one leader, papers add something that breaks the symmetry: coin flips [Derakhshandeh2015Leader], a scheduler that activates one particle at a time [Briones2023Asynchronous], or a common direction [Chalopin2026Stationary].",
+        "analysis": "The argument only uses symmetry: an algorithm cannot tell apart particles whose surroundings are rotated copies of each other. The same reasoning shows that a configuration with six-fold symmetry cannot end with fewer than six leaders, which is why stationary particles with chirality elect up to six leaders [Bazzi2019Stationary]. To get exactly one leader, papers add something that breaks the symmetry: coin flips [Derakhshandeh2015Leader], a scheduler that activates one particle at a time [Briones2023Asynchronous], or a common direction [Chalopin2026Stationary].",
         "why_it_matters": "Symmetry is the basic obstacle in all of programmable matter; it explains why results say 'at most three' or 'at most six' leaders."
       },
       {
@@ -385,21 +385,35 @@
         "orientation": "chirality",
         "movement": "stationary"
       },
-      "statement": "Up to six leaders may be elected.",
-      "summary": "Without moving, particles with chirality elect at most six leaders in $O(n^2)$ rounds, holes allowed.",
-      "lower_bounds": [],
+      "statement": "Elect a unique leader when the configuration allows it; otherwise elect $k$ leaders, where $k \\in \\{2, 3, 6\\}$ is the symmetricity of the configuration. Holes are allowed.",
+      "summary": "Without moving, particles with chirality elect a unique leader unless the configuration is $k$-symmetric, and then $k \\in \\{2, 3, 6\\}$ leaders, which cannot be avoided; holes allowed, $O(n^2)$ rounds as stated.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{unique leader impossible}",
+          "ref": "Bazzi2019Stationary",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Section 5.3: deterministic, stationary algorithms",
+            "a configuration with $k$-fold rotational symmetry, $k \\in \\{2, 3, 6\\}$: fewer than $k$ leaders cannot be elected",
+            "weak scheduler: all particles read their neighbours' memory, then all write, and the cycle repeats",
+            "holds even with chirality"
+          ],
+          "note": "With a strong scheduler symmetry can be broken without moving, for example between two particles (Section 6)."
+        }
+      ],
       "results": [
         {
           "ref": "Bazzi2019Stationary",
           "role": "best",
           "time": "O(n^2)",
-          "note": "Introductory and current best; at most six leaders."
+          "note": "Introductory and current best: a unique leader whenever the configuration is not $k$-symmetric, otherwise exactly $k$ leaders (Sections 4–6). First 1, 2, 3 or 6 candidates are elected on the outer boundary by merging stretches (runs of consecutive points along the boundary, each carrying the sum of the $\\pm 1$ labels of its points, at most 6), then candidates grow trees and compare them. The $O(n^2)$ bound is stated in the abstract (as steps) and in Table 1 (as rounds); the paper gives no proof of it."
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "—"
+          "note": "No round lower bound; the $O(n^2)$ upper bound is stated without proof. A unique leader is impossible on $k$-symmetric configurations, so the relaxation to $k$ leaders is necessary."
         },
         "moves": {
           "status": "tight",
@@ -407,10 +421,11 @@
         }
       },
       "open": [
-        "Is a unique leader ever impossible for stationary particles with chirality? Dufoulon et al. say this was shown in [Bazzi2019Stationary], at least for a weak scheduler [Dufoulon2021Efficient]; the theorem was not read."
+        "Prove, or improve, the $O(n^2)$-round bound of [Bazzi2019Stationary], which the paper states without proof, and give a lower bound on rounds.",
+        "Elect a bounded number of leaders deterministically, without moving, under the weak scheduler and without chirality, on configurations with holes; Bazzi and Briones conjecture that it is possible [Bazzi2019Stationary]."
       ],
-      "notes": "Bounds are from the table of Dufoulon, Kutten and Moses [Dufoulon2021Efficient]; the abstract of [Bazzi2019Stationary] was not read.",
-      "status": "draft"
+      "notes": "Model (Section 2): anonymous particles with finite memory and chirality, all contracted, connected, holes allowed; a particle reads its neighbours' memory and writes its own, but not in one atomic step, and the scheduler may activate a particle any finite number of times before another. The question whether a unique leader is ever impossible here (raised from [Dufoulon2021Efficient]) is answered by Section 5.3 of [Bazzi2019Stationary]: yes, on every $k$-symmetric configuration with $k \\in \\{2, 3, 6\\}$. Bazzi and Briones report that [Emek2019Deterministic] use their algorithm, announced at SSS 2018, as a subroutine. Checked against the full text.",
+      "status": "verified"
     },
     {
       "id": "stationary-direction",
@@ -645,7 +660,7 @@
           "definition": "Particles may expand and contract during the election."
         }
       ],
-      "origin": "The early leader-election algorithms for amoebots only exchanged messages, and \"did not use the movement ability as an aid to the computation\" [Dufoulon2021Efficient]. Emek et al. showed that movement lets particles elect a unique leader deterministically with no assumption on chirality or holes; the main idea is \"the usage of the ability of the amoebots to move, which previous leader election algorithms have not used\" [Emek2019Deterministic]. The stationary setting stayed interesting because particles may be unable to move, \"so as to maintain a configuration or due to the presence of obstacles\" [Chalopin2026Stationary]. Bazzi and Briones studied stationary deterministic election [Bazzi2019Stationary], where symmetric configurations can force up to six leaders (as reported by [Dufoulon2021Efficient]). Chalopin, Das and Kokkou showed that one common direction suffices for a unique stationary leader [Chalopin2026Stationary]."
+      "origin": "The early leader-election algorithms for amoebots only exchanged messages, and \"did not use the movement ability as an aid to the computation\" [Dufoulon2021Efficient]. Emek et al. showed that movement lets particles elect a unique leader deterministically with no assumption on chirality or holes; the main idea is \"the usage of the ability of the amoebots to move, which previous leader election algorithms have not used\" [Emek2019Deterministic]. The stationary setting stayed interesting because particles may be unable to move, \"so as to maintain a configuration or due to the presence of obstacles\" [Chalopin2026Stationary]. Bazzi and Briones studied stationary deterministic election with chirality under a weak scheduler, where a configuration with $k$-fold rotational symmetry ($k = 2$, $3$ or $6$) cannot elect fewer than $k$ leaders [Bazzi2019Stationary]. Chalopin, Das and Kokkou showed that one common direction suffices for a unique stationary leader [Chalopin2026Stationary]."
     }
   ],
   "figure": {

@@ -182,7 +182,7 @@
           "definition": "$k\\ge2$ identical agents."
         }
       ],
-      "origin": "Map construction began as a single-robot problem: Dudek, Jenkin, Milios and Wilkes framed robotic exploration as building a graph, with a robot carrying one or more markers [Dudek1991Robotic]. Das, Flocchini, Kutten, Nayak and Santoro posed the distributed version: $k$ identical agents, initially dispersed among the nodes and communicating through whiteboards, must each build an identically labelled map [Das2007Map] (abstract read). They note that it \"is much more difficult than exploration by a single agent, because it involves achieving cooperation among multiple agents\", and that it is deterministically unsolvable in some cases [Das2007Map]. The axis separates the single agent, whose difficulty is recognising nodes it has already seen, from the team, which must in addition break the symmetry between identical agents."
+      "origin": "Map construction began as a single-robot problem: Dudek, Jenkin, Milios and Wilkes framed robotic exploration as building a graph, with a robot carrying one or more markers [Dudek1991Robotic]. Das, Flocchini, Kutten, Nayak and Santoro posed the distributed version: $k$ identical agents, initially dispersed among the nodes and communicating through whiteboards, must each build an identically labelled map [Das2007Map]. They note that it \"is much more difficult than exploration by a single agent, because it involves achieving cooperation among multiple agents\", and that it is deterministically unsolvable in some cases [Das2007Map]. The axis separates the single agent, whose difficulty is recognising nodes it has already seen, from the team, which must in addition break the symmetry between identical agents."
     },
     {
       "id": "knowledge",
@@ -245,7 +245,7 @@
           "definition": "Each node has a whiteboard."
         }
       ],
-      "origin": "Whiteboards, a small memory at every node that visiting agents read and write in mutual exclusion, are the standard communication device in the work of Flocchini, Santoro and coauthors on asynchronous agents [Dobrev2006Searching] [Flocchini2012PingPong]. Das, Flocchini, Kutten, Nayak and Santoro used them for map construction by $k$ identical agents, which communicate only through these \"small public bulletin boards available at each node\" [Das2007Map] (abstract read). Flocchini, Ilcinkas and Santoro note that whiteboards also \"allow to break symmetry among identical agents\" [Flocchini2012PingPong], which is what a team of identical agents needs in order to agree on one labelled map."
+      "origin": "Whiteboards, a small memory at every node that visiting agents read and write in mutual exclusion, are the standard communication device in the work of Flocchini, Santoro and coauthors on asynchronous agents [Dobrev2006Searching] [Flocchini2012PingPong]. Das, Flocchini, Kutten, Nayak and Santoro used them for map construction by $k$ identical agents, which communicate only through these \"small public bulletin boards available at each node\" [Das2007Map]. Flocchini, Ilcinkas and Santoro note that whiteboards also \"allow to break symmetry among identical agents\" [Flocchini2012PingPong], which is what a team of identical agents needs in order to agree on one labelled map."
     }
   ],
   "variants": [
@@ -344,7 +344,7 @@
         "team": "many",
         "marking": "whiteboards"
       },
-      "summary": "Several identical agents with whiteboards build a common labelled map exactly when symmetry can be broken.",
+      "summary": "Several identical asynchronous agents with whiteboards build a common labelled map in $O(m\\log k)$ moves when $n$ and $k$ are co-prime; otherwise some placements are unsolvable.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -352,30 +352,46 @@
           "ref": "Das2007Map",
           "bottleneck": "symmetry",
           "preconditions": [
-            "some configurations of identical agents"
+            "$\\gcd(n,k) > 1$: on a symmetric graph such as a ring the agents can be placed symmetrically, so that no deterministic algorithm elects a leader (Lemma 2.2, derived from earlier results on election and rendezvous)",
+            "map construction, leader election, labelling the nodes and rendezvous are solvable on exactly the same instances (Theorem 2.1)",
+            "agents that know neither $n$ nor $k$ cannot solve every solvable instance (Lemma 2.1)",
+            "some instances with $\\gcd(n,k) > 1$ are solvable, e.g. a tree with an odd number of nodes"
           ]
         }
       ],
       "results": [
         {
           "ref": "Das2007Map",
-          "role": "best",
-          "time": "\\text{finite}",
+          "role": "introductory",
+          "time": "O(km)",
           "assumes": [
-            "$n$ and $k$ co-prime"
+            "each agent knows $n$ or $k$",
+            "$O(\\log n)$ bits per whiteboard"
           ],
-          "note": "Introductory and current best."
+          "note": "Algorithm MERGE-TREE (Theorems 5.1 to 5.3): solves the problem whenever $\\gcd(n,k) = 1$, and every agent terminates explicitly, also on instances it cannot solve."
+        },
+        {
+          "ref": "Das2007Map",
+          "role": "best",
+          "time": "O(m\\log k)",
+          "assumes": [
+            "each agent knows $\\gcd(n,k)$ and $n$ or $k$ (for instance both $n$ and $k$)",
+            "$\\gcd(n,k) = 1$",
+            "$O(\\log n)$ bits per whiteboard"
+          ],
+          "note": "Algorithm Explore-&-Capture (Theorems 6.1 and 6.2): at most $\\log k$ phases of $O(m)$ moves each."
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "Costs not checked."
+          "note": "No lower bound on the number of moves is stated in [Das2007Map]."
         }
       },
       "open": [],
-      "notes": "",
-      "status": "draft"
+      "notes": "Checked against the full text of [Das2007Map]. Both algorithms first let every agent explore and mark a territory around its homebase with a depth-first search ($4m - 2n + 2k$ moves in total, Lemma 3.2), then merge territories in phases: neighbouring territories compare tokens (number of nodes and number of agents), and the smaller is captured. If all territories have the same counts, $\\gcd(n,k) > 1$, which is how the agents detect an instance the algorithm cannot solve (Lemmas 5.3 and 5.4). Each agent stores a full map in its own memory; the whiteboards need only $O(\\log n)$ bits (Theorem 6.2).",
+      "status": "verified",
+      "statement": "$k$ identical asynchronous agents start on $k$ distinct nodes (their homebases, which are marked) of an anonymous graph with $n$ nodes, $m$ edges and arbitrary ports. Every node has a whiteboard that agents read and write in fair mutual exclusion; agents at the same node can talk. Each agent knows $n$ or $k$. Every agent must return to its homebase with the same labelled map: a copy of the graph with ports in which every node carries the same label in every agent's map. Cost is the total number of moves."
     }
   ],
   "figure": {

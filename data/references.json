@@ -826,7 +826,8 @@
     "title": "Faster leader election via mobile agents and its applications",
     "venue": "Theoretical Computer Science 1059:115578",
     "year": 2026,
-    "doi": "10.1016/j.tcs.2025.115578"
+    "doi": "10.1016/j.tcs.2025.115578",
+    "note": "The abstract states $O(n\\log^2 n + D\\Delta)$ rounds; Theorem 1 proves $O(n\\log^2 n + D\\Delta\\log n)$."
   },
   "TaShma2014Deterministic": {
     "authors": [
@@ -925,7 +926,7 @@
     "year": 2008,
     "first_year": 2006,
     "doi": "10.1016/j.tcs.2008.02.010",
-    "note": "Bounds cited as reported by [Pelc2019Survey]."
+    "note": "Full text read; the bound is Corollary 4.1."
   },
   "Czyzowicz2012Forget": {
     "authors": [
@@ -1186,7 +1187,7 @@
     "venue": "SSS 2018, pp. 317–332",
     "year": 2018,
     "doi": "10.1007/978-3-030-03232-6_21",
-    "note": "Abstract not read; result as reported by [Feletti2024Optimal]."
+    "note": "Full text read."
   },
   "Feletti2023Schedulers": {
     "authors": [
@@ -1265,7 +1266,7 @@
     "venue": "SIROCCO 2011, pp. 125–137",
     "year": 2011,
     "doi": "10.1007/978-3-642-22212-2_12",
-    "note": "Abstract seen only as a search snippet; the result is confirmed by [Kirkpatrick2024Separating]."
+    "note": "Full text read (SIROCCO 2011). The counterexample to the algorithm of Ando et al. is in the appendix of a full version, not read."
   },
   "Kirkpatrick2024Separating": {
     "authors": [
@@ -1493,7 +1494,7 @@
     "venue": "SPAA 2011, pp. 139–148",
     "year": 2011,
     "doi": "10.1145/1989493.1989515",
-    "note": "Abstract not fully read; the bound is as restated by [Castenow2022Unifying]."
+    "note": "Full text read: $\\Theta(n^2)$ rounds for the algorithm of Ando et al. (Theorems 5.1 and 6.14)."
   },
   "Castenow2022Unifying": {
     "authors": [
@@ -1579,7 +1580,8 @@
     "title": "Search on a Line with Faulty Robots",
     "venue": "PODC 2016, pp. 405–414; journal: Distributed Computing 32(6):493–504 (2019)",
     "year": 2016,
-    "doi": "10.1145/2933057.2933102"
+    "doi": "10.1145/2933057.2933102",
+    "note": "Local copy is the PODC 2016 version; theorem numbers refer to it."
   },
   "Kupavskii2018Lower": {
     "authors": [
@@ -2478,7 +2480,7 @@
     "year": 2013,
     "first_year": 2011,
     "doi": "10.1007/s00446-013-0190-3",
-    "note": "Metadata from Crossref; conference version PODC 2011, pp. 21–30, doi:10.1145/1993806.1993810. Not read; cited as the origin of the homonymous model, as reported by [Bouzid2011Homonyms]."
+    "note": "Metadata from Crossref; conference version PODC 2011, pp. 21–30, doi:10.1145/1993806.1993810. Full text read: defines processes with $\\ell$ identifiers among $n$ (homonyms)."
   },
   "Chand2026Triangle": {
     "authors": [
@@ -2914,7 +2916,7 @@
     "year": 2019,
     "first_year": 2018,
     "doi": "10.1007/978-3-030-34992-9_3",
-    "note": "Brief announcement at SSS 2018."
+    "note": "Brief announcement at SSS 2018. The $O(n^2)$ running time is stated in the abstract and Table 1 without proof."
   },
   "Briones2023Asynchronous": {
     "authors": [
@@ -4303,7 +4305,7 @@
     "year": 2008,
     "first_year": 2006,
     "doi": "10.1016/j.tcs.2008.02.004",
-    "note": "Metadata from Crossref (SIROCCO 2006 version: doi 10.1007/11780823_7). Not read; its result (one searcher above optimum, non-monotone, unknown graphs) is as reported by [Ilcinkas2009Monotonicity]."
+    "note": "Metadata from Crossref (SIROCCO 2006 version: doi 10.1007/11780823_7). Full text read."
   },
   "Michail2016Temporal": {
     "authors": [
@@ -4314,7 +4316,7 @@
     "venue": "Theoretical Computer Science 634:1–23",
     "year": 2016,
     "doi": "10.1016/j.tcs.2016.04.006",
-    "note": "Metadata from Crossref; conference version not checked. Not read; credited by [Erlebach2021Temporal] with introducing temporal graph exploration (TEXP) with the schedule known in advance."
+    "note": "Metadata from Crossref. Full text read (TCS version); introduces temporal graph exploration (TEXP) with the temporal graph given as input."
   },
   "Kuhn2010Dynamic": {
     "authors": [
@@ -4433,7 +4435,7 @@
     "venue": "SOFSEM 2007, LNCS 4362, pp. 70–87",
     "year": 2007,
     "doi": "10.1007/978-3-540-69507-3_5",
-    "note": "Metadata from Crossref. Not read; cited with [Peleg2005Swarms] for the lights suggestion, as reported by [Das2016Lights]."
+    "note": "Metadata from Crossref. Full text read: Section 6.3 adds a two-state signalling light to solve partitioning with a randomized algorithm."
   },
   "Defago2006Fault": {
     "authors": [
@@ -4446,7 +4448,7 @@
     "venue": "DISC 2006, LNCS, pp. 46–60",
     "year": 2006,
     "doi": "10.1007/11864219_4",
-    "note": "Metadata from Crossref. Abstract read (Semantic Scholar): deterministic and probabilistic gathering under crash and Byzantine faults and bounded schedulers."
+    "note": "Metadata from Crossref. Full text read (DISC 2006); most proofs are deferred to a full version."
   },
   "Yamauchi2014Randomized": {
     "authors": [
@@ -4457,7 +4459,7 @@
     "venue": "DISC 2014, LNCS, pp. 137–151",
     "year": 2014,
     "doi": "10.1007/978-3-662-45174-8_10",
-    "note": "Metadata from Crossref. Not read; result as reported by [Bramas2016Probabilistic]."
+    "note": "Metadata from Crossref. Full text read: ASYNC, chirality, $n \\ge 5$, no multiplicities in the initial configuration or the pattern."
   },
   "Bandettini2011Survey": {
     "authors": [
@@ -4496,7 +4498,7 @@
     "year": 2023,
     "first_year": 2019,
     "doi": "10.1016/j.ic.2023.105036",
-    "note": "Metadata from Crossref (SSS 2019 version: doi 10.1007/978-3-030-34992-9_20). Not read: no open copy found (ScienceDirect refused automated access; the IPSJ technical report AL-173 is members-only). Results as reported in Table 1 of [Ooshita2024Crash] and in the introduction of [Nagahama2022Grid]."
+    "note": "Metadata from Crossref (SSS 2019 version: doi 10.1007/978-3-030-34992-9_20). Full text read (Information and Computation version)."
   },
   "Nagahama2022Grid": {
     "authors": [
@@ -4538,7 +4540,7 @@
     "year": 2021,
     "doi": "10.1007/978-3-030-91014-3_7",
     "url": "https://inria.hal.science/hal-03547159",
-    "note": "Metadata from Crossref. Not read (the HAL record has no file); results as reported in Table 1 of [Darwich2023Torus] and in the related work of [Bramas2026AsyncGrid]."
+    "note": "Metadata from Crossref. Full text read. The two-robot impossibility (Theorem 1) is proved for visibility range 1 only, although the contributions state it for every finite range."
   },
   "Darwich2023Torus": {
     "authors": [
@@ -4783,7 +4785,7 @@
     "venue": "ICDCN 2025, pp. 249–253",
     "year": 2025,
     "doi": "10.1145/3700838.3700841",
-    "note": "Metadata from Crossref. Not read (title and venue only)."
+    "note": "Metadata from Crossref. Full text read (short paper; proofs sketched)."
   },
   "Bockenhauer2023Inports": {
     "authors": [
@@ -4852,7 +4854,7 @@
     "venue": "Algorithmica 37(3):165–186",
     "year": 2003,
     "doi": "10.1007/s00453-003-1030-9",
-    "note": "Metadata from Crossref. Full text not read (no open copy found); bounds taken from the abstract and from [Menc2017Rotor]."
+    "note": "Metadata from Crossref. Full text read (Algorithmica version)."
   },
   "Bampas2009LockIn": {
     "authors": [
@@ -4868,7 +4870,7 @@
     "year": 2009,
     "doi": "10.1007/978-3-642-04355-0_44",
     "url": "https://hal.science/hal-00402749",
-    "note": "Metadata from Crossref. Full text not read (HAL unavailable when checked); the authors' DISC 2009 slides and the HAL abstract were read."
+    "note": "Metadata from Crossref. Full text read (DISC 2009, LNCS version)."
   },
   "Priezzhev1996Eulerian": {
     "authors": [
@@ -5243,5 +5245,28 @@
     "year": 2026,
     "arxiv": "2610.17677",
     "note": "Preprint, not peer reviewed."
+  },
+  "Dumitrescu2014Fence": {
+    "authors": [
+      "Adrian Dumitrescu",
+      "Anirban Ghosh",
+      "Csaba D. Tóth"
+    ],
+    "title": "On Fence Patrolling by Mobile Agents",
+    "venue": "The Electronic Journal of Combinatorics 21(3):P3.4",
+    "year": 2014,
+    "doi": "10.37236/4063",
+    "note": "Metadata from Crossref. Full text read (open access): Theorem 1 disproves Conjecture 2 of [Czyzowicz2011Patrolling] for unidirectional circle patrolling."
+  },
+  "BaezaYates1995Parallel": {
+    "authors": [
+      "Ricardo A. Baeza-Yates",
+      "René Schott"
+    ],
+    "title": "Parallel searching in the plane",
+    "venue": "Computational Geometry 5(3):143–154",
+    "year": 1995,
+    "doi": "10.1016/0925-7721(95)00003-R",
+    "note": "Metadata from Crossref. Full text read: Section 2.2 treats two robots searching for a point on a line, with communication (time $3D$ when both must reach it) and without (time $9D$, waiting half the time)."
   }
 }

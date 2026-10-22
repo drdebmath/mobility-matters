@@ -128,7 +128,7 @@
       "avoid": []
     }
   ],
-  "history": "Splitting a swarm into a given number of groups was asked as **solvability under each timing model and amount of orientation** [Efrima2009Partition], who called it partitioning and required equal group sizes. Team assembling of heterogeneous robots, where the composition of each team is prescribed, is a related task [Liu2018Team].",
+  "history": "Splitting a swarm into a given number of groups was asked as **solvability under each timing model and amount of orientation** [Efrima2009Partition], who called it partitioning and required equal group sizes. Team assembling is a related task for robots of $q$ fixed colours: a specification $(a_1, \\dots, a_q)$ says how many robots of each colour form one team, and the robots must gather into teams at distinct points from any configuration. Liu, Yamauchi, Kijima and Yamashita show that oblivious ASYNC robots with chirality and strong multiplicity detection can form a number $k > 1$ of teams from every configuration in which no two robots of one colour share a point if and only if $\\gcd(a_1, \\dots, a_q) = 1$ (Theorem 1 of [Liu2018Team]; their $m$ is $k$ here). With one colour this means that identical robots cannot gather into $k > 1$ groups of equal size greater than one; the necessity proof keeps the symmetry of the start already in FSYNC with rigid moves (Lemma 2 of [Liu2018Team]).",
   "measures": [
     {
       "id": "time",

@@ -220,7 +220,7 @@
             "for $k \\le n\\log^\\kappa n$; first shown by [Dynia2007Maps] for $k<\\sqrt n$",
             "the hard instances are trees"
           ],
-          "note": "Before that, a ratio of at least $2-1/k$ for deterministic and randomized algorithms when $k<\\sqrt n$ [Fraigniaud2006Collective], as cited by [Dereniowski2015Fast]."
+          "note": "Before that, a ratio of at least $2-1/k$ on trees of $n = xk^2+1$ nodes, so for $k<\\sqrt n$ (Theorem 3.2 of [Fraigniaud2006Collective], proved with an adversary that answers each choice of an unexplored edge); [Dereniowski2015Fast] state it for deterministic and randomized algorithms. [Dynia2007Maps] prove their bound for deterministic algorithms on trees of $O(tk)$ nodes with $t > k$ (Theorem 1)."
         }
       ],
       "results": [
@@ -269,7 +269,7 @@
         "Determine the competitive ratio of synchronous collective tree exploration: between $\\Omega(\\log k/\\log\\log k)$ and $O(\\log^2 k)$.",
         "Do randomized algorithms help? A randomized lower bound of $\\Omega(\\sqrt{\\log k}/\\log\\log k)$ is attributed to Ortolf and Schindelhauer (SPAA 2012), not checked here. Cosson and Massoulié conjecture they do not [Cosson2025Asynchronous]."
       ],
-      "notes": "Fraigniaud et al. conjectured that a constant ratio is possible; [Dynia2007Maps] refuted it. Greedy algorithms cannot beat $\\Omega(k/\\log k)$ [Higashikawa2014Online], which is why progress needed new ideas: tree-mining games [Cosson2024Mining] and potential functions [Cosson2024Potential].",
+      "notes": "Fraigniaud et al. listed an algorithm with constant ratio as their first open problem [Fraigniaud2006Collective], and according to [Disser2020General] suggested in their initial version that one exists; [Dynia2007Maps] showed that no deterministic algorithm achieves it. Greedy algorithms cannot beat $\\Omega(k/\\log k)$ [Higashikawa2014Online], which is why progress needed new ideas: tree-mining games [Cosson2024Mining] and potential functions [Cosson2024Potential].",
       "status": "verified"
     },
     {

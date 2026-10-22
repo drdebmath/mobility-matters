@@ -185,7 +185,7 @@
           "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
         }
       ],
-      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For leader election both levels are catalogued: without knowledge [Kshemkalyani2024AgentLE] [Chand2026MDS], and faster with $n$ and $\\Delta$ known [Kshemkalyani2026Leader]."
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithms assume both $n$ and $\\Delta$ when the agents start dispersed or arbitrarily placed, but need no knowledge from a rooted start [Pattanayak2024MIS]. Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For leader election both levels are catalogued: without knowledge [Kshemkalyani2024AgentLE] [Chand2026MDS], and with $n$ and $\\Delta$ known [Kshemkalyani2026Leader], whose $O(n\\log^2 n+D\\Delta\\log n)$ rounds do not improve on the $O(n)$ rounds catalogued without knowledge [Chand2026MDS]; from a dispersed start it needs $O(D\\Delta\\log n)$ rounds (Remark 1 of [Kshemkalyani2026Leader])."
     }
   ],
   "variants": [
@@ -213,7 +213,8 @@
           "ref": "Kshemkalyani2025NearLinear",
           "role": "other",
           "time": "O(n\\log^2 n)",
-          "memory": "O(\\log n)"
+          "memory": "O(\\log n)",
+          "note": "Theorem 1.1: from any start, without knowledge of any graph parameter; the dispersion algorithm of [Sudo2024NearLinear] is made terminating without knowing $n$."
         },
         {
           "ref": "Chand2026MDS",
@@ -256,13 +257,13 @@
           "role": "best",
           "time": "O(n\\log^2 n+D\\Delta\\log n)",
           "memory": "O(\\log n)",
-          "note": "The bound with the $\\log n$ factor is the correct one (confirmed by the catalogue owner, a co-author); the abstract omits it."
+          "note": "Theorem 1 (Lemma 2): disperse in $O(n\\log^2 n)$ rounds [Sudo2024NearLinear], knowing $n$ to detect the end, then flood the largest ID over the ID-bit schedule. The abstract omits the $\\log n$ factor of the second term. From a rooted start $O(n\\log n+D\\Delta\\log n)$ rounds, from a dispersed start $O(D\\Delta\\log n)$ (Remark 1)."
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "—"
+          "note": "No lower bound. From an arbitrary start, the $O(n)$ rounds without knowledge [Chand2026MDS] carry over to this setting and dominate the bound recorded here, as does $O(n\\log^2 n)$ [Kshemkalyani2025NearLinear]."
         },
         "memory": {
           "status": "unknown",
@@ -270,7 +271,7 @@
         }
       },
       "open": [],
-      "notes": "",
+      "notes": "An algorithm that needs no knowledge also works when $n$ and $\\Delta$ are known, so the $O(n)$-round, $O(\\log n)$-bit election of [Chand2026MDS] holds here and dominates the $O(n\\log^2 n+D\\Delta\\log n)$ bound of [Kshemkalyani2026Leader] from an arbitrary start. The latter is listed because it is the catalogued algorithm designed for this setting; from a dispersed start it takes $O(D\\Delta\\log n)$ rounds (Remark 1 of [Kshemkalyani2026Leader]), which is smaller than $n$ when $D\\Delta\\log n = o(n)$.",
       "status": "verified"
     }
   ],

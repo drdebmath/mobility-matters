@@ -161,11 +161,33 @@
           "definition": "A closed fence: a circle of length $\\ell$."
         }
       ],
-      "origin": "Patrolling asks agents to visit every point of a terrain often enough; the measure is the idle time, the longest time a point is left unvisited [Kawamura2015Fence]. Czyzowicz, Gąsieniec, Kosowski and Kranakis proposed the open fence (a segment) and the closed fence (a circle) for agents with distinct speeds at ESA 2011, and conjectured that simple strategies are optimal on both [Czyzowicz2011Patrolling] (as reported by [Kawamura2020Simple]). Kawamura and Kobayashi disproved the segment conjecture [Kawamura2015Fence], and Kawamura and Soejima showed that optimal schedules can beat the simple strategies by factors $4/3$ on the segment and $21/20$ on the circle [Kawamura2020Simple]. They note that \"finding an optimal strategy is not at all straightforward, even when the terrain is as simple as it could be\" [Kawamura2020Simple]. Graphs, the most general domain, were studied by Czyzowicz et al. with unreliable robots: the domain is \"represented by all points belonging to the graph edges\", and edges are rectifiable curves whose lengths are their weights [Czyzowicz2017Patrolmen]."
+      "origin": "Patrolling asks agents to visit every point of a terrain often enough; the measure is the idle time, the longest time a point is left unvisited [Kawamura2015Fence]. Czyzowicz, Gąsieniec, Kosowski and Kranakis proposed the open fence (a segment) and the closed fence (a circle) for agents with distinct speeds at ESA 2011, and conjectured that simple strategies are optimal on both: partition on the segment, and on the circle the cyclic strategy for robots that all move in one direction; on the circle the same paper shows that for three robots moving in both directions neither simple strategy is optimal [Czyzowicz2011Patrolling]. Kawamura and Kobayashi disproved the segment conjecture [Kawamura2015Fence], Dumitrescu, Ghosh and Tóth disproved the one-way circle conjecture and showed that on the two-way circle a new strategy beats both simple ones by a factor approaching $3/2$ [Dumitrescu2014Fence], and Kawamura and Soejima showed that optimal schedules can beat the simple strategies by factors $4/3$ on the segment and $21/20$ on the circle with every robot moving in one direction [Kawamura2020Simple]. They note that \"finding an optimal strategy is not at all straightforward, even when the terrain is as simple as it could be\" [Kawamura2020Simple]. Graphs, the most general domain, were studied by Czyzowicz et al. with unreliable robots: the domain is \"represented by all points belonging to the graph edges\", and edges are rectifiable curves whose lengths are their weights [Czyzowicz2017Patrolmen]."
+    },
+    {
+      "id": "movement",
+      "name": "Direction of movement",
+      "values": [
+        {
+          "id": "one-way",
+          "level": 0,
+          "label": "one-way: every robot moves in the same fixed direction",
+          "short": "one-way",
+          "definition": "On a closed fence every robot moves only counterclockwise, at any speed between $0$ and its maximum speed $v_i$; it never reverses. Czyzowicz et al. require strictly positive speeds, while Dumitrescu, Ghosh and Tóth and Kawamura and Soejima allow robots to stop; the counterexample of Dumitrescu et al. holds under both conventions (Remark after Theorem 1 of [Dumitrescu2014Fence]). Schedules are a subset of the two-way schedules, so this is the harder level for the robots."
+        },
+        {
+          "id": "two-way",
+          "level": 1,
+          "label": "two-way: robots may reverse direction at any time",
+          "short": "two-way",
+          "definition": "Every robot moves along the fence in either direction at any speed between $0$ and $v_i$, and may reverse at any point and any time. On a segment and on a graph this is the only meaningful choice."
+        }
+      ],
+      "origin": "Czyzowicz, Gąsieniec, Kosowski and Kranakis first studied the circle with every robot moving in the same direction, since \"in order to profit from the circle topology it may seem natural to try to traverse the cycle always in the same direction\", and then asked whether allowing both directions helps: it does not for two robots, but it does for some speeds of three [Czyzowicz2011Patrolling]. Dumitrescu, Ghosh and Tóth studied both versions, as the unidirectional and the bidirectional unit circle [Dumitrescu2014Fence], and Kawamura and Soejima call the first the (unidirectional) circle patrolling problem [Kawamura2020Simple]. The scale is one-way < two-way: a one-way schedule is also a two-way schedule."
     }
   ],
   "axis_order": [
     "domain",
+    "movement",
     "faults",
     "speeds",
     "communication",
@@ -178,7 +200,8 @@
       "standard": true,
       "assumptions": {
         "domain": "segment",
-        "faults": "none"
+        "faults": "none",
+        "movement": "two-way"
       },
       "summary": "Partitioning the segment among the agents is optimal for 2 and 3 agents but not in general; optimal schedules can be up to $4/3$ better.",
       "lower_bounds": [
@@ -197,12 +220,18 @@
           "ref": "Czyzowicz2011Patrolling",
           "role": "introductory",
           "time": "\\text{partition optimal for } k=2",
-          "note": "Introduces patrolling by agents with distinct speeds; shows the partition strategy optimal for $k=2$ and conjectures it optimal for every $k$, as stated by [Kawamura2015Fence], who disproved the conjecture."
+          "note": "Introduces patrolling by robots with distinct speeds; shows the partition strategy optimal for $k=2$ (Theorem 1) and conjectures it optimal for every $k$ (Conjecture 1); [Kawamura2015Fence] disproved the conjecture."
         },
         {
           "ref": "Kawamura2015Fence",
           "role": "other",
           "time": "\\text{partition optimal for } k=2,3"
+        },
+        {
+          "ref": "Dumitrescu2014Fence",
+          "role": "other",
+          "time": "\\to\\tfrac{25}{24}\\times\\text{partition}",
+          "note": "Theorem 3: for every integer $x \\ge 2$, $k = 4x+1$ robots with $v_1 + \\dots + v_k = 16x+1$ patrol a segment of length $25x/3$ with idle time 1, against $(16x+1)/2$ for the partition; this improved the counterexample of [Kawamura2015Fence] and is superseded by the $4/3$ of [Kawamura2020Simple]."
         },
         {
           "ref": "Kawamura2020Simple",
@@ -225,36 +254,89 @@
     },
     {
       "id": "circle",
-      "title": "Closed fence, distinct speeds",
+      "title": "Closed fence, one-way, distinct speeds",
       "assumptions": {
         "domain": "circle",
+        "movement": "one-way",
         "faults": "none"
       },
-      "summary": "On a circle, optimal schedules can beat the simple strategies by a factor $21/20$.",
+      "summary": "With every robot moving in one direction, the cyclic strategy is optimal for up to four robots but not in general; optimal schedules can patrol a circle $21/20$ times as long.",
       "lower_bounds": [],
       "results": [
         {
+          "ref": "Czyzowicz2011Patrolling",
+          "role": "introductory",
+          "time": "\\text{cyclic optimal for } k \\le 4",
+          "note": "The cyclic strategy (the $r$ fastest robots, equally spaced, all at speed $v_r$, with $r$ maximising $iv_i$) has idle time $1/\\max_i iv_i$ on the unit circle (Theorem 2); it is optimal for $k \\le 4$ (Theorem 3) and conjectured optimal for every $k$ (Conjecture 2)."
+        },
+        {
+          "ref": "Dumitrescu2014Fence",
+          "role": "other",
+          "time": "\\text{cyclic not optimal}",
+          "note": "Theorem 1: 32 robots with speeds $v_i = 1/i$ have a periodic schedule with idle time strictly below $1$, the idle time of the cyclic strategy; this disproves Conjecture 2 of [Czyzowicz2011Patrolling], also when speeds must stay positive (Remark). Theorem 2: for every $\\tau \\in (0,1]$ and horizon $t \\ge \\tau$, $k \\le e^{4t/\\tau^2}$ robots with speeds $1/i$ keep the idle time at most $\\tau$ during $[0,t]$."
+        },
+        {
           "ref": "Kawamura2020Simple",
           "role": "best",
-          "time": "\\tfrac{21}{20}\\times\\text{simple}"
+          "time": "\\tfrac{21}{20}\\times\\text{simple}",
+          "note": "Theorem 10: speeds and a schedule that patrol a circle of length $1.05\\max_r rv_r$ with idle time 1. Kawamura and Soejima conjecture that the cyclic strategy is not within any constant factor of optimal."
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "—"
+          "note": "The largest ratio between optimal schedules and the cyclic strategy is unknown; it is at least $21/20$."
         }
       },
-      "open": [],
-      "notes": "",
+      "open": [
+        "Is the cyclic strategy within a constant factor of optimal on the one-way circle? [Kawamura2020Simple] conjecture that it is not; [Dumitrescu2014Fence] (Theorem 2) show unbounded gains over finite horizons."
+      ],
+      "notes": "Conjecture 2 of [Czyzowicz2011Patrolling] was disproved by Dumitrescu, Ghosh and Tóth (Theorem 1 of [Dumitrescu2014Fence]); [Kawamura2020Simple] then gave a quantitative gap of $21/20$. Theorem 2 of [Dumitrescu2014Fence] suggests that the ratio to the cyclic strategy is unbounded, but it holds only over a finite horizon. Theorem 3 of [Czyzowicz2011Patrolling] (optimality of the cyclic strategy for $k \\le 4$) is proved for strictly positive speeds; whether it survives when robots may stop was not checked. A lower bound valid for both directions: no schedule has idle time below $1/(v_1 + \\dots + v_k)$ on the unit circle (Proposition 2 of [Czyzowicz2011Patrolling]).",
       "status": "verified"
+    },
+    {
+      "id": "circle-two-way",
+      "title": "Closed fence, two-way, distinct speeds",
+      "assumptions": {
+        "domain": "circle",
+        "movement": "two-way",
+        "faults": "none"
+      },
+      "summary": "If robots may reverse, two robots gain nothing over the cyclic strategy, but for suitable speeds a train of slow robots with one fast robot shuttling along it beats both simple strategies by a factor approaching $3/2$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Czyzowicz2011Patrolling",
+          "role": "introductory",
+          "time": "\\tfrac{36}{35}\\times\\text{simple}",
+          "note": "For $k = 2$ no schedule moving in both directions beats the cyclic strategy (Theorem 4). For three robots with speeds $1, \\tfrac12, \\tfrac13$ a schedule in which some robots reverse has idle time $\\tfrac{35}{36}$, below the idle time $1$ of the cyclic strategy and of the partition (Theorem 5; the conference version omits the analysis and gives the schedule as a figure). Dumitrescu, Ghosh and Tóth restate these idle times (35/36 against 12/11 for the partition and 1 for the cyclic strategy) [Dumitrescu2014Fence]."
+        },
+        {
+          "ref": "Dumitrescu2014Fence",
+          "role": "best",
+          "time": "\\to\\tfrac32\\times\\text{simple}",
+          "note": "Proposition 1 (train algorithm $A_3$): robots $a_2,\\dots,a_k$ equally spaced move one way at speed $v_k$, and the fastest robot $a_1$ shuttles back and forth along the arc between the end and the start of the train. With $v_1 = 1$ and $v_2 = \\dots = v_k = 1/k$ its idle time tends to $2/3$, against $1$ for the partition and the cyclic strategy; for every $k \\ge 4$ some speeds make it beat both. Proposition 2: for every $k \\ge 2$ some speeds have an optimal schedule that leaves up to $k-1$ robots unused (on a segment every robot is needed)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "The largest ratio between optimal schedules and the simple strategies is unknown; it tends to at least $3/2$ for large $k$ [Dumitrescu2014Fence]."
+        }
+      },
+      "open": [
+        "Is the best of the simple strategies within a constant factor of optimal on the two-way circle?"
+      ],
+      "notes": "The analysis of Theorem 5 of [Czyzowicz2011Patrolling] is omitted in the conference version, so its $35/36$ is not checked; the best result, Proposition 1 of [Dumitrescu2014Fence], was checked with its proof. The setting stays a draft only because of Theorem 5.",
+      "status": "draft"
     },
     {
       "id": "graph-faulty",
       "title": "Graphs with faulty patrollers",
       "assumptions": {
         "faults": "crash",
-        "speeds": "equal"
+        "speeds": "equal",
+        "movement": "two-way"
       },
       "summary": "With at most $f$ unreliable robots among $k$, the optimal idle time lies between $(f+1)|E|/k$ and $(f+1)\\,\\mathrm{CPT}(G)/k$, which coincide on Eulerian graphs; computing it is NP-hard.",
       "lower_bounds": [

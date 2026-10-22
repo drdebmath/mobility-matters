@@ -28,7 +28,7 @@
         "variant": "async",
         "ref": "Cohen2005Gravitational",
         "idea": "1. Look at the positions of all robots.\n2. Compute their **centre of gravity**: the average of all positions (add up the $x$-coordinates and divide by $n$, and the same for $y$).\n3. Move towards it.",
-        "analysis": "The centre of gravity does not depend on the local coordinate system, so robots with different local coordinate systems aim at the same point. In FSYNC (every robot is activated in every **round**) with **rigid moves** (moves that reach their destination), all robots compute the same point and meet in one round. In ASYNC the snapshots are outdated, but each destination is an average of positions that were already inside the **convex hull** of the robots (the smallest convex region containing them), so the convex hull of the robots and their destinations never grows; Cohen and Peleg prove that it actually shrinks to a point [Cohen2005Gravitational]. A later analysis shows that $O(n)$ rounds halve the diameter, improving $O(n^2)$ [CordLandwehr2011Convergence]; the catalogue has not checked which scheduler that analysis assumes.",
+        "analysis": "The centre of gravity does not depend on the local coordinate system, so robots with different local coordinate systems aim at the same point. In FSYNC (every robot is activated in every **round**) with **rigid moves** (moves that reach their destination), all robots compute the same point and meet in one round. In ASYNC the snapshots are outdated, but each destination is an average of positions that were already inside the **convex hull** of the robots (the smallest convex region containing them), so the convex hull of the robots and their destinations never grows; Cohen and Peleg prove that it actually shrinks to a point [Cohen2005Gravitational]. A later analysis in ASYNC, counting a **round** as a stretch of time in which every robot completes a Look–Compute–Move cycle, shows that with rigid moves $O(n)$ rounds halve the diameter, improving $O(n^2)$, and that this is tight for the centre of gravity [CordLandwehr2011Convergence].",
         "why_it_matters": "It is the simplest convergence rule, and the never-growing convex hull is reused as a building block, for example to split robots into groups [Efrima2009Partition]."
       },
       {
@@ -182,7 +182,7 @@
         }
       },
       "open": [],
-      "notes": "Convergence time of the centre-of-gravity algorithm: [CordLandwehr2011Convergence] show that $O(n)$ rounds halve the diameter of the convex hull, improving $O(n^2)$, against a known $\\Omega(n)$. **Unverified:** the scheduler of that analysis.",
+      "notes": "Convergence time of the centre-of-gravity algorithm, in epochs (a round of [CordLandwehr2011Convergence] ends once every robot has completed a cycle): with rigid moves, $O(n)$ epochs halve the diameter of the robots' positions and target points, improving the $O(n^2)$ of [Cohen2005Gravitational], and the $\\Omega(n)$ construction of [Cohen2005Gravitational] makes this tight for that algorithm; with non-rigid moves the bound is $O(n + n\\Delta_0/\\delta)$ epochs (Theorem 3 of [CordLandwehr2011Convergence]; their $S$ is $\\delta$ and their $h$ is $\\Delta_0$ here). Their ASYNC model treats Look, Compute and Move as instantaneous operations that other robots' operations may interleave. With axes common to all robots, moving to the centre of the axis-aligned bounding box halves the diameter in $O(1)$ epochs with rigid moves (Theorem 4). Checked against the full text of [CordLandwehr2011Convergence].",
       "status": "verified"
     },
     {
@@ -244,7 +244,7 @@
           "assumes": [
             "1-ASYNC"
           ],
-          "note": "Also solves unlimited-visibility ASYNC convergence without multiplicity detection."
+          "note": "Theorem 7, in 1-bounded asynchrony: while a robot goes from its Look to the end of its move, no other robot makes more than one Look; non-rigid moves, no multiplicity detection. The same paper solves unlimited-visibility ASYNC convergence without multiplicity detection (move halfway towards the furthest robot), and it states that the appendix of its full version (not read) proves that the algorithm of [Ando1999Convergence] fails in 1-bounded asynchrony."
         },
         {
           "ref": "Kirkpatrick2024Separating",

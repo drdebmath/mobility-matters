@@ -13,7 +13,7 @@
     "relation": "Evacuation is a form of search with an extra requirement: \"optimality in evacuation is measured by the time it takes for the last robot to reach the exit, whereas in traditional search, optimality is measured by the time it takes the first robot to reach the exit\" [Czyzowicz2017Faulty]. The introductory paper notes its similarity with the cow-path problem, and that evacuating uniform agents on a line \"is as hard as the cow-path problem\" [Czyzowicz2014Evacuating]."
   },
   "summary": "Robots start at the centre of a disk (or a polygon) and must all leave through an exit at an unknown point of the boundary, as fast as possible.",
-  "statement": "$k$ unit-speed robots start together at the centre of a unit disk (or the centroid of a unit equilateral triangle or square). An exit lies at an unknown point of the boundary; a robot recognises it only on reaching it. **Time** is the worst case, over exit positions, of the time until the last robot reaches the exit (in priority evacuation, where one robot is the **queen**: until the queen does).",
+  "statement": "$k$ unit-speed robots start together at the centre of a unit disk (or at the centroid, or at a given point of the boundary, of a unit equilateral triangle or square). An exit lies at an unknown point of the boundary; a robot recognises it only on reaching it. **Time** is the worst case, over exit positions, of the time until the last robot reaches the exit (in priority evacuation, where one robot is the **queen**: until the queen does; in weighted evacuation of two robots, a weighted average of their arrival times; in search, until a non-faulty robot has reached the exit and every non-faulty robot knows where it is).",
   "primer": {
     "intro": "Two people stand in the middle of a dark round room of radius 1 and know there is one door somewhere along its edge, but not where; they can talk by walkie-talkie. In evacuation the people are **robots**, points that move at unit speed; the room is a unit **disk**, the points at distance at most 1 from its centre; its edge is the **boundary**, the circle of radius 1; and the door is the **exit**, a point of the boundary that a robot recognises only when it stands on it. $k$ robots start at the centre of the disk. The goal is to minimise, in the worst case over exit positions, the time until the **last** robot reaches the exit. In the basic version there are two robots with **wireless** communication: a robot that finds the exit tells the other instantly, wherever it is.",
     "ideas": [
@@ -115,7 +115,7 @@
     {
       "id": "time",
       "name": "Evacuation time",
-      "description": "worst-case time until the last robot (or the queen) reaches the exit; unit disk, unit speed"
+      "description": "worst-case time until the last robot (or the queen) reaches the exit, or the weighted average or search time where the goal says so; unit disk, unit speed"
     }
   ],
   "axes": [
@@ -128,7 +128,7 @@
           "level": 0,
           "label": "unspecified bounded domain",
           "short": "any domain",
-          "definition": "A bounded convex domain, robots start at an interior point."
+          "definition": "A bounded convex domain; the robots start together at a given point of it, in its interior or on its boundary."
         },
         {
           "id": "disk",
@@ -152,6 +152,20 @@
           "definition": "The unit square; robots start at its centroid; the exit is a point of the boundary."
         },
         {
+          "id": "triangle-boundary",
+          "level": 1,
+          "label": "triangle, start on the boundary",
+          "short": "triangle, boundary start",
+          "definition": "A triangle (the equilateral triangle of unit side unless the setting names another family); the robots start together at a point of its boundary, either given (at distance $y$ from the nearest midpoint of a side) or chosen by the algorithm, as the setting says; the exit is a point of the boundary."
+        },
+        {
+          "id": "square-boundary",
+          "level": 1,
+          "label": "unit square, start on the boundary",
+          "short": "square, boundary start",
+          "definition": "The unit square; the robots start together at a given point of its boundary, at distance $x \\le 1/2$ from the nearest corner; the exit is a point of the boundary."
+        },
+        {
           "id": "line",
           "level": 1,
           "label": "the infinite line",
@@ -166,7 +180,7 @@
           "definition": "$m \\ge 2$ half-lines share an endpoint, the junction; the exit lies on one ray at distance at least $1$ from the start; the measure is the competitive ratio."
         }
       ],
-      "origin": "Czyzowicz et al. posed evacuation in the unit disk with the exit on its boundary [Czyzowicz2014Evacuating], which remains the standard domain. Evacuation on the line had been raised just before by Chrobak et al., who showed that evacuating several uniform agents is as hard as the cow-path problem (as reported by [Czyzowicz2014Evacuating]) [Chrobak2015GroupSearch]. Polygons followed: equilateral triangles and squares, first with wireless robots [Czyzowicz2015Wireless] and then face-to-face [Chuangpishit2020Triangles]. Brandt et al. studied $m$ concurrent rays, citing Hammar et al. that \"a problem with paradigmatic status in this framework is searching on m concurrent rays\" [Brandt2020Rays]. Evacuation from a general convex region appears in a separate line of online-strategy papers [Xu2013Groups] [Wei2014Convex]."
+      "origin": "Czyzowicz et al. posed evacuation in the unit disk with the exit on its boundary [Czyzowicz2014Evacuating], which remains the standard domain. Evacuation on the line had been raised just before by Chrobak et al.: robots that communicate only when they meet need time $9d - o(d)$ to evacuate whatever their number, as much as a single robot in the cow-path problem [Chrobak2015GroupSearch]; Czyzowicz et al. cite this as showing that evacuating several uniform agents \"is as hard as the cow-path problem\" [Czyzowicz2014Evacuating]. Polygons followed: equilateral triangles and squares, first with wireless robots [Czyzowicz2015Wireless] and then face-to-face [Chuangpishit2020Triangles]. Czyzowicz et al. let the robots start either at the centroid or at a point of the boundary, and the start changes the answer: from the boundary of a triangle three or more robots do no better than two, while from the centroid three robots beat two [Czyzowicz2015Wireless]. A start on the boundary is therefore a separate domain value. Brandt et al. studied $m$ concurrent rays, citing Hammar et al. that \"a problem with paradigmatic status in this framework is searching on m concurrent rays\" [Brandt2020Rays]. Evacuation from a general convex region appears in a separate line of online-strategy papers [Xu2013Groups] [Wei2014Convex]."
     },
     {
       "id": "robots",
@@ -220,9 +234,23 @@
           "label": "search-and-fetch: a treasure must be brought to the exit",
           "short": "search-and-fetch",
           "definition": "A treasure lies at an unknown point of the boundary, and the exit at a known arc distance $\\alpha$ from it; the task ends when some robot has carried the treasure to the exit."
+        },
+        {
+          "id": "weighted",
+          "level": 1,
+          "label": "weighted: a weighted average of two arrival times",
+          "short": "weighted",
+          "definition": "Two robots, a light one and a heavy one of known weight $w \\ge 1$, both must reach the exit and stay there; with arrival times $t_1$ (light) and $t_2$ (heavy), the cost is $(t_1 + w\\,t_2)/(1+w)$."
+        },
+        {
+          "id": "search",
+          "level": 1,
+          "label": "search: the exit is found and known to every non-faulty robot",
+          "short": "search",
+          "definition": "The task ends as soon as a non-faulty robot has reached the exit and every non-faulty robot knows its position for certain; the robots need not go to the exit."
         }
       ],
-      "origin": "Search ends at the first arrival and evacuation at the last [Czyzowicz2014Evacuating]. Czyzowicz et al. introduced *priority evacuation*, in which only a distinguished robot, the queen, must reach the exit while servants help. They motivate it by a robot that alone \"has the capability to address an urgent need at the target, for example, performing an emergency procedure, or closing a breach in the perimeter\" [Czyzowicz2018Priority]. Georgiou, Karakostas and Kranakis introduced *search-and-fetch* (treasure evacuation), where a robot must carry a treasure to the exit. It is motivated by search-and-rescue, where drones must \"locate a victim (the treasure) and bring her to safety (the exit)\" [Georgiou2019SearchFetch]. They note that \"this is the first time an explicit ordering on the tasks to be performed is imposed on two moving robots\" [Georgiou2019SearchFetch]."
+      "origin": "Search ends at the first arrival and evacuation at the last [Czyzowicz2014Evacuating]. Czyzowicz et al. introduced *priority evacuation*, in which only a distinguished robot, the queen, must reach the exit while servants help. They motivate it by a robot that alone \"has the capability to address an urgent need at the target, for example, performing an emergency procedure, or closing a breach in the perimeter\" [Czyzowicz2018Priority]. Georgiou, Karakostas and Kranakis introduced *search-and-fetch* (treasure evacuation), where a robot must carry a treasure to the exit. It is motivated by search-and-rescue, where drones must \"locate a victim (the treasure) and bring her to safety (the exit)\" [Georgiou2019SearchFetch]. They note that \"this is the first time an explicit ordering on the tasks to be performed is imposed on two moving robots\" [Georgiou2019SearchFetch]. Georgiou and Lucier weighted the arrival times of two robots on the line, a light one and a heavy one, and obtained priority evacuation on the line as the limit of large weight [Georgiou2023WeightedLine]. With faulty robots, *search* (the exit is found by a non-faulty robot and known to all non-faulty robots) is the first stage of evacuation: Georgiou et al. solved it on the circle with crash faults and with one Byzantine robot [Georgiou2023OptimalCircle], and Behrouz et al. note that the evacuation time \"is inherently greater than or equal to the time required to find the exit\" [Behrouz2025Byzantine]. Linear search uses the same two goals."
     },
     {
       "id": "exits",
@@ -354,7 +382,7 @@
       "open": [
         "Close the gap between $3+\\pi/6+\\sqrt3 \\approx 5.255$ and $5.6234$ for two face-to-face robots."
       ],
-      "notes": "The \"second cut\" of [Disser2019Second] is a second detour through the interior: an upper-bound technique. Measured in the average case over the exit position, the trade-off between average and worst-case time is mapped, and $1+\\pi$ is conjectured to be the optimal average for any number of robots [Chuangpishit2019Average].",
+      "notes": "The \"second cut\" of [Disser2019Second] is a second detour through the interior: an upper-bound technique. Measured in the average case over the exit position, the trade-off between average and worst-case time is mapped, and $1+\\pi$ is conjectured to be the optimal average for any number of robots, even wireless [Chuangpishit2019Average] [Chuangpishit2020MultiObjective].",
       "status": "verified"
     },
     {
@@ -525,15 +553,17 @@
         "communication": "wireless",
         "faults": "crash"
       },
-      "summary": "If one of three wireless robots may crash, evacuation takes between $\\approx 5.082$ and $\\approx 6.309$.",
+      "summary": "If one of three wireless robots may crash, evacuation takes between $1+4\\pi/3 \\approx 5.188$ and $\\approx 6.309$.",
       "lower_bounds": [
         {
           "measure": "time",
-          "bound": "\\approx 5.082",
+          "bound": "1+4\\pi/3 \\approx 5.188",
           "ref": "Czyzowicz2017Faulty",
           "bottleneck": "faulty reports",
           "preconditions": [
-            "three robots, at most one crash"
+            "Theorem 3(a)",
+            "three robots, at most one crash",
+            "every boundary point must be visited by two robots, so some robot explores an arc of length at least $4\\pi/3$"
           ]
         }
       ],
@@ -542,7 +572,7 @@
           "ref": "Czyzowicz2017Faulty",
           "role": "best",
           "time": "\\approx 6.309",
-          "note": "Introductory and current best; time until the last non-faulty robot exits."
+          "note": "Introductory and current best (Theorem 1; the best asymmetric-persistent algorithm, Lemma 3); time until the last non-faulty robot exits."
         }
       ],
       "optimality": {
@@ -554,7 +584,7 @@
       "open": [
         "Tight bounds for disk evacuation with one crash-faulty robot among three."
       ],
-      "notes": "",
+      "notes": "The best symmetric-persistent algorithm, with all three robots exploring in the same direction, takes $1+4\\pi/3+\\sqrt3 \\approx 6.921$ (Lemma 1) [Czyzowicz2017Faulty]. The survey [Czyzowicz2019GroupSearch] (Theorem 17) states a weaker crash lower bound of $\\approx 5.082$; the SIROCCO paper proves $1+4\\pi/3$. Checked against the full text of [Czyzowicz2017Faulty].",
       "status": "verified"
     },
     {
@@ -574,6 +604,7 @@
           "ref": "Czyzowicz2017Faulty",
           "bottleneck": "indistinguishable Byzantine agents",
           "preconditions": [
+            "Theorem 3(b)",
             "three robots, at most one Byzantine"
           ]
         }
@@ -582,8 +613,8 @@
         {
           "ref": "Czyzowicz2017Faulty",
           "role": "best",
-          "time": "\\approx 6.921",
-          "note": "Introductory and current best."
+          "time": "1+4\\pi/3+\\sqrt3 \\approx 6.921",
+          "note": "Introductory and current best (Theorem 2)."
         }
       ],
       "optimality": {
@@ -593,7 +624,7 @@
         }
       },
       "open": [],
-      "notes": "Byzantine evacuation with $k$ robots and $f$ faults is studied by [Leonardos2023Symmetric] and [Behrouz2025Byzantine]; those papers were not read.",
+      "notes": "Checked against the full text of [Czyzowicz2017Faulty]. For $k$ wireless robots of which one may be faulty, Leonardos, Pagourtzis and Papaioannou prove that symmetric-persistent algorithms (all robots go to the boundary and explore in the same direction until told of the exit) need time at least $1+4\\pi/k+2\\sin(\\pi/2-\\pi/k)$ (Theorem 1, proved with a crash-faulty robot), and give a symmetric-persistent algorithm with time at most $3+4\\pi/k$ for one Byzantine robot (Theorem 3), which for $k=3$ is about $7.19$, above $6.921$; with two Byzantine robots the time is at most $3+6\\pi/k$ for $k \\ge 9$ (Theorem 4); they also give face-to-face upper bounds (Theorems 5–7) [Leonardos2023Symmetric]. Behrouz et al. give upper bounds for $f$ Byzantine robots among $k > 2f$ wireless robots (Theorem 1) and among $k$ face-to-face robots (Theorem 2), and no lower bounds [Behrouz2025Byzantine].",
       "status": "verified"
     },
     {
@@ -721,7 +752,7 @@
         }
       },
       "open": [],
-      "notes": "Wireless evacuation of triangles and squares was introduced at ADHOC-NOW 2015 (not yet in the bibliography).",
+      "notes": "Wireless evacuation of triangles and squares was introduced by [Czyzowicz2015Wireless].",
       "status": "verified"
     },
     {
@@ -844,7 +875,7 @@
       "open": [
         "Close the gap between $2R$ and $(1+\\pi/3)R$ for two wireless robots and two exits [Pattanayak2018TwoExits]."
       ],
-      "notes": "Bounds supplied by the catalogue owner (a co-author). When robots move only along a circle and the exits' arrangement is known, two robots starting at known distance $L$ evacuate optimally in $3/4+L/2$ (one exit, circle of unit length) [Czyzowicz2016MultipleExits].",
+      "notes": "Bounds supplied by the catalogue owner (a co-author). When two wireless robots move only along a circle of unit length, know the arrangement of the exits but not their own position, and start at arc distance $L \\le 1/2$, they evacuate through one exit optimally in $3/4+L/2$ (Theorem 1) [Czyzowicz2016MultipleExits].",
       "status": "verified"
     },
     {
@@ -935,7 +966,7 @@
       "open": [
         "Close the gap between $4.568$ and $4.819$ [Georgiou2025WeightedDisk]."
       ],
-      "notes": "Weighted group search, where the two robots' arrival times are weighted $1$ and $w$, is solved within a gap in the same paper [Georgiou2025WeightedDisk]. Checked against the full texts.",
+      "notes": "Weighted group search, where the two robots' arrival times are weighted $1$ and $w$, is bounded in the same paper [Georgiou2025WeightedDisk]; see the weighted setting in the disk. Checked against the full texts.",
       "status": "verified"
     },
     {
@@ -1007,7 +1038,7 @@
       "open": [
         "Lower bounds that separate wireless from face-to-face search-and-fetch [Georgiou2019SearchFetch]."
       ],
-      "notes": "With one robot, the treasure-evacuation version is solved optimally when only a lower bound on the treasure–exit distance is known [Georgiou2021Treasure] (abstract only). Checked against the full text of [Georgiou2019SearchFetch].",
+      "notes": "With one robot, treasure evacuation is solved optimally when only a lower bound $\\alpha$ on the actual treasure–exit arc distance $\\lambda$ is known: time $1+2\\pi-\\alpha+2\\sin(\\alpha/2)+2\\sin(\\lambda/2)$ (Theorem 2; the paper writes $l$ for $\\lambda$); when the exact distance is known, the best algorithm is within a factor $1.019$ (additively $0.157$) of a lower bound (Theorems 7, 8) [Georgiou2021Treasure]. Checked against the full texts of [Georgiou2019SearchFetch] and [Georgiou2021Treasure].",
       "status": "verified"
     },
     {
@@ -1069,14 +1100,31 @@
             "any number of robots of maximum speed at most 1",
             "full proof of $9d-o(d)$"
           ]
+        },
+        {
+          "measure": "time",
+          "bound": "9",
+          "ref": "Chrobak2015GroupSearch",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 3 and Corollary 1",
+            "any number $k \\ge 2$ of unit-speed robots that communicate only when they meet",
+            "the argument covers algorithms whose explored segment does not grow at rate exactly $1/3$; [Bampas2019Speeds] call it partial and complete it (Corollary 3.4)"
+          ]
         }
       ],
       "results": [
         {
+          "ref": "BaezaYates1995Parallel",
+          "role": "introductory",
+          "time": "9",
+          "note": "Section 2.2: two robots that cannot communicate wait half the time (equivalently, search at speed $1/3$); the finder goes back, meets the other and both return to the exit, in time $9d$, \"the same time as one robot\". No lower bound is claimed for two robots."
+        },
+        {
           "ref": "Chrobak2015GroupSearch",
           "role": "best",
           "time": "9",
-          "note": "Introductory and current best: the robots move together and run the doubling strategy; as described by later papers."
+          "note": "Each robot runs the doubling strategy, the finder waiting at the exit, or two robots search in opposite directions at speed $1/3$ and the finder catches the other (Section 2.2); with the lower bound of Theorem 3 this shows that $9d$ is optimal for any number of robots."
         }
       ],
       "optimality": {
@@ -1086,7 +1134,7 @@
         }
       },
       "open": [],
-      "notes": "For two face-to-face robots the energy of group search can be traded against time; with maximum speed $v$ and time at most $9d/v$ the energy is about $8.42588\\,v^2 d$ (the paper writes $b$ for $v$; Theorem 16) [Czyzowicz2019Energy]. Checked against the full text of [Bampas2019Speeds]; [Chrobak2015GroupSearch] was not read.",
+      "notes": "For two face-to-face robots the energy of group search can be traded against time; with maximum speed $v$ and time at most $9d/v$ the energy is about $8.42588\\,v^2 d$ (the paper writes $b$ for $v$; Theorem 16) [Czyzowicz2019Energy]. Checked against the full texts of [BaezaYates1995Parallel], [Chrobak2015GroupSearch] and [Bampas2019Speeds].",
       "status": "verified"
     },
     {
@@ -1103,19 +1151,37 @@
         {
           "measure": "time",
           "bound": "3",
-          "ref": "Chrobak2015GroupSearch",
+          "ref": "Czyzowicz2021GroupEvacuation",
           "bottleneck": "unknown distance",
           "preconditions": [
-            "as cited by [Czyzowicz2021GroupEvacuation]"
+            "Section 4 (a remark)",
+            "consider the first time any robot reaches $d$ or $-d$ and put the exit at the other point",
+            "any number of robots and any communication model"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Bampas2019Speeds",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 4.8 with equal speeds ($v = 1$)",
+            "two robots"
           ]
         }
       ],
       "results": [
         {
-          "ref": "Chrobak2015GroupSearch",
+          "ref": "BaezaYates1995Parallel",
+          "role": "introductory",
+          "time": "3",
+          "note": "Section 2.2: with instantaneous communication, two robots search in opposite directions; \"if both robots must reach the goal, the distance increases to $4D$ and the time to 3 units\" (their $D$ is $d$ here). Stated without a lower bound."
+        },
+        {
+          "ref": "Bampas2019Speeds",
           "role": "best",
           "time": "3",
-          "note": "Introductory and current best: two robots search in opposite directions and call the others; as cited by [Czyzowicz2021GroupEvacuation]."
+          "note": "Algorithm $B^*$ with $v = 1$ (Corollary 4.3): two robots move in opposite directions at unit speed, the finder calls the other, which needs $2d$ more. Further robots can move with one of the two (the catalogue's own observation, see notes). [Czyzowicz2021GroupEvacuation] attribute the bound to [Chrobak2015GroupSearch], which treats only robots that communicate when they meet; it is stated earlier by [BaezaYates1995Parallel]."
         }
       ],
       "optimality": {
@@ -1125,8 +1191,8 @@
         }
       },
       "open": [],
-      "notes": "**Unverified:** [Chrobak2015GroupSearch] was not read; the bounds are as cited by later papers.",
-      "status": "draft"
+      "notes": "Checked against the full texts of [BaezaYates1995Parallel], [Bampas2019Speeds], [Czyzowicz2021GroupEvacuation] and [Chrobak2015GroupSearch]. Own observation of this catalogue, not taken from a paper: with $k > 2$ robots, let the extra robots move together with one of the two robots that walk apart at unit speed. Whichever of the two finds the exit, at distance $d$ and time $d$, every robot is then within $2d$ of it and all arrive by time $3d$; so ratio 3 holds for every $k \\ge 2$.",
+      "status": "verified"
     },
     {
       "id": "line-two-speeds-f2f",
@@ -1338,7 +1404,7 @@
       "title": "Triangle, two wireless robots starting on the boundary",
       "assumptions": {
         "faults": "none",
-        "domain": "triangle",
+        "domain": "triangle-boundary",
         "robots": "two",
         "speeds": "equal",
         "communication": "wireless"
@@ -1362,7 +1428,7 @@
           "ref": "Czyzowicz2015Wireless",
           "role": "introductory",
           "time": "3/2+y",
-          "note": "Equilateral unit triangle, start on the boundary at distance $y$ from a side's midpoint; tight; as cited by later papers."
+          "note": "Equilateral unit triangle, start on the boundary at distance $y$ from the nearest midpoint of a side; tight (Theorem 1), and $k \\ge 3$ robots starting there do no better (Theorem 3)."
         },
         {
           "ref": "Georgiou2026Triangle",
@@ -1380,7 +1446,7 @@
       "open": [
         "Face-to-face evacuation of general triangles, and wireless evacuation of obtuse triangles [Georgiou2026Triangle]."
       ],
-      "notes": "With many wireless robots an equilateral triangle is evacuated in $1+\\sqrt3/3$, optimal with 6 robots [Czyzowicz2015Wireless]; with communication range $r$, $6+2\\lceil 1/r-1\\rceil$ robots achieve it [Bagheri2019Triangles]. Checked against the full texts of [Georgiou2026Triangle] and [Bagheri2019Triangles].",
+      "notes": "With $k \\ge 3$ robots starting at the same point of the boundary the bound $3/2+y$ is still tight (Theorem 3 of [Czyzowicz2015Wireless]); see the setting with any number of robots. Checked against the full texts of [Czyzowicz2015Wireless] and [Georgiou2026Triangle].",
       "status": "verified"
     },
     {
@@ -1421,24 +1487,697 @@
       "open": [],
       "notes": "Checked against the full text.",
       "status": "verified"
+    },
+    {
+      "id": "line-weighted-wireless",
+      "title": "Line, weighted evacuation of two wireless robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless",
+        "goal": "weighted"
+      },
+      "summary": "When the heavy robot's arrival counts $w$ times the light one's, two wireless robots achieve exactly $1+\\sqrt{2w/(1+w)}$, between $2$ and $1+\\sqrt2$.",
+      "statement": "Two unit-speed robots start at the origin of the line; the exit is at unknown distance $d \\ge 1$. Both know which robot is heavy and the weight $w \\ge 1$. The cost is $(t_1 + w\\,t_2)/((1+w)d)$ in the worst case, where $t_1, t_2$ are the times from which the light and the heavy robot stay at the exit.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\sqrt{2w/(1+w)}",
+          "ref": "Georgiou2023WeightedLine",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 3.6",
+            "identities and $w$ known"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2023WeightedLine",
+          "role": "best",
+          "time": "1+\\sqrt{2w/(1+w)}",
+          "note": "Introductory and current best (Theorems 3.1, 3.2). Without the identities, robots walking apart at unit speed achieve $1+2w/(1+w)$ (Theorem 5.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $w \\ge 1$."
+        }
+      },
+      "open": [
+        "Weighted evacuation with more than two robots [Georgiou2023WeightedLine]."
+      ],
+      "notes": "For $w = 1$ the cost is the average arrival time, ratio $2$; as $w$ grows the ratio tends to $1+\\sqrt2$, below the ratio $3$ of evacuating both robots. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "line-weighted-f2f",
+      "title": "Line, weighted evacuation of two face-to-face robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "f2f",
+        "goal": "weighted"
+      },
+      "summary": "Face-to-face, the weighted cost is at most between $6.60258$ and $6.82843$, decreasing in $w$, well below the ratio $9$ of evacuating both robots; no face-to-face lower bound is known.",
+      "statement": "As in the wireless setting, but the robots exchange information only when they meet.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\sqrt{2w/(1+w)}",
+          "ref": "Georgiou2023WeightedLine",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 3.6",
+            "wireless bound; it holds face-to-face"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2023WeightedLine",
+          "role": "best",
+          "time": "6.60258 \\text{ to } 6.82843",
+          "note": "Introductory and current best (Theorem 4.1; numerical parameters in Theorems 4.12–4.14): $4+2\\sqrt2 \\approx 6.82843$ at $w=1$, decreasing to $6.60258$ as $w$ grows. Oblivious to the identities: $(2w+4\\sqrt{w(w+1)})/(w+1)+3$ with $w$ known, $4w/(w+1)+5$ with nothing known (Theorem 5.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap: only the wireless lower bound is known."
+        }
+      },
+      "open": [
+        "Lower bounds for weighted evacuation of two face-to-face robots on the line [Georgiou2023WeightedLine]."
+      ],
+      "notes": "The robots meet at a sequence of points away from the origin; a missed meeting tells a robot the direction of the exit. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "line-priority-wireless",
+      "title": "Line, priority evacuation, queen and one wireless servant",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless",
+        "goal": "queen"
+      },
+      "summary": "A queen and one wireless servant bring the queen to the exit with ratio at most $1+\\sqrt2$, against $3$ for evacuating both; no lower bound is known.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Georgiou2023WeightedLine",
+          "role": "best",
+          "time": "1+\\sqrt2",
+          "note": "Introductory and current best (Theorem 6.1, the weighted algorithm as $w \\to \\infty$); the servant also reaches the exit."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound beyond the trivial one."
+        }
+      },
+      "open": [
+        "A lower bound for priority evacuation of a queen and one wireless servant on the line."
+      ],
+      "notes": "Georgiou and Lucier call this the strict version (the servant must also reach the exit) and note that the problem had been studied only on the circle before. Checked against the full text of [Georgiou2023WeightedLine].",
+      "status": "verified"
+    },
+    {
+      "id": "line-priority-f2f",
+      "title": "Line, priority evacuation, queen and one face-to-face servant",
+      "assumptions": {
+        "faults": "none",
+        "domain": "line",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "f2f",
+        "goal": "queen"
+      },
+      "summary": "Face-to-face, the queen reaches the exit with ratio at most $2+\\sqrt5 \\approx 4.236$, far below $9$; no lower bound is known.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Georgiou2023WeightedLine",
+          "role": "best",
+          "time": "2+\\sqrt5",
+          "note": "Introductory and current best (Theorem 6.2): the queen walks one way at unit speed, the servant the other way at speed $\\sqrt5-2$; a servant that finds the exit catches the queen and brings her back. If the servant must also reach the exit, $6.60258$ (Theorem 6.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is known."
+        }
+      },
+      "open": [
+        "A lower bound for priority evacuation of a queen and one face-to-face servant on the line."
+      ],
+      "notes": "Checked against the full text of [Georgiou2023WeightedLine].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-byzantine-wireless",
+      "title": "Disk, $k$ wireless robots, $f$ Byzantine",
+      "assumptions": {
+        "domain": "disk",
+        "speeds": "equal",
+        "communication": "wireless",
+        "faults": "byzantine"
+      },
+      "statement": "$k$ wireless robots start at the centre of the unit disk; up to $f < k/2$ of them are Byzantine. Every non-faulty robot must reach the exit; messages carry the sender's identifier.",
+      "summary": "With $k$ wireless robots and one Byzantine robot evacuation takes at most $3+4\\pi/k$; general $f < k/2$ has upper bounds only, and lower bounds come from search and from the fault-free case.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2\\pi(f+1)/k",
+          "ref": "Georgiou2023OptimalCircle",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "Theorem 1: search bound with $f$ crash-faulty robots, hence with Byzantine ones",
+            "every point of the boundary must be visited by $f+1$ robots",
+            "evacuation takes at least as long as search"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "3+\\pi/k",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "fault-free bound of $k$ wireless robots (setting with many wireless robots in the disk)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Leonardos2023Symmetric",
+          "role": "introductory",
+          "time": "3+4\\pi/k\\ (f=1)",
+          "note": "Theorem 3 (search algorithm of [Georgiou2023OptimalCircle] plus a diameter); $3+6\\pi/k$ for $f=2$ when $k \\ge 9$, plus a term $\\delta(k) \\le 0.5687$ when $k < 9$ (Theorem 4)."
+        },
+        {
+          "ref": "Behrouz2025Byzantine",
+          "role": "best",
+          "time": "1+2\\pi(f+1)/k+\\max\\{G_e(k^*),H_e(k^*)\\}",
+          "note": "Theorem 1, for every $f < k/2$; $G_e$ and $H_e$ are the evacuation times of two groups of robots that settle disputed reports, defined in the theorem."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "For $f=1$: $3+4\\pi/k$ against $3+\\pi/k$, an additive gap $3\\pi/k$; for general $f$ the gap is not quantified."
+        }
+      },
+      "open": [
+        "Lower bounds for evacuation of $k$ robots with $f$ Byzantine faults from the disk [Behrouz2025Byzantine]."
+      ],
+      "notes": "Symmetric-persistent algorithms (all robots go to the boundary and explore in the same direction until told of the exit) need at least $1+4\\pi/k+2\\sin(\\pi/2-\\pi/k)$ with one faulty robot (Theorem 1 of [Leonardos2023Symmetric]), so $3+4\\pi/k$ is within $O(1/k^2)$ of the best such algorithm. With $k = 3$ see the setting with three robots, where $\\approx 6.921$ is known [Czyzowicz2017Faulty]. Checked against the full texts of [Leonardos2023Symmetric], [Behrouz2025Byzantine] and [Georgiou2023OptimalCircle].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-byzantine-f2f",
+      "title": "Disk, $k$ face-to-face robots, $f$ Byzantine",
+      "assumptions": {
+        "domain": "disk",
+        "speeds": "equal",
+        "communication": "f2f",
+        "faults": "byzantine"
+      },
+      "statement": "$k$ robots start at the centre of the unit disk and exchange information only when they meet; up to $f$ of them are Byzantine. Every non-faulty robot must reach the exit.",
+      "summary": "Face-to-face with $f$ Byzantine robots: $3+4\\pi/k+2\\sin(\\pi/k)$ for $f=1$, and a general upper bound; lower bounds come from search and the fault-free case.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2\\pi(f+1)/k",
+          "ref": "Georgiou2023OptimalCircle",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "Theorem 1: search bound with $f$ crash-faulty robots, hence with Byzantine ones",
+            "every point of the boundary must be visited by $f+1$ robots",
+            "wireless search bound; it holds face-to-face and for evacuation"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "3+2\\pi/k-O(k^{-2})",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "fault-free bound of $k$ face-to-face robots (setting with many face-to-face robots in the disk)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Leonardos2023Symmetric",
+          "role": "introductory",
+          "time": "3+4\\pi/k+2\\sin(\\pi/k)\\ (f=1)",
+          "note": "Theorem 6; $3+6\\pi/k+2\\sin(2\\pi/k)$ for $f=2$ (Theorem 7)."
+        },
+        {
+          "ref": "Behrouz2025Byzantine",
+          "role": "best",
+          "time": "3+2\\pi(f+1)/k+\\max_{2\\le j\\le k} 2(j-1)\\sin\\bigl(\\tfrac{f-j+2}{j-1}\\cdot\\tfrac{\\pi}{k}\\bigr)",
+          "note": "Theorem 2, for every $f$ (their $k$ is $j$ here, the number of conflicting reports); equals the bounds of [Leonardos2023Symmetric] for $f = 1, 2$. Against the trivial algorithm (every robot walks the whole boundary, time $1+2\\pi$): the trivial one is better when $f \\ge 0.3842\\,k$ (Lemma 6), Theorem 2 is better when $f \\le \\beta k$ with $\\beta < (\\pi-1)/(2\\pi) \\approx 0.34$ and $k$ large enough (Lemma 7)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap."
+        }
+      },
+      "open": [
+        "Lower bounds for face-to-face evacuation of the disk with Byzantine robots [Behrouz2025Byzantine]."
+      ],
+      "notes": "Checked against the full texts of [Leonardos2023Symmetric], [Behrouz2025Byzantine] and [Georgiou2023OptimalCircle].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-crash-f2f",
+      "title": "Disk, $k$ face-to-face robots, $f$ crash faults",
+      "assumptions": {
+        "domain": "disk",
+        "speeds": "equal",
+        "communication": "f2f",
+        "faults": "crash"
+      },
+      "statement": "$k$ robots start at the centre of the unit disk and exchange information only when they meet; up to $f < k$ of them may crash. Every non-faulty robot must reach the exit.",
+      "summary": "Face-to-face with $f$ crash faults, $k$ robots evacuate in at most $3+2\\pi(f+1)/k$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2\\pi(f+1)/k",
+          "ref": "Georgiou2023OptimalCircle",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "Theorem 1: search bound with $f$ crash-faulty robots, hence with Byzantine ones",
+            "every point of the boundary must be visited by $f+1$ robots",
+            "wireless search bound; it holds face-to-face and for evacuation"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "3+2\\pi/k-O(k^{-2})",
+          "ref": "Czyzowicz2014Evacuating",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "fault-free bound of $k$ face-to-face robots (setting with many face-to-face robots in the disk)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Leonardos2023Symmetric",
+          "role": "best",
+          "time": "3+2\\pi(f+1)/k",
+          "note": "Introductory and current best (Theorem 5)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Additive gap at most $2$."
+        }
+      },
+      "open": [
+        "Tight bounds for face-to-face evacuation of the disk with crash faults."
+      ],
+      "notes": "Checked against the full texts of [Leonardos2023Symmetric] and [Georgiou2023OptimalCircle].",
+      "status": "verified"
+    },
+    {
+      "id": "disk-search-crash",
+      "title": "Disk search, $k$ wireless robots, $f$ crash faults",
+      "assumptions": {
+        "domain": "disk",
+        "speeds": "equal",
+        "communication": "wireless",
+        "faults": "crash",
+        "goal": "search"
+      },
+      "statement": "$k \\ge f+1$ wireless robots start at the centre of the unit disk; up to $f$ may crash. The task ends when a non-faulty robot has reached the exit and every non-faulty robot knows where it is.",
+      "summary": "Search of the disk boundary with $f$ crash faults takes exactly $1+2\\pi(f+1)/k$: every point must be seen by $f+1$ robots.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+2\\pi(f+1)/k",
+          "ref": "Georgiou2023OptimalCircle",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "Theorem 1",
+            "every point of the boundary must be visited by $f+1$ robots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2023OptimalCircle",
+          "role": "best",
+          "time": "1+2\\pi(f+1)/k",
+          "note": "Introductory and current best (Theorem 2): robot $i$ explores $f+1$ consecutive arcs of length $2\\pi/k$ from the point $2\\pi i/k$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-search-byzantine",
+      "title": "Disk search, $k$ wireless robots, one Byzantine",
+      "assumptions": {
+        "domain": "disk",
+        "speeds": "equal",
+        "communication": "wireless",
+        "faults": "byzantine",
+        "goal": "search"
+      },
+      "statement": "$k \\ge 2$ wireless robots start at the centre of the unit disk; one of them may be Byzantine (it may lie about the exit). Messages carry the sender's identifier. The task ends when a non-faulty robot has reached the exit and every non-faulty robot knows its position for certain.",
+      "summary": "With one Byzantine robot, search takes exactly $1+4\\pi/k$, as with one crash fault.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+4\\pi/k",
+          "ref": "Georgiou2023OptimalCircle",
+          "bottleneck": "faulty reports",
+          "preconditions": [
+            "Corollary 1: the crash bound of Theorem 1 with $f=1$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2023OptimalCircle",
+          "role": "best",
+          "time": "1+4\\pi/k",
+          "note": "Introductory and current best (Theorem 3, with separate analyses for $k = 3, 4$ in Lemma 1 and Section 4.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for one Byzantine robot."
+        }
+      },
+      "open": [
+        "Search of the disk with $f \\ge 2$ Byzantine robots: only the crash lower bound $1+2\\pi(f+1)/k$ and evacuation upper bounds are known [Georgiou2023OptimalCircle] [Behrouz2025Byzantine]."
+      ],
+      "notes": "With one Byzantine and $f-1$ crash-faulty robots, search takes at most $1+2\\pi f/k+2\\sin(2\\pi/k)$ (Theorem 4). Checked against the full text of [Georgiou2023OptimalCircle].",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-centroid-two-wireless",
+      "title": "Triangle, two wireless robots at the centroid",
+      "assumptions": {
+        "faults": "none",
+        "domain": "triangle",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "Two wireless robots at the centroid of the unit equilateral triangle evacuate in exactly $3/2+\\sqrt3/6 \\approx 1.789$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3/2+\\sqrt3/6",
+          "ref": "Czyzowicz2015Wireless",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 2 with the start at the centroid, at distance $\\sqrt3/6$ from the midpoints of the sides"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "best",
+          "time": "3/2+\\sqrt3/6",
+          "note": "Introductory and current best (Theorem 2: from an interior point at distance $y$ from the nearest midpoint of a side, $3/2+y$ is tight)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "Three robots at the centroid do better than two (Theorem 4). Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-many-wireless",
+      "title": "Triangle, any number of wireless robots at the centroid",
+      "assumptions": {
+        "faults": "none",
+        "domain": "triangle",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "$k$ wireless robots at the centroid evacuate in $1+\\sqrt3/3+3/k$, and no number of robots beats $1+\\sqrt3/3$, which 8 robots attain.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\sqrt3/3",
+          "ref": "Czyzowicz2015Wireless",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 5",
+            "every $k$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "introductory",
+          "time": "1+\\sqrt3/3+3/k",
+          "note": "Theorem 5."
+        },
+        {
+          "ref": "Bagheri2019Triangles",
+          "role": "best",
+          "time": "1+\\sqrt3/3\\ (k \\ge 8)",
+          "note": "Theorem 5.2: $6+2\\lceil 1/r-1\\rceil$ robots of communication range $r < 1$ suffice, hence 8 wireless robots; they report that 6 suffice with range 1, citing an extended version of [Czyzowicz2015Wireless]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for $k \\ge 8$; for $3 \\le k \\le 7$ the optimum is not proved."
+        }
+      },
+      "open": [
+        "The optimal evacuation time of $k = 3, \\dots, 7$ wireless robots from the centroid of the triangle."
+      ],
+      "notes": "For range-limited robots, $\\Omega(1/r)$ robots are needed to reach $1+\\sqrt3/3$ (Theorem 5.1 of [Bagheri2019Triangles]); their Table 1 gives about $1.667$ and $1.6105$ for three and four robots with range 1, citing the extended version. Checked against the full texts of [Czyzowicz2015Wireless] and [Bagheri2019Triangles].",
+      "status": "verified"
+    },
+    {
+      "id": "triangle-boundary-many-wireless",
+      "title": "Triangle, any number of wireless robots starting on the boundary",
+      "assumptions": {
+        "faults": "none",
+        "domain": "triangle-boundary",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "From a point of the boundary at distance $y$ from the nearest midpoint of a side, any number $k \\ge 2$ of wireless robots needs exactly $3/2+y$: extra robots do not help.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3/2+y",
+          "ref": "Czyzowicz2015Wireless",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorems 1 and 3",
+            "unit equilateral triangle, given start on the boundary",
+            "the argument does not depend on the number of robots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "best",
+          "time": "3/2+y",
+          "note": "Introductory and current best: two robots walk the boundary in opposite directions (Theorem 1); more robots do no better (Theorem 3)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $k \\ge 2$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "square-many-wireless",
+      "title": "Square, any number of wireless robots at the centre",
+      "assumptions": {
+        "faults": "none",
+        "domain": "square",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "$k$ wireless robots at the centre of the unit square evacuate in $3\\sqrt2/2+4/k$, against the lower bound $3\\sqrt2/2$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3\\sqrt2/2",
+          "ref": "Czyzowicz2015Wireless",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 9",
+            "every $k$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "best",
+          "time": "3\\sqrt2/2+4/k",
+          "note": "Introductory and current best (Theorem 9): the robots split the boundary into $k$ pieces of length $4/k$ and the finder calls the others."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "The gap $4/k$ vanishes as $k$ grows."
+        }
+      },
+      "open": [
+        "The optimal evacuation time of $k$ wireless robots from the centre of the square for fixed $k$."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "square-boundary-two-wireless",
+      "title": "Square, two wireless robots starting on the boundary",
+      "assumptions": {
+        "faults": "none",
+        "domain": "square-boundary",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless"
+      },
+      "summary": "From a point of the boundary at distance $x$ from the nearest corner, two wireless robots need exactly $1+x+\\sqrt{1+(1-2x)^2}$; the best start is $x = 1/2-1/\\sqrt{12}$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+x+\\sqrt{1+(1-2x)^2}",
+          "ref": "Czyzowicz2015Wireless",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 6",
+            "given start on the boundary, $x \\le 1/2$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2015Wireless",
+          "role": "best",
+          "time": "1+x+\\sqrt{1+(1-2x)^2}",
+          "note": "Introductory and current best (Theorem 6): the robots walk the boundary in opposite directions and the finder calls the other."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every start."
+        }
+      },
+      "open": [
+        "Optimal evacuation of the square by $k \\ge 3$ wireless robots from a point of the boundary other than a corner."
+      ],
+      "notes": "From a corner, any number of robots needs $1+\\sqrt2$, the two-robot time (Theorem 7); from the midpoint of a side three robots beat two (Theorem 8) [Czyzowicz2015Wireless]. Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "disk-weighted-wireless",
+      "title": "Disk, weighted evacuation of two wireless robots",
+      "assumptions": {
+        "faults": "none",
+        "domain": "disk",
+        "robots": "two",
+        "speeds": "equal",
+        "communication": "wireless",
+        "goal": "weighted"
+      },
+      "statement": "Two wireless robots with known identities start at the centre of the unit disk; the heavy robot's arrival time counts $w \\ge 1$ times the light one's, and the cost is $(t_1+w\\,t_2)/(1+w)$ in the worst case over exit positions.",
+      "summary": "For two wireless robots in the disk the weighted cost is exactly $1+\\pi$ when $w = 1$; for larger $w$ it lies between $\\max(1+\\pi,\\ 3.618+0.782\\,w/(w+1))$ and $1+d+\\tfrac{2w}{w+1}\\sin d$, tending to priority evacuation as $w \\to \\infty$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\pi",
+          "ref": "Georgiou2025WeightedDisk",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Lemma 7 (arXiv numbering)",
+            "the two robots together need time $1+\\pi$ to search the whole boundary"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "1+\\pi/7+5\\sin(\\pi/7)+\\tfrac{w}{w+1}\\cos(3\\pi/14)",
+          "ref": "Georgiou2025WeightedDisk",
+          "bottleneck": "unknown exit",
+          "preconditions": [
+            "Theorem 2 (arXiv numbering), about $3.618+0.782\\,w/(w+1)$; above $1+\\pi$ for large $w$",
+            "linear-programming relaxation over exits at the vertices of a regular 7-gon, computer-assisted (Lemmas 4, 8)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2025WeightedDisk",
+          "role": "best",
+          "time": "1+d+\\tfrac{2w}{w+1}\\sin d",
+          "note": "Introductory and current best (Lemmas 5, 6, arXiv numbering): the robots split the boundary in halves, $d = \\arccos(-(w+1)/(2w))$, while $w \\le 21.8861$; for larger $w$ the heavy robot leaves the boundary early (a detour, with $d$ the solution of a non-linear system), which as $w \\to \\infty$ is the priority algorithm of cost $\\approx 4.81854$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Tight ($1+\\pi$) at $w=1$; a constant gap otherwise, up to $4.568$ against $4.819$ in the limit of priority evacuation."
+        }
+      },
+      "open": [
+        "Close the gap for weighted evacuation of two wireless robots in the disk when $w > 1$ [Georgiou2025WeightedDisk]."
+      ],
+      "notes": "The paper writes the cost as $w'x + y$ with $w' \\in [0,1]$; its $w'$ is $1/w$ here. For $w \\to \\infty$ (their $w'=0$) the cost is priority evacuation, where the same framework gives the lower bound $\\approx 4.56798$ (Theorem 1); see the setting of a queen and one servant in the disk. Checked against the full text (arXiv 2406.19490v1; theorem numbers may differ in the journal version).",
+      "status": "verified"
     }
   ],
   "further": [
     {
       "ref": "Czyzowicz2019GroupSearch",
-      "note": "Survey chapter on group search and evacuation. Not read."
+      "note": "Survey chapter (2019) on group search and evacuation: line search with crash and Byzantine faults, linear terrains, disk, triangle and square evacuation, faulty robots, several exits on a circle, and search-and-fetch. Read; it reports results of the papers placed in the settings."
     },
     {
       "ref": "Kranakis2024Survey",
-      "note": "Survey of how knowledge affects the competitive ratio of linear search, including evacuation. Not read."
-    },
-    {
-      "ref": "Georgiou2023OptimalCircle",
-      "note": "Circle search with crash and Byzantine robots. Not read."
-    },
-    {
-      "ref": "Georgiou2023WeightedLine",
-      "note": "Weighted group search on the line, with consequences for priority evacuation. Not read."
+      "note": "Invited survey (SSS 2024) on how knowledge of the communication model, of faults and of the target's distance and speed changes the competitive ratio of linear group search and evacuation, with open problems. Read; no new results."
     },
     {
       "ref": "Czyzowicz2021TimeEnergy",
@@ -1446,19 +2185,19 @@
     },
     {
       "ref": "Jawhar2021Bike",
-      "note": "Introduces bike-assisted evacuation on the line. Abstract only."
+      "note": "Two robots and one bike on the line: walking speed $1$, riding speed $v > 1$, one rider at a time; three algorithms in the wireless model and three face-to-face (Theorems 1–6), and a lower bound for both models (Theorem 8). Read."
     },
     {
       "ref": "Pattanayak2020Collaborative",
-      "note": "One-page summary of collaborative disk evacuation (two exits, chauffeuring). Abstract only."
+      "note": "One-page extended abstract (ICDCN 2020) summarising two-robot disk evacuation with two exits at known arc distance, labelled or unlabelled, wireless or face-to-face, and carrying a crashed robot to the exit at reduced speed; it states no bounds and defers to the full papers. Read."
     },
     {
       "ref": "Chuangpishit2020MultiObjective",
-      "note": "Average versus worst case for two face-to-face robots in the disk; probably the journal version of [Chuangpishit2019Average]. Not read."
+      "note": "Journal version of [Chuangpishit2019Average]: two face-to-face robots in the disk; families of algorithms minimising the average evacuation time over the exit position subject to a bound on the worst-case time, for every feasible bound (Theorems 6, 7); conjectures that $1+\\pi$ is the optimal average. Read."
     },
     {
       "ref": "Liu2022Square",
-      "note": "Evacuating crashed robots from a square. Abstract only."
+      "note": "Evacuation of $k$ wireless robots from the centre of a unit square whose exit is at one of its corners, with crash faults that stop a robot, which a non-faulty robot must then carry to the exit at reduced speed; competitive ratios for $(k,f) = (2,1)$ (Theorem 1), $(3,1)$ and $(3,2)$ as functions of the slowdown. Read; neither the exit at a corner nor carrying is in the tree."
     },
     {
       "ref": "Fekete2010Rectilinear",
@@ -1466,31 +2205,31 @@
     },
     {
       "ref": "Borowiecki2025Discrete",
-      "note": "Discrete evacuation of many agents through known exits of a graph, limited by congestion: a different sense of evacuation. Not read."
+      "note": "Discrete evacuation of agents from distinct nodes of a known graph to known exits, at most one agent per node: an optimal offline strategy in polynomial time (Theorem 3.1); on trees, with communication at distance two, no $(2-\\Theta(1/k))$-competitive online algorithm (Theorem 4.1) and an $O(1)$-competitive one (Theorem 4.2); NP-complete with agents restricted to subgraphs (Theorems 5.1, 5.2). A different sense of evacuation. Read."
     },
     {
       "ref": "Czyzowicz2019Plane",
-      "note": "Group search of the plane with crash and Byzantine robots. Abstract only."
+      "note": "Search for a point in the plane by $k$ robots of speeds $v_i$ with unit visibility, ending when the last reliable robot reaches the target: $\\pi d^2/(2V) + o(d^2)$ with $V$ the sum of the speeds, asymptotically optimal (Theorem 1); asymptotically optimal bounds with $f$ crash faults (Theorem 2, Lemma 6); with $f$ Byzantine faults asymptotically optimal when wireless, and $(f+1)\\pi d^2/(2k) + o(d^2)$ face-to-face for equal speeds and $k \\ge 2f+1$ (Theorem 3). Read."
     },
     {
       "ref": "Dobrev2020Shoreline",
-      "note": "Lower bounds for searching an unknown line in the plane. Not read."
+      "note": "Search for a line (the shoreline) at known distance $d$ in the plane (they write $\\delta$): every algorithm needs time at least $2d$ with three robots (Theorem 1) and $(1+\\sqrt3+\\pi/6)d \\approx 3.2556d$ with two (Theorem 3), matching known upper bounds; the bound for three robots also holds for unknown $d$. Search, not evacuation. Read."
     },
     {
       "ref": "Xu2013Groups",
-      "note": "Groups escaping an unknown convex region of the plane; the group lower bound 3 is cited by [Wei2016Competitive]."
+      "note": "Groups of evacuees at one point of an unknown convex region of the plane, sharing information at all times, leave when all have reached the boundary: every strategy has ratio at least 3 (Theorem 1); $k \\ge 3$ groups in equally spaced directions achieve $3/\\cos(\\pi/k)$ (Theorem 2); strategies on a grid network, ratio 3 with four groups (Theorem 6). Read."
     },
     {
       "ref": "Wei2014Convex",
-      "note": "Online strategies for escaping a convex region. Not read."
+      "note": "One group, without communication with others, escaping an unknown convex region of the plane: a $19.64$-competitive strategy along growing semicircles (Theorem 1) and a $21$-competitive strategy on a grid network (Theorem 2). Read."
     },
     {
       "ref": "Li2017Convex",
-      "note": "Online strategies for escaping a convex region. Not read."
+      "note": "Escaping an unknown convex region once the boundary is known to all after the first evacuee reaches it: a 5-competitive strategy from one start (Theorem 2); from several starts, every strategy has ratio at least 3 (Theorem 1), and the strategy MES achieves 4 with two starts (Theorem 3) and $2+\\sqrt5$ in general (Theorem 4), improving $4\\sqrt2$ of [Liu2015Groups]. Read."
     },
     {
       "ref": "Liu2015Groups",
-      "note": "Groups escaping a convex region. Not read."
+      "note": "Groups that start at several points of an unknown convex region of the plane and share information: a $4\\sqrt2$-competitive strategy for $n \\ge 3$ groups (Theorem 1). Read."
     },
     {
       "ref": "Jiang2015Groups",
@@ -1498,7 +2237,7 @@
     },
     {
       "ref": "Wei2016Affected",
-      "note": "Escaping an unknown affected area. Not read."
+      "note": "Escaping an unknown convex region: a $19.64$-competitive strategy for one group (Theorem 1), a $14.37$-competitive strategy for two groups (Theorem 2), and $21$- and $17$-competitive strategies for one and two groups on a grid network (Theorems 3, 4). Read."
     },
     {
       "ref": "Conley2025Inspection",

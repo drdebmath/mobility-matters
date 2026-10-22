@@ -833,7 +833,7 @@
           "time": "O(mD)",
           "colours": "\\deg(v)",
           "memory": "0",
-          "note": "Introductory and current best, as reported by [Menc2017Rotor]: from arbitrary pointers the walk settles into an Euler tour within $O(mD)$ moves (the abstract gives $2mD$ steps), which is $\\Theta(mD)$ in the worst case [Bampas2009LockIn]. Not checked against the full text."
+          "note": "Introductory and current best: within $2|E|D$ moves every arc has been traversed and the walk repeats an Euler tour of the arcs (Corollary 7 and Theorem 3, with $|E| = 2m$ counting both directions of every edge), so every node is visited within $O(mD)$ moves. The paper starts every pointer at the first port of an arbitrary port order, which is the same as an arbitrary pointer; Bampas et al. restate the bound for any initial pointers and ports (their Theorem 1) [Bampas2009LockIn]."
         }
       ],
       "optimality": {
@@ -853,8 +853,57 @@
       "open": [
         "For which graphs (other than paths) is the rotor-router exactly time-optimal among oblivious agents without the entry port [Menc2017Rotor]?"
       ],
-      "notes": "The rotor-router (also *Propp machine*, *Edge Ant Walk*) goes back to the Eulerian walkers of Priezzhev, D. Dhar, A. Dhar and Krishnamurthy (as cited by [Takahashi2025Recolorable]) [Priezzhev1996Eulerian]; Yanovski, Wagner and Bruckstein used it for patrolling [Yanovski2003Ant]. Bampas et al. show that if the pointers may be chosen and the adversary then numbers the ports, the lock-in time drops to $O(m\\min(\\log m, D))$ (abstract) [Bampas2009LockIn]. It is a recolourable node whose palette grows with the degree: a deterministic recolouring rule fixed in advance. **Unverified:** the $O(mD)$ bound, taken from [Menc2017Rotor], the abstract of [Yanovski2003Ant] and the slides of [Bampas2009LockIn].",
-      "status": "draft"
+      "notes": "The rotor-router (also *Propp machine*, *Edge Ant Walk*) goes back to the Eulerian walkers of Priezzhev, D. Dhar, A. Dhar and Krishnamurthy (as cited by [Takahashi2025Recolorable]) [Priezzhev1996Eulerian]; Yanovski, Wagner and Bruckstein used it for patrolling [Yanovski2003Ant]. Bampas, Gąsieniec, Hanusse, Ilcinkas, Klasing and Kosowski study the *lock-in time*, until the walk has traversed every edge in both directions and repeats an Euler tour; this can exceed the time to visit every node [Bampas2009LockIn]. When the adversary sets ports and pointers, in every graph with about $m$ edges and diameter about $D$ some start and setting force at least $mD/4$ moves before lock-in (Theorem 2), so the $O(mD)$ lock-in bound is tight for every such graph. If a designer who knows the ports sets the pointers, lock-in takes $O(m)$ moves (Section 2.1; setting *Rotor-router with pointers set by a designer*). If the pointers must be chosen first and the adversary then numbers the ports, lock-in takes $O(m\\min(\\log m, D))$ moves (Theorem 3), and some graphs need $\\Omega(m\\min(\\log m, D))$ (Theorem 4); if the adversary sets the pointers, before or after the ports are chosen, some graphs still need $\\Omega(mD)$ (Theorems 5 and 7). It is a recolourable node whose palette grows with the degree: a deterministic recolouring rule fixed in advance.",
+      "status": "verified"
+    },
+    {
+      "id": "rotor-router-designer",
+      "title": "Rotor-router with pointers set by a designer",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ports": "ports",
+        "view": "own",
+        "memory": "oblivious",
+        "recolouring": "unrestricted",
+        "colouring": "designer",
+        "termination": "perpetual"
+      },
+      "summary": "If a designer who knows the graph and its port numbers sets the initial pointers, the rotor-router follows an Euler tour from the first move, so it visits every node and locks in within $O(m)$ moves.",
+      "statement": "As in the rotor-router setting, the colour of a node is its pointer and the agent leaves by the pointer and advances it cyclically. The adversary numbers the ports; then a designer who knows the graph, its port numbers and the start node chooses the initial pointer at every node (case $A()P(f)$ of [Bampas2009LockIn]). The agent must visit every node (and keeps going).",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bampas2009LockIn",
+          "role": "best",
+          "time": "O(m)",
+          "colours": "\\deg(v)",
+          "memory": "0",
+          "assumes": [
+            "the designer knows the port numbers when it sets the pointers"
+          ],
+          "note": "Introductory and current best (Section 2.1, cases $P$-all and $A()P(f)$): the designer chooses pointers that make the walk follow an Euler tour of the arcs from the start, so every edge is traversed in both directions, and every node visited, within $2m$ moves. The bound is on the *lock-in time*, which bounds the time to visit every node."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Lock-in takes $\\Theta(m)$ moves here, since an Euler tour of the arcs has $2m$ of them; the time to visit every node may be smaller, and no lower bound is known for it in this setting."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "$\\deg(v)$ colours per node suffice; no lower bound is known when the designer chooses the initial colours."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Zero bits."
+        }
+      },
+      "open": [
+        "How few moves does a rotor-router with designer pointers need to visit every node, as opposed to locking in? In Hamiltonian graphs the pointers can follow a Hamiltonian cycle [Bampas2009LockIn]."
+      ],
+      "notes": "Bampas, Gąsieniec, Hanusse, Ilcinkas, Klasing and Kosowski let a player who wants a fast lock-in and an adversary choose the pointers and the port order in either order [Bampas2009LockIn]. This setting is their case $A()P(f)$: the ports are fixed first and the player answers with the pointers, which reduces to choosing everything and gives $O(m)$ (Section 2.1). If instead the player must set the pointers before the adversary orders the ports (case $P(f)A()$), lock-in takes $O(m\\min(\\log m, D))$ moves, with pointers towards the child of largest Strahler rank in a breadth-first search tree (Theorem 3), and some graphs need $\\Omega(m\\min(\\log m, D))$ moves before lock-in whatever the pointers (Theorem 4). The catalogue has no setting for that order of choices, so Theorems 3 and 4 are recorded here only; they bound lock-in, not the time to visit every node.",
+      "status": "verified"
     },
     {
       "id": "label-guided",
@@ -2468,10 +2517,6 @@
     {
       "ref": "Sudo2015Whiteboards",
       "note": "Trade-offs between agent memory and whiteboard size for single-agent exploration. Not read."
-    },
-    {
-      "ref": "Bampas2009LockIn",
-      "note": "Rotor-router lock-in: $\\Theta(mD)$ when the adversary sets pointers and ports, $O(m\\min(\\log m, D))$ when pointers are chosen first. Abstract and talk slides read."
     },
     {
       "ref": "Zhang2012Ratio",

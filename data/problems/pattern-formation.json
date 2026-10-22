@@ -35,8 +35,8 @@
         "title": "With a common compass nobody is symmetric",
         "variant": "compass",
         "ref": "Flocchini2008Arbitrary",
-        "idea": "Suppose all robots agree on north and east (a **common compass**), though not on origin or unit.\n\n1. Each robot sorts all robots from west to east, and robots on the same north-south line from south to north. Since all robots agree on north and east, they all obtain the same order, even though their origins and units differ.\n2. Each robot sorts the points of the pattern $P$ in the same way and matches the $i$-th robot with the $i$-th point of $P$, its target point, (after placing and scaling $P$ by a rule everyone computes alike).\n3. The robots move in an order chosen so that the order of step 1, and hence the assignment of target points, does not change while they move.",
-        "analysis": "A common compass removes the adversary's trick: no rotation or mirror image can map a set of points to itself while keeping north and east fixed, so every configuration has a first robot that all robots recognise. Flocchini, Prencipe, Santoro and Widmayer showed that with a common compass any number of robots form any pattern in ASYNC, and that agreement on one axis suffices for an odd number of robots [Flocchini2008Arbitrary]. The steps above are a simplified sketch that was not checked against that paper's full text; the fact that a compass gives all robots the same order is Lemma 2.1 of [Efrima2009Partition].",
+        "idea": "Suppose all robots agree on north and east (a **common compass**), though not on origin or unit.\n\n1. Each robot sorts all robots from west to east, and robots on the same north-south line from south to north. Since all robots agree on north and east, they all obtain the same order, even though their origins and units differ.\n2. Each robot sorts the points of the pattern $P$ in the same way. At first only the first robot moves: staying first in the order, it moves until the direction from it to the second robot is the direction from the first to the second point of $P$.\n3. Every robot now places $P$ so that its first two points fall on the first two robots. This fixes where $P$ lies and how large it is, so all robots compute the same target points.\n4. The other robots walk to the remaining target points one at a time, in an order chosen so that once a robot starts moving, no other robot moves until it has arrived.",
+        "analysis": "A common compass removes the adversary's trick: no rotation or mirror image can map a set of points to itself while keeping north and east fixed, so every configuration has a first robot that all robots recognise. Flocchini, Prencipe, Santoro and Widmayer showed that with a common compass any number of robots form any pattern in ASYNC, and that agreement on one axis, without a common handedness, suffices for an odd number of robots [Flocchini2008Arbitrary]. The steps above follow their algorithm for a common compass (Theorem 4.1 of [Flocchini2008Arbitrary]); the fact that a compass gives all robots the same order is also Lemma 2.1 of [Efrima2009Partition].",
         "why_it_matters": "It shows that symmetry, not obliviousness or asynchrony, is the real obstacle to forming patterns."
       }
     ]
@@ -164,6 +164,7 @@
           "bottleneck": "symmetry",
           "preconditions": [
             "for some initial configurations: symmetric configurations cannot be broken by oblivious deterministic robots",
+            "Theorem 7.1: from a regular $n$-gon whose local coordinate systems are rotated by $360^\\circ/n$ from one robot to the next, all robots keep the same view",
             "holds in every scheduler"
           ]
         }
@@ -174,7 +175,7 @@
           "role": "introductory",
           "time": "\\text{finite}",
           "colours": "0",
-          "note": "Introduces arbitrary pattern formation for asynchronous oblivious robots and shows that with no common agreement an arbitrary pattern cannot be formed in general."
+          "note": "Introduces arbitrary pattern formation for asynchronous oblivious robots and shows that without agreement on both axes an arbitrary pattern cannot be formed in general (Theorem 7.1); also that forming arbitrary patterns implies leader election for $n \\ge 3$ (Theorem 2.1)."
         },
         {
           "ref": "Cicerone2019Asynchronous",
@@ -197,7 +198,7 @@
       "open": [
         "Bound the number of epochs needed by an arbitrary pattern formation algorithm in ASYNC; no time analysis is recorded."
       ],
-      "notes": "Patterns are formed up to translation, rotation, scaling and reflection, starting from distinct positions. The four-robot case needed a separate geometric invariant [Bramas2018Four]. The point (gathering) and the regular polygon (uniform circle) are the only patterns formable from every initial configuration [Flocchini2017Uniform].",
+      "notes": "Patterns are formed up to translation, rotation, scaling and reflection, starting from distinct positions. The four-robot case needed a separate geometric invariant, the H-segment of a quadrilateral, with or without chirality [Bramas2018Four]. The point (gathering) and the regular polygon (uniform circle) are the only patterns formable from every initial configuration [Flocchini2017Uniform].",
       "status": "verified"
     },
     {
@@ -255,7 +256,7 @@
         "frames": "one-axis",
         "body": "point"
       },
-      "summary": "With a common North and chirality, any odd number of robots forms any pattern; an even number cannot, in the worst case.",
+      "summary": "With a common North but no common handedness, any odd number of robots forms any pattern; an even number cannot, in the worst case.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -263,7 +264,8 @@
           "ref": "Flocchini2008Arbitrary",
           "bottleneck": "symmetry",
           "preconditions": [
-            "even $n$, for some initial configurations"
+            "even $n$, for some initial configurations and patterns (Corollary 2.1)",
+            "leader election is impossible for even $n$ (Theorem 2.2): robots placed symmetrically about a line parallel to the common axis, with mirrored local coordinate systems and partners activated together, stay symmetric (an SSYNC scheduler, so it holds in ASYNC too)"
           ]
         }
       ],
@@ -276,7 +278,7 @@
           "assumes": [
             "odd $n$"
           ],
-          "note": "Introductory and current best."
+          "note": "Introductory and current best (Result 2, Theorem 5.1): any pattern for odd $n$. For even $n$ the formable patterns are characterised exactly (Result 3, Theorem 6.2)."
         }
       ],
       "optimality": {
@@ -290,7 +292,7 @@
         }
       },
       "open": [],
-      "notes": "",
+      "notes": "The robots of [Flocchini2008Arbitrary] agree on the direction and orientation of one axis but have no common handedness: \"knowing North does not distinguish East from West\". Checked against the full text of [Flocchini2008Arbitrary].",
       "status": "verified"
     },
     {
@@ -311,7 +313,7 @@
           "role": "best",
           "time": "\\text{finite}",
           "colours": "0",
-          "note": "Introductory and current best."
+          "note": "Introductory and current best (Theorem 4.1): any pattern, any $n$, collision-free, non-rigid moves; the pattern keeps the orientation in which it is given."
         }
       ],
       "optimality": {
@@ -325,7 +327,7 @@
         }
       },
       "open": [],
-      "notes": "",
+      "notes": "Checked against the full text of [Flocchini2008Arbitrary].",
       "status": "verified"
     },
     {
@@ -364,7 +366,51 @@
         }
       },
       "open": [],
-      "notes": "Yamauchi and Yamashita gave a randomized algorithm with chirality (DISC 2014, not yet in the bibliography). **Disputed:** the proof of [Bramas2016Probabilistic] is questioned by [Cicerone2019Asynchronous]; no undisputed result is recorded for this setting.",
+      "notes": "Yamauchi and Yamashita gave a randomized algorithm that forms any pattern from any initial configuration in ASYNC with non-rigid moves, for $n \\ge 5$ and patterns and initial configurations without multiplicities [Yamauchi2014Randomized]; their robots have right-handed local coordinate systems (chirality), so the result belongs to the setting *Randomized, ASYNC, chirality*, and its second phase runs the deterministic algorithm of [Fujinaga2015Pattern], whose proof [Cicerone2019Asynchronous] report as not correct. **Disputed:** the proof of [Bramas2016Probabilistic] is questioned by [Cicerone2019Asynchronous]; no undisputed result is recorded for this setting.",
+      "status": "verified"
+    },
+    {
+      "id": "randomized-chirality",
+      "title": "Randomized, ASYNC, chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "algorithm": "randomized",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With random bits and common handedness, $n \\ge 5$ robots form any pattern without multiplicities from any initial configuration, with probability 1.",
+      "statement": "Robots may draw random bits in Compute. From any initial configuration of distinct points, the robots must form the given pattern with probability 1 and then stop moving.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Yamauchi2014Randomized",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$",
+            "neither the initial configuration nor the pattern has multiplicities",
+            "non-rigid moves"
+          ],
+          "note": "Theorem 5: forms any pattern from any initial configuration with probability 1. A randomized phase reaches a configuration with symmetricity 1 (Theorem 4); the robots then run the deterministic algorithm of [Fujinaga2015Pattern], whose proof [Cicerone2019Asynchronous] report as not correct, so this result depends on a disputed proof."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "A proof that does not rely on the disputed algorithm of [Fujinaga2015Pattern], for example by combining the symmetry-breaking phase of [Yamauchi2014Randomized] with the algorithm of [Cicerone2019Asynchronous]."
+      ],
+      "notes": "Yamauchi and Yamashita's local coordinate systems are all right-handed (chirality). Checked against the full text of [Yamauchi2014Randomized] (DISC 2014): the statements of Theorems 4 and 5 and the model; the combination with $\\psi_{CWM}$ rests on [Fujinaga2015Pattern].",
       "status": "verified"
     },
     {

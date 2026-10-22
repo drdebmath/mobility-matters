@@ -35,7 +35,7 @@
         "variant": "known-n-delta",
         "ref": "Kshemkalyani2024AgentLE",
         "idea": "Here the agents know $n$ and $\\Delta$, which lets them use the disperse-and-simulate method.\n\n1. Disperse, so that every node holds one agent.\n2. Repeat simulated message-passing rounds, each made of $O(\\log n)$ blocks of $2\\Delta$ rounds in which neighbouring agents meet by the **ID-bit schedule**: in block $i$ an agent whose $i$-th ID bit is $1$ visits its neighbours one by one and an agent whose bit is $0$ waits on its node (see leader election by agents).\n3. An agent joins the set as soon as every neighbour with a larger ID has decided and none of them joined; it stays out as soon as some neighbour with a larger ID joined.\n4. Each agent tells its neighbours its decision at the next meetings.",
-        "analysis": "The agent with the largest ID decides at once, and an agent waits only for neighbours with larger IDs, so a chain of waiting agents has decreasing IDs and at most $n$ members: at most $n$ simulated rounds. Each costs $O(\\Delta\\log n)$ real rounds, so the total is $O(n\\Delta\\log n)$ plus the time to disperse, the same order as the introductory $O(n\\Delta\\log n)$ bound of [Pattanayak2024MIS] (whose algorithm may differ). With $n$ and $\\Delta$ known the current best is $O(n\\log^2 n + D\\Delta\\log n)$ rounds with $O(\\log n)$ bits [Kshemkalyani2026Leader].",
+        "analysis": "The agent with the largest ID decides at once, and an agent waits only for neighbours with larger IDs, so a chain of waiting agents has decreasing IDs and at most $n$ members: at most $n$ simulated rounds. Each costs $O(\\Delta\\log n)$ real rounds, so the total is $O(n\\Delta\\log n)$ plus the time to disperse, the introductory $O(n\\Delta\\log n)$ bound of [Pattanayak2024MIS], whose dispersed-start algorithm is this greedy rule with the ID-bit schedule (Theorem 3.4). With $n$ and $\\Delta$ known the current best is $O(n\\log^2 n + D\\Delta\\log n)$ rounds with $O(\\log n)$ bits [Kshemkalyani2026Leader].",
         "why_it_matters": "It shows the cost of the generic method: a slow message-passing algorithm becomes a slow agent algorithm, which is why later work designs algorithms for agents directly."
       }
     ]
@@ -142,7 +142,7 @@
       "avoid": []
     }
   ],
-  "history": "MIS by agents was posed with **time first, memory second**: rooted and arbitrary starts, trees and grids [Pattanayak2024MIS]; later work removed the knowledge of $n$ and $\\Delta$ [Kaur2026MIS].",
+  "history": "MIS by agents was posed with **time first, memory second**: rooted, dispersed and arbitrary starts, trees and grids [Pattanayak2024MIS]; only the rooted algorithm needed no knowledge, and later work removed the knowledge of $n$ and $\\Delta$ for every start [Kshemkalyani2024AgentLE] [Kaur2026MIS].",
   "measures": [
     {
       "id": "time",
@@ -192,7 +192,7 @@
           "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
         }
       ],
-      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For maximal independent sets the introductory algorithm assumes $n$ and $\\Delta$ [Pattanayak2024MIS]; [Kshemkalyani2024AgentLE] and [Kaur2026MIS] remove the assumption."
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithms assume both $n$ and $\\Delta$ when the agents start dispersed or arbitrarily placed, but need no knowledge from a rooted start [Pattanayak2024MIS]. Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For maximal independent sets the introductory algorithms assume $n$ and $\\Delta$ from dispersed and arbitrary starts and nothing from a rooted start (Theorems 3.1, 3.4 and 3.5 of [Pattanayak2024MIS]); [Kshemkalyani2024AgentLE] and [Kaur2026MIS] remove the assumption for every start."
     }
   ],
   "variants": [
@@ -208,7 +208,7 @@
         "timing": "sync",
         "knowledge": "n-delta"
       },
-      "summary": "With $n$ and $\\Delta$ known: $O(n\\Delta)$ rounds from a rooted start, and $O(n\\log^2 n+D\\Delta\\log n)$ from any start, with $O(\\log n)$ bits.",
+      "summary": "With $n$ and $\\Delta$ known: $O(n\\log^2 n+D\\Delta\\log n)$ rounds from any start with $O(\\log n)$ bits; from a rooted start $O(n\\Delta)$ rounds need no knowledge.",
       "lower_bounds": [],
       "results": [
         {
@@ -216,13 +216,14 @@
           "role": "introductory",
           "time": "O(n\\Delta\\log n)",
           "memory": "O(\\log n)",
-          "note": "$O(n\\Delta)$ from a rooted start; trees: $O(D^2)$ rooted, $O(D)$ dispersed."
+          "note": "Theorems 3.4 and 3.5: $O(n\\Delta\\log n)$ rounds from dispersed and arbitrary starts. From a rooted start $O(n\\Delta)$ rounds with no knowledge (Theorem 3.1, listed under the rooted setting). Trees: $O(D^2)$ rounds from a rooted start with $O(\\log n)$ bits (Theorem 4.2); $O(D)$ rounds from a dispersed start knowing $\\Delta$, and $O(n)$ rounds from an arbitrary start knowing $n$ and $\\Delta$, both with $O(\\Delta+\\log n)$ bits (Theorems 4.3 and 4.4). Rectangular grids of $x \\times y$ nodes: $O(\\max(x, y))$ rounds with $O(\\log n)$ bits, knowing $x$ and $y$ (Theorem 5.1)."
         },
         {
           "ref": "Kshemkalyani2026Leader",
           "role": "best",
           "time": "O(n\\log^2 n+D\\Delta\\log n)",
-          "memory": "O(\\log n)"
+          "memory": "O(\\log n)",
+          "note": "Theorem 3: elect a leader (Theorem 1), then build the set from the dispersed configuration."
         }
       ],
       "optimality": {
@@ -277,6 +278,42 @@
       },
       "open": [],
       "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "rooted",
+      "title": "Rooted start, no knowledge",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "rooted"
+      },
+      "summary": "From a rooted start without knowledge of $n$ or $\\Delta$, an MIS takes $O(n\\Delta)$ rounds with $O(\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Pattanayak2024MIS",
+          "role": "best",
+          "time": "O(n\\Delta)",
+          "memory": "O(\\log n)",
+          "note": "Introductory and current best (Theorem 3.1, Algorithm MIS-GraphRooted): a depth-first traversal that settles one agent on each new node, while the unsettled agents visit the neighbours of that node to learn whether one of them is already in the set; at most $4m$ rounds of traversal and $2\\delta$ rounds of visits at a node of degree $\\delta$. No knowledge of graph parameters. On trees, $O(D^2)$ rounds with $O(\\log n)$ bits (Theorem 4.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound. From an arbitrary start, $O(\\max\\{n\\log^2 n, m\\})$ rounds with $O(\\log n)$ bits [Kaur2026MIS] carry over and are faster when $m = o(n\\Delta)$ and $\\Delta$ exceeds $\\log^2 n$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "[Pattanayak2024MIS] call $O(\\log n)$ bits optimal because an agent stores its ID; no lower bound is recorded here."
+        }
+      },
+      "open": [],
+      "notes": "The rooted start is all $n$ agents on one node (initial axis of the model). From the same start, [Kshemkalyani2024AgentLE] need $O(n\\Delta)$ rounds and $O(n\\log n)$ bits (Theorem 20), which this result dominates. Checked against the full text of [Pattanayak2024MIS].",
       "status": "verified"
     }
   ],

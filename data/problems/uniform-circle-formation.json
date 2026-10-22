@@ -351,7 +351,7 @@
           "role": "introductory",
           "time": "O(1)",
           "colours": "O(1)",
-          "note": "First paper on the opaque luminous model; as described by [Feletti2024Optimal]."
+          "note": "Uniform circle formation for opaque luminous robots in FSYNC, without common coordinates or chirality: a Complete Visibility phase, then five cycles (the last repeated at most twice), each with $O(1)$ colours (Section 4 and conclusion)."
         },
         {
           "ref": "Feletti2023Schedulers",

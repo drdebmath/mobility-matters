@@ -178,7 +178,7 @@
           "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
         }
       ],
-      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithm assumes both $n$ and $\\Delta$ [Pattanayak2024MIS] (as reported by [Kaur2026MIS] and [Kshemkalyani2024AgentLE]). Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For minimum spanning trees, Kshemkalyani et al. need no parameter [Kshemkalyani2024AgentLE], and Chand, Kumar and Molla reduce memory to $O(\\log n)$ bits knowing only $L$ [Chand2025Trees]."
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithms assume both $n$ and $\\Delta$ when the agents start dispersed or arbitrarily placed, but need no knowledge from a rooted start [Pattanayak2024MIS]. Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For minimum spanning trees, Kshemkalyani et al. need no parameter [Kshemkalyani2024AgentLE], and Chand, Kumar and Molla reduce memory to $O(\\log n)$ bits knowing only $L$ [Chand2025Trees]."
     }
   ],
   "variants": [
@@ -201,7 +201,8 @@
           "ref": "Kshemkalyani2024AgentLE",
           "role": "introductory",
           "time": "O(m+n\\log n)",
-          "memory": "O(n\\log n)"
+          "memory": "O(\\log n\\cdot\\min\\{\\Delta,\\log n\\})",
+          "note": "Theorem 3 of [Kshemkalyani2024AgentLE]: from a dispersed start the memory is $O(\\log n\\cdot\\min\\{\\Delta, \\log n\\})$ bits; $O(n\\log n)$ bits from rooted or arbitrary starts."
         },
         {
           "ref": "Chand2025Trees",
@@ -225,6 +226,51 @@
       },
       "open": [],
       "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "arbitrary",
+      "title": "Arbitrary start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "arbitrary"
+      },
+      "summary": "From an arbitrary start without knowledge, an MST takes $O(m+n\\log n)$ rounds with $O(n\\log n)$ bits, or $O(m+n\\log^2 n)$ rounds with $O(\\Delta\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kshemkalyani2024AgentLE",
+          "role": "introductory",
+          "time": "O(m+n\\log n)",
+          "memory": "O(n\\log n)",
+          "note": "Theorem 3: elect a leader in $O(m)$ rounds (Theorem 2), which also disperses the agents, then merge components along minimum outgoing edges; no knowledge of graph parameters."
+        },
+        {
+          "ref": "Kshemkalyani2025NearLinear",
+          "role": "best",
+          "time": "O(m+n\\log^2 n)",
+          "memory": "O(\\Delta\\log n)",
+          "note": "Theorem 4.4: elect a leader in $O(n\\log^2 n)$ rounds with $O(\\log n)$ bits (Theorem 1.1), then run the MST technique of [Kshemkalyani2024AgentLE]; no knowledge of graph parameters. Best in memory; it pays a $\\log n$ factor on the $n\\log n$ term of the time."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound stated; the two algorithms trade a $\\log n$ factor in time against memory."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "[Kshemkalyani2026Leader] call $O(\\Delta\\log n)$ bits memory optimal for MST (Remark 2), but from a dispersed start $O(\\log n)$ bits suffice when the largest identifier is known [Chand2025Trees]; no lower bound is recorded."
+        }
+      },
+      "open": [
+        "An MST from an arbitrary start in $O(m + n\\log n)$ rounds, or fewer, with $O(\\log n)$ bits per agent and no knowledge of graph parameters."
+      ],
+      "notes": "Knowing $n$ and $\\Delta$, [Kshemkalyani2026Leader] obtain $O(m+n\\log^2 n+D\\Delta\\log n)$ rounds with $O(\\Delta\\log n)$ bits (Theorem 2), which the algorithm of [Kshemkalyani2025NearLinear] matches or beats without knowledge. Checked against the full text of [Kshemkalyani2024AgentLE] (Theorem 3) and [Kshemkalyani2025NearLinear] (Theorem 4.4).",
       "status": "verified"
     }
   ],

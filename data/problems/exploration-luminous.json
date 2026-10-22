@@ -13,7 +13,7 @@
     "relation": "The same Look–Compute–Move robots, but each carries a light with a constant number $c$ of colours that acts both as persistent memory (the robot sees its own colour in the next cycle) and as a message (every robot within range reads it); in exchange, robots usually see only within a fixed distance $\\varphi$. An oblivious algorithm is a luminous one with $c = 1$, so algorithms of the parent problem with myopic vision carry over, and lower bounds proved here for any number of colours hold for oblivious robots too [Ooshita2022Ring]."
   },
   "summary": "Myopic Look–Compute–Move robots with a light of a few colours must visit every node of a ring, grid or torus, and stop or keep visiting; how many robots and colours are needed?",
-  "statement": "$k$ anonymous robots, each with a **light** that shows one of $c$ colours, are placed on an anonymous graph $G=(V,E)$ (a ring, a finite grid or a torus) in an initial configuration designated by the algorithm (positions and colours). Each robot repeats Look–Compute–Move cycles. **Look:** it sees every node within distance $\\varphi$, with the multiset of colours of the robots on each (so it sees **towers**, nodes with several robots), and its own colour. **Compute:** a deterministic function of this snapshot, the same for all robots, gives a new colour and a destination, its own node or a neighbour; the robot sees no identifiers, no ports, and (without chirality) no orientation. **Move:** it moves there. A fair adversarial scheduler (FSYNC, SSYNC or ASYNC) activates the robots. **Terminating exploration:** every node is visited by some robot and eventually no robot is enabled. **Perpetual exploration:** every node is visited infinitely often. With finite $\\varphi$ no algorithm works from every initial configuration, so each result names its initial configurations; some papers also require *exclusive* executions (no two robots on one node or one edge) or opaque robots, recorded under each result. **Measures:** the number of robots $k$ and the number of colours $c$.",
+  "statement": "$k$ anonymous robots, each with a **light** that shows one of $c$ colours, are placed on an anonymous graph $G=(V,E)$ (a ring, a finite grid, a torus or a triangular grid) in an initial configuration designated by the algorithm (positions and colours). Each robot repeats Look–Compute–Move cycles. **Look:** it sees every node within distance $\\varphi$, with the multiset of colours of the robots on each (so it sees **towers**, nodes with several robots), and its own colour. **Compute:** a deterministic function of this snapshot, the same for all robots, gives a new colour and a destination, its own node or a neighbour; the robot sees no identifiers, no ports, and (without chirality) no orientation. **Move:** it moves there. A fair adversarial scheduler (FSYNC, SSYNC or ASYNC) activates the robots. **Terminating exploration:** every node is visited by some robot and eventually no robot is enabled. **Perpetual exploration:** every node is visited infinitely often. With finite $\\varphi$ no algorithm works from every initial configuration, so each result names its initial configurations; some papers also require *exclusive* executions (no two robots on one node or one edge) or opaque robots, recorded under each result. **Measures:** the number of robots $k$ and the number of colours $c$.",
   "history": "**Where it started.** Oblivious robots on graphs see every robot and remember nothing, so the configuration itself must record progress; the first question was how many robots explore a ring [Flocchini2013Ring] [Lamani2010Ring] or a grid [Devismes2012Grid]. Datta, Lamani, Larmore and Petit made the robots *myopic*: with visibility $\\varphi = 1$, five robots explore a ring and stop under FSYNC, and no number below $n$ can under SSYNC or ASYNC [Datta2013Local]. Ooshita and Tixeuil then gave each myopic robot the smallest possible light, two colours: three robots then suffice under FSYNC and four under ASYNC, and perpetual exploration needs only two and three [Ooshita2022Ring]. This showed that \"there exist some tasks that myopic luminous robots with small visibility can achieve, but that non-luminous robots with larger visibility cannot\" [Ooshita2022Ring]. The community then traded robots against colours, visibility and chirality: rings with $\\varphi \\ge 2$ [Nagahama2023Ring], perpetual exploration of grids with chirality [Bramas2023Chirality] and without [Rauch2021Chirality], terminating exploration of grids [Nagahama2022Grid], tori [Darwich2023Torus], asynchronous grids [Bramas2026AsyncGrid], and crash faults on rings [Ooshita2024Crash] [Ooshita2025Colors].\n\n**A light is a message and a memory.** Think of a light as a flag that a robot raises on its own mast. It is a *message*: every robot within sight can read it, without being addressed, and the robot that raised it does not know who has read it, so it is a broadcast to the neighbourhood that nobody acknowledges. It *persists*: it stays up until its owner changes it, so a robot that looks much later still reads it, and in ASYNC it may read a flag that is about to change. And it is a *sticky note to oneself*: an oblivious robot forgets everything at the end of a cycle, but in the next cycle it sees its own flag and so recalls $\\log_2 c$ bits. The light models separate the two roles [Flocchini2016Constant]: a flag that only its owner can see is memory without messages (FSTA, an internal light); a flag on the robot's back that only the others can see is a message without memory (FCOM, an external light); a flag that everybody, owner included, can see is both (LUMI, a full light) [Das2016Lights], which is the model of every exploration result here. Two consequences of the picture are worth keeping. First, a LUMI robot's memory is public: whatever it remembers, its neighbours know too. Second, positions are messages as well, and lights were introduced to supplement them [Peleg2005Swarms]; on a graph a myopic robot sees so little that the light is often its only memory, which is why two colours change the number of robots so much [Ooshita2022Ring].",
   "primer": {
     "intro": "Imagine a circular race track of $n$ squares and a few identical toy robots on it. The track is a **ring**: its squares are its $n$ **nodes**, and two squares side by side are **neighbours**. The robots are **myopic**: each sees only its own node and its two neighbours. They cannot talk, and they are **oblivious**: they forget everything after each cycle. Each robot carries a **light** (think of a small lamp) that can glow in one of two colours, say green (G) or white (W). The light stays on until its owner switches it, and every robot that sees the node, the owner included, sees the colour. Each robot works in **Look–Compute–Move cycles**: **Look** (take a **snapshot** of its own node and its two neighbours, with the robots and light colours on them), **Compute** (decide from that snapshot alone a new colour and whether to move to one neighbour, move to the other, or stay) and **Move**. The nodes have no names and the ring has no left or right, and an **adversary** (an imagined opponent) decides when each robot acts. In the basic version all robots act together in **rounds** (**FSYNC**, fully synchronous): $k$ robots start on neighbouring nodes in a colour pattern chosen by the algorithm (the initial **configuration**), and must visit every node and then all stop. We count the robots $k$ and the colours $c$.",
@@ -258,7 +258,7 @@
           "definition": "All robots agree on the clockwise direction: a snapshot is known up to rotation only (no reflection), so a robot on an axis of symmetry of its view can still tell its two sides apart. Robots still share no North."
         }
       ],
-      "origin": "Chirality was mostly assumed in the plane; an early use on graphs is by Bramas, Devismes and Lafourcade, for infinite grid exploration [Bramas2021Infinite] and for perpetual exploration of finite grids [Bramas2023Chirality], noting that only \\\"a few works dedicated to discrete environments\\\" assume it and that it changes the number of robots needed [Bramas2023Chirality]. Nagahama, Ooshita and Inoue give terminating grid algorithms with and without it [Nagahama2022Grid]; without it, perpetual grid exploration needs three robots [Rauch2021Chirality] (as reported in [Darwich2023Torus]). Ring results assume an unoriented ring."
+      "origin": "Chirality was mostly assumed in the plane; an early use on graphs is by Bramas, Devismes and Lafourcade, for infinite grid exploration [Bramas2021Infinite] and for perpetual exploration of finite grids [Bramas2023Chirality], noting that only \\\"a few works dedicated to discrete environments\\\" assume it and that it changes the number of robots needed [Bramas2023Chirality]. Nagahama, Ooshita and Inoue give terminating grid algorithms with and without it [Nagahama2022Grid]; without it, two robots cannot explore a grid perpetually with $\\varphi = 1$ and three robots with three colours can, under FSYNC [Rauch2021Chirality]. Ring results assume an unoriented ring."
     },
     {
       "id": "goal",
@@ -319,9 +319,16 @@
           "label": "torus",
           "short": "torus",
           "definition": "An $a \\times b$ torus: the grid with wrap-around edges in both dimensions, so every node has degree four and there is no border."
+        },
+        {
+          "id": "triangular",
+          "level": 1,
+          "label": "rectangle-enclosed triangular grid",
+          "short": "triangular grid",
+          "definition": "The subgraph of the infinite triangular grid (every node of degree six, every face an equilateral triangle of unit side) induced by the nodes on or inside a rectangle, one pair of whose sides is parallel to a family of grid lines; the lines parallel to those sides are its *columns*. It is anonymous and its dimensions are unknown. Corner nodes have degree two or three and other border nodes degree three, four or five, so the border is seen from within range as on a square grid, but with more cases."
         }
       ],
-      "origin": "Rings were the first graphs explored by oblivious robots [Flocchini2013Ring] and by myopic ones [Datta2013Local] [Ooshita2022Ring]. Finite grids followed for myopic luminous robots in perpetual [Bramas2023Chirality] and terminating [Nagahama2022Grid] form, and tori, whose missing border removes the landmark that grid algorithms use to turn, in [Darwich2023Torus]. Infinite grids and 3D grids are studied in papers listed under further reading. This axis replaces the model's topology axis because the torus is not one of the model's values."
+      "origin": "Rings were the first graphs explored by oblivious robots [Flocchini2013Ring] and by myopic ones [Datta2013Local] [Ooshita2022Ring]. Finite grids followed for myopic luminous robots in perpetual [Bramas2023Chirality] and terminating [Nagahama2022Grid] form, and tori, whose missing border removes the landmark that grid algorithms use to turn, in [Darwich2023Torus]. Das, Goswami, Mondal and Sau explored the rectangle-enclosed triangular grid, noting that square-grid algorithms do not apply directly because its corner and border nodes have other degrees, and motivating it by programmable matter and by sensor coverage [Das2025Triangular]. Infinite grids and 3D grids are studied in papers listed under further reading. This axis replaces the model's topology axis because the torus and the triangular grid are not among the model's values."
     }
   ],
   "ignore_axes": [
@@ -524,7 +531,7 @@
       "open": [
         "Can three oblivious robots ($c = 1$) with $\\varphi = 1$ explore a ring perpetually under SSYNC or ASYNC, or are two colours necessary?"
       ],
-      "notes": "With $\\varphi \\ge 2$ two robots suffice [Nagahama2023Ring] (variant *Rings, ASYNC, perpetual, $\\varphi = 2$*).",
+      "notes": "With $\\varphi \\ge 2$ two robots suffice [Nagahama2023Ring] (variant *Rings, ASYNC, perpetual, $\\varphi \\ge 2$*).",
       "status": "verified"
     },
     {
@@ -578,7 +585,7 @@
       "open": [
         "Does any task separate SSYNC from ASYNC for myopic luminous robots on rings? The known exploration bounds coincide under both [Ooshita2022Ring]."
       ],
-      "notes": "Without lights, terminating exploration with $\\varphi = 1$ is impossible under SSYNC and ASYNC for $1 \\le k < n$ [Datta2013Local]. With $\\varphi \\ge 2$, Nagahama, Ooshita and Inoue report that three robots with two colours are necessary and sufficient for terminating exploration (abstract of their IPSJ technical report, the precursor of [Nagahama2023Ring]); not checked against the paper, and the scheduler was not confirmed.",
+      "notes": "Without lights, terminating exploration with $\\varphi = 1$ is impossible under SSYNC and ASYNC for $1 \\le k < n$ [Datta2013Local]. With $\\varphi \\ge 2$ three robots suffice and are necessary [Nagahama2023Ring] (setting *Rings, ASYNC, terminating, $\\varphi \\ge 2$*).",
       "status": "verified"
     },
     {
@@ -599,11 +606,21 @@
         {
           "measure": "agents",
           "bound": "2",
-          "ref": "Ooshita2024Crash",
+          "ref": "Nagahama2023Ring",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "one robot sees nobody, so its snapshot is symmetric and the adversary chooses its direction (any $\\varphi$, any number of colours)",
-            "as stated for every $\\varphi$ and every number of colours in [Ooshita2024Crash]"
+            "one robot: when it sees nobody its snapshot is symmetric and the scheduler chooses the direction of each move (Section 3); any $\\varphi$, any number of colours",
+            "also stated for every $\\varphi$ and every number of colours in [Ooshita2024Crash]"
+          ]
+        },
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Nagahama2023Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "two robots of the same colour on a ring of $n \\ge 2\\varphi + 4$ nodes, even under FSYNC (Lemma 3): the scheduler moves both at once, so they keep the same colour and move symmetrically",
+            "with one colour every configuration of two robots is of this kind"
           ]
         }
       ],
@@ -613,7 +630,11 @@
           "role": "best",
           "agents": "2",
           "colours": "2",
-          "note": "As reported in Table 1 of [Ooshita2024Crash] (SSYNC and ASYNC, $\\varphi \\ge 2$); the paper itself was not read."
+          "note": "Introductory and current best (Algorithm 1, Theorem 1, ASYNC). It is universal for $n \\ge 2\\varphi + 4$ (Theorem 2): every other configuration of two robots (out of sight of each other, or of the same colour) is unsolvable even under FSYNC (Lemmas 2 and 3).",
+          "assumes": [
+            "initial configurations in which the two robots have different colours and see each other (on one node, or at distance at most $\\varphi$)",
+            "$n \\ge 5$"
+          ]
         }
       ],
       "optimality": {
@@ -622,13 +643,66 @@
           "note": "Two."
         },
         "colours": {
-          "status": "unknown",
-          "note": "No lower bound on colours is reported."
+          "status": "tight",
+          "note": "Two, for two robots on rings of $n \\ge 2\\varphi + 4$ nodes."
         }
       },
       "open": [],
-      "notes": "Larger visibility lets the distance between robots carry information that otherwise needs a robot, as Ooshita and Tixeuil anticipated [Ooshita2022Ring].",
-      "status": "draft"
+      "notes": "Larger visibility lets the distance between robots carry information that otherwise needs a robot, as Ooshita and Tixeuil anticipated [Ooshita2022Ring]. With $\\varphi \\ge 2$ the same two robots also suffice under FSYNC and SSYNC, so visibility saves one robot under SSYNC and ASYNC and none under FSYNC [Nagahama2023Ring]. In the algorithm the robot coloured W moves away from the other robot when they are at distance at most one, and the robot coloured G moves towards the other robot when they are farther apart (Section 3).",
+      "status": "verified"
+    },
+    {
+      "id": "ring-async-stop-phi2",
+      "title": "Rings, ASYNC, terminating, $\\varphi \\ge 2$",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "goal": "terminating",
+        "memory": "lights",
+        "scheduler": "async",
+        "visibility": "phi-2"
+      },
+      "summary": "With visibility two, three robots with two colours explore a ring and stop even under ASYNC; two robots cannot, even under FSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Nagahama2023Ring",
+          "bottleneck": "locality",
+          "preconditions": [
+            "two robots, any $\\varphi$, even with infinitely many colours, under FSYNC (hence ASYNC) (Theorem 3)",
+            "two robots that keep seeing each other cannot tell a ring of $n_1 \\ge 2\\varphi + 4$ nodes from a larger one before they stop; two robots that lose sight of each other stay in disjoint territories (Lemma 1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Nagahama2023Ring",
+          "role": "best",
+          "agents": "3",
+          "colours": "2",
+          "assumes": [
+            "designated initial configurations: three robots that see one another in a row coloured W, W, G with gaps of at most $\\varphi - 1$ free nodes, and the mirror image",
+            "$n \\ge 4$"
+          ],
+          "note": "Introductory and current best (Algorithm 2, Theorem 4). Two further algorithms cover the other configurations in which the three robots see one another and no two share a node, for $n \\ge 3\\varphi + 1$ (Theorems 5 and 6, Lemmas 4 to 6), but no single algorithm with three robots and two colours works from all of them (Theorem 7)."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Three."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "No lower bound on colours for three robots is proved for every $\\varphi \\ge 2$; without lights and with $\\varphi = 2$ or $3$, five robots are necessary under SSYNC and ASYNC (Datta et al., as listed in Table 1 of [Nagahama2023Ring])."
+        }
+      },
+      "open": [],
+      "notes": "With $\\varphi = 1$ four robots are needed under SSYNC and ASYNC [Ooshita2022Ring], so a larger range saves one robot; under FSYNC three robots are needed for both ranges [Nagahama2023Ring].",
+      "status": "verified"
     },
     {
       "id": "ring-fsync-perpetual-crash",
@@ -1060,7 +1134,9 @@
           "ref": "Rauch2021Chirality",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "two robots, any finite number of colours and any finite $\\varphi$ (as reported in [Darwich2023Torus])"
+            "two robots with $\\varphi = 1$ and any finite number of colours (Theorem 1), on a large enough grid",
+            "holds without exclusiveness for edges, but the model forbids two robots on one node",
+            "self-inconsistent robots: the adversary may rotate and mirror each snapshot differently in every round"
           ]
         }
       ],
@@ -1071,9 +1147,11 @@
           "agents": "3",
           "colours": "3",
           "assumes": [
-            "exclusive: no two robots ever share a node or traverse an edge together"
+            "exclusive: no two robots ever share a node or traverse an edge together",
+            "locally defined initial configurations (three aligned robots coloured L, L, F)",
+            "grid with at least $k$ rows and $k$ columns"
           ],
-          "note": "As reported in [Darwich2023Torus] and [Bramas2026AsyncGrid]; with $\\varphi = 2$, five oblivious robots suffice."
+          "note": "Introductory and current best (algorithm $V^{one}_{33}$, Theorem 2). With $\\varphi = 2$, five oblivious robots suffice (algorithm $V^{two}_{51}$, Theorem 3)."
         }
       ],
       "optimality": {
@@ -1083,12 +1161,12 @@
         },
         "colours": {
           "status": "unknown",
-          "note": "No colour lower bound is reported for three robots."
+          "note": "No colour lower bound is proved for three robots [Rauch2021Chirality]."
         }
       },
       "open": [],
-      "notes": "Not read: bounds as reported by [Darwich2023Torus] (Table 1) and [Bramas2026AsyncGrid].",
-      "status": "draft"
+      "notes": "Rauch, Bramas, Devismes, Lafourcade and Lamani state in their contributions that two robots fail for every finite $\\varphi$, but the proof of Theorem 1 assumes $\\varphi = 1$ throughout (Section 3) [Rauch2021Chirality]. The correctness proof of $V^{one}_{33}$ is a sketch: a simulation tool checks grids of sizes $3$ and $4$ in each dimension, and an argument extends it to larger grids (Theorem 2).",
+      "status": "verified"
     },
     {
       "id": "grid-async-perpetual-chirality",
@@ -1230,7 +1308,8 @@
           "ref": "Rauch2021Chirality",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "two robots without chirality, any finite colours and $\\varphi$, under FSYNC (as reported in [Bramas2026AsyncGrid])"
+            "two robots without chirality, any finite number of colours, under FSYNC (hence ASYNC)",
+            "stated for every finite $\\varphi$ in the contributions of [Rauch2021Chirality] and in [Bramas2026AsyncGrid], but the proof of Theorem 1 of [Rauch2021Chirality] assumes $\\varphi = 1$; for $\\varphi \\ge 2$ the proved bound is two (one robot fails for every $\\varphi$ even with chirality [Bramas2023Chirality])"
           ]
         },
         {
@@ -1260,7 +1339,7 @@
       "optimality": {
         "agents": {
           "status": "tight",
-          "note": "Three."
+          "note": "Three, if the two-robot impossibility holds for $\\varphi \\ge 2$ as [Rauch2021Chirality] and [Bramas2026AsyncGrid] state; the published proof covers $\\varphi = 1$, so the proved range is two to three."
         },
         "colours": {
           "status": "tight",
@@ -1268,7 +1347,8 @@
         }
       },
       "open": [
-        "Is there an optimal ASYNC algorithm (three robots, $\\varphi = 2$, no chirality) for opaque robots? Posed in [Bramas2026AsyncGrid]."
+        "Is there an optimal ASYNC algorithm (three robots, $\\varphi = 2$, no chirality) for opaque robots? Posed in [Bramas2026AsyncGrid].",
+        "Can two robots without chirality explore a grid perpetually with $\\varphi \\ge 2$ under FSYNC? [Rauch2021Chirality] state that they cannot for every finite $\\varphi$, but prove it for $\\varphi = 1$."
       ],
       "notes": "",
       "status": "verified"
@@ -1294,7 +1374,8 @@
           "ref": "Rauch2021Chirality",
           "bottleneck": "symmetry breaking",
           "preconditions": [
-            "two robots without chirality (as reported in [Bramas2026AsyncGrid])"
+            "two robots without chirality, any finite number of colours, under FSYNC (hence ASYNC)",
+            "stated for every finite $\\varphi$ in the contributions of [Rauch2021Chirality] and in [Bramas2026AsyncGrid], but the proof of Theorem 1 of [Rauch2021Chirality] assumes $\\varphi = 1$; for $\\varphi \\ge 2$ the proved bound is two (one robot fails for every $\\varphi$ even with chirality [Bramas2023Chirality])"
           ]
         }
       ],
@@ -1313,14 +1394,16 @@
       "optimality": {
         "agents": {
           "status": "tight",
-          "note": "Three."
+          "note": "Three, if the two-robot impossibility holds for $\\varphi \\ge 2$ as [Rauch2021Chirality] and [Bramas2026AsyncGrid] state; the published proof covers $\\varphi = 1$, so the proved range is two to three."
         },
         "colours": {
           "status": "tight",
           "note": "No light needed."
         }
       },
-      "open": [],
+      "open": [
+        "Can two robots without chirality explore a grid perpetually with $\\varphi \\ge 2$ under FSYNC? [Rauch2021Chirality] state that they cannot for every finite $\\varphi$, but prove it for $\\varphi = 1$."
+      ],
       "notes": "A larger range replaces the light: compare three robots with two colours at $\\varphi = 2$.",
       "status": "verified"
     },
@@ -1451,7 +1534,7 @@
       "optimality": {
         "agents": {
           "status": "tight",
-          "note": "Constant on both sides, so tight up to a constant: two against four; the two-robot impossibility of [Rauch2021Chirality] is stated for perpetual exploration. The exact number is open."
+          "note": "Constant on both sides, so tight up to a constant: two against four; the two-robot impossibility of [Rauch2021Chirality] is proved for perpetual exploration (Theorem 1). The exact number is open."
         },
         "colours": {
           "status": "unknown",
@@ -1461,7 +1544,7 @@
       "open": [
         "How many robots are needed for terminating grid exploration under FSYNC with $\\varphi = 1$ and no chirality: three or four?"
       ],
-      "notes": "Without chirality two robots cannot explore a grid perpetually [Rauch2021Chirality] (as reported in [Darwich2023Torus]); whether that argument also excludes terminating exploration was not checked.",
+      "notes": "Without chirality two robots with $\\varphi = 1$ cannot explore a grid perpetually [Rauch2021Chirality] (Theorem 1). The proof shows that after some time the two robots stay within a bounded distance of the walls, so nodes far from every wall are not visited again (Lemma 7 and Theorem 1); this contradicts perpetual but not terminating exploration, so the argument does not apply as written to terminating exploration.",
       "status": "verified"
     },
     {
@@ -2125,6 +2208,129 @@
       ],
       "notes": "",
       "status": "verified"
+    },
+    {
+      "id": "triangular-fsync-perpetual",
+      "title": "Triangular grids, FSYNC, perpetual, no chirality, $\\varphi = 1$",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "triangular",
+        "goal": "perpetual",
+        "memory": "lights",
+        "scheduler": "fsync"
+      },
+      "summary": "On a triangular grid two robots with three colours and $\\varphi = 1$ explore perpetually under FSYNC, if each robot keeps its own chirality; on a square grid two robots cannot.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Das2025Triangular",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "one robot, any number of colours and any finite $\\varphi$ (Theorem 3.1)",
+            "a robot far from the border sees nothing, and the adversary sets its local orientation so that it moves between two nodes",
+            "proof sketch only"
+          ]
+        },
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Das2025Triangular",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "two oblivious robots with $\\varphi = 2$, hence also with $\\varphi = 1$ (Theorem 3.2)",
+            "self-inconsistent robots: the adversary sets each robot's local orientation in every round",
+            "proof sketch only"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2025Triangular",
+          "role": "best",
+          "agents": "2",
+          "colours": "3",
+          "assumes": [
+            "each robot keeps the same chirality in every round (robots need not agree on it)",
+            "initial configuration: two robots on neighbouring nodes, one coloured $L$ or $R$ and the other $F$",
+            "at least four columns of at least four nodes",
+            "no two robots share a node"
+          ],
+          "note": "Introductory and current best (algorithm $A^{VRL}_{123}$, Section 4): the robot coloured $F$ follows the other, and the pair sweeps the columns one by one, turning at the border. Correctness is argued informally."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Between two and three; the one-colour impossibility is a sketch for self-inconsistent robots, while the algorithm assumes robots that keep their chirality."
+        }
+      },
+      "open": [
+        "Is there a proof of perpetual triangular-grid exploration by two robots with $\\varphi = 1$ for self-inconsistent robots, or with two colours?"
+      ],
+      "notes": "Das, Goswami, Mondal and Sau contrast this with the square grid, where two robots with $\\varphi = 1$ and no chirality cannot explore perpetually [Rauch2021Chirality] [Das2025Triangular]. The paper is a five-page short paper: the impossibilities and the algorithm are given with proof sketches, so the setting stays a draft.",
+      "status": "draft"
+    },
+    {
+      "id": "triangular-fsync-perpetual-chirality-phi2",
+      "title": "Triangular grids, FSYNC, perpetual, chirality, $\\varphi = 2$",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "triangular",
+        "goal": "perpetual",
+        "memory": "lights",
+        "scheduler": "fsync",
+        "visibility": "phi-2",
+        "chirality": "common"
+      },
+      "summary": "With common chirality and $\\varphi = 2$, two robots with two colours explore a triangular grid perpetually under FSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Das2025Triangular",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "one robot, any number of colours and any finite $\\varphi$ (Theorem 3.1)",
+            "proof sketch only"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2025Triangular",
+          "role": "best",
+          "agents": "2",
+          "colours": "2",
+          "assumes": [
+            "initial configuration: two robots on one column or diagonal line within distance two, coloured $L$ and $F$",
+            "at least four columns of at least four nodes",
+            "no two robots share a node"
+          ],
+          "note": "Introductory and current best (algorithm $A^{VRL}_{222}$, Section 5), built like $A^{VRL}_{123}$ with a single leader colour."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "The one-colour impossibility of [Das2025Triangular] (Theorem 3.2) is argued for self-inconsistent robots without chirality."
+        }
+      },
+      "open": [],
+      "notes": "Proof sketches only (five-page short paper), so the setting stays a draft.",
+      "status": "draft"
     }
   ],
   "figure": {
@@ -2903,10 +3109,6 @@
   },
   "further": [
     {
-      "ref": "Nagahama2023Ring",
-      "note": "Rings with $\\varphi \\ge 2$: two robots for perpetual and, per its technical-report abstract, three for terminating exploration with two colours. Not read; the perpetual bound is placed as reported by [Ooshita2024Crash]."
-    },
-    {
       "ref": "Bramas2021Infinite",
       "note": "Infinite grid exploration (every node eventually visited) by synchronous, opaque, myopic luminous robots with chirality: two robots never suffice, five robots with five colours are optimal. Abstract read."
     },
@@ -2921,10 +3123,6 @@
     {
       "ref": "Bramas2026Grey",
       "note": "Perpetual exploration of a finite 3D grid by three synchronous robots without chirality: 77 colours with $\\varphi = 1$, or four colours with $\\varphi = 2$; three robots are optimal. Preprint; abstract read."
-    },
-    {
-      "ref": "Das2025Triangular",
-      "note": "Exploration of a rectangle-enclosed triangular grid by myopic luminous robots. Not read."
     },
     {
       "ref": "Kamei2025Rings",

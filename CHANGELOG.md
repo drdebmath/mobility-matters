@@ -2,6 +2,28 @@
 
 Versions are dated; the website footer and the book's title page show the current one.
 
+## 2026-10-22 — full texts checked, 26 new settings
+
+- **Read in full.** 100 papers that had been cited from abstracts or later surveys were
+  read; about 70 "as reported" and "abstract only" remarks now cite the theorem directly,
+  and 11 draft settings are verified.
+- **Corrections.** Among them: one crash among three wireless robots in a disk needs at
+  least $1+4\pi/3 \approx 5.188$, not $5.082$; the two-robot impossibility for grid
+  exploration is proved only for visibility 1; with one common axis, robots in the plane
+  only reach a segment of length 1, and gathering at a point needs a compass; the rooted
+  MIS algorithm by agents needs no knowledge of $n$ or $\Delta$; three plane-robot
+  settings now record the rigid moves their papers assume.
+- **New settings.** 26, among them priority and weighted evacuation on the line, disk
+  evacuation and search with crash and Byzantine robots, triangles and squares with many
+  wireless robots, terminating ring exploration with visibility 2, triangular grids,
+  rotor-router with chosen pointers, one-way and two-way circle patrolling, event-driven
+  scattering, MST from an arbitrary start, mutual visibility with crash faults and one
+  axis, randomized pattern formation and time-optimal gathering with a compass.
+- **Also.** Weighted evacuation on the disk, MIS from a rooted start without knowledge
+  of $n$ or $\Delta$, rotor-router lock-in in $O(m)$ when the designer knows the ports,
+  the counterexample of Dumitrescu, Ghosh and Tóth to the cyclic patrolling conjecture,
+  and a scattering figure that follows the published rule.
+
 ## 2026-10-17 — ring exploration, oriented grids and two-robot models
 
 - **Exploration by oblivious robots.** Ring results corrected and completed: separate

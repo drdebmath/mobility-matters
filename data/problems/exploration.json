@@ -187,7 +187,7 @@
           "definition": "The agent is given a graph isomorphic to $G$, with port numbers, and (where stated) its own position on it; for a dynamic graph, the whole sequence $(G_t)$."
         }
       ],
-      "origin": "Knowing the size of the graph is the classical way to let an exploring walk end. Aleliunas, Karp, Lipton, Lovász and Rackoff proved that a random walk on a connected graph visits every node within $2m(n-1)$ expected steps from any start (Theorem 4), so by Markov's inequality $O(mn\\log n)\\subseteq O(n^3\\log n)$ steps cover it with high probability, and a step counter and the value of $n$ give a randomized explorer that stops [Aleliunas1979Random]; Reingold's log-space universal exploration sequences do the same deterministically when $n$ is known [Reingold2008Undirected] (as summarised in [Disser2019Pebbles]). Without a bound and without a marker an agent cannot tell a cycle from a longer one, so it can explore perpetually but never stop [Fraigniaud2006Reduced]. Bender, Fernández, Ron, Sahai and Vadhan measured what the bound is worth in directed graphs: one pebble suffices when an upper bound on $n$ is known, while without it $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient, the lower bound holding even for randomized robots [Bender2002Pebble]. The top level, a full map, makes static exploration an offline planning task (a known undirected graph is explored by depth-first search in fewer than $2n$ steps); it matters for temporal graphs, where exploration with the whole schedule known in advance was introduced by Michail and Spirakis [Michail2016Temporal] (as reported by [Erlebach2021Temporal]) and studied by Erlebach, Hoffmann and Kammer [Erlebach2021Temporal]."
+      "origin": "Knowing the size of the graph is the classical way to let an exploring walk end. Aleliunas, Karp, Lipton, Lovász and Rackoff proved that a random walk on a connected graph visits every node within $2m(n-1)$ expected steps from any start (Theorem 4), so by Markov's inequality $O(mn\\log n)\\subseteq O(n^3\\log n)$ steps cover it with high probability, and a step counter and the value of $n$ give a randomized explorer that stops [Aleliunas1979Random]; Reingold's log-space universal exploration sequences do the same deterministically when $n$ is known [Reingold2008Undirected] (Corollary 5.5). Without a bound and without a marker an agent cannot tell a cycle from a longer one, so it can explore perpetually but never stop [Fraigniaud2006Reduced]. Bender, Fernández, Ron, Sahai and Vadhan measured what the bound is worth in directed graphs: one pebble suffices when an upper bound on $n$ is known, while without it $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient, the lower bound holding even for randomized robots [Bender2002Pebble]. The top level, a full map, makes static exploration an offline planning task (a known undirected graph is explored by depth-first search in fewer than $2n$ steps); it matters for temporal graphs, where exploration with the whole schedule known in advance was introduced by Michail and Spirakis, who are given the whole temporal graph as input and show that the fastest exploration cannot be approximated within $cn$ for some constant $c > 0$ unless P = NP (Theorem 1) [Michail2016Temporal], and studied by Erlebach, Hoffmann and Kammer [Erlebach2021Temporal]."
     },
     {
       "id": "markers",
@@ -810,9 +810,9 @@
           "ref": "Czyzowicz2012Periodic",
           "bottleneck": "every tree edge twice",
           "preconditions": [
-            "any agent: on a tree every edge is traversed in both directions",
-            "realised by the star; folklore",
-            "for oblivious agents the bound is $2.8n-2$"
+            "any agent, whatever its memory: on a tree every edge is traversed in both directions",
+            "folklore, stated in [Czyzowicz2012Periodic] and [Gasieniec2008Periodic]",
+            "for oblivious agents the bound is $2.8n - O(1)$: for $n = 5k + l$ with $l < 5$ some $n$-node graph has no witness cycle shorter than $14k + 2l$ (Theorem 13 of [Czyzowicz2012Periodic])"
           ]
         }
       ],
@@ -832,7 +832,7 @@
           "role": "other",
           "time": "3.75n-2",
           "memory": "O(1)",
-          "note": "The step between $4n-2$ and $3.5n-2$, as cited by [Czyzowicz2012Periodic]."
+          "note": "Period less than $3.75n-2$ (Theorem 2), with port numbers set along a spanning tree; this disproved Ilcinkas's conjecture that $4n - O(1)$ is optimal for any memory [Ilcinkas2008Ports]."
         },
         {
           "ref": "Czyzowicz2012Periodic",
@@ -847,15 +847,15 @@
           "time": "4n-2",
           "memory": "0",
           "assumes": [
-            "oblivious agent (right-hand rule)"
+            "oblivious agent following the right-hand rule: it leaves by port $(i \\bmod \\deg(v)) + 1$ after entering by port $i$"
           ],
-          "note": "Figure as reported by [Czyzowicz2012Periodic]."
+          "note": "Theorem 3; the labelling is computed in polynomial time (Theorem 4). It is the best possible for labellings in which the edges traversed twice form a connected spanning subgraph: $K_{2,l}$ needs $4n-8$ under that restriction (Theorem 5)."
         }
       ],
       "optimality": {
         "time": {
           "status": "tight",
-          "note": "$\\Theta(n)$; the constant is open: $2n-2$ versus $3.5n-2$ (constant memory), $2.8n-2$ versus $4n-2$ (oblivious)."
+          "note": "$\\Theta(n)$; the constant is open: $2n-2$ versus $3.5n-2$ (constant memory), $2.8n - O(1)$ versus $4n-2$ (oblivious)."
         },
         "memory": {
           "status": "tight",
@@ -863,11 +863,11 @@
         }
       },
       "open": [
-        "Close the constant gaps: $2n-2$ versus $3.5n-2$ for constant memory, $2.8n-2$ versus $4n-2$ for oblivious agents [Czyzowicz2012Periodic].",
+        "Close the constant gaps: $2n-2$ versus $3.5n-2$ for constant memory, $2.8n - O(1)$ versus $4n-2$ for oblivious agents [Czyzowicz2012Periodic] [Kosowski2012Decomposition].",
         "Trade-offs between period and memory: the only lower bound for agents with memory does not depend on memory."
       ],
-      "notes": "Without the designer's help, periodic exploration by a finite automaton is impossible (Budach, as cited by [Czyzowicz2012Periodic]). These papers began with Dobrev, Jansson, Sadakane and Sung (SIROCCO 2005; period $10n$, as cited by [Czyzowicz2012Periodic]). Computing the shortest witness cycle for an oblivious agent is NP-hard. The period is defined differently: Ilcinkas counts returns to a node in the same state through the same port, Czyzowicz et al. returns to a node through the same port. **Unverified:** the oblivious $4n-2$ of [Kosowski2012Decomposition], known only from [Czyzowicz2012Periodic].",
-      "status": "draft"
+      "notes": "Without the designer's help, periodic exploration by a finite automaton is impossible (Budach, as cited by [Czyzowicz2012Periodic]). These papers began with Dobrev, Jansson, Sadakane and Sung (SIROCCO 2005; period $10n$, as cited by [Czyzowicz2012Periodic]). Computing the shortest witness cycle for an oblivious agent is NP-hard. The period is defined differently: Ilcinkas counts returns to a node in the same state through the same port, Czyzowicz et al. returns to a node through the same port. For oblivious agents the right-hand rule is no restriction: the shortest period over all labellings is the same for every oblivious strategy, as Kosowski and Navarra note citing [Czyzowicz2012Periodic] [Kosowski2012Decomposition].",
+      "status": "verified"
     },
     {
       "id": "directed-pebble",

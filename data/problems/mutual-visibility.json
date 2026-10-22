@@ -173,7 +173,7 @@
           "role": "other",
           "time": "O(1)",
           "colours": "12",
-          "note": "$O(1)$ rounds; as described by later papers, not read."
+          "note": "$O(1)$ time with 12 colours in SSYNC with rigid moves, as reported by [Sharma2017Logarithmic] (Table I) and [Poudel2021FaultTolerant]; the paper itself is not available locally and was not read."
         }
       ],
       "optimality": {
@@ -200,7 +200,7 @@
         "scheduler": "ssync",
         "body": "point"
       },
-      "summary": "With non-rigid moves, 3 colours suffice in SSYNC, and 2 if $\\delta$ or $n$ is known.",
+      "summary": "With non-rigid moves in SSYNC, 2 colours suffice, which is optimal.",
       "lower_bounds": [
         {
           "measure": "colours",
@@ -215,10 +215,17 @@
       "results": [
         {
           "ref": "DiLuna2017Mutual",
-          "role": "best",
+          "role": "introductory",
           "time": "\\text{finite}",
           "colours": "3",
-          "note": "Introductory and current best (Theorem 1.2); 2 colours if $\\delta$ or $n$ is known."
+          "note": "Introductory (Theorem 1.2): 3 colours; 2 colours if $\\delta$ or $n$ is known."
+        },
+        {
+          "ref": "Sharma2015Optimal",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Current best (Theorem 6, part of Theorem 3(a)): 2 colours without knowing $\\delta$ or $n$, collision-free. Many proofs are omitted in this conference version."
         }
       ],
       "optimality": {
@@ -228,13 +235,11 @@
         },
         "colours": {
           "status": "tight",
-          "note": "2 or 3 colours."
+          "note": "Exactly 2 colours [Sharma2015Optimal]."
         }
       },
-      "open": [
-        "Does the 2-colour algorithm work in non-rigid SSYNC without knowing $\\delta$ [DiLuna2017Mutual]?"
-      ],
-      "notes": "Checked against the full text.",
+      "open": [],
+      "notes": "Di Luna et al. asked whether their 2-colour algorithm works in non-rigid SSYNC without knowing $\\delta$ [DiLuna2017Mutual]; Sharma, Busch and Mukhopadhyay settle the colour count with a different 2-colour algorithm that needs neither $\\delta$ nor $n$ [Sharma2015Optimal] (Theorem 6). Checked against the full texts of [DiLuna2017Mutual] and [Sharma2015Optimal].",
       "status": "verified"
     },
     {
@@ -247,7 +252,7 @@
         "movement": "rigid",
         "body": "point"
       },
-      "summary": "In rigid ASYNC, 3 colours suffice, and $O(1)$ epochs are achievable with 47 colours.",
+      "summary": "In rigid ASYNC, 2 colours suffice, which is optimal, and $O(1)$ epochs are achievable with 47 colours.",
       "lower_bounds": [
         {
           "measure": "colours",
@@ -281,14 +286,14 @@
           "role": "other",
           "time": "\\text{finite}",
           "colours": "2",
-          "note": "Claimed optimal colours; later papers disagree on its setting, and the paper was not read."
+          "note": "Fewest colours (Theorem 7, part of Theorem 3(a)): 2 colours, which is optimal; collision-free, finite time, no time analysis. Many proofs are omitted in this conference version."
         },
         {
           "ref": "Sharma2017Logarithmic",
           "role": "other",
           "time": "O(\\log n)",
-          "colours": "O(1)",
-          "note": "Abstract only."
+          "colours": "25",
+          "note": "Theorem 1.1: $O(\\log n)$ epochs, collision-free, for any $n \\ge 1$; $O(1)$ colours, 25 by its Table I. Superseded in time by [Sharma2021Constant]."
         },
         {
           "ref": "Sharma2021Constant",
@@ -305,14 +310,14 @@
         },
         "colours": {
           "status": "tight",
-          "note": "$\\Theta(1)$; 2 or 3 colours for finite time, 47 for $O(1)$ epochs."
+          "note": "$\\Theta(1)$; exactly 2 colours for finite time [Sharma2015Optimal], 47 for $O(1)$ epochs."
         }
       },
       "open": [
         "Fewer colours with $O(1)$ epochs [Sharma2021Constant].",
         "Time bounds with non-rigid moves."
       ],
-      "notes": "**Unverified:** [Sharma2015Optimal] and [Sharma2017Logarithmic] were not read in full.",
+      "notes": "Checked against the full texts of [Sharma2015Optimal] (Theorem 7) and [Sharma2017Logarithmic] (Theorem 1.1, rigid moves, robots that may be disoriented). Both are conference versions that omit many proofs.",
       "status": "verified"
     },
     {
@@ -325,7 +330,7 @@
         "frames": "one-axis",
         "body": "point"
       },
-      "summary": "With non-rigid moves, 3 colours suffice in ASYNC if robots agree on one axis; without axis agreement the problem is open.",
+      "summary": "With non-rigid moves, 2 colours suffice in ASYNC if robots agree on one axis; without axis agreement the problem is open.",
       "lower_bounds": [
         {
           "measure": "colours",
@@ -340,40 +345,58 @@
       "results": [
         {
           "ref": "DiLuna2017Mutual",
-          "role": "best",
+          "role": "introductory",
           "time": "\\text{finite}",
           "colours": "3",
-          "note": "Introductory and current best (Theorem 1.2(d))."
+          "note": "Introductory (Theorem 1.2(d)): 3 colours."
+        },
+        {
+          "ref": "Sharma2015Optimal",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "2",
+          "note": "Current best for colours (Theorem 8, Theorem 3(b)): 2 colours, which is optimal. The conference version only sketches this case."
+        },
+        {
+          "ref": "Poudel2021FaultTolerant",
+          "role": "other",
+          "time": "O(n)",
+          "colours": "3",
+          "assumes": [
+            "$n \\ge 3$"
+          ],
+          "note": "Only time bound for this setting: its crash-tolerant algorithm (Theorem 1.1) with $f = 0$ runs in $O(n)$ epochs with 3 colours, collision-free; each robot moves at most once and the robots do not end on a convex hull."
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "Not analysed."
+          "note": "$O(n)$ epochs with 3 colours [Poudel2021FaultTolerant]; no lower bound beyond the trivial one."
         },
         "colours": {
           "status": "tight",
-          "note": "2 or 3 colours."
+          "note": "Exactly 2 colours [Sharma2015Optimal]."
         }
       },
       "open": [
         "Mutual visibility in non-rigid ASYNC without axis agreement, ideally with 2 colours [DiLuna2017Mutual]."
       ],
-      "notes": "Checked against the full text.",
+      "notes": "Checked against the full texts of [DiLuna2017Mutual], [Sharma2015Optimal] and [Poudel2021FaultTolerant].",
       "status": "verified"
     },
     {
       "id": "lights-fsync-chirality",
-      "title": "Lights, FSYNC, chirality",
+      "title": "Lights, FSYNC, rigid, chirality",
       "assumptions": {
         "visibility": "unlimited",
         "faults": "none",
         "memory": "lights",
         "scheduler": "fsync",
+        "movement": "rigid",
         "frames": "chirality",
         "body": "point"
       },
-      "summary": "In FSYNC with chirality, complete visibility takes $O(\\log n)$ rounds with 12 colours.",
+      "summary": "In FSYNC with rigid moves and chirality, mutual visibility takes $O(\\log n)$ rounds with 12 colours.",
       "lower_bounds": [],
       "results": [
         {
@@ -381,48 +404,16 @@
           "role": "best",
           "time": "O(\\log n)",
           "colours": "12",
-          "note": "Introductory and current best; robot paths may cross. Abstract only."
+          "note": "Introductory and current best (Theorem 11): $n \\ge 4$ robots, $O(\\log n)$ rounds, 12 colours, $n$ unknown. Robot paths may cross; no two robots head for the same point.",
+          "assumes": [
+            "$n \\ge 4$"
+          ]
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "$O(1)$ is known in SSYNC with rigid moves [Sharma2016Complete], which needs no chirality but is not a weaker setting on every axis."
-        },
-        "colours": {
-          "status": "tight",
-          "note": "$\\Theta(1)$."
-        }
-      },
-      "open": [],
-      "notes": "**Unverified:** read from the abstract only.",
-      "status": "draft"
-    },
-    {
-      "id": "fat",
-      "title": "Fat robots, ASYNC, one axis",
-      "assumptions": {
-        "visibility": "unlimited",
-        "faults": "none",
-        "memory": "lights",
-        "frames": "one-axis",
-        "body": "fat"
-      },
-      "summary": "Fat robots that agree on one axis reach mutual visibility in ASYNC in $O(n)$ epochs with $O(1)$ colours.",
-      "lower_bounds": [],
-      "results": [
-        {
-          "ref": "Bhagat2024Fat",
-          "role": "best",
-          "time": "O(n)",
-          "colours": "O(1)",
-          "note": "Introductory and current best for ASYNC. Abstract only."
-        }
-      ],
-      "optimality": {
-        "time": {
-          "status": "unknown",
-          "note": "—"
+          "note": "$O(\\log n)$ rounds here; the paper proves no lower bound and asks for one. $O(1)$ time is reported for rigid SSYNC without chirality [Sharma2016Complete] (not read), a weaker setting whose algorithm would carry over."
         },
         "colours": {
           "status": "tight",
@@ -430,10 +421,53 @@
         }
       },
       "open": [
-        "Non-rigid moves, and SSYNC and ASYNC extensions of the 2-colour FSYNC algorithm [Alsaedi2022Fat]."
+        "What is the lower bound on the number of rounds, and can chirality and crossing paths be dropped [Vaidyanathan2015Log]?"
       ],
-      "notes": "**Unverified:** read from the abstract only.",
-      "status": "draft"
+      "notes": "Vaidyanathan, Busch, Trahan, Sharma and Rai also show that the algorithm of [DiLuna2014Robots] takes $\\Theta(n)$ rounds in the worst case even in FSYNC. Checked against the full text of [Vaidyanathan2015Log] (model in Section IV, Theorem 11). The variant was previously recorded without rigid moves; the paper assumes that \"a robot in motion cannot be stopped\".",
+      "status": "verified"
+    },
+    {
+      "id": "fat",
+      "title": "Fat robots, ASYNC, rigid, one axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "movement": "rigid",
+        "frames": "one-axis",
+        "body": "fat"
+      },
+      "summary": "Fat robots that agree on one axis reach mutual visibility in rigid ASYNC in $O(n)$ epochs with $O(1)$ colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bhagat2024Fat",
+          "role": "best",
+          "time": "O(n)",
+          "colours": "O(1)",
+          "note": "Introductory and current best for ASYNC (Theorem 1, Lemma 3.17): $n \\ge 3$ unit discs, collision-free, $n$ unknown; the robots end on a semicircle.",
+          "assumes": [
+            "$n \\ge 3$",
+            "robots know their common radius"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is recorded. [Bhagat2024Fat] attribute an $\\Omega(\\sqrt{n})$ lower bound to [Sharma2018Fat], but that paper (ICDCN 2018) states no lower bound."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$."
+        }
+      },
+      "open": [
+        "Non-rigid moves, and SSYNC and ASYNC extensions of the 2-colour FSYNC algorithm [Alsaedi2022Fat].",
+        "Mutual visibility of fat robots in ASYNC with non-rigid moves and no axis agreement [Bhagat2024Fat]."
+      ],
+      "notes": "Checked against the full text of [Bhagat2024Fat] (Section 2, Theorem 1). The variant was previously recorded without rigid moves; the paper assumes \"rigid movement\". Its count of colours is $O(1)$; the phases use 3 to 5 colours each (Lemmas 3.3, 3.7 and 3.14), and the total is not stated.",
+      "status": "verified"
     },
     {
       "id": "fat-fsync",
@@ -465,7 +499,7 @@
           "role": "introductory",
           "time": "O(n)",
           "colours": "9",
-          "note": "Abstract only."
+          "note": "Theorem 1.1: unit discs, $n \\ge 1$, $O(n)$ rounds, 9 colours, collision-free, no chirality, rigid moves. A short paper; details are deferred to a full version."
         },
         {
           "ref": "Alsaedi2022Fat",
@@ -486,7 +520,7 @@
         }
       },
       "open": [],
-      "notes": "Checked against the full text of [Alsaedi2022Fat].",
+      "notes": "Checked against the full texts of [Alsaedi2022Fat] and [Sharma2018Fat].",
       "status": "verified"
     },
     {
@@ -525,7 +559,61 @@
       "open": [
         "Tolerating three or more crashes, and using 2 colours [Aljohani2018Faults]."
       ],
-      "notes": "With $f$ crashes, robots that agree on one axis reach complete visibility in ASYNC in $O(n)$ epochs with 3 colours [Poudel2021FaultTolerant] (abstract only). Checked against the full text of [Aljohani2018Faults].",
+      "notes": "With up to $f \\le n$ crashes, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours (setting *Lights, crash faults, ASYNC, one axis*), and in SSYNC with 2 colours [Poudel2021FaultTolerant] (Theorems 1.1 and 4.10, $n \\ge 3$). Their crash stops only movement: a crashed robot must still change its light, and Poudel, Aljohani and Sharma leave the case of lights that stop with the robot as \"a major open problem\". Checked against the full texts of [Aljohani2018Faults] and [Poudel2021FaultTolerant].",
+      "status": "verified"
+    },
+    {
+      "id": "crash-one-axis",
+      "title": "Lights, crash faults, ASYNC, one axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "crash",
+        "memory": "lights",
+        "frames": "one-axis",
+        "body": "point"
+      },
+      "summary": "With up to $n$ crashed robots, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours.",
+      "statement": "Up to $f \\le n$ robots may crash, at unknown times; a crashed robot never moves again. The correct robots must reach, without collisions, a configuration in which no three correct robots are collinear and no crashed robot lies between two correct ones [Poudel2021FaultTolerant].",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "fault-free bound (no robot crashes): one colour does not suffice when $n$ is unknown and robots must terminate (Section 7 of [DiLuna2017Mutual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Poudel2021FaultTolerant",
+          "role": "best",
+          "time": "O(n)",
+          "colours": "3",
+          "assumes": [
+            "$n \\ge 3$",
+            "any $f \\le n$ crashes, $f$ unknown",
+            "a crashed robot's light keeps working: the crash stops only its movement"
+          ],
+          "note": "Introductory and current best (Theorem 1.1): collision-free, non-rigid moves, each robot moves at most once, and the robots do not end on a convex hull. Improves the 4 colours of the WALCOM 2018 version to 3. In SSYNC 2 colours suffice (Theorem 4.10)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "$O(n)$ epochs; no lower bound beyond the trivial one."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "2 or 3 colours."
+        }
+      },
+      "open": [
+        "Mutual visibility with several crashes when a crashed robot's light stops changing too, which [Poudel2021FaultTolerant] call \"a major open problem\".",
+        "Two colours in ASYNC with crashes [Poudel2021FaultTolerant]."
+      ],
+      "notes": "The fault model differs from that of [Aljohani2018Faults] (one crash, SSYNC, rigid moves, compass): here faults affect only mobility, and lights must keep working after the crash. Checked against the full text of [Poudel2021FaultTolerant] (Theorems 1.1 and 4.10).",
       "status": "verified"
     },
     {

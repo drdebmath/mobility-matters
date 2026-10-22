@@ -163,7 +163,7 @@
           "definition": "Two robots."
         }
       ],
-      "origin": "The classical problem has one searcher [Beck1964Linear] [BaezaYates1993Searching]. Chrobak et al. and Czyzowicz et al. proposed parallel versions with $k$ robots on the line, where communication and faults make the team size matter [Chrobak2015GroupSearch] [Czyzowicz2019FaultyLine] (as reported by [Kupavskii2018Lower]). With $k$ fault-free robots, two of them already finish in time equal to the distance by going in opposite directions, so the multi-robot questions are interesting only with faults, with evacuation, or with unequal speeds [Kupavskii2018Lower] [Bampas2019Speeds]. Two robots are the smallest team in which speeds and communication interact, and Bampas et al. solve that case for every speed ratio [Bampas2019Speeds]."
+      "origin": "The classical problem has one searcher [Beck1964Linear] [BaezaYates1993Searching]. Chrobak et al. and Czyzowicz et al. proposed parallel versions with $k$ robots on the line, where communication and faults make the team size matter: Chrobak et al. show that robots that communicate only when they meet need time $9d - o(d)$ to evacuate, whatever their number [Chrobak2015GroupSearch], and Czyzowicz et al. let up to $f$ robots fail to detect the target [Czyzowicz2019FaultyLine]. With $k$ fault-free robots, two of them already finish in time equal to the distance by going in opposite directions, so the multi-robot questions are interesting only with faults, with evacuation, or with unequal speeds [Kupavskii2018Lower] [Bampas2019Speeds]. Two robots are the smallest team in which speeds and communication interact, and Bampas et al. solve that case for every speed ratio [Bampas2019Speeds]."
     },
     {
       "id": "goal",
@@ -184,7 +184,7 @@
           "definition": "The task ends when the first robot reaches the target (and, with faults, the others can be sure of it)."
         }
       ],
-      "origin": "In search the time is the first arrival at the target, while in group evacuation it is the arrival of the last robot [Bampas2019Speeds] [Czyzowicz2021GroupEvacuation]. Chrobak et al. showed that evacuating several uniform agents on the line is as hard as the cow-path problem (as reported by [Czyzowicz2014Evacuating]) [Chrobak2015GroupSearch]. Bampas et al. compare search with rendezvous: in both the time is set by the last robot to arrive, but in search the meeting point is chosen by the adversary [Bampas2019Speeds]. With faults the two goals are closely linked: when $k = 2f+1$ all agents may have to reach the target, and crash evacuation is then \"a sub-problem of the more difficult byzantine search problem\" [Czyzowicz2021NearMajority]."
+      "origin": "In search the time is the first arrival at the target, while in group evacuation it is the arrival of the last robot [Bampas2019Speeds] [Czyzowicz2021GroupEvacuation]. Chrobak et al. showed that evacuating any number of unit-speed robots that communicate only when they meet takes time $9d - o(d)$ on the line, as for one robot in the cow-path problem (Theorem 3, Corollary 1) [Chrobak2015GroupSearch]. Bampas et al. compare search with rendezvous: in both the time is set by the last robot to arrive, but in search the meeting point is chosen by the adversary [Bampas2019Speeds]. With faults the two goals are closely linked: when $k = 2f+1$ all agents may have to reach the target, and crash evacuation is then \"a sub-problem of the more difficult byzantine search problem\" [Czyzowicz2021NearMajority]."
     }
   ],
   "axis_order": [
@@ -357,7 +357,7 @@
           "ref": "Czyzowicz2019FaultyLine",
           "role": "best",
           "time": "2\\rho^{\\rho}/(\\rho-1)^{\\rho-1}+1",
-          "note": "Introductory and current best (proportional schedules); optimality proved by [Kupavskii2018Lower]."
+          "note": "Introductory and current best (proportional schedules, Theorem 1); the algorithm needs no communication; optimality proved by [Kupavskii2018Lower]."
         }
       ],
       "optimality": {
@@ -367,7 +367,7 @@
         }
       },
       "open": [],
-      "notes": "On $m$ rays the same formula holds with $\\rho = m(f+1)/k$ [Kupavskii2018Lower].",
+      "notes": "On $m$ rays the same formula holds with $\\rho = m(f+1)/k$ [Kupavskii2018Lower]. Czyzowicz et al. write the ratio as $(\\tfrac{4f+4}{k})^{(2f+2)/k}(\\tfrac{4f+4}{k}-2)^{1-(2f+2)/k}+1$, the same expression; their own lower bound, which holds even with communication, is about $3.76$ for $(k,f) = (3,1)$ (Theorem 2) and $3 + 2\\ln k/k - 2\\ln\\ln k/k$ asymptotically (Corollary 2), so for $k = 2f+1$ the ratio tends to 3 [Czyzowicz2019FaultyLine]. Checked against the full text of [Czyzowicz2019FaultyLine] (PODC 2016 version).",
       "status": "verified"
     },
     {
@@ -409,7 +409,7 @@
       "open": [
         "Determine the optimal competitive ratio $B(k,f)$ for Byzantine search on the line; already $B(3,1)$ is open."
       ],
-      "notes": "For three robots with one Byzantine robot the upper bound is about $7.437$ [Czyzowicz2021NearMajority], improving $8.653$ [Sun2020Byzantine].",
+      "notes": "For three robots with one Byzantine robot the upper bound is about $7.437$ [Czyzowicz2021NearMajority], improving $8.653$ (Theorem 3 of [Sun2020Byzantine]; its abstract says $8.53$).",
       "status": "verified"
     },
     {
@@ -435,6 +435,12 @@
       ],
       "results": [
         {
+          "ref": "Chrobak2015GroupSearch",
+          "role": "introductory",
+          "time": "9\\ (v \\ge 1/3)",
+          "note": "Face-to-face, speeds $1$ and $v \\ge 1/3$: the slower robot follows its own doubling path at speed $1/3$ and is fetched by the faster one (Theorem 4)."
+        },
+        {
           "ref": "Bampas2019Speeds",
           "role": "best",
           "time": "\\text{optimal for every speed ratio}",
@@ -448,7 +454,7 @@
         }
       },
       "open": [],
-      "notes": "Introduced by Chrobak, Gąsieniec, Gorry and Martin (SOFSEM 2015, not yet in the bibliography).",
+      "notes": "Introduced by Chrobak, Gąsieniec, Gorry and Martin, who also show that two unit-speed robots and further robots of speed at least $1/5$ still finish in time $9d$ (Section 3.2) [Chrobak2015GroupSearch]. Checked against the full texts of [Chrobak2015GroupSearch] and [Bampas2019Speeds].",
       "status": "verified"
     }
   ],

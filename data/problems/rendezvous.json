@@ -213,7 +213,7 @@
           "definition": "Both agents start in the same round ($\\tau=0$)."
         }
       ],
-      "origin": "Dessmark, Fraigniaud, Kowalski and Pelc treated two startup scenarios for deterministic rendezvous: simultaneous startup, and an arbitrary delay $\\tau$ chosen by the adversary, in which each agent counts rounds from its own wake-up without knowing $\\tau$ [Dessmark2006Deterministic]. The delay is the stronger adversary: it can delay one agent long enough that the other must find it while it sleeps, which is treasure hunt [Pelc2019Survey] [TaShma2014Deterministic]. It changes cost: on a ring simultaneous start gives $\\Theta(d\\log \\lambda)$, while with arbitrary delay $\\Omega(n+d\\log \\lambda)$ is a lower bound even when $n$ is known; and the first polynomial algorithm for arbitrary graphs had cost growing with $\\sqrt\\tau$, leaving open whether the dependence could be removed [Dessmark2006Deterministic], which Kowalski and Malinowski and then Ta-Shma and Zwick did [Kowalski2008Meet] [TaShma2014Deterministic] (the first as summarised in [Pelc2019Survey]). It also changes memory: Fraigniaud and Pelc showed that identical agents need $\\Theta(\\log n)$ bits in trees with arbitrary delay, even on a line, but only $O(\\log\\nu+\\log\\log n)$ bits with simultaneous start in trees with $\\nu$ leaves, an exponential gap when $\\nu$ is small [Fraigniaud2013Delays]."
+      "origin": "Dessmark, Fraigniaud, Kowalski and Pelc treated two startup scenarios for deterministic rendezvous: simultaneous startup, and an arbitrary delay $\\tau$ chosen by the adversary, in which each agent counts rounds from its own wake-up without knowing $\\tau$ [Dessmark2006Deterministic]. The delay is the stronger adversary: it can delay one agent long enough that the other must find it while it sleeps, which is treasure hunt [Pelc2019Survey] [TaShma2014Deterministic]. It changes cost: on a ring simultaneous start gives $\\Theta(d\\log \\lambda)$, while with arbitrary delay $\\Omega(n+d\\log \\lambda)$ is a lower bound even when $n$ is known; and the first polynomial algorithm for arbitrary graphs had cost growing with $\\sqrt\\tau$, leaving open whether the dependence could be removed [Dessmark2006Deterministic], which Kowalski and Malinowski and then Ta-Shma and Zwick did [Kowalski2008Meet] [TaShma2014Deterministic]. It also changes memory: Fraigniaud and Pelc showed that identical agents need $\\Theta(\\log n)$ bits in trees with arbitrary delay, even on a line, but only $O(\\log\\nu+\\log\\log n)$ bits with simultaneous start in trees with $\\nu$ leaves, an exponential gap when $\\nu$ is small [Fraigniaud2013Delays]."
     }
   ],
   "variants": [
@@ -265,9 +265,10 @@
           "ref": "Kowalski2008Meet",
           "role": "other",
           "time": "O(\\log^3 \\lambda+n^{15}\\log^{12}n)",
-          "note": "First bound independent of $\\tau$ (as stated in [Pelc2019Survey]); needs backtracking (as stated in [TaShma2014Deterministic]).",
+          "note": "Corollary 4.1; the first bound independent of $\\tau$, answering the question of [Dessmark2006Deterministic]. The cover walk it uses runs shorter cover walks recursively and goes back along them, so it needs backtracking (Section 4.1.2). Like [Dessmark2006Deterministic] it is deterministic but not explicit: each agent finds by exhaustive local search a walk whose existence is proved by the probabilistic method. The same algorithm gathers $k$ labelled agents.",
           "assumes": [
-            "backtracking: the agent learns the port by which it entered"
+            "backtracking: the agent learns the port by which it entered",
+            "memory unbounded; local computation free"
           ]
         },
         {
@@ -290,8 +291,8 @@
       "open": [
         "Find an optimal-time synchronous rendezvous algorithm for labelled agents in arbitrary graphs (open problem of [Pelc2019Survey])."
       ],
-      "notes": "$\\ell$ in [TaShma2014Deterministic] is the length of the shorter label, our $\\log \\lambda$. Checked against the full text of [Dessmark2006Deterministic]: there agents know only their own label, learn the entry port and the degree at each node, and do not notice crossing inside an edge. With **simultaneous** start the same paper meets in $O(d\\Delta^{d}\\log\\lambda)$ rounds in any graph without knowing $\\Delta$ (Theorem 4.1), optimal when $d$ and $\\Delta$ are bounded. **Unverified against the original paper:** the bound of [Kowalski2008Meet] (from [Pelc2019Survey]); [TaShma2014Deterministic] was read in full.",
-      "status": "draft"
+      "notes": "$\\ell$ in [TaShma2014Deterministic] is the length of the shorter label, our $\\log \\lambda$; $\\ell$ in [Kowalski2008Meet] is the smaller label itself, our $\\lambda$. Checked against the full texts of [Dessmark2006Deterministic], [Kowalski2008Meet] and [TaShma2014Deterministic]: agents know only their own label, learn the entry port and the degree at each node, and do not notice crossing inside an edge. With **simultaneous** start [Dessmark2006Deterministic] meets in $O(d\\Delta^{d}\\log\\lambda)$ rounds in any graph without knowing $\\Delta$ (Theorem 4.1), optimal when $d$ and $\\Delta$ are bounded.",
+      "status": "verified"
     },
     {
       "id": "labelled-trees",
@@ -389,7 +390,7 @@
         }
       },
       "open": [],
-      "notes": "Checked against the full text of [Dessmark2006Deterministic]. With **arbitrary delay** on an $n$-node ring, $\\Omega(n+d\\log\\lambda)$ rounds are necessary even when $n$ is known (Proposition 3.1); $O(n\\log\\lambda)$ suffices for known $n$ (Theorem 3.2) and $O(\\lambda\\tau+\\lambda n^2)$ for unknown $n$ (Theorem 3.3) [Dessmark2006Deterministic]. The paper announces that a forthcoming paper reaches $O(n\\log\\lambda)$ with arbitrary delay; as stated in [Pelc2019Survey], this is [Kowalski2008Meet], for unknown $n$.",
+      "notes": "Checked against the full text of [Dessmark2006Deterministic]. With **arbitrary delay** on an $n$-node ring, $\\Omega(n+d\\log\\lambda)$ rounds are necessary even when $n$ is known (Proposition 3.1); $O(n\\log\\lambda)$ suffices for known $n$ (Theorem 3.2) and $O(\\lambda\\tau+\\lambda n^2)$ for unknown $n$ (Theorem 3.3) [Dessmark2006Deterministic]. The paper announces that a forthcoming paper reaches $O(n\\log\\lambda)$ with arbitrary delay; this is [Kowalski2008Meet] (Theorem 3.1), for unknown $n$, which with Proposition 3.1 of [Dessmark2006Deterministic] makes it optimal (their Corollary 3.1).",
       "status": "verified"
     },
     {
@@ -593,7 +594,7 @@
           "ref": "Guilbault2011Asynchronous",
           "role": "best",
           "time": "\\text{finite}",
-          "note": "Introductory and current best. Feasible iff the views differ or the two nodes are joined by a path whose port sequence is a palindrome (as summarised in [Pelc2019Survey]); randomized agents meet with probability 1."
+          "note": "Introductory and current best. Feasible if and only if the views from the two starting nodes differ or the nodes are joined by a path whose sequence of ports reads the same in both directions (Theorem 1), in finite or countably infinite graphs; randomized agents meet with probability 1 from any starting nodes (Theorem 2)."
         }
       ],
       "optimality": {
