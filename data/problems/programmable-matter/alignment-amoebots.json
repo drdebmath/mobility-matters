@@ -1,0 +1,2385 @@
+{
+  "id": "alignment-amoebots",
+  "model": "programmable-matter",
+  "name": "Alignment",
+  "origin": {
+    "ref": "Kedia2022Alignment",
+    "year": 2022,
+    "note": "APPROX/RANDOM 2022."
+  },
+  "derived_from": {
+    "problem": "compression-amoebots",
+    "kind": "generalisation of",
+    "relation": "Alignment adds an orientation to each particle; the same chains also give compression and expansion [Kedia2022Alignment]."
+  },
+  "summary": "Oriented particles, following a local stochastic rule, must align their orientations.",
+  "statement": "Each particle carries one of $q \\ge 2$ **orientations**, a spin state, not a sense of direction. Particles run a local **Markov chain**; the system should be **aligned** (most particles share an orientation) or not, depending on the **bias**, with high probability in the stationary distribution, both when connectivity is kept and when particles may disconnect.",
+  "primer": {
+    "intro": "Picture a school of fish or a flock of birds in which every animal turns to face the same way as its neighbours. The floor is the **triangular lattice**: the endless graph whose **nodes** are the corners of a tiling of the plane by equal triangles; each node is joined by an edge to six others, its **neighbours**. A **particle** occupies one node and moves in two actions: an **expansion** into an empty neighbouring node, after which it occupies both, then a **contraction** into one of the two; so one expansion and one contraction move it by one node. The **system** of $n$ particles starts connected, and each particle carries an **orientation**, one of $q \\ge 2$ values drawn as an arrow; the orientation is just a state, not a compass, and a particle can only compare its orientation with its neighbours' orientations. One randomly chosen particle acts at a time; it either steps (moves to a neighbouring node) or turns (changes its orientation). The system should become **aligned** (one orientation is held by most particles) or stay *non-aligned* (all orientations about equally common), depending on a bias; this is studied both when the system must stay connected and when it may fall apart.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Step or turn, with a bias towards agreeing neighbours",
+        "variant": "stochastic",
+        "ref": "Kedia2022Alignment",
+        "idea": "In the connected setting there are two **biases**: $\\lambda$ rewards having neighbours, as in compression, and a second bias, written $\\gamma$ in [Kedia2022Alignment], rewards **agreeing neighbours** (neighbours with the same orientation). A randomly chosen particle does one of two things, with equal chance.\n\n1. **Step.** Pick a random empty neighbouring node; check locally that the system stays connected without **holes** (regions of empty nodes surrounded by particles); move with a probability that grows with the gain in neighbours and in agreeing neighbours.\n2. **Turn.** Pick a new orientation; accept it with a probability that grows with the gain in agreeing neighbours (certainly, if it gains).",
+        "analysis": "With both biases large (for instance $\\gamma > 29.3(q-1)$ and $\\lambda\\gamma$ large enough), the system is **compressed** (its perimeter, the length of the walk around its outside, is at most a constant times the minimum) with high probability, and under further conditions on $\\gamma$ one orientation dominates [Kedia2022Alignment]. With $\\lambda$ large but $\\gamma$ small, the system is compressed but its orientations stay evenly split among the $q$ values; with $\\lambda$ small, the system stays stretched out. Compactness matters: a long thin bottleneck lets two regions with different orientations coexist cheaply, so alignment is proved only for well compressed systems.",
+        "why_it_matters": "It brings the Potts and clock models of magnetism into programmable matter, with particles that move as well as turn."
+      },
+      {
+        "kind": "algorithm",
+        "title": "When particles may drift apart: one knob",
+        "variant": "stochastic",
+        "ref": "Kedia2022Alignment",
+        "idea": "If the system is allowed to disconnect, the connectivity check is dropped: a particle may step to any empty neighbouring node. A single bias then rewards, at the same time, having neighbours and having agreeing neighbours.\n\n1. Pick step or turn with equal chance.\n2. Step: move to a random empty neighbouring node, accepted with a probability that grows with the gain in (agreeing) neighbours.\n3. Turn: as before.",
+        "analysis": "When the single bias is large, the particles gather into compact **clusters** (sets of particles connected through neighbours) and align; when it is small, they disperse and the orientations stay balanced [Kedia2022Alignment]. The proof is harder than in the connected case because a spread-out system can contain many small clusters scattered over the lattice.",
+        "why_it_matters": "It shows that the stochastic approach does not need the connectivity rule, which is costly to check and not always realistic."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "particle",
+      "definition": "an anonymous computing unit of constant size that occupies one node of the triangular lattice, or two neighbouring nodes while it moves",
+      "avoid": [
+        "robot",
+        "agent"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph $G_\\Delta$ whose nodes are the corners of a tiling of the plane by equilateral triangles; every node has six neighbours",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the triangular lattice; it is empty or occupied by a particle (an expanded particle occupies two)",
+      "avoid": [
+        "spot",
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "two nodes are neighbours when an edge of the triangular lattice joins them; two particles are neighbours when they occupy neighbouring nodes",
+      "avoid": [
+        "adjacent",
+        "touching"
+      ]
+    },
+    {
+      "term": "expansion",
+      "definition": "the action in which a particle that occupies one node extends into an empty neighbouring node and then occupies both"
+    },
+    {
+      "term": "contraction",
+      "definition": "the action in which a particle that occupies two nodes withdraws into one of them"
+    },
+    {
+      "term": "system",
+      "definition": "the set of all $n$ particles",
+      "avoid": [
+        "group",
+        "swarm"
+      ]
+    },
+    {
+      "term": "hole",
+      "definition": "a finite set of empty nodes enclosed by particles"
+    },
+    {
+      "term": "compressed",
+      "definition": "having perimeter (the length of the walk around the outside of the system) at most a constant times the minimum possible perimeter of $n$ particles"
+    },
+    {
+      "term": "Markov chain",
+      "definition": "the random process in which, at each step, one particle chosen uniformly at random proposes an action and accepts it with a probability set by the biases and its neighbourhood; results describe its stationary distribution"
+    },
+    {
+      "term": "orientation",
+      "definition": "the state of a particle, one of $q \\ge 2$ values (a spin, drawn as an arrow or a colour), not a sense of direction on the lattice"
+    },
+    {
+      "term": "agreeing neighbours",
+      "definition": "the neighbours of a particle that carry the same orientation as it"
+    },
+    {
+      "term": "aligned",
+      "definition": "most particles carry the same orientation"
+    },
+    {
+      "term": "bias",
+      "definition": "a parameter of the Markov chain: in the connected setting $\\lambda$ rewards neighbours and $\\gamma$ rewards agreeing neighbours; when the system may disconnect, a single bias rewards both"
+    },
+    {
+      "term": "cluster",
+      "definition": "a maximal set of particles connected through neighbours",
+      "avoid": [
+        "clump"
+      ]
+    }
+  ],
+  "history": "Alignment brought Potts and clock models from statistical physics to programmable matter [Kedia2022Alignment].",
+  "variants": [
+    {
+      "id": "stochastic",
+      "title": "Markov chain, sequential",
+      "standard": true,
+      "assumptions": {
+        "memory": "constant",
+        "scheduler": "sequential",
+        "algorithm": "randomized"
+      },
+      "summary": "For every $q \\ge 2$, alignment and non-alignment are both achieved by the bias.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kedia2022Alignment",
+          "role": "best",
+          "time": "\\text{eventually}",
+          "note": "Introductory and current best; simply connected and unconstrained settings."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Mixing time not bounded."
+        },
+        "moves": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "asynchronous rounds"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total expansions and contractions (work)"
+    }
+  ],
+  "axis_order": [
+    "memory",
+    "scheduler",
+    "communication",
+    "orientation",
+    "algorithm",
+    "shape",
+    "connectivity"
+  ],
+  "figure": {
+    "caption": "Alignment by the Markov chain of [Kedia2022Alignment], connected setting: each particle carries one of $q$ orientations (here $q = 3$, shown as three colours). One particle at a time (outlined) either steps, expanding into a free neighbouring node and contracting forward with a probability that grows with its gain in neighbours ($\\lambda$) and in agreeing neighbours ($\\gamma$), or turns to a new orientation, accepted with a probability that grows with its gain in agreeing neighbours; moves that would disconnect the system or create a hole are refused. Shown is a run in which every proposed move is accepted. For large biases most particles end up sharing one orientation, with high probability; for small biases they do not.",
+    "view": [
+      100,
+      56
+    ],
+    "unit": 8,
+    "origin": [
+      34,
+      18
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            4.14
+          ],
+          [
+            99.0,
+            4.14
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            11.07
+          ],
+          [
+            99.0,
+            11.07
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            18.0
+          ],
+          [
+            99.0,
+            18.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            24.93
+          ],
+          [
+            99.0,
+            24.93
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            31.86
+          ],
+          [
+            99.0,
+            31.86
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            38.78
+          ],
+          [
+            99.0,
+            38.78
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            45.71
+          ],
+          [
+            99.0,
+            45.71
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            52.64
+          ],
+          [
+            99.0,
+            52.64
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            43.98
+          ],
+          [
+            7.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            30.12
+          ],
+          [
+            15.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            16.27
+          ],
+          [
+            23.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            2.41
+          ],
+          [
+            31.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            8.19,
+            1.0
+          ],
+          [
+            39.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            16.19,
+            1.0
+          ],
+          [
+            47.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            24.19,
+            1.0
+          ],
+          [
+            55.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            32.19,
+            1.0
+          ],
+          [
+            63.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            40.19,
+            1.0
+          ],
+          [
+            71.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            48.19,
+            1.0
+          ],
+          [
+            79.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            56.19,
+            1.0
+          ],
+          [
+            87.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            64.19,
+            1.0
+          ],
+          [
+            95.36,
+            55.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            72.19,
+            1.0
+          ],
+          [
+            99.0,
+            47.44
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            80.19,
+            1.0
+          ],
+          [
+            99.0,
+            33.59
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            88.19,
+            1.0
+          ],
+          [
+            99.0,
+            19.73
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            96.19,
+            1.0
+          ],
+          [
+            99.0,
+            5.88
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            5.88
+          ],
+          [
+            3.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            19.73
+          ],
+          [
+            11.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            33.59
+          ],
+          [
+            19.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            1.0,
+            47.44
+          ],
+          [
+            27.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            4.64,
+            55.0
+          ],
+          [
+            35.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            12.64,
+            55.0
+          ],
+          [
+            43.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            20.64,
+            55.0
+          ],
+          [
+            51.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            28.64,
+            55.0
+          ],
+          [
+            59.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            36.64,
+            55.0
+          ],
+          [
+            67.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            44.64,
+            55.0
+          ],
+          [
+            75.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            52.64,
+            55.0
+          ],
+          [
+            83.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            60.64,
+            55.0
+          ],
+          [
+            91.81,
+            1.0
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            68.64,
+            55.0
+          ],
+          [
+            99.0,
+            2.41
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            76.64,
+            55.0
+          ],
+          [
+            99.0,
+            16.27
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            84.64,
+            55.0
+          ],
+          [
+            99.0,
+            30.12
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            92.64,
+            55.0
+          ],
+          [
+            99.0,
+            43.98
+          ]
+        ],
+        "c": "line",
+        "w": 0.25
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: orientations mixed",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              5,
+              1
+            ],
+            "c": "l4"
+          }
+        ]
+      },
+      {
+        "label": "A step that gains neighbours",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              5,
+              1
+            ],
+            "qlat": [
+              4,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              78.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "qlat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l4"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              62.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "label": "A turn that gains agreeing neighbours",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              18.0
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              5,
+              0
+            ],
+            "qlat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              74.0,
+              18.0
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              0
+            ],
+            "qlat": [
+              0,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              34.0,
+              18.0
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              38.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              66.0,
+              18.0
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              0,
+              1
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              38.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              46.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "qlat": [
+              2,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              46.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l4"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              54.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              62.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              0
+            ],
+            "qlat": [
+              1,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              42.0,
+              18.0
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l2"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              46.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l1"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              54.0,
+              24.93
+            ],
+            "r": 3.68,
+            "c": "near",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "label": "Final: compressed, one orientation shared",
+        "ents": [
+          {
+            "id": "0",
+            "k": "particle",
+            "lat": [
+              2,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "1",
+            "k": "particle",
+            "lat": [
+              1,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "2",
+            "k": "particle",
+            "lat": [
+              2,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "3",
+            "k": "particle",
+            "lat": [
+              3,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "4",
+            "k": "particle",
+            "lat": [
+              4,
+              0
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "particle",
+            "lat": [
+              4,
+              1
+            ],
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "particle",
+            "lat": [
+              3,
+              1
+            ],
+            "c": "l1"
+          }
+        ]
+      }
+    ]
+  }
+}

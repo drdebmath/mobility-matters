@@ -1,0 +1,3016 @@
+{
+  "id": "map-construction",
+  "model": "mobile-agents-on-graphs",
+  "name": "Map construction",
+  "origin": {
+    "ref": "Dudek1991Robotic",
+    "year": 1991,
+    "note": "Dudek, Jenkin, Milios and Wilkes framed robotic exploration as graph construction."
+  },
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "strengthening of",
+    "relation": "Building an isomorphic map implies having visited every node, so map construction is exploration with more output; it is used to solve rendezvous and leader election [Das2019Survey]."
+  },
+  "summary": "Agents must not only visit every node but output a map of the anonymous graph, up to isomorphism.",
+  "statement": "Agents explore an unknown anonymous port-labelled graph and must output a **map**: a port-labelled graph, kept in the agent's memory, that is isomorphic to the explored graph (with the ports), with the agent's current node indicated. **Time** is the number of moves.",
+  "primer": {
+    "intro": "Imagine an explorer dropped into a maze of identical rooms joined by corridors, with no compass and no way to tell rooms apart; it must draw a correct map of the maze. Here the maze is a **graph** with $n$ **nodes** (the rooms) and $m$ **edges** (the corridors; each edge joins two nodes), and the explorer is an **agent** that walks from node to node along edges; one crossing of one edge is a **move**. The nodes are **anonymous**: they have no names the agent can read. At each node the edges at that node are numbered $1, 2, \\dots$ (these numbers are **ports**), so the agent can choose which edge to take and sees through which port it arrived. One agent starts at some node, its **start node**; it must walk around and finally output a **map**: a graph with port numbers, kept in the agent's memory, that is the same as the real graph up to renaming of the nodes, with the node where the agent stands indicated. We count the moves. In the basic catalogued version the agent cannot leave anything on a node, but it knows upper bounds on $n$ and on the maximum **degree** $\\Delta$ (the degree of a node is the number of edges at it).",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Drop a marker to recognise a node",
+        "variant": "marker",
+        "ref": "Dudek1991Robotic",
+        "idea": "The agent carries one **marker**, an object that it can put down on a node and pick up again (a simplified description of [Dudek1991Robotic]).\n\n1. Keep a map of the nodes seen so far; at first it holds only the start node.\n2. Choose a node of the map with a port that has not been tried yet. Walk to that node of the graph, following the map, and cross the edge at that port.\n3. Put the marker down on the node of the graph just reached, step back across the same edge, and visit every node of the graph that is in the map (walking along edges of the map).\n4. If the marker is found on the node of the graph that a node $u$ of the map stands for, the new edge leads to $u$: record that edge in the map, pick up the marker, and go to step 2.\n5. If the marker is not found anywhere, the node is new: cross the edge again, pick up the marker, and add the node and the edge to the map.\n6. Stop when every port of every node in the map has been tried.",
+        "analysis": "Each edge is tried once from each end, so there are at most $2m$ tests. One test costs a walk to the edge plus a tour of the nodes in the map, and both are $O(n)$ moves if the agent walks along a tree inside its map. In total this is $O(mn)$ moves; [Dudek1991Robotic] count the moves precisely: with one marker, at most $7mn - 3n^2$ plus lower-order moves, and fewer with more markers. This is the current best bound recorded in the catalogue for the marker setting.",
+        "why_it_matters": "It showed that a single movable marker turns an unsolvable task into a polynomial one, and it started the study of how much marking or knowledge map construction needs."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Graphs that look the same from inside",
+        "variant": "single",
+        "ref": "Chalopin2010Map",
+        "idea": "Take a **ring** (nodes joined in a circle, each node with two edges) and number the ports so that at every node port $1$ goes clockwise and port $2$ goes counterclockwise. Now compare a ring of $3$ nodes with a ring of $6$ nodes. An agent without a marker sees the same thing at every node of both rings: two ports, and whichever port it takes, it arrives through the other one. Every walk it can make produces exactly the same observations in the two rings. So it cannot tell the rings apart, and it cannot tell when it has seen every node.",
+        "analysis": "In general, two nodes with the same **view** (everything an agent can observe on walks that start at the node: the ports it can take and the ports through which it arrives) cannot be told apart, and the most an agent can learn is the **quotient graph**, which merges the nodes with the same view into one node (here all nodes have the same view, so the quotient graph is a single node with one edge from the node to itself, port $1$ at one end and port $2$ at the other). Without a marked node, [Chalopin2010Map] note that no algorithm can explore graphs of arbitrary size and stop, so the agent needs extra knowledge (bounds on $n$ and $\\Delta$) to stop, and then it builds the quotient graph, which equals the real graph only when all views are distinct.",
+        "why_it_matters": "It explains why every map construction algorithm needs something extra: a marker, a recognisable start node, or knowledge of the size."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Recognise a node by walking home",
+        "variant": "single",
+        "ref": "Chalopin2010Map",
+        "idea": "Suppose only the start node $s$ is marked: the agent can recognise $s$ when it stands on it, and nothing else.\n\n1. Build the map breadth-first: for every node $u$ already in the map, store the list of ports of a path from $u$ back to $s$.\n2. To test a port that has not been tried yet, cross its edge and arrive at some node $v$ of the graph.\n3. For each node $u$ in the map: from $v$, follow the stored port list of $u$ and see whether the walk ends on the marked node $s$; then walk back to $v$.\n4. If some list ends at $s$, then $v$ is $u$: record the edge in the map. Otherwise $v$ is new, and the agent stores a path home for it (the edge it just crossed followed by the path of the node it came from).\n5. Stop when every port has been tested.",
+        "analysis": "The test is correct because a list of ports, read backwards from $s$, leads to exactly one node; if it leads home from both $u$ and $v$, then $u = v$. There are at most $n\\Delta$ ports to test, each test tries up to $n$ stored paths, and each path has fewer than $n$ moves, so the cost is $O(n^3\\Delta)$ moves, the bound of [Chalopin2010Map] (Proposition 9). This needs no knowledge of $n$, and the output is an exact copy of the graph. Without any marked node the same paper needs known bounds and universal exploration sequences, with $O(N^6\\Delta^2\\log N)$ moves, where $N$ is the known upper bound on $n$.",
+        "why_it_matters": "It shows that a marked start node, which cannot be moved, is already enough, which is much weaker than a marker the agent carries."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the unknown connected graph $G = (V, E)$ that the agent explores, with $n$ nodes and $m$ edges; distinct from the agent's map",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; a node of the graph is distinct from a node of the map, which stands for one",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; the agent crosses it in one move",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "the mobile entity that walks along edges, observes ports and computes; here a single agent",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "anonymous",
+      "definition": "nodes carry no names an agent can read",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge at it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit",
+        "door"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$; $\\Delta$ is the maximum degree",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one crossing of one edge by the agent; time is the number of moves",
+      "avoid": []
+    },
+    {
+      "term": "start node",
+      "definition": "the node $s$ where the agent is placed",
+      "avoid": []
+    },
+    {
+      "term": "map",
+      "definition": "the port-labelled graph that the agent builds in its memory and outputs, isomorphic to the explored graph (or, without a marked node, to its quotient graph), with the agent's current node indicated",
+      "avoid": [
+        "plan"
+      ]
+    },
+    {
+      "term": "marker",
+      "definition": "an object the agent carries and can put down on a node of the graph and pick up again",
+      "avoid": [
+        "pebble",
+        "token"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "a graph whose nodes are joined in one cycle, every node of degree 2",
+      "avoid": []
+    },
+    {
+      "term": "view",
+      "definition": "of a node $v$: everything an agent can observe on walks that start at $v$ (the ports taken and the ports of arrival); nodes with the same view cannot be told apart",
+      "avoid": []
+    },
+    {
+      "term": "quotient graph",
+      "definition": "the graph obtained from the graph by merging all nodes with the same view; it is the most an agent can learn without a marked node",
+      "avoid": []
+    }
+  ],
+  "history": "Map construction started in robotics as **exploration as graph construction** with markers [Dudek1991Robotic]; in distributed computing the questions were **feasibility** for anonymous agents [Das2007Map] and then the cost for a single agent without marks [Chalopin2010Map], as surveyed in [Das2019Survey].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Cost",
+      "description": "moves until the map is built"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "timing",
+    "team",
+    "knowledge",
+    "markers",
+    "marking",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "team",
+      "name": "Agents",
+      "values": [
+        {
+          "id": "one",
+          "level": 0,
+          "label": "a single agent",
+          "short": "one agent",
+          "definition": "A single agent."
+        },
+        {
+          "id": "many",
+          "level": 1,
+          "label": "several identical agents",
+          "short": "several agents",
+          "definition": "$k\\ge2$ identical agents."
+        }
+      ],
+      "origin": "Map construction began as a single-robot problem: Dudek, Jenkin, Milios and Wilkes framed robotic exploration as building a graph, with a robot carrying one or more markers [Dudek1991Robotic]. Das, Flocchini, Kutten, Nayak and Santoro posed the distributed version: $k$ identical agents, initially dispersed among the nodes and communicating through whiteboards, must each build an identically labelled map [Das2007Map]. They note that it \"is much more difficult than exploration by a single agent, because it involves achieving cooperation among multiple agents\", and that it is deterministically unsolvable in some cases [Das2007Map]. The axis separates the single agent, whose difficulty is recognising nodes it has already seen, from the team, which must in addition break the symmetry between identical agents."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known",
+          "short": "nothing known",
+          "definition": "Nothing is known about $G$."
+        },
+        {
+          "id": "bound-n",
+          "level": 1,
+          "label": "an upper bound on $n$",
+          "short": "bound on $n$",
+          "definition": "An upper bound $N\\ge n$ is known."
+        }
+      ],
+      "origin": "In an anonymous graph an agent that cannot mark nodes cannot tell a revisited node from a new one by looking at it, so it needs information from outside before it can commit to a map. The standard information is an upper bound on $n$, which fixes how long a universal sequence must be followed; Chalopin, Das and Kosowski state the trade-off exactly: \"in the model where no vertices of the graph are marked, for the task of map construction to be feasible, the agents must know some bound $n$ on the number of nodes of the graph and some bound $d\\le n$ on its degree\", and with these bounds they build the map by following universal exploration sequences; without any knowledge they instead assume that the starting node is marked, and then build the map in $O(n^3\\Delta)$ moves with $O(n\\Delta\\log n)$ bits of memory [Chalopin2010Map]. The clearest measurement of what the bound is worth comes from directed graphs: Bender et al. map any strongly connected digraph with one pebble when an upper bound on $n$ is known, while without it $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient [Bender2002Pebble]."
+    },
+    {
+      "id": "markers",
+      "name": "Markers",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no markers",
+          "short": "no markers",
+          "definition": "No markers."
+        },
+        {
+          "id": "pebbles",
+          "level": 1,
+          "label": "markers the agent carries",
+          "short": "markers",
+          "definition": "The agent carries markers it can drop and pick up."
+        }
+      ],
+      "origin": "A marker lets a robot recognise one chosen node, which is exactly what an anonymous graph withholds. Dudek, Jenkin, Milios and Wilkes introduced the robot that carries $k\\ge1$ distinct markers and builds the graph as it explores; they show that without markers the task is unsolvable in general (regular graphs of the same degree look alike everywhere) and that their algorithm makes at most $(5+2/k)mn-3n^2$ plus lower-order moves, that is $O(mn)\\subseteq O(n^2\\Delta)$ [Dudek1991Robotic]. Bender, Fernández, Ron, Sahai and Vadhan showed in \"The power of a pebble\" that one pebble also suffices to map a directed graph in polynomial time when an upper bound on $n$ is known [Bender2002Pebble]. The axis keeps carried markers apart from whiteboards because a marker is a single movable bit, while a whiteboard stores information permanently at every node."
+    },
+    {
+      "id": "marking",
+      "name": "Whiteboards",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no whiteboards",
+          "short": "no whiteboards",
+          "definition": "No whiteboards."
+        },
+        {
+          "id": "whiteboards",
+          "level": 1,
+          "label": "whiteboards at the nodes",
+          "short": "whiteboards",
+          "definition": "Each node has a whiteboard."
+        }
+      ],
+      "origin": "Whiteboards, a small memory at every node that visiting agents read and write in mutual exclusion, are the standard communication device in the work of Flocchini, Santoro and coauthors on asynchronous agents [Dobrev2006Searching] [Flocchini2012PingPong]. Das, Flocchini, Kutten, Nayak and Santoro used them for map construction by $k$ identical agents, which communicate only through these \"small public bulletin boards available at each node\" [Das2007Map]. Flocchini, Ilcinkas and Santoro note that whiteboards also \"allow to break symmetry among identical agents\" [Flocchini2012PingPong], which is what a team of identical agents needs in order to agree on one labelled map."
+    }
+  ],
+  "variants": [
+    {
+      "id": "single",
+      "title": "One agent, no marking",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "knowledge": "bound-n"
+      },
+      "summary": "Knowing upper bounds on $n$ and on the degree, one agent builds the quotient graph of an anonymous graph without marking anything, by following a universal exploration sequence.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Chalopin2010Map",
+          "role": "best",
+          "time": "O(N^6\\Delta^2\\log N)",
+          "memory": "O(N^6\\Delta^2\\log N)",
+          "assumes": [
+            "upper bounds on $n$ and on $\\Delta$ known"
+          ],
+          "note": "Introductory and current best (Proposition 6): follow a universal exploration sequence $U(2N^2,\\Delta)$ of length $O(N^6\\Delta^2\\log N)$ from Aleliunas et al., record the signature, and compute the smallest graph with that signature; memory of the same order. The paper writes $n$ and $d$ for the known bounds. Using the routines of Czyzowicz, Kosowski and Pelc [Czyzowicz2012Forget] gives $O(n^{10}\\Delta^5\\log^2 n)$ time with $O(n^9\\Delta^4\\log^2 n)$ memory (as computed in [Chalopin2010Map])."
+        },
+        {
+          "ref": "Chalopin2010Map",
+          "role": "other",
+          "time": "O(N^6\\Delta^3\\log N)",
+          "memory": "O(N^3\\Delta^2\\log N\\log\\Delta)",
+          "assumes": [
+            "upper bounds on $n$ and on $\\Delta$ known"
+          ],
+          "note": "Proposition 7 (class refinement, as in automaton minimisation): slightly more time for much less memory."
+        },
+        {
+          "ref": "Chalopin2010Map",
+          "role": "other",
+          "time": "O(n^3\\Delta)",
+          "memory": "O(n\\Delta\\log n)",
+          "assumes": [
+            "the starting node is marked (recognisable); no bound on $n$ needed"
+          ],
+          "note": "Proposition 9: breadth-first construction that recognises a node by walking its path back to the marked home base; the output is an exact copy of $G$. With a marked start and no knowledge, Proposition 8 also computes a polynomial bound $N\\ge n$ with $\\Theta(\\log n)$ bits, so map construction is possible in polynomial time with optimal memory."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is proved in [Chalopin2010Map]."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Chalopin2010Map]. Which bound needs what: without any marked node the agent must know bounds on $n$ and on the degree (Propositions 6 and 7, $O(N^6\\Delta^2\\log N)$ and $O(N^6\\Delta^3\\log N)$); with a marked starting node no knowledge is needed (Propositions 8 and 9, $O(n^3\\Delta)$ moves and $O(n\\Delta\\log n)$ bits). The paper writes that \"it is not possible to perform exploration with stop in unlabelled graphs of arbitrary size and topology\" without a marked node; a marked home base is \"a much weaker assumption compared to allowing the agent to have a pebble\". The same paper solves rendezvous of two agents with marked home bases, even asynchronously, in $O(n^4\\Delta^2)$ moves per agent whenever it is deterministically possible, and detects when it is not (Propositions 10 and 11). The timing axis is not set because a single agent's moves are counted regardless of timing. [Das2019Survey] summarises that a full map is obtainable only for covering-minimal graphs; in the paper's terms, an exact copy is obtained exactly when all views are distinct. The $O(n^3\\Delta)$ bound is the one Disser, Hackfeld and Klimm report [Disser2019Pebbles].",
+      "status": "verified",
+      "statement": "The agent knows an upper bound $N\\ge n$ (and a bound on the maximum degree; $N-1$ will do) and may not mark nodes. Following [Chalopin2010Map], it must output the **quotient graph** of $G$ with its port numbering, the multigraph obtained by merging nodes with the same view; this is $G$ itself exactly when all nodes have distinct views, and nothing more can be learned, since graphs with the same quotient graph are indistinguishable to the agent. **Time** is the number of edge traversals; local computation is free."
+    },
+    {
+      "id": "marker",
+      "title": "One agent with a marker",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "markers": "pebbles"
+      },
+      "summary": "An agent with $k\\ge1$ distinct markers it can drop and pick up builds the graph as it explores, in $O(mn)$ moves.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Dudek1991Robotic",
+          "role": "best",
+          "time": "O(mn)",
+          "assumes": [
+            "$k\\ge1$ distinct markers",
+            "the agent sees the edges at a node in a cyclic order relative to the edge it entered by"
+          ],
+          "note": "Introductory and current best recorded here: at most $(5+2/k)mn-3n^2$ plus lower-order moves (equation (4)); a variant that marks both ends of an unexplored edge makes $(3+4/k)mn-n^2$ plus lower-order moves. The bound counts only physical moves; the agent's computation is $O(n^2m+m^2\\log m)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded; [Dudek1991Robotic] reports that experiments needed 25–65% of the bound."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dudek1991Robotic] (a scan, read through OCR). The agent cannot measure distances and has no compass; without markers the problem is unsolvable in general, because regular graphs of the same degree look the same at every node. For directed graphs, one marker and a bound on $n$ suffice, and without a bound $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient [Bender2002Pebble]; Bender et al. also cite the $O(n\\cdot m)$ bound of Dudek et al. for one marker.",
+      "status": "verified"
+    },
+    {
+      "id": "team",
+      "title": "Identical agents with whiteboards",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "team": "many",
+        "marking": "whiteboards"
+      },
+      "summary": "Several identical asynchronous agents with whiteboards build a common labelled map in $O(m\\log k)$ moves when $n$ and $k$ are co-prime; otherwise some placements are unsolvable.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Das2007Map",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "$\\gcd(n,k) > 1$: on a symmetric graph such as a ring the agents can be placed symmetrically, so that no deterministic algorithm elects a leader (Lemma 2.2, derived from earlier results on election and rendezvous)",
+            "map construction, leader election, labelling the nodes and rendezvous are solvable on exactly the same instances (Theorem 2.1)",
+            "agents that know neither $n$ nor $k$ cannot solve every solvable instance (Lemma 2.1)",
+            "some instances with $\\gcd(n,k) > 1$ are solvable, e.g. a tree with an odd number of nodes"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2007Map",
+          "role": "introductory",
+          "time": "O(km)",
+          "assumes": [
+            "each agent knows $n$ or $k$",
+            "$O(\\log n)$ bits per whiteboard"
+          ],
+          "note": "Algorithm MERGE-TREE (Theorems 5.1 to 5.3): solves the problem whenever $\\gcd(n,k) = 1$, and every agent terminates explicitly, also on instances it cannot solve."
+        },
+        {
+          "ref": "Das2007Map",
+          "role": "best",
+          "time": "O(m\\log k)",
+          "assumes": [
+            "each agent knows $\\gcd(n,k)$ and $n$ or $k$ (for instance both $n$ and $k$)",
+            "$\\gcd(n,k) = 1$",
+            "$O(\\log n)$ bits per whiteboard"
+          ],
+          "note": "Algorithm Explore-&-Capture (Theorems 6.1 and 6.2): at most $\\log k$ phases of $O(m)$ moves each."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound on the number of moves is stated in [Das2007Map]."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Das2007Map]. Both algorithms first let every agent explore and mark a territory around its homebase with a depth-first search ($4m - 2n + 2k$ moves in total, Lemma 3.2), then merge territories in phases: neighbouring territories compare tokens (number of nodes and number of agents), and the smaller is captured. If all territories have the same counts, $\\gcd(n,k) > 1$, which is how the agents detect an instance the algorithm cannot solve (Lemmas 5.3 and 5.4). Each agent stores a full map in its own memory; the whiteboards need only $O(\\log n)$ bits (Theorem 6.2).",
+      "status": "verified",
+      "statement": "$k$ identical asynchronous agents start on $k$ distinct nodes (their homebases, which are marked) of an anonymous graph with $n$ nodes, $m$ edges and arbitrary ports. Every node has a whiteboard that agents read and write in fair mutual exclusion; agents at the same node can talk. Each agent knows $n$ or $k$. Every agent must return to its homebase with the same labelled map: a copy of the graph with ports in which every node carries the same label in every agent's map. Cost is the total number of moves."
+    }
+  ],
+  "figure": {
+    "caption": "Map construction with one movable marker [Dudek1991Robotic] (simplified), a setting of the problem of [Chalopin2010Map]: the agent crosses the edge at an untried port, drops the marker, steps back and tours the nodes of its map. If it finds the marker on a node already in the map, the edge leads there; otherwise the node is new, and the agent fetches the marker and adds the node and the edge to the map. Left: the unknown graph with its ports; right: the map, with the agent's position circled. One frame per move.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          10,
+          34
+        ],
+        "b": [
+          36,
+          46
+        ],
+        "c": [
+          36,
+          16
+        ],
+        "d": [
+          14,
+          8
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "a",
+          "c"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "d"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          14.8,
+          37.9
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          15.8,
+          31.8
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          37.5,
+          40.0
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          31.2,
+          42.1
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          30.2,
+          18.2
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          30.9,
+          12.5
+        ],
+        "s": "2",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          34.5,
+          22.0
+        ],
+        "s": "3",
+        "size": 2.3,
+        "c": "muted"
+      },
+      {
+        "t": "text",
+        "p": [
+          19.1,
+          11.5
+        ],
+        "s": "1",
+        "size": 2.3,
+        "c": "muted"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          }
+        ],
+        "label": "Start: an unknown anonymous graph; the map holds the start node"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "b",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.4,
+                35.1
+              ],
+              [
+                33.6,
+                44.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Cross the edge at an untried port, drop the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "b",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                44.9
+              ],
+              [
+                12.4,
+                35.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Step back and search the mapped nodes for the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.4,
+                35.1
+              ],
+              [
+                33.6,
+                44.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Marker not found: a new node; pick it up, add it to the map"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "c",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36.0,
+                43.4
+              ],
+              [
+                36.0,
+                18.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Cross the edge at an untried port, drop the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "c",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36.0,
+                18.6
+              ],
+              [
+                36.0,
+                43.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Step back and search the mapped nodes for the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "c",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                44.9
+              ],
+              [
+                12.4,
+                35.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "c",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.4,
+                35.1
+              ],
+              [
+                33.6,
+                44.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36.0,
+                43.4
+              ],
+              [
+                36.0,
+                18.6
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Marker not found: a new node; pick it up, add it to the map"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "a",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.9,
+                17.5
+              ],
+              [
+                12.1,
+                32.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Cross the edge at an untried port, drop the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "a",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.1,
+                32.5
+              ],
+              [
+                33.9,
+                17.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Step back and search the mapped nodes for the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "a",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                36.0,
+                18.6
+              ],
+              [
+                36.0,
+                43.4
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                44.9
+              ],
+              [
+                12.4,
+                35.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Marker found: the edge leads to a node already in the map"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.1,
+                32.5
+              ],
+              [
+                33.9,
+                17.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "d",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                15.1
+              ],
+              [
+                16.4,
+                8.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Cross the edge at an untried port, drop the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                16.4,
+                8.9
+              ],
+              [
+                33.6,
+                15.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Step back and search the mapped nodes for the marker"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.9,
+                17.5
+              ],
+              [
+                12.1,
+                32.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "b",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.4,
+                35.1
+              ],
+              [
+                33.6,
+                44.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "a",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                44.9
+              ],
+              [
+                12.4,
+                35.1
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "c",
+            "k": "agent"
+          },
+          {
+            "id": "M",
+            "at": "d",
+            "k": "exit",
+            "c": "near",
+            "r": 1.3
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                12.1,
+                32.5
+              ],
+              [
+                33.9,
+                17.5
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "d",
+            "k": "agent",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "rect",
+            "p": [
+              78,
+              28
+            ],
+            "wd": 42,
+            "ht": 50,
+            "c": "line",
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              78,
+              51
+            ],
+            "s": "the agent's map",
+            "size": 2.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                68,
+                8
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                34
+              ],
+              [
+                90,
+                16
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                90,
+                46
+              ],
+              [
+                64,
+                34
+              ]
+            ],
+            "c": "accent",
+            "w": 0.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              46
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              8
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              64,
+              34
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              90,
+              16
+            ],
+            "r": 1.4,
+            "c": "accent",
+            "fill": "soft",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              68,
+              8
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.8
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                33.6,
+                15.1
+              ],
+              [
+                16.4,
+                8.9
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Final: the last node is new; every port tried, the map is complete"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Stopkin2025Simple",
+      "note": "One agent that paints nodes, edges and the ends of edges with a single colour reports each step to a second, stationary agent outside the graph, which builds the map; a depth-first algorithm takes $O(n^2)$ moves, $O(n^2)$ time and memory, and $O(n^2\\log n)$ bits of messages. No lower bound. In Ukrainian. Read."
+    },
+    {
+      "ref": "Chalopin2016Binoculars",
+      "note": "With binoculars of radius 1, one agent explores every Weetman graph (a class containing the chordal graphs, some of them with $\\Theta(n^2)$ edges) and builds its map in $O(n)$ moves, without knowing $n$ or the diameter and for any port numbering. Read (arXiv v1)."
+    },
+    {
+      "ref": "Stepkin2021Algorithm",
+      "note": "Two finite-memory agents, one walking and marking the graph and one building the map, recognise a simple graph. In Russian; abstract read."
+    },
+    {
+      "ref": "Stopkin2024Algorithm",
+      "note": "A variant of the same two-agent recognition algorithm for simple undirected graphs. In Ukrainian; abstract read."
+    },
+    {
+      "ref": "Stopkin2025Exploration",
+      "note": "An agent-researcher that traverses and marks the graph and an agent-experimenter that builds its map explore simple undirected graphs. Abstract read."
+    }
+  ]
+}

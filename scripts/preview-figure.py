@@ -9,6 +9,11 @@ import html, json, math, shutil, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return ROOT / "data" / "problems" / fam / f"{pid}.json" if fam else ROOT / "data" / "problems" / f"{pid}.json"
 COL = {"accent": "#2f4fd1", "tight": "#2e8b57", "gap": "#c0392b", "near": "#d4a017", "muted": "#888", "fg": "#222",
        "disputed": "#8e44ad", "l1": "#e4572e", "l2": "#17bebb", "l3": "#ffc914", "l4": "#76b041", "soft": "#eee", "line": "#bbb"}
 col = lambda c, d="accent": COL.get(c or d, c or COL[d])
@@ -87,7 +92,8 @@ def frame_svg(fig, f, n):
 
 def main():
     pid = sys.argv[1]
-    p = json.loads((ROOT / f"data/problems/{pid}.json").read_text())
+    idx = json.loads((ROOT / "data/index.json").read_text())
+    p = json.loads(problem_file(idx, pid).read_text())
     fig = p["figure"]
     d = ROOT / "build" / "preview"; d.mkdir(parents=True, exist_ok=True)
     page = d / f"{pid}.html"

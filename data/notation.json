@@ -63,6 +63,15 @@
         "meaning": "diameter of the graph (for a tree explored from a root: its height)"
       },
       {
+        "symbol": "\\mathrm{tw}",
+        "meaning": "treewidth of the graph (of the underlying graph of a temporal graph)",
+        "papers_write": "$k$ [Adamson2026Exploration], $w$ [Carnevale2026Hiding]",
+        "where": [
+          "exploration",
+          "dynamic-exploration"
+        ]
+      },
+      {
         "symbol": "u, v, w",
         "meaning": "nodes (local names)"
       },
@@ -73,13 +82,15 @@
       },
       {
         "symbol": "k",
-        "meaning": "number of agents"
+        "meaning": "number of agents",
+        "papers_write": "$n$ for robots on graphs [Maiti2026When] [Maiti2026Surplus]; $k$ for the ignorant agents only, the source agent not counted, so their $k$ is $k - 1$ here [Das2026Broadcast] [Moses2025Broadcast]"
       },
       {
         "symbol": "\\ell",
         "meaning": "number of initially occupied nodes; $\\ell=1$ is a rooted start, $\\ell=k$ a dispersed start",
         "where": [
-          "dispersion"
+          "dispersion",
+          "gathering-oblivious-graphs"
         ]
       },
       {
@@ -112,8 +123,8 @@
       },
       {
         "symbol": "d",
-        "meaning": "distance from the starting node to the target (the treasure), or between the starting nodes of two agents in rendezvous",
-        "papers_write": "$D$ for the distance between starting positions [Pelc2019Survey]"
+        "meaning": "distance from the starting node to the target (the treasure); otherwise the largest distance between two starting nodes (of the two agents in rendezvous, of two initially occupied nodes in gathering)",
+        "papers_write": "$D$ for the distance between starting positions [Pelc2019Survey]; $\\Delta(C)$ [Cicerone2025NonVertexTransitive] [Cicerone2025Gathering]"
       },
       {
         "symbol": "v^*",
@@ -147,7 +158,7 @@
       {
         "symbol": "\\mu",
         "meaning": "maximum number of edges missing in a round ($\\mu$-bounded 1-interval connected graphs)",
-        "papers_write": "$\\ell$-bounded [Saxena2025Balanced]"
+        "papers_write": "$\\ell$-bounded [Saxena2025Balanced]; $k$ ($k$-edge-deficient temporal graphs) [Lahtin2026Exploration]; $f$ [Kaur2026Dynamic]"
       },
       {
         "symbol": "\\eta",
@@ -158,9 +169,10 @@
       },
       {
         "symbol": "\\delta",
-        "meaning": "longest time an edge of a dynamic ring may be absent",
+        "meaning": "longest time an edge of a dynamic graph may stay missing",
         "where": [
-          "exploration"
+          "exploration",
+          "decontamination"
         ]
       },
       {
@@ -206,8 +218,11 @@
         "symbol": "X(n)",
         "meaning": "time to explore any $n$-node graph",
         "where": [
-          "dispersion"
-        ]
+          "dispersion",
+          "collision-free-exploration",
+          "gathering-graphs"
+        ],
+        "papers_write": "$R(n)$ [Bhagat2025Deterministic], $R(N)$ [Papin2026Deterministic]"
       },
       {
         "symbol": "\\mathrm{port}_v",
@@ -292,7 +307,9 @@
         "symbol": "a\\times b",
         "meaning": "size of a grid or torus with $a$ rows and $b$ columns",
         "where": [
-          "exploration-luminous"
+          "exploration-luminous",
+          "broadcast-agents",
+          "gathering-oblivious-graphs"
         ]
       },
       {
@@ -337,6 +354,54 @@
         "meaning": "a known upper bound on the circumference",
         "where": [
           "exploration-recolourable"
+        ]
+      },
+      {
+        "symbol": "\\mathrm{wt}(e)",
+        "meaning": "weight (length) of edge $e$ of a weighted graph",
+        "papers_write": "$w(e)$",
+        "where": [
+          "online-exploration",
+          "energy-delivery"
+        ]
+      },
+      {
+        "symbol": "\\mathrm{OPT}",
+        "meaning": "cost of a shortest closed walk through all nodes (an optimal travelling-salesperson tour)",
+        "papers_write": "$\\mathrm{Opt}(G)$",
+        "where": [
+          "online-exploration"
+        ]
+      },
+      {
+        "symbol": "\\vartheta",
+        "meaning": "largest ratio $\\mathrm{wt}^+(e)/\\mathrm{wt}^-(e)$ between the ends of the announced interval of an edge weight",
+        "papers_write": "$\\alpha$ [Gehnen2025Graph]",
+        "where": [
+          "online-exploration"
+        ]
+      },
+      {
+        "symbol": "\\Pi",
+        "meaning": "a decision problem: a set of configurations (graph, start nodes and inputs of the agents)",
+        "where": [
+          "deciding-agents"
+        ]
+      },
+      {
+        "symbol": "B,\\ B_i",
+        "meaning": "energy budget: the largest total distance an agent may travel ($B_i$ for agent $i$, $B$ when all budgets are equal)",
+        "papers_write": "$R_i$ (range) [Chalopin2013Data] [Chalopin2014Line]; $P$ (power) [Anaya2014Convergecast]",
+        "where": [
+          "energy-delivery"
+        ]
+      },
+      {
+        "symbol": "v_s,\\ v_t",
+        "meaning": "source and target node of the message in delivery",
+        "papers_write": "$s$, $t$",
+        "where": [
+          "energy-delivery"
         ]
       }
     ],
@@ -515,6 +580,15 @@
         "papers_write": "$n$",
         "where": [
           "evacuation"
+        ]
+      },
+      {
+        "symbol": "u",
+        "meaning": "speed of a moving target, which moves at constant speed toward or away from the origin",
+        "papers_write": "$v$; [Coleman2024Linear] write $u$ for the evasiveness $1/(1-u)$",
+        "where": [
+          "linear-search",
+          "moving-target-search"
         ]
       }
     ],

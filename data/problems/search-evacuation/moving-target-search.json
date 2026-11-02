@@ -1,0 +1,2292 @@
+{
+  "id": "moving-target-search",
+  "model": "search-in-geometric-domains",
+  "derived_from": {
+    "problem": "linear-search",
+    "kind": "generalisation of",
+    "relation": "A static target is the case $u = 0$; then capture by every robot is evacuation on the line or on $m$ rays, and the ratio of [Jawhar2025Linear] reduces to $3+2\\sqrt2$ [Czyzowicz2021GroupEvacuation]. Algorithms carry over from linear search only for $u = 0$; lower bounds for a static target hold for a target of speed $u$ chosen by the adversary."
+  },
+  "name": "Search for a moving target",
+  "origin": {
+    "ref": "Alpern2003Theory",
+    "year": 2003,
+    "note": "An early treatment, as reported by [Coleman2022Line]: Alpern and Gal give an optimal algorithm for one robot and a target moving away from the origin at a known speed. Coleman et al. write that the case of a moving target \"appears to have been first considered by McCabe\" (1974), for a target performing a random walk on the integers; that paper is not in the bibliography."
+  },
+  "summary": "A target starts at unknown distance $d$ from the origin of a line (or of $m$ rays) and moves at constant speed $u$; how fast can robots capture it, depending on what they know about $d$ and $u$?",
+  "statement": "Robots of unit speed start at the origin of the line (or of $m$ rays). The target starts at distance $d \\ge 1$ from the origin, on a side (ray) unknown to the robots, and moves along it at constant speed $u$, either away from the origin ($u < 1$, since a faster target can never be caught) or toward it ($u \\ge 0$); the robots know which. The target cannot change its speed or direction. Depending on the setting the robots know $d$, $u$, both or neither. The target is **captured** when every robot stands on it. **Time** is the competitive ratio: the supremum, over the target's initial positions and speeds, of the capture time divided by the time the robots would need if they knew the target's initial position.",
+  "primer": {
+    "intro": "A dog has run off along a straight road and keeps trotting away at a steady pace, slower than its owner, who does not know which way it went. In this problem the owner is a **robot**, a point that moves at speed 1 and sees the **target** (the dog) only when it reaches it. The robot starts at the **origin**, the point $0$ of an infinite line. The target starts at distance $d \\ge 1$ from the origin, on a side the robot does not know, and moves at constant speed $u$ along its side. It moves either away from the origin, with $u < 1$ (a faster target could never be caught), or toward it; the robot knows which. On $m$ **rays** (half-lines that share the origin) the target moves along one of them. The target is **captured** when the robot stands on it. We measure the **competitive ratio**: the worst case, over all starting positions and speeds of the target, of the capture time divided by the time a robot that knew where the target started would need. In the standard version the target moves away and the robot knows $u$ but not $d$. The other versions change what the robot knows, or use two robots, and then both must reach the target.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Go far enough on one side, then turn",
+        "variant": "line-one-away-full",
+        "ref": "Coleman2022Line",
+        "idea": "Suppose the target moves away and the robot knows both $d$ and $u$; only the side is unknown.\n1. Walk to one side for time $d/(1-u)$. If the target is on this side, the robot reaches it exactly then, because by that time the target has moved from $d$ to $d + u \\cdot d/(1-u) = d/(1-u)$.\n2. If the target is not there, it is on the other side: turn and walk until reaching it.",
+        "analysis": "When the robot turns, it stands at $d/(1-u)$ on one side and the target at $d/(1-u)$ on the other, so they are $2d/(1-u)$ apart. The robot gains on the target at speed $1-u$, which takes another $2d/(1-u)^2$. A robot that knew the side would need $d/(1-u)$, so the ratio is $1 + 2/(1-u) = (3-u)/(1-u)$ [Coleman2022Line]. No strategy does better. To catch the target the robot must visit $d/(1-u)$ or $-d/(1-u)$, and the **adversary**, an opponent who knows the strategy, puts the target on the side that the robot reaches second. For a target that does not move ($u = 0$) the ratio is 3.",
+        "why_it_matters": "It is the baseline: every other version is measured by how much it costs not to know $d$, $u$ or both."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Zigzag with trips that grow faster",
+        "variant": "line-one-away-speed",
+        "ref": "Alpern2003Theory",
+        "idea": "Now the robot knows $u$ but not $d$, the standard version. It zigzags: it walks out to distance $1$ on one side and back to the origin, then out to distance $a$ on the other side and back, then $a^2$ on the first side, and so on, with the growth factor $a = 2(1+u)/(1-u)$.",
+        "analysis": "A target that moves away gains ground during every trip, so the trips must grow faster than for a target that stays put. With this growth factor the ratio is $(3+u)^2/(1-u)^2$, and no strategy does better. This is the result of Alpern and Gal, as reported by [Coleman2022Line] (Theorem 6, Algorithm 3); the book was not read for this atlas, and the setting stays a draft. For a target that does not move ($u = 0$) the factor is $2$: this is the doubling strategy of linear search, with ratio $9$.",
+        "why_it_matters": "It shows how the doubling idea of linear search adapts to a target that runs away, and how quickly the price grows as $u$ approaches 1."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Waiting is best when nothing is known",
+        "variant": "line-one-toward-none",
+        "ref": "Coleman2022Line",
+        "idea": "Suppose the target moves toward the origin and the robot knows neither $d$ nor $u$. The robot could simply wait at the origin. Any other strategy leaves the origin at some time, say it waits for time $t$ and then walks a distance $d'$ to the right. The adversary puts the target at $-d$, with speed $u = d/(t + d')$, so that it reaches the origin exactly when the robot is at $d'$.",
+        "analysis": "The two are then $d'$ apart and approach each other at speed $1+u$, so they meet after time $d/u + d'/(1+u)$, which is more than the $d/u$ it takes the target to reach the waiting robot. A robot that knew where the target started would walk to meet it, in time $d/(1+u)$. The ratio is therefore at least $(d/u)/(d/(1+u)) = 1 + 1/u$, and waiting achieves exactly that [Coleman2022Line]. It grows without bound for slow targets. Knowing $d$ helps a lot: going for time $d$ on one side and then turning gives ratio $3$ for every speed.",
+        "why_it_matters": "It shows that a moving target can make searching useless: what the robot knows decides between a constant ratio and an unbounded one."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point that starts at the origin, moves at unit speed and sees the target only when it reaches it",
+      "avoid": [
+        "searcher",
+        "agent"
+      ]
+    },
+    {
+      "term": "origin",
+      "definition": "the point where the robots start: $0$ on the line, the common endpoint of the $m$ rays",
+      "avoid": []
+    },
+    {
+      "term": "target",
+      "definition": "a point that starts at distance $d$ and moves at constant speed $u$ toward or away from the origin; it has no memory and cannot change its motion",
+      "avoid": [
+        "mobile",
+        "treasure"
+      ]
+    },
+    {
+      "term": "ray",
+      "definition": "a half-line; the $m$ rays share the origin",
+      "avoid": []
+    },
+    {
+      "term": "captured",
+      "definition": "the target is captured when every robot stands on it",
+      "avoid": []
+    },
+    {
+      "term": "competitive ratio",
+      "definition": "the supremum, over the target's initial positions and speeds, of the capture time divided by the time needed by robots that know the target's initial position",
+      "avoid": []
+    }
+  ],
+  "history": "A target that moves away from the origin at a speed the robot knows was treated by Alpern and Gal [Alpern2003Theory], and a target performing a random walk on the integers by McCabe (1974), both as reported by [Coleman2022Line]. Coleman, Kranakis, Krizanc and Morales-Ponce posed the problem for one robot in all eight combinations of the target's direction (away or toward) and of what the robot knows about $d$ and $u$, with tight bounds whenever the target moves toward the origin or its speed is known [Coleman2022Line]. With Ivanov they settled the exponent for a target moving away at an unknown speed when $d$ is known: the ratio is $(1-u)^{-4+o(1)}$ [Coleman2024Linear]. Jawhar and Kranakis extended it to two robots that communicate face-to-face [Jawhar2026Linear] or as a sender and a receiver [Jawhar2025Linear], and to $m$ rays [Jawhar2026Capturing].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Competitive ratio",
+      "description": "worst-case capture time divided by the capture time of robots that know the target's initial position"
+    }
+  ],
+  "axes": [
+    {
+      "id": "domain",
+      "name": "Domain",
+      "values": [
+        {
+          "id": "rays",
+          "level": 0,
+          "label": "$m$ rays from a common origin",
+          "short": "$m$ rays",
+          "definition": "$m \\ge 2$ half-lines sharing their endpoint, the origin; the target moves along one of them."
+        },
+        {
+          "id": "line",
+          "level": 1,
+          "label": "the line (two rays)",
+          "short": "line",
+          "definition": "The real line; the target moves along one side of the origin."
+        }
+      ],
+      "origin": "Moving targets were studied on the line [Jawhar2026Linear] [Jawhar2025Linear]; Jawhar and Kranakis call the $m$-ray star \"a natural generalization of linear search to multiple directions\" [Jawhar2026Capturing]."
+    },
+    {
+      "id": "robots",
+      "name": "Number of robots",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number $k$ of robots",
+          "short": "any $k$",
+          "definition": "$k \\ge 1$ robots."
+        },
+        {
+          "id": "one",
+          "level": 1,
+          "label": "a single robot",
+          "short": "one robot",
+          "definition": "A single robot."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two robots",
+          "short": "two robots",
+          "definition": "Two robots, both of which must reach the target."
+        }
+      ],
+      "origin": "One robot: Alpern and Gal for a target moving away at known speed (as reported by [Coleman2022Line]) and Coleman, Kranakis, Krizanc and Morales-Ponce for the other cases [Coleman2022Line]. Two robots that must both reach the target were studied by Jawhar and Kranakis [Jawhar2026Linear] [Jawhar2025Linear]."
+    },
+    {
+      "id": "direction",
+      "name": "Direction of the target",
+      "values": [
+        {
+          "id": "unknown",
+          "level": 0,
+          "label": "the robots do not know the direction",
+          "short": "direction unknown",
+          "definition": "The target moves toward or away from the origin, and the robots do not know which."
+        },
+        {
+          "id": "away",
+          "level": 1,
+          "label": "away from the origin, speed $u < 1$",
+          "short": "away",
+          "definition": "The target moves away from the origin at constant speed $u < 1$, and the robots know it."
+        },
+        {
+          "id": "toward",
+          "level": 1,
+          "label": "toward the origin, speed $u \\ge 0$",
+          "short": "toward",
+          "definition": "The target moves toward the origin at constant speed $u \\ge 0$, and the robots know it."
+        }
+      ],
+      "origin": "Coleman, Kranakis, Krizanc and Morales-Ponce treat targets moving away from and toward the origin separately and assume that the robot knows which [Coleman2022Line]; the later papers read do the same. Tight bounds when the direction is unknown are left open in [Coleman2022Line]; no catalogued setting leaves it unknown."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the target",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "neither $d$ nor $u$ known",
+          "short": "nothing known",
+          "definition": "The robots know neither the initial distance $d$ nor the speed $u$."
+        },
+        {
+          "id": "speed",
+          "level": 1,
+          "label": "$u$ known, $d$ unknown",
+          "short": "speed known",
+          "definition": "The robots know $u$ but not $d$."
+        },
+        {
+          "id": "distance",
+          "level": 1,
+          "label": "$d$ known, $u$ unknown",
+          "short": "distance known",
+          "definition": "The robots know $d$ but not $u$."
+        },
+        {
+          "id": "full",
+          "level": 2,
+          "label": "$d$ and $u$ known",
+          "short": "both known",
+          "definition": "The robots know $d$ and $u$; only the side (ray) of the target is unknown."
+        }
+      ],
+      "origin": "The four cases (their FullKnowledge, NoDistance, NoSpeed and NoKnowledge) are those of Coleman, Kranakis, Krizanc and Morales-Ponce [Coleman2022Line], who extend the case of a known speed and an unknown distance treated by Alpern and Gal (as reported). Kranakis surveys how such knowledge changes the competitive ratio [Kranakis2024Survey]."
+    }
+  ],
+  "axis_order": [
+    "domain",
+    "robots",
+    "direction",
+    "knowledge",
+    "communication",
+    "faults",
+    "speeds",
+    "algorithm"
+  ],
+  "variants": [
+    {
+      "id": "line-one-away-speed",
+      "title": "One robot, line, target moving away, speed known",
+      "standard": true,
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "away",
+        "knowledge": "speed"
+      },
+      "summary": "One robot that knows the speed $u < 1$ of a target moving away from the origin, but not its distance, zigzags with turning distances that grow by the factor $2(1+u)/(1-u)$; its ratio $(3+u)^2/(1-u)^2$ is optimal (Alpern and Gal, as reported).",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{(3+u)^2}{(1-u)^2}",
+          "ref": "Alpern2003Theory",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "one robot",
+            "as reported by [Coleman2022Line] (Theorem 6) and [Jawhar2025Linear]; the book was not read"
+          ],
+          "note": "At $u = 0$ it is the bound 9 of linear search."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Alpern2003Theory",
+          "role": "best",
+          "time": "\\frac{(3+u)^2}{(1-u)^2}",
+          "note": "Introductory and current best, as reported by [Coleman2022Line] (Theorem 6, which writes it $1 + 8\\frac{1+u}{(1-u)^2}$) and [Jawhar2025Linear] (who cite p. 134, Equation 8.25): the zigzag of Algorithm 3 of [Coleman2022Line], which turns at distances $1, a, a^2, \\dots$ on alternate sides, with $a = 2(1+u)/(1-u)$. Not read."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "As reported; the book of Alpern and Gal was not read."
+        }
+      },
+      "open": [
+        "Tight bounds when the robot does not know whether the target moves toward or away from the origin [Coleman2022Line]."
+      ],
+      "notes": "Draft because the source of the bound, the book of Alpern and Gal, was not read; [Coleman2022Line] state the result without proof. At $u = 0$ the zigzag is the doubling strategy of linear search.",
+      "status": "draft"
+    },
+    {
+      "id": "line-one-away-full",
+      "title": "One robot, line, target moving away, $d$ and $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "away",
+        "knowledge": "full"
+      },
+      "summary": "A robot that knows $d$ and $u$ but not the side goes far enough to catch the target on one side and then turns: ratio exactly $(3-u)/(1-u)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "the robot must visit $d/(1-u)$ or $-d/(1-u)$ to catch the target, and the adversary puts the target on the other side (Theorem 1)"
+          ],
+          "note": "Theorem 1, written $1 + 2/(1-u)$ in the paper."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "best",
+          "time": "\\frac{3-u}{1-u}",
+          "note": "Introductory and current best (Algorithm 1, Theorem 1): go for time $d/(1-u)$ on one side; if the target is not there, turn and go until it is found."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $(3-u)/(1-u)$; 3 for a static target."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Coleman2022Line] (OPODIS 2022).",
+      "status": "verified"
+    },
+    {
+      "id": "line-one-toward-full",
+      "title": "One robot, line, target moving toward the origin, $d$ and $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "toward",
+        "knowledge": "full"
+      },
+      "summary": "A robot that knows $d$ and $u$ goes for time $d/(1+u)$ on one side and turns if needed, with ratio $(3+u)/(1+u)$ for $u \\le 1$; for $u \\ge 1$ waiting at the origin, with ratio $1 + 1/u$, is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3+u}{1+u}\\ (u \\le 1),\\ 1+\\frac{1}{u}\\ (u \\ge 1)",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "the adversary puts the target on the side opposite to the first point $\\pm a$ that the robot occupies exactly when the target would reach it (Theorem 3, for $u < 1$)",
+            "for $u \\ge 1$ the same bound is smallest when the robot never leaves the origin (Theorem 4)"
+          ],
+          "note": "Theorems 3 and 4; the paper writes $1 + 2/(1+u)$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "best",
+          "time": "\\frac{3+u}{1+u}\\ (u \\le 1),\\ 1+\\frac{1}{u}\\ (u \\ge 1)",
+          "note": "Introductory and current best: Algorithm 2 (go for time $d/(1+u)$ on one side, then turn; Theorem 2) for $u < 1$, and the waiting algorithm, which stays at the origin until the target arrives (Theorem 4), for $u \\ge 1$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $u$."
+        }
+      },
+      "open": [],
+      "notes": "The waiting algorithm uses neither $d$ nor $u$, so it applies in every setting in which the target moves toward the origin (Remark 5 of [Coleman2022Line]). Checked against the full text of [Coleman2022Line] (OPODIS 2022).",
+      "status": "verified"
+    },
+    {
+      "id": "line-one-toward-speed",
+      "title": "One robot, line, target moving toward the origin, speed known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "toward",
+        "knowledge": "speed"
+      },
+      "summary": "A robot that knows the speed but not the distance of a target moving toward the origin should wait at the origin if $u \\ge 1/3$ and otherwise zigzag with turning distances that grow by the factor $2(1-u)/(1+u)$; both are optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac1u\\ (u \\ge \\tfrac13),\\ \\frac{(3-u)^2}{(1+u)^2}\\ (u < \\tfrac13)",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "any strategy: the adversary takes the limit $\\beta$ of the ratio of time to distance from the origin along the robot's trajectory and places the target on the side the robot is not on, just beyond what the robot can have reached (Theorem 9, with techniques of an unpublished manuscript of Killick)",
+            "a contracting strategy, which never goes beyond some distance on one side, cannot beat $1 + 1/u$ (Theorem 7)"
+          ],
+          "note": "Theorem 9; the paper writes $1 + 8\\frac{1-u}{(1+u)^2}$ for $u < 1/3$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "best",
+          "time": "1+\\frac1u\\ (u \\ge \\tfrac13),\\ \\frac{(3-u)^2}{(1+u)^2}\\ (u < \\tfrac13)",
+          "note": "Introductory and current best (Algorithm 4, Theorem 8): wait at the origin if $u \\ge 1/3$; otherwise zigzag, turning at distances $1, a, a^2, \\dots$ on alternate sides with $a = 2(1-u)/(1+u)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact for every $u$."
+        }
+      },
+      "open": [],
+      "notes": "A target moving toward the origin comes to the robot, so waiting is a strategy; it is optimal down to speed $1/3$, and the zigzag below. Checked against the full text of [Coleman2022Line] (OPODIS 2022).",
+      "status": "verified"
+    },
+    {
+      "id": "line-one-away-distance",
+      "title": "One robot, line, target moving away, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "away",
+        "knowledge": "distance"
+      },
+      "summary": "A robot that knows the distance but not the speed of a target moving away guesses ever larger speeds, trip by trip: its ratio is $(1-u)^{-4+o(1)}$, and no strategy achieves $O((1-u)^{-4+\\varepsilon})$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{not } O\\big((1-u)^{-4+\\varepsilon}\\big)",
+          "ref": "Coleman2024Linear",
+          "bottleneck": "unknown speed",
+          "preconditions": [
+            "for every constant $\\varepsilon > 0$ (Theorem 1)",
+            "every strategy; zigzag strategies that return to the origin after each trip are no worse",
+            "adapts the argument of Beck and Newman for linear search"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "bound for a robot that knows $d$ and $u$ (Theorem 1), which holds a fortiori here (Remark 13)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "introductory",
+          "time": "5\\ (u \\le \\tfrac12),\\ 1+\\frac{16\\log^2\\frac{1}{1-u}}{(1-u)^4}\\ (u > \\tfrac12)",
+          "note": "Introductory (Algorithm 5, Theorem 12, with Lemmas 10 and 11; logarithms to base 2): in round $i$ the robot guesses the speed $1 - 2^{-2^i}$, goes on alternate sides far enough to catch such a target, and returns to the origin. Better than [Coleman2024Linear] for $u \\le 1/2$ (5 against 9)."
+        },
+        {
+          "ref": "Coleman2024Linear",
+          "role": "best",
+          "time": "9\\ (u \\le \\tfrac34),\\ 56.18\\,(1-u)^{-4+(\\log_2\\log_2\\frac{1}{1-u})^{-2}}\\ (u > \\tfrac34)",
+          "note": "Current best for $u > 1/2$ (Algorithm 1, Theorem 2): a zigzag strategy that guesses a larger speed on each trip, goes far enough to catch a target of that speed, and returns to the origin; the guesses grow faster than in [Coleman2022Line]. The paper writes $v$ for the speed and $u$ for the evasiveness $1/(1-v)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "Both bounds have exponent 4: with $M = 1/(1-u)$, $O(M^{4-(\\log_2\\log_2 M)^{-2}})$ against no $O(M^{4-\\varepsilon})$. The remaining factor $M^{(\\log_2\\log_2 M)^{-2}}$ grows more slowly than any power of $M$ but faster than any power of $\\log M$; the authors call the result optimal up to lower-order terms in the exponent [Coleman2024Linear]."
+        }
+      },
+      "open": [
+        "Determine the lower-order terms in the exponent: the bounds differ by a factor $(1-u)^{-o(1)}$ [Coleman2024Linear]."
+      ],
+      "notes": "Without an upper bound on $u$ below 1 the robot cannot use the algorithm for known $u$; a known bound $\\hat u < 1$ on the speed would give $1 + 2/(1-\\hat u)$ (Section 4.1 of [Coleman2022Line]). [Coleman2022Line] asked for tight bounds for an unknown speed; [Coleman2024Linear] settle the exponent. Checked against the full texts of [Coleman2022Line] (OPODIS 2022) and [Coleman2024Linear] (arXiv v2, the full version; the JCSS version states the same bounds as Theorems 3 and 4).",
+      "status": "verified"
+    },
+    {
+      "id": "line-one-toward-distance",
+      "title": "One robot, line, target moving toward the origin, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "toward",
+        "knowledge": "distance"
+      },
+      "summary": "A robot that knows the distance of a target moving toward the origin goes for time $d$ on one side and turns: ratio exactly 3, for every speed.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "a slow target ($u = \\varepsilon/3$) placed on the side opposite to the first of the points $\\pm(d-\\varepsilon)$ that the robot reaches (Theorem 14)",
+            "a robot that never visits $\\pm d$ has an unbounded ratio for small $u$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "best",
+          "time": "3",
+          "note": "Introductory and current best (Algorithm 6, Theorem 14): go for time $d$ on one side, then turn."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 3."
+        }
+      },
+      "open": [],
+      "notes": "Two robots do no better, whether they communicate face-to-face [Jawhar2026Linear] or as a sender and a receiver [Jawhar2025Linear]. Checked against the full text of [Coleman2022Line] (OPODIS 2022).",
+      "status": "verified"
+    },
+    {
+      "id": "line-one-away-none",
+      "title": "One robot, line, target moving away, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "away",
+        "knowledge": "none"
+      },
+      "summary": "A robot that knows neither the distance nor the speed of a target moving away runs the algorithm for a known distance as if $d = 1$: its ratio grows like $d^3/(1-u)^4$ up to lower-order terms in the exponent, against $(3+u)^2/(1-u)^2$ and no $O((1-u)^{-4+\\varepsilon})$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{not } O\\big((1-u)^{-4+\\varepsilon}\\big)",
+          "ref": "Coleman2024Linear",
+          "bottleneck": "unknown speed",
+          "preconditions": [
+            "for every constant $\\varepsilon > 0$",
+            "bound for a robot that knows $d$ (Theorem 1), which holds a fortiori here (end of Section 3)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\frac{(3+u)^2}{(1-u)^2}",
+          "ref": "Alpern2003Theory",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "bound for a robot that knows $u$ (Remark 17 of [Coleman2022Line])",
+            "as reported; the book was not read"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "bound for a robot that knows $d$ and $u$ (Theorem 1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "introductory",
+          "time": "1+\\frac{16}{d}\\,(\\log\\log M+3)\\,M^8\\log^2 M",
+          "note": "Introductory (Algorithm 7, Theorem 16, Lemma 15), with $M = \\max\\{d, 1/(1-u)\\}$ and logarithms to base 2: in round $i$ the robot guesses the speed $1 - 2^{-2^i}$ and the distance $2^{2^i}$."
+        },
+        {
+          "ref": "Coleman2024Linear",
+          "role": "best",
+          "time": "1+\\frac{8}{d}\\ (E \\le 4),\\ 1+\\frac{56.18\\,E^{4-(\\log_2\\log_2 E)^{-2}}-1}{d}\\ (E > 4)",
+          "note": "Current best (Algorithm 2, Theorem 3), with $E = d/(1-u)$: the robot runs the algorithm for a known distance with $d = 1$; a target at distance $d$ is caught no later than one at distance 1 with evasiveness $E$ (Lemma 11). Since $E \\le M^2$, this improves on [Coleman2022Line]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "The upper bound grows like $d^3(1-u)^{-4}$ up to lower-order terms in the exponent; the lower bounds do not depend on $d$."
+        }
+      },
+      "open": [
+        "Tight bounds when neither $d$ nor $u$ is known [Coleman2024Linear]; the upper bound grows with $d$, the lower bounds do not."
+      ],
+      "notes": "Draft because the bound $(3+u)^2/(1-u)^2$ rests on the result of Alpern and Gal, which was not read. The other bounds were checked against the full texts of [Coleman2022Line] (OPODIS 2022) and [Coleman2024Linear] (arXiv v2, Theorem 3; Theorem 5 of the JCSS version). The JCSS version states the Alpern–Gal bound as its Theorem 2 without a proof, so it does not settle this.",
+      "status": "draft"
+    },
+    {
+      "id": "line-one-toward-none",
+      "title": "One robot, line, target moving toward the origin, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "direction": "toward",
+        "knowledge": "none"
+      },
+      "summary": "A robot that knows neither the distance nor the speed of a target moving toward the origin can do no better than wait for it: ratio exactly $1 + 1/u$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac1u",
+          "ref": "Coleman2022Line",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "a robot that waits for time $t$ and then goes distance $d'$ on one side meets a target that starts at distance $d$ on the other side with speed $u = d/(t+d')$ no earlier than time $d/u$ (Theorem 18)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Coleman2022Line",
+          "role": "best",
+          "time": "1+\\frac1u",
+          "note": "Introductory and current best: the waiting algorithm (Theorems 4 and 18)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact; it grows without bound as $u \\to 0$."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Coleman2022Line] (OPODIS 2022).",
+      "status": "verified"
+    },
+    {
+      "id": "line-two-f2f-away-full",
+      "title": "Line, two face-to-face robots, away, $d$ and $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "full"
+      },
+      "summary": "Robots that know $d$ and $u$ but not the side capture a target moving away with ratio exactly $(3-u)/(1-u)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "the first robot to reach distance $d/(1-u)$ finds the target on the other side",
+            "any communication model"
+          ],
+          "note": "Theorem 2.2."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "\\frac{3-u}{1-u}",
+          "note": "Introductory and best (Theorem 2.1): both robots walk together to one side, then turn."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "The same value as for one robot (Theorem 1 of [Coleman2022Line]).",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-toward-full",
+      "title": "Line, two face-to-face robots, toward, $d$ and $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "toward",
+        "knowledge": "full"
+      },
+      "summary": "Robots that know $d$ and $u$ capture a target moving toward the origin with ratio $(3+u)/(1+u)$ when $u \\le 1$ and $1+1/u$ when $u \\ge 1$, both optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3+u}{1+u}\\ (u \\le 1),\\ 1+\\frac{1}{u}\\ (u \\ge 1)",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 2.5",
+            "any communication model"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "\\frac{3+u}{1+u}\\ (u \\le 1),\\ 1+\\frac{1}{u}\\ (u \\ge 1)",
+          "note": "Introductory and best: go to distance $d/(1+u)$ and turn if needed (Theorem 2.3), or wait at the origin when $u \\ge 1$ (Theorem 2.4)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "The same values as for one robot (Theorems 2–4 of [Coleman2022Line]).",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-away-speed",
+      "title": "Line, two face-to-face robots, away, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "speed"
+      },
+      "summary": "Knowing only the speed, two face-to-face robots capture a target moving away with ratio $(3+u)^2/(1-u)^2$, the single-robot value, using three turns.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "bound for robots that know $d$ and $u$ (Theorem 2.2 of [Jawhar2026Linear])",
+            "the argument does not use the communication model"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "\\frac{(3+u)^2}{(1-u)^2}",
+          "note": "Introductory and best: each robot zigzags on its own side (Algorithm 4, Theorem 3.1, unboundedly many turns), or both walk apart at speed $(3u+1)/(3+u)$ and the finder fetches the other (Algorithm 5, Theorem 3.3, three turns, the fewest possible by Theorem 3.4)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Against the full-knowledge bound, a factor $(3+u)/(1-u)$; at $u = 0$ the ratio 9 is optimal [Chrobak2015GroupSearch]."
+        }
+      },
+      "open": [
+        "Is $(3+u)^2/(1-u)^2$ optimal for two face-to-face robots for every $u \\in (0,1)$, as it is for one robot?"
+      ],
+      "notes": "At $u = 0$ this is evacuation of two face-to-face robots on the line, where 9 is optimal [Chrobak2015GroupSearch].",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-toward-speed",
+      "title": "Line, two face-to-face robots, toward, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "toward",
+        "knowledge": "speed"
+      },
+      "summary": "Knowing only the speed, two face-to-face robots capture a target moving toward the origin with ratio $(3-u)^2/(1+u)^2$ for $u < 1/3$ and $1+1/u$ otherwise.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3+u}{1+u}\\ (u \\le 1),\\ 1+\\frac{1}{u}\\ (u \\ge 1)",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "full-knowledge bound (Theorem 2.5 of [Jawhar2026Linear])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "\\frac{(3-u)^2}{(1+u)^2}\\ (u<\\tfrac13),\\ 1+\\frac1u\\ (u \\ge \\tfrac13)",
+          "note": "Introductory and best: zigzag (Theorem 3.5) or walking apart at speed $(1-3u)/(3-u)$ (Algorithm 7, Theorem 3.6, three turns); waiting at the origin when $u \\ge 1/3$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No lower bound beyond the full-knowledge one."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-away-distance",
+      "title": "Line, two face-to-face robots, away, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "distance"
+      },
+      "summary": "Knowing only the initial distance, two face-to-face robots capture a target moving away with ratio $O(M^8\\log^2 M)$, $M = 1/(1-u)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\frac{3-u}{1-u}",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "bound for robots that know $d$ and $u$ (Theorem 2.2 of [Jawhar2026Linear])",
+            "the argument does not use the communication model"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "O(M^8\\log^2 M),\\ M = \\tfrac{1}{1-u}",
+          "note": "Introductory and best (Algorithm 8, Theorem 4.1): the robots walk apart, guessing speeds $1-2^{-2^i}$, and speed up when a guess fails; three turns (Theorem 4.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Polynomial in $1/(1-u)$."
+        }
+      },
+      "open": [],
+      "notes": "For one robot, [Coleman2022Line] give $O(M^4\\log^2 M)$ (Theorem 12), and [Coleman2024Linear] $O(M^{4-(\\log_2\\log_2 M)^{-2}})$ (Theorem 2) against no $O(M^{4-\\varepsilon})$ (Theorem 1).",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-toward-distance",
+      "title": "Line, two face-to-face robots, toward, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "toward",
+        "knowledge": "distance"
+      },
+      "summary": "Knowing only the initial distance, two face-to-face robots capture a target moving toward the origin with ratio exactly 3.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 4.4",
+            "a slow target placed at $-d$ after a robot visits $d$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "3",
+          "note": "Introductory and best (Algorithm 9, Theorem 4.3): both walk distance $d$ to one side, then turn."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 3."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-away-none",
+      "title": "Line, two face-to-face robots, away, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "none"
+      },
+      "summary": "Knowing neither distance nor speed, two face-to-face robots capture a target moving away with a ratio polynomial in $M = \\max\\{d, 1/(1-u)\\}$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "12M^7 + 192(\\log\\log M+3)M^{10}\\log^2 M/d",
+          "note": "Introductory and best (Algorithm 10, Theorem 5.1), with $M = \\max\\{d, 1/(1-u)\\}$; three turns (Theorem 5.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No lower bound beyond those of the stronger settings."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-f2f-toward-none",
+      "title": "Line, two face-to-face robots, toward, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "toward",
+        "knowledge": "none"
+      },
+      "summary": "Knowing neither distance nor speed, the best two face-to-face robots can do against a target moving toward the origin is to wait: ratio $1+1/u$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac1u",
+          "ref": "Jawhar2026Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 5.3"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Linear",
+          "role": "best",
+          "time": "1+\\frac1u",
+          "note": "Introductory and best: both robots wait at the origin (Theorem 5.3)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact; unbounded as $u \\to 0$."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-away-speed",
+      "title": "Line, a sender and a receiver, away, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "speed"
+      },
+      "summary": "A sender and a receiver that know the speed capture a target moving away with ratio $(\\sqrt{u^2-2u+2}+1)/(\\sqrt{u^2-2u+2}-1)$, which is $3+2\\sqrt2$ at $u = 0$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3+2\\sqrt2\\ (u = 0)",
+          "ref": "Czyzowicz2021GroupEvacuation",
+          "bottleneck": "one-way communication",
+          "preconditions": [
+            "static target",
+            "Theorem 10 of [Czyzowicz2021GroupEvacuation]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "\\frac{\\sqrt{u^2-2u+2}+1}{\\sqrt{u^2-2u+2}-1}",
+          "note": "Introductory and best (Algorithm 3, Theorem 4): the sender walks away at reduced speed, the receiver at unit speed; generalises [Czyzowicz2021GroupEvacuation]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Optimal at $u = 0$; no lower bound for $u > 0$ beyond the full-knowledge argument."
+        }
+      },
+      "open": [
+        "Is $(\\sqrt{u^2-2u+2}+1)/(\\sqrt{u^2-2u+2}-1)$ optimal for a sender and a receiver for $u > 0$?"
+      ],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-toward-speed",
+      "title": "Line, a sender and a receiver, toward, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "toward",
+        "knowledge": "speed"
+      },
+      "summary": "A sender and a receiver that know the speed capture a target moving toward the origin with ratio $(\\sqrt{u^2+2u+2}+1)/(\\sqrt{u^2+2u+2}-1)$ for $u \\le 1/3$ and $1+1/u$ above.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "\\frac{\\sqrt{u^2+2u+2}+1}{\\sqrt{u^2+2u+2}-1}\\ (u \\le \\tfrac13),\\ 1+\\frac1u\\ (u \\ge \\tfrac13)",
+          "note": "Introductory and best: walking apart at two speeds (Algorithm 1, Theorem 1) or waiting (Theorem 3); a zigzag strategy (Theorem 2) is dominated."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound is stated."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-away-distance",
+      "title": "Line, a sender and a receiver, away, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "distance"
+      },
+      "summary": "Knowing only the initial distance, a sender and a receiver capture a target moving away with ratio $1+O(M^{10/3}\\log M)$, $M = 1/(1-u)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac{2}{1-u}",
+          "ref": "Jawhar2025Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 7",
+            "the first robot to reach $d/(1-u)$ finds the target on the other side"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "1+O(M^{10/3}\\log M),\\ M = \\tfrac{1}{1-u}",
+          "note": "Introductory and best (Algorithm 5, Theorem 6)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Polynomial in $1/(1-u)$."
+        }
+      },
+      "open": [],
+      "notes": "Two robots with one-way communication beat the single-robot lower bound $\\Omega(M^{4-\\varepsilon})$ reported by [Jawhar2025Linear].",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-toward-distance",
+      "title": "Line, a sender and a receiver, toward, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "toward",
+        "knowledge": "distance"
+      },
+      "summary": "Knowing only the initial distance, a sender and a receiver capture a target moving toward the origin with ratio exactly 3.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "3",
+          "ref": "Jawhar2025Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 5"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "3",
+          "note": "Introductory and best (Algorithm 4, Theorem 5): the robots move together, as in the face-to-face case."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 3."
+        }
+      },
+      "open": [],
+      "notes": "One-way communication does not help here.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-away-none",
+      "title": "Line, a sender and a receiver, away, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "none"
+      },
+      "summary": "Knowing neither distance nor speed, a sender and a receiver capture a target moving away with ratio $1+O(M^{16/3}\\log M(\\log\\log M)^{3/2})$, $M = \\max\\{d, 1/(1-u)\\}$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "1+O(M^{16/3}\\log M\\,(\\log\\log M)^{3/2})",
+          "note": "Introductory and best (Algorithm 6, Theorem 9), with $M = \\max\\{d, 1/(1-u)\\}$; the proof ends with a factor $6^{\\log\\log M}$, which the statement writes as $\\log M$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No lower bound beyond those of the stronger settings."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "line-two-sr-toward-none",
+      "title": "Line, a sender and a receiver, toward, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "toward",
+        "knowledge": "none"
+      },
+      "summary": "Knowing neither distance nor speed, a sender and a receiver can do no better than waiting: ratio $1+1/u$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\frac1u",
+          "ref": "Jawhar2025Linear",
+          "bottleneck": "unknown side",
+          "preconditions": [
+            "Theorem 8"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2025Linear",
+          "role": "best",
+          "time": "1+\\frac1u",
+          "note": "Introductory and best: both robots wait at the origin (Theorem 8)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exact."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-f2f-away-speed",
+      "title": "$m$ rays, two face-to-face robots, away, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "speed"
+      },
+      "summary": "On $m$ rays, two face-to-face robots that know the speed capture a target moving away with a ratio that grows exponentially with $m$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "1+\\frac{(m+2)^{(m+2)/2}(1+u)^{m/2}}{m^{m/2}(1-u)^{(m+2)/2}}\\ (m \\text{ even})",
+          "note": "Introductory and best (Algorithm 1, Theorem 2.1): the robots explore two new rays per round with geometrically growing depths; for odd $m$ replace $m$ by $m+1$. Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Only the bound $m$ of Lemma 4.1 (in the sender/receiver setting) applies."
+        }
+      },
+      "open": [],
+      "notes": "At $m = 2$, $u = 0$ the ratio is 9.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-f2f-away-distance",
+      "title": "$m$ rays, two face-to-face robots, away, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "distance"
+      },
+      "summary": "On $m$ rays, knowing only the initial distance, two face-to-face robots capture a target moving away with a ratio whose exponent in $1/(1-u)$ is about $2^{m/2}$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "1+O\\bigl(M^{2^{(m+2)/2}}\\log^2 M\\bigr),\\ M = \\tfrac{1}{1-u}\\ (m \\text{ even})",
+          "note": "Introductory and best (Theorem 2.2); exponent $2^{(m+3)/2}$ for odd $m$. Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No matching lower bound."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-f2f-away-none",
+      "title": "$m$ rays, two face-to-face robots, away, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "f2f",
+        "direction": "away",
+        "knowledge": "none"
+      },
+      "summary": "On $m$ rays, knowing neither distance nor speed, two face-to-face robots capture a target moving away with a ratio polynomial in $M = \\max\\{d, 1/(1-u)\\}$, of degree about $2^{m/2}$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "1+O\\bigl(M^{2^{(m+4)/2}}\\log^2 M\\log\\log M\\bigr)\\ (m \\text{ even})",
+          "note": "Introductory and best (Theorem 2.3), $M = \\max\\{d, 1/(1-u)\\}$; exponent $2^{(m+5)/2}$ for odd $m$. Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No matching lower bound."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-sr-away-speed",
+      "title": "$m$ rays, a sender and a receiver, away, $u$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "speed"
+      },
+      "summary": "On $m$ rays, a sender and a receiver that know the speed improve on face-to-face robots when $m$ is odd.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "m",
+          "ref": "Jawhar2026Capturing",
+          "bottleneck": "unknown ray",
+          "preconditions": [
+            "Lemma 4.1",
+            "any deterministic algorithm with two unit-speed robots",
+            "the target on the last ray explored"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "(m-1)+2+2\\sqrt2\\ (u = 0)",
+          "ref": "Jawhar2026Capturing",
+          "bottleneck": "one-way communication",
+          "preconditions": [
+            "Theorem 3.3",
+            "static target",
+            "adapts Lemmas 26 and 29 of [Czyzowicz2021GroupEvacuation]; the proof is a sketch"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "\\frac{2}{1-u}+\\frac{(m-1)(1+u^2)}{(1+u)(1-u)}\\Bigl(\\frac{(m+1)(1+u)}{(m-1)(1-u)}\\Bigr)^{(m+1)/2}\\ (m \\text{ odd})",
+          "note": "Introductory and best for odd $m$ (Algorithm 4, Theorem 3.2); 10 for $m = 3$, $u = 0$. For even $m$ the paper uses the face-to-face algorithm. Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "For $m = 3$, $u = 0$: $4+2\\sqrt2 \\approx 6.83$ against 10."
+        }
+      },
+      "open": [
+        "For even $m \\ge 4$, can a sender and a receiver beat two face-to-face robots, as they do on the line?"
+      ],
+      "notes": "Lemma 3.1 of [Jawhar2026Capturing] claims that for even $m$ a sender and a receiver do no better than face-to-face robots; for $m = 2$ and a static target this contradicts $3+2\\sqrt2$ [Czyzowicz2021GroupEvacuation] against 9 [Chrobak2015GroupSearch], and for moving targets on the line the sender/receiver bounds of [Jawhar2025Linear] are smaller than the face-to-face ones of [Jawhar2026Linear]. Even $m$ is therefore open for a sender and a receiver.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-sr-away-distance",
+      "title": "$m$ rays, a sender and a receiver, away, $d$ known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "distance"
+      },
+      "summary": "On $m$ rays, knowing only the initial distance, a sender and a receiver lower the exponent of the face-to-face bound when $m$ is odd.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "m",
+          "ref": "Jawhar2026Capturing",
+          "bottleneck": "unknown ray",
+          "preconditions": [
+            "Lemma 4.1",
+            "any deterministic algorithm with two unit-speed robots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "O(M)+O\\bigl(M^{2^{(m+1)/2}+1}\\log^2 M\\bigr),\\ M = \\tfrac{1}{1-u}\\ (m \\text{ odd})",
+          "note": "Introductory and best for odd $m$ (Algorithm 5, Theorem 3.4). Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Exponential gap in $m$."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    },
+    {
+      "id": "rays-two-sr-away-none",
+      "title": "$m$ rays, a sender and a receiver, away, nothing known",
+      "assumptions": {
+        "faults": "none",
+        "speeds": "equal",
+        "robots": "two",
+        "communication": "sr",
+        "direction": "away",
+        "knowledge": "none"
+      },
+      "summary": "On $m$ rays, knowing neither distance nor speed, a sender and a receiver capture a target moving away with a ratio polynomial in $M = \\max\\{d, 1/(1-u)\\}$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Jawhar2026Capturing",
+          "role": "best",
+          "time": "O\\bigl(\\tfrac{1}{1-u}\\bigr)+O\\Bigl(\\frac{\\log\\log M}{d(1-u)}\\log^2 M\\,M^{2^{(m+3)/2}}\\Bigr)\\ (m \\text{ odd})",
+          "note": "Introductory and best for odd $m$ (Algorithm 6, Theorem 3.5), $M = \\max\\{d, 1/(1-u)\\}$. Preprint."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "No matching lower bound."
+        }
+      },
+      "open": [],
+      "notes": "Draft.",
+      "status": "draft"
+    }
+  ],
+  "figure": {
+    "caption": "Search for a target moving away, by a robot that knows the distance $d$ and the speed $u$ but not the side, Algorithm 1 of [Coleman2022Line]: walk for time $d/(1-u)$ to one side, where a target on that side would be caught, and if it is not there turn and walk until reaching it. Here $d = 1$ and $u = 1/3$. The target (amber star) starts at $-d$; the grey star shows where it would be on the other side. The robot turns at time $1.5$, when it is $2d/(1-u) = 3$ from the target, closes the gap at speed $1 - u$ and captures it at time $6$, four times the $1.5$ that a robot knowing the side would need: the ratio is $(3-u)/(1-u) = 4$, which is optimal. The trace above the line shows the robot's two trips.",
+    "view": [
+      100,
+      36
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              62.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              48.0,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          },
+          {
+            "id": "g",
+            "p": [
+              76.0,
+              14
+            ],
+            "k": "target",
+            "c": "muted",
+            "r": 1.4
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 0",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Start: d = 1, u = 1/3; the robot does not know the side (grey: the other possibility)"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              69.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              45.67,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          },
+          {
+            "id": "g",
+            "p": [
+              78.33,
+              14
+            ],
+            "k": "target",
+            "c": "muted",
+            "r": 1.4
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                69.0,
+                20
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 0.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              76.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              43.33,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          },
+          {
+            "id": "g",
+            "p": [
+              80.67,
+              14
+            ],
+            "k": "target",
+            "c": "muted",
+            "r": 1.4
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                76.0,
+                20
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 1",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              83.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              41.0,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 1.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Time d/(1−u) = 1.5: a target on this side would be here; it is not, so turn"
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              76.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              38.67,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                76.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 2",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              69.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              36.33,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                69.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 2.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              62.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              34.0,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                62.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 3",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              55.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              31.67,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                55.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 3.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              48.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              29.33,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                48.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 4",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              41.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              27.0,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                41.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 4.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              34.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              24.67,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                34.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              27.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              22.33,
+              14
+            ],
+            "k": "target",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                27.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 5.5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "r",
+            "p": [
+              20.0,
+              14
+            ]
+          },
+          {
+            "id": "t",
+            "p": [
+              20.0,
+              14
+            ],
+            "k": "target",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "path",
+            "p": [
+              [
+                62.0,
+                20
+              ],
+              [
+                83.0,
+                20
+              ],
+              [
+                83.0,
+                25
+              ],
+              [
+                20.0,
+                25
+              ]
+            ],
+            "c": "accent",
+            "w": 0.6,
+            "arrow": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              32
+            ],
+            "s": "time 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Final: captured at time 6 = 4 × 1.5; ratio (3−u)/(1−u) = 4"
+      }
+    ],
+    "static": [
+      {
+        "t": "line",
+        "p": [
+          [
+            3,
+            14
+          ],
+          [
+            97,
+            14
+          ]
+        ],
+        "c": "fg",
+        "w": 0.8
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            62.0,
+            12.5
+          ],
+          [
+            62.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          62.0,
+          9.5
+        ],
+        "s": "0",
+        "size": 2.6
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            76.0,
+            12.5
+          ],
+          [
+            76.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          76.0,
+          9.5
+        ],
+        "s": "d",
+        "size": 2.6
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            48.0,
+            12.5
+          ],
+          [
+            48.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          48.0,
+          9.5
+        ],
+        "s": "−d",
+        "size": 2.6
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            83.0,
+            12.5
+          ],
+          [
+            83.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          83.0,
+          5.0
+        ],
+        "s": "d/(1−u)",
+        "size": 2.6
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            41.0,
+            12.5
+          ],
+          [
+            41.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          41.0,
+          5.0
+        ],
+        "s": "−d/(1−u)",
+        "size": 2.6
+      },
+      {
+        "t": "line",
+        "p": [
+          [
+            20.0,
+            12.5
+          ],
+          [
+            20.0,
+            15.5
+          ]
+        ],
+        "c": "fg",
+        "w": 0.6
+      },
+      {
+        "t": "text",
+        "p": [
+          20.0,
+          9.5
+        ],
+        "s": "−3d",
+        "size": 2.6
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Kranakis2024Survey",
+      "note": "Invited survey (SSS 2024) on how knowledge of the communication model, of faults and of the target's distance and speed changes the competitive ratio of linear group search and evacuation, with open problems. Read; no new results."
+    },
+    {
+      "ref": "Czyzowicz2020Searching",
+      "note": "The target, a bus, moves at constant speed $u$ (their $s$) along a cycle of length $2\\pi$, and robots of speed 1 search for it. One robot that knows $u$ but not the direction needs exactly $2\\pi/u$ for $u \\ge 1$, $4\\pi/(u+1)$ for $1/3 \\le u \\le 1$ and $2\\pi/(1-u)$ for $u \\le 1/3$ (Theorem 2); knowing neither, exactly $2\\pi(1 + 1/(u+1))$, so some speed forces $4\\pi - \\varepsilon$ (Theorem 3). For $k$ robots the bounds match when the direction is known (Theorem 4), when $u$ is known and $u \\ge 1$ or $k$ is even (Theorem 5), and up to the parity of $k$ when nothing is known (Theorem 6). Read in full."
+    }
+  ]
+}

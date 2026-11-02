@@ -1,0 +1,1273 @@
+{
+  "id": "dynamic-exploration",
+  "model": "mobile-agents-on-graphs",
+  "name": "Exploration of dynamic graphs by teams",
+  "origin": {
+    "ref": "DiLuna2020Dynamic",
+    "year": 2016,
+    "note": "Live exploration of dynamic rings was posed at ICDCS 2016."
+  },
+  "derived_from": {
+    "problem": "collaborative-exploration",
+    "kind": "variant of",
+    "relation": "When an adversary removes edges, a single agent can be blocked forever; the question shifts from speed to **how many agents** are needed to visit every node."
+  },
+  "summary": "An adversary changes the graph over time; how many agents are needed to explore it?",
+  "statement": "Agents must visit every node of a **dynamic graph**: a sequence of graphs $G_t = (V, E_t)$ on one node set, whose edges are removed round by round by an adversary subject to a connectivity constraint (**1-interval connectivity**: every $G_t$ is connected; **temporal connectivity**: every node can reach every other through edges present at non-decreasing times). The primary measure is the **number of agents**; the secondary is time in rounds.",
+  "primer": {
+    "intro": "Imagine guards who must check every station on a circular railway, while the operator closes some piece of track at any moment without warning. We model the railway as a graph: stations are **nodes**, the pieces of track between neighbouring stations are **edges**, and each guard is an **agent**. In the basic version the graph is a **ring** of $n$ nodes (the nodes form one cycle, each joined by an edge to its two neighbours). Time runs in **rounds**: in each round every agent may cross one edge or wait. An **adversary** (an imagined opponent, the operator of the picture) chooses, in every round, which edges are **missing** (removed for that round), with one rule: the graph must stay connected in every round (**1-interval connectivity**); in a ring this means that at most one edge is missing per round. A graph that changes like this is a **dynamic graph**. The agents must together visit every node; in the version recorded here they also know an upper bound $N \\ge n$ and must stop. We count the agents needed and the rounds.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Two agents walking in opposite directions",
+        "variant": "ring",
+        "ref": "DiLuna2020Dynamic",
+        "idea": "The simplest case: two agents start on the same node and know $N \\ge n$.\n\n1. The two agents set off in opposite directions around the ring (the paper shows how two identical agents can agree on this).\n2. In every round each agent tries to cross the next edge in its direction; if the edge is missing, it waits (it is **blocked**) and tries again in the next round.\n3. After $N - 1$ rounds both agents stop.",
+        "analysis": "At most one edge is missing per round, and until the two agents have between them covered the whole ring they are trying to cross two different edges, so at least one of them moves forward, onto a node that nobody has visited. Each round therefore visits at least one new node, and the $n - 1$ other nodes are all visited within $n - 1 \\le N - 1$ rounds. [DiLuna2020Dynamic] handle the harder cases (different starting nodes, no common sense of left and right) with one extra rule, turning back after being blocked for long, and both agents stop after $3N - 6$ rounds.",
+        "why_it_matters": "It shows that a second agent turns an impossible task into an easy one, because the adversary can only block one of them at a time."
+      },
+      {
+        "kind": "impossibility",
+        "title": "One agent can always be blocked",
+        "variant": "ring",
+        "ref": "DiLuna2020Dynamic",
+        "idea": "A single agent stands on a node of the ring and, in some round, decides to cross one of the two edges at its node. The adversary removes exactly that edge in that round. Removing one edge from a ring leaves a path, which is still connected, so this is allowed. The adversary can do this in every round, so the agent never leaves its starting node.",
+        "analysis": "So at least two agents are needed [DiLuna2020Dynamic]. The same paper also shows that the adversary can prevent two agents that start on different nodes from ever meeting, by removing an edge only at the moment the two would otherwise meet: the agents cannot rely on meeting to coordinate.",
+        "why_it_matters": "The number of agents becomes the main measure on dynamic graphs, because a few agents may be unable to explore at all, whatever time they are given."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of the fixed node set $V$; there are $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a pair of nodes that may be present or missing in a given round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that, in each round, crosses one present edge at its node or waits",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "dynamic graph",
+      "definition": "a sequence $(G_t)_{t \\ge 0}$ of graphs $G_t = (V, E_t)$ on one node set, $E_t$ being the edges present in round $t$",
+      "avoid": []
+    },
+    {
+      "term": "ring",
+      "definition": "the graph in which the $n$ nodes form one cycle, each node joined by an edge to its two neighbours",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step: the adversary fixes the edges present, then every agent crosses at most one of them or waits",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that chooses, in every round, which edges are missing, within the connectivity constraint",
+      "avoid": []
+    },
+    {
+      "term": "missing edge",
+      "definition": "an edge that the adversary has removed for the current round; it cannot be crossed in that round",
+      "avoid": []
+    },
+    {
+      "term": "1-interval connectivity",
+      "definition": "the constraint that every $G_t$ is connected; on a ring, at most one edge is missing per round",
+      "avoid": []
+    },
+    {
+      "term": "temporal connectivity",
+      "definition": "the constraint that for all nodes $u, v$ and every time $t$ there is a journey (a path whose edges are present at non-decreasing times $\\ge t$) from $u$ to $v$; no single $G_t$ need be connected",
+      "avoid": []
+    },
+    {
+      "term": "blocked",
+      "definition": "an agent is blocked in a round when the edge it tries to cross is missing, so it waits",
+      "avoid": []
+    }
+  ],
+  "history": "In dynamic graphs the community first asked **how many agents** make exploration possible at all, under each connectivity assumption [DiLuna2020Dynamic] [Gotoh2021Dynamic] [Saxena2026Highly]; time came second.",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Agents",
+      "description": "number of agents needed"
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm",
+    "ids"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "timing",
+    "topology"
+  ],
+  "variants": [
+    {
+      "id": "ring",
+      "title": "1-interval-connected rings",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "summary": "One agent cannot explore a dynamic ring; two agents with a known bound on $n$ explore in $3N-6$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "DiLuna2020Dynamic",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "one agent cannot explore",
+            "anonymous agents without a landmark and with $n$ unknown cannot explore with termination at all"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2020Dynamic",
+          "role": "introductory",
+          "agents": "2",
+          "time": "3N-6",
+          "assumes": [
+            "a known bound $N \\ge n$"
+          ]
+        },
+        {
+          "ref": "Mandal2023Live",
+          "role": "other",
+          "agents": "3",
+          "assumes": [
+            "identifiers, no landmark"
+          ],
+          "note": "Explicit termination with three agents."
+        },
+        {
+          "ref": "Das2022Landmark",
+          "role": "other",
+          "agents": "3",
+          "assumes": [
+            "identifiers, no landmark, no edge-crossing detection"
+          ]
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two (with a bound on $n$)."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "$O(n\\log n)$ with a landmark but no chirality; whether that is necessary is open."
+        }
+      },
+      "open": [
+        "With a landmark but no chirality, is $O(n\\log n)$ time necessary? [DiLuna2020Dynamic]"
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "1-interval",
+      "title": "Connected at every step, any graph",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "timing": "sync"
+      },
+      "summary": "Against an adaptive adversary that keeps every snapshot connected, $2m-n+1$ silent agents explore any graph, and $m-n+1$ are needed even with a central offline scheduler.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "m-n+1",
+          "ref": "Dobrev2020Exploration",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "all agents start at one node (Theorem 2)",
+            "the adversary blocks one agent on each non-tree edge of a DFS tree",
+            "holds even for a central offline scheduler that sees all agents but not the future snapshots"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2020Exploration",
+          "role": "best",
+          "agents": "2m-n+1",
+          "assumes": [
+            "sense of direction: from the labels of traversed edges an agent can name nodes",
+            "silent agents: a mutual-exclusion mechanism lets one agent per port move, and the others learn that they failed",
+            "any starting nodes"
+          ],
+          "note": "Introductory and current best (Theorem 1); whether this algorithm explores in polynomial time is not known."
+        },
+        {
+          "ref": "Dobrev2020Exploration",
+          "role": "other",
+          "agents": "O(n^4)",
+          "time": "O(n^9)",
+          "assumes": [
+            "agents also see how many agents are at their node, and their actions"
+          ],
+          "note": "Theorem 3: polynomial time with more agents."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "gap",
+          "note": "$m-n+1$ against $2m-n+1$; the ratio is unbounded on graphs with few cycles."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound; $O(n^9)$ only with $O(n^4)$ agents."
+        }
+      },
+      "open": [
+        "Does the algorithm with $2m-n+1$ agents explore in polynomial time? Posed in [Dobrev2020Exploration]."
+      ],
+      "notes": "Every snapshot is a connected spanning subgraph of an underlying graph with $n$ nodes and $m$ edges, chosen by an adversary that sees the agents' moves. Checked against the full text of [Dobrev2020Exploration].",
+      "status": "verified"
+    },
+    {
+      "id": "temporal",
+      "title": "Temporally connected graphs, arbitrary topology",
+      "assumptions": {
+        "direction": "undirected",
+        "timing": "sync"
+      },
+      "summary": "Perpetual exploration of a temporally connected graph with $\\eta$ transient edges needs exactly $2\\eta+1$ agents.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2\\eta+1",
+          "ref": "Gotoh2021Dynamic",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "$2\\eta$ agents fail even with identifiers, knowledge of $n$ and $k$, and unbounded whiteboards"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gotoh2021Dynamic",
+          "role": "best",
+          "agents": "2\\eta+1",
+          "note": "Introductory and current best; whiteboards of $O(\\log\\deg(v))$ bits at node $v$."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$2\\eta+1$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "further": [
+    {
+      "ref": "Adamson2026Exploration",
+      "note": "Exploration by teams when the whole sequence of snapshots is given in advance (offline), each agent crossing at most one present edge per round. In an *always $S$-connected* temporal graph every snapshot joins every node by a path to some node of a fixed set $S$; $|S|$ agents, one starting on each node of $S$, explore every such graph whose lifetime is polynomial in $n$, $|S|$ and the average degree of the underlying graph (Theorem 1, Corollary 1). Through a division of the underlying graph into parts with few boundary nodes, a single agent explores an always connected temporal graph whose underlying graph has treewidth $\\mathrm{tw}$ within $O(n^{4/3}\\,\\mathrm{tw}^{9/2}\\log^{5/2} n)$ rounds (Theorem 2). When every edge is present in exactly one snapshot, deciding whether one agent can explore is NP-hard (Theorem 5), and the minimum number of agents that explore a path is computed in $O(n)$ time, that for a cycle in polynomial time (Theorems 6 and 7). Full version (arXiv v2) read; [Carnevale2026Hiding] cites $\\mathrm{tw}^{11/2}$ for the brief announcement, which was not read."
+    },
+    {
+      "ref": "Bournat2017Perpetual",
+      "note": "Perpetual exploration of connected-over-time rings by anonymous FSYNC robots with persistent memory and local weak multiplicity detection: $k \\ge 3$ robots for $n > k$ (Theorem III.1); two robots fail for $n > 3$ and one for $n > 2$ (Theorems IV.1, V.1), and suffice for $n = 3$ and $n = 2$ (Theorems IV.2, V.2). Read."
+    },
+    {
+      "ref": "Bournat2019Highly",
+      "note": "Self-stabilizing perpetual exploration of connected-over-time rings by FSYNC robots with distinct identifiers: three robots for rings of at least four nodes (Theorem 4.1); two robots are impossible for $n \\ge 4$ (Theorem 3.1). Read."
+    },
+    {
+      "ref": "Feletti2026Safe",
+      "note": "Extends the temporally connected setting of [Gotoh2021Dynamic] to graphs with any number of black holes, unknown to the agents, which must visit every safe node while at least one agent survives. Semi-synchronous oblivious anonymous agents starting on arbitrary safe nodes explore perpetually with $2\\eta' + \\sum_{x \\in B}\\deg(x) + 1$ agents, where $B$ is the set of black holes and $\\eta'$ the number of transient edges between safe nodes, using whiteboards of $O(\\Delta)$ bits (Theorem 11); without black holes this is the $2\\eta + 1$ of [Gotoh2021Dynamic]. Agents with identifiers that know the number of safe nodes also terminate (Theorem 16). Preprint; read."
+    },
+    {
+      "ref": "Saxena2026SemiSynchronous",
+      "note": "Exploration of 1-interval connected graphs of arbitrary topology, with port numbers reassigned in every round, under a semi-synchronous scheduler: in each round an adversary deactivates up to $\\alpha$ agents (their $p$), and every agent is activated infinitely often. Agents have distinct identifiers, start on arbitrary nodes and know neither $n$ nor $k$; nodes have no storage. With $k \\le (n-2)(\\alpha+1)$ agents exploration is impossible, even with full visibility, global communication, node identifiers and storage, unbounded memory and knowledge of every parameter (Theorem 2.1, $n \\ge 3$, $\\alpha \\ge 1$). With $(n-2)(\\alpha+1)+1$ agents it stays impossible for agents that see their neighbouring nodes but communicate only face to face (Theorem 2.2, $n \\ge 9$), and for agents that see only their own node but communicate globally (Theorem 2.3). Agents that see their neighbouring nodes and communicate globally explore whenever $k \\ge (n-2)(\\alpha+1)+1$, that is $\\alpha \\le \\lfloor (k-1)/(n-2) \\rfloor - 1$, without knowing $n$, $k$ or $\\alpha$; every agent eventually knows that exploration is complete, the total number of moves is $O(k)$ times the largest diameter of a snapshot, and each agent uses $O(\\max\\{\\log n, \\log\\alpha\\})$ bits (Theorem 3.1, $n \\ge 4$). The number of agents is therefore tight for every $\\alpha \\ge 1$; whether global communication is necessary is left open. For $\\alpha = 0$ the threshold $n-1$ is the bound for synchronous agents of [Saxena2025PathConnected], as reported by [Saxena2026SemiSynchronous]. The timing axis has no semi-synchronous value, so the result is not placed in a setting. Preprint; read."
+    },
+    {
+      "ref": "Sudo2026Tight",
+      "note": "A single deterministic agent on $T$-interval-connected graphs of arbitrary topology whose nodes carry identifiers: the window must be $\\Omega(m)$ (Theorem 3), and with a window of $O(\\zeta m + n\\log^2 n)$, where $\\zeta = \\ln n/(1+\\ln(m/n))$, the agent explores and stops within $O((m-n+1)\\,n + n\\log^2 n)$ moves, optimal when $m-n+1 = \\Omega(\\log^2 n)$ (Theorems 1 and 4). Placed in the setting *$T$-interval-connected graphs, labelled nodes* of single-agent exploration. Preprint; read."
+    },
+    {
+      "ref": "Ayoubi2026Online",
+      "note": "In vertex-permuted rings, where every snapshot is a cycle through all $n$ nodes in an order the adversary chooses at each step, up to $n-3$ agents starting at one node cannot even find a treasure, so they cannot explore, even with memory, chirality, a view of the whole snapshot and knowledge of the node labels (Theorem 1). If every two nodes are adjacent within every $\\xi$ steps and agents flag the nodes they visit, $k$ agents visit all nodes within $\\xi\\lceil 2n/k\\rceil$ steps (proof of Theorem 8). Preprint; read."
+    },
+    {
+      "ref": "Gotoh2020Dynamic",
+      "note": "A single agent on a 1-interval connected ring with partial knowledge of the future: it sees which edges within $H$ hops will be present in each of the next $S$ rounds. It can explore exactly when $H + S \\ge n$ and $S \\ge \\lceil n/2\\rceil$ (Theorem 2), in $O(n^2)$ rounds, $O(n^2/H + nH)$ when $S$ is large enough, and $O(n^2/H + n\\log H)$ when $S \\ge n-1$ (Theorems 1, 3), against $\\Omega(n^2/H)$ for every $S$ (Theorem 4). Read in full."
+    }
+  ],
+  "figure": {
+    "caption": "Live exploration of a dynamic ring [DiLuna2020Dynamic]: in every round an adversary removes at most one edge of the ring (1-interval connectivity; the missing edge is dashed red). Two agents start on one node, know $N = n = 8$ and walk in opposite directions, waiting while their next edge is missing; the adversary can block only one of them, so every round visits a new node, and after $N - 1$ rounds both stop. One agent alone can be blocked forever.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "v0": [
+          50.0,
+          47.0
+        ],
+        "v1": [
+          64.14,
+          41.14
+        ],
+        "v2": [
+          70.0,
+          27.0
+        ],
+        "v3": [
+          64.14,
+          12.86
+        ],
+        "v4": [
+          50.0,
+          7.0
+        ],
+        "v5": [
+          35.86,
+          12.86
+        ],
+        "v6": [
+          30.0,
+          27.0
+        ],
+        "v7": [
+          35.86,
+          41.14
+        ]
+      },
+      "edges": [
+        [
+          "v0",
+          "v1"
+        ],
+        [
+          "v1",
+          "v2"
+        ],
+        [
+          "v2",
+          "v3"
+        ],
+        [
+          "v3",
+          "v4"
+        ],
+        [
+          "v4",
+          "v5"
+        ],
+        [
+          "v5",
+          "v6"
+        ],
+        [
+          "v6",
+          "v7"
+        ],
+        [
+          "v7",
+          "v0"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v0",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v0",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 0",
+            "c": "muted"
+          }
+        ],
+        "label": "Start: a and b on one node; a goes clockwise, b the other way"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v0",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v7",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                47.0
+              ],
+              [
+                64.14,
+                41.14
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              59.37,
+              49.61
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 1",
+            "c": "muted"
+          }
+        ],
+        "label": "The adversary removes a's edge: a waits, b moves"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v0",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v6",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                47.0
+              ],
+              [
+                64.14,
+                41.14
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              59.37,
+              49.61
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 2",
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v1",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v6",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.0,
+                27.0
+              ],
+              [
+                35.86,
+                12.86
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              27.39,
+              17.63
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 3",
+            "c": "muted"
+          }
+        ],
+        "label": "Now b is blocked and a moves: someone always advances"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v6",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                30.0,
+                27.0
+              ],
+              [
+                35.86,
+                12.86
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              27.39,
+              17.63
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 4",
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                70.0,
+                27.0
+              ],
+              [
+                64.14,
+                12.86
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              72.61,
+              17.63
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 5",
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v4",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                70.0,
+                27.0
+              ],
+              [
+                64.14,
+                12.86
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              72.61,
+              17.63
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 6",
+            "c": "muted"
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "v3",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "v4",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              47.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              70.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              64.14,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              7.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              12.86
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.0,
+              27.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.86,
+              41.14
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                7.0
+              ],
+              [
+                64.14,
+                12.86
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              59.37,
+              4.39
+            ],
+            "s": "missing",
+            "c": "gap",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              27
+            ],
+            "s": "round 7",
+            "c": "muted"
+          }
+        ],
+        "label": "After N - 1 = 7 rounds every node is visited; both stop"
+      }
+    ]
+  }
+}

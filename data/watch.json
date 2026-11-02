@@ -853,6 +853,570 @@
   "extra_authors": [],
   "homepages": {},
   "min_score": 8,
-  "last_run": null,
-  "seen": []
+  "last_run": "2026-10-27",
+  "seen": [
+    "arxiv:2610.30123"
+  ],
+  "openalex_author_ids": {
+    "Adam Heriban": [
+      "A5050768567"
+    ],
+    "Adrian Kosowski": [
+      "A5075900164"
+    ],
+    "Aisha Aljohani": [
+      "A5061136284"
+    ],
+    "Ajay D. Kshemkalyani": [
+      "A5030287525"
+    ],
+    "Akitoshi Kawamura": [
+      "A5074573236"
+    ],
+    "Anaïs Durand": [
+      "A5047127483"
+    ],
+    "Andrzej Pelc": [
+      "A5102714160"
+    ],
+    "André van Renssen": [
+      "A5042432858"
+    ],
+    "Andréa W. Richa": [
+      "A5031875286"
+    ],
+    "Anissa Lamani": [
+      "A5043476646"
+    ],
+    "Anisur Rahaman Molla": [
+      "A5018807670"
+    ],
+    "Apurba Das": [
+      "A5000145938",
+      "A5060623649"
+    ],
+    "Archak Das": [
+      "A5000145938",
+      "A5060623649"
+    ],
+    "Aris Pagourtzis": [
+      "A5091546742"
+    ],
+    "Arnaud Labourel": [
+      "A5038247454"
+    ],
+    "Asaf Efrima": [
+      "A5059423877"
+    ],
+    "Ashish Saxena": [
+      "A5101558548"
+    ],
+    "Avisek Sharma": [
+      "A5062551593"
+    ],
+    "Barbara Kempkes": [
+      "A5057341664"
+    ],
+    "Barun Gorain": [
+      "A5022174128"
+    ],
+    "Bastian Degener": [
+      "A5066191243"
+    ],
+    "Beatrice Palano": [
+      "A5073652157"
+    ],
+    "Bibhuti Das": [
+      "A5090732745",
+      "A5112754157"
+    ],
+    "Bo Jiang": [
+      "A5053609164"
+    ],
+    "Brati Mondal": [
+      "A5082164770"
+    ],
+    "Buddhadeb Sau": [
+      "A5008101325"
+    ],
+    "Carlo Mereghetti": [
+      "A5084595302"
+    ],
+    "Caterina Feletti": [
+      "A5035308041"
+    ],
+    "Christian Scheideler": [
+      "A5063355098"
+    ],
+    "Dana Randall": [
+      "A5001088440"
+    ],
+    "Danny Krizanc": [
+      "A5058262792"
+    ],
+    "Dariusz Dereniowski": [
+      "A5048684673"
+    ],
+    "Dariusz R. Kowalski": [
+      "A5101948468"
+    ],
+    "David Ilcinkas": [
+      "A5021373855"
+    ],
+    "David Liedtke": [
+      "A5098754746"
+    ],
+    "David Peleg": [
+      "A5056419022"
+    ],
+    "Debasish Pattanayak": [
+      "A5005878475"
+    ],
+    "Dominik Pająk": [
+      "A5027015215"
+    ],
+    "Evangelos Bampas": [
+      "A5090353719"
+    ],
+    "Fabian Frei": [
+      "A5027072512"
+    ],
+    "Fabian Kuhn": [
+      "A5023808567"
+    ],
+    "Francesco Piselli": [
+      "A5088063901"
+    ],
+    "Franck Petit": [
+      "A5073816060"
+    ],
+    "Friedhelm Meyer auf der Heide": [
+      "A5109961260"
+    ],
+    "Fukuhito Ooshita": [
+      "A5054694650"
+    ],
+    "George Karakostas": [
+      "A5051576344"
+    ],
+    "Giovanni Viglietta": [
+      "A5015796580"
+    ],
+    "Giuseppe A. Di Luna": [
+      "A5103081624"
+    ],
+    "Giuseppe Antonio Di Luna": [
+      "A5103081624"
+    ],
+    "Giuseppe Prencipe": [
+      "A5031863470"
+    ],
+    "Gokarna Sharma": [
+      "A5002981812",
+      "A5103498869"
+    ],
+    "H. Ramesh": [
+      "A5111517076"
+    ],
+    "Hao Zhang": [
+      "A5100396888"
+    ],
+    "Hirotsugu Kakugawa": [
+      "A5023541322"
+    ],
+    "Huda Chuangpishit": [
+      "A5062201904"
+    ],
+    "Ichiro Suzuki": [
+      "A5004114068",
+      "A5101685358"
+    ],
+    "Ioannis Papaioannou": [
+      "A5024908492"
+    ],
+    "Irina Kostitsyna": [
+      "A5040775926"
+    ],
+    "Jamison W. Weber": [
+      "A5034466163"
+    ],
+    "Jared Coleman": [
+      "A5025634277"
+    ],
+    "Jaroslav Opatrny": [
+      "A5012902253",
+      "A5084120290"
+    ],
+    "Jerry L. Trahan": [
+      "A5091129000"
+    ],
+    "Jesse Lucier": [
+      "A5009443874"
+    ],
+    "Joachim Gudmundsson": [
+      "A5087003217"
+    ],
+    "John Augustine": [
+      "A5016331110"
+    ],
+    "Jonas Harbig": [
+      "A5058331868"
+    ],
+    "Joseph L. Briones": [
+      "A5021618239"
+    ],
+    "Joshua J. Daymude": [
+      "A5070425572"
+    ],
+    "Junya Nakamura": [
+      "A5030705873"
+    ],
+    "Jurek Czyzowicz": [
+      "A5067736776"
+    ],
+    "Jérémie Chalopin": [
+      "A5041906976"
+    ],
+    "Kaushik Mondal": [
+      "A5059765803"
+    ],
+    "Kaustav Bose": [
+      "A5088674552"
+    ],
+    "Khaled Jawhar": [
+      "A5000123575"
+    ],
+    "Koichi Wada": [
+      "A5102728563"
+    ],
+    "Konstantinos Georgiou": [
+      "A5020851132",
+      "A5048045969",
+      "A5104807074"
+    ],
+    "Krishnendu Mukhopadhyaya": [
+      "A5048645380"
+    ],
+    "Kristian Hinnenthal": [
+      "A5076271633"
+    ],
+    "Lata Narayanan": [
+      "A5067542317"
+    ],
+    "Laurent Massoulié": [
+      "A5007698196"
+    ],
+    "Leszek Gąsieniec": [
+      "A5052366414"
+    ],
+    "Lijuan Wang": [
+      "A5100436501"
+    ],
+    "Manash Kumar Kundu": [
+      "A5030811069"
+    ],
+    "Manish Kumar": [
+      "A5006344213",
+      "A5013263398",
+      "A5038845271",
+      "A5062946231"
+    ],
+    "Manuel Lafond": [
+      "A5016796629"
+    ],
+    "Maria Gradinariu Potop-Butucaru": [
+      "A5080217489"
+    ],
+    "Maria Kokkou": [
+      "A5093957967"
+    ],
+    "Masafumi Yamashita": [
+      "A5111575379"
+    ],
+    "Masahiro Shibata": [
+      "A5108670540"
+    ],
+    "Maxime Godon": [
+      "A5057273190"
+    ],
+    "Michiko Inoue": [
+      "A5070572924"
+    ],
+    "Nicola Santoro": [
+      "A5044260252"
+    ],
+    "Nicolas Nisse": [
+      "A5057804168"
+    ],
+    "Nikos Giachoudis": [
+      "A5024222008"
+    ],
+    "Nikos Leonardos": [
+      "A5044456685"
+    ],
+    "Oscar Morales-Ponce": [
+      "A5083778759"
+    ],
+    "Othon Michail": [
+      "A5002991731"
+    ],
+    "Paola Flocchini": [
+      "A5030360680"
+    ],
+    "Partha Sarathi Mandal": [
+      "A5000337783",
+      "A5029020046"
+    ],
+    "Pascal Lafourcade": [
+      "A5024799131"
+    ],
+    "Paul G. Spirakis": [
+      "A5011756177"
+    ],
+    "Pavan Poudel": [
+      "A5063357607"
+    ],
+    "Peter Kling": [
+      "A5007675663"
+    ],
+    "Peter Widmayer": [
+      "A5109904634"
+    ],
+    "Pierre Fraigniaud": [
+      "A5071967017"
+    ],
+    "Prabhat Kumar Chand": [
+      "A5056758034"
+    ],
+    "Preeti Sharma": [
+      "A5103089264"
+    ],
+    "Pritam Goswami": [
+      "A5059583611"
+    ],
+    "Przemysław Uznański": [
+      "A5020580102"
+    ],
+    "Qi Wei": [
+      "A5083905079"
+    ],
+    "Quentin Bramas": [
+      "A5054863398"
+    ],
+    "Raja Das": [
+      "A5110818950"
+    ],
+    "Ralf Klasing": [
+      "A5112786437"
+    ],
+    "Ramachandran Vaidyanathan": [
+      "A5066929188"
+    ],
+    "Ranendu Adhikary": [
+      "A5027772980"
+    ],
+    "Rastislav Královič": [
+      "A5056423330"
+    ],
+    "Rik Banerjee": [
+      "A5101351322"
+    ],
+    "Robert Gmyr": [
+      "A5085084886"
+    ],
+    "Roger Wattenhofer": [
+      "A5078339613"
+    ],
+    "Romain Cosson": [
+      "A5021665812"
+    ],
+    "Russell Martin": [
+      "A5102792370",
+      "A5106500064"
+    ],
+    "Rusul J. Alsaedi": [
+      "A5005805229"
+    ],
+    "Ryan Killick": [
+      "A5050565589"
+    ],
+    "Ryota Eguchi": [
+      "A5024410721"
+    ],
+    "Samia Souissi": [
+      "A5059138591"
+    ],
+    "Sarah Cannon": [
+      "A5032733831"
+    ],
+    "Saswata Jana": [
+      "A5075397645"
+    ],
+    "Sayaka Kamei": [
+      "A5071032734",
+      "A5122855939"
+    ],
+    "Sebastian Brandt": [
+      "A5047583476"
+    ],
+    "Sergio Rajsbaum": [
+      "A5005997085"
+    ],
+    "Shantanu Das": [
+      "A5101921230"
+    ],
+    "Shay Kutten": [
+      "A5033442948"
+    ],
+    "Shota Nagahama": [
+      "A5070064811"
+    ],
+    "Shuji Kijima": [
+      "A5050611028"
+    ],
+    "Shunhao Oh": [
+      "A5085855781"
+    ],
+    "Somnath Kundu": [
+      "A5051012372"
+    ],
+    "Sruti Gan Chaudhuri": [
+      "A5004243737"
+    ],
+    "Stefan Dobrev": [
+      "A5060660647"
+    ],
+    "Stéphane Devismes": [
+      "A5004285781"
+    ],
+    "Subhajit Pramanick": [
+      "A5027857227"
+    ],
+    "Subhash Bhagat": [
+      "A5065508245"
+    ],
+    "Sumathi Sivasubramaniam": [
+      "A5036234467"
+    ],
+    "Sunil Shende": [
+      "A5012948179"
+    ],
+    "Supantha Pandit": [
+      "A5002524165"
+    ],
+    "Supratik Mukhopadhyay": [
+      "A5101963514"
+    ],
+    "Suresh Rai": [
+      "A5102126816"
+    ],
+    "Sébastien Bouchard": [
+      "A5014422267"
+    ],
+    "Sébastien Tixeuil": [
+      "A5073883755"
+    ],
+    "Taisuke Izumi": [
+      "A5101050681"
+    ],
+    "Takashi Okumura": [
+      "A5103709729"
+    ],
+    "Tanvir Kaur": [
+      "A5115744787"
+    ],
+    "Thim Strothmann": [
+      "A5009628602"
+    ],
+    "Thomas Gorry": [
+      "A5060428323"
+    ],
+    "Tishya Chhabra": [
+      "A5084383077"
+    ],
+    "Tom Peters": [
+      "A5011655587"
+    ],
+    "Tomasz Radzik": [
+      "A5070579616"
+    ],
+    "Toshimitsu Masuzawa": [
+      "A5075313331"
+    ],
+    "Vincent Villain": [
+      "A5023906766"
+    ],
+    "Xavier Défago": [
+      "A5081892376"
+    ],
+    "Xiaohui Zhang": [
+      "A5044176695",
+      "A5061731552"
+    ],
+    "Xuehou Tan": [
+      "A5023193789"
+    ],
+    "Yann Disser": [
+      "A5021248592"
+    ],
+    "Yinfeng Xu": [
+      "A5113747124"
+    ],
+    "Yoann Dieudonné": [
+      "A5036192968"
+    ],
+    "Yoshiaki Katayama": [
+      "A5079842025"
+    ],
+    "Yuan Liu": [
+      "A5100390915"
+    ],
+    "Yuichi Sudo": [
+      "A5084196039"
+    ],
+    "Yukiko Yamauchi": [
+      "A5103763741"
+    ],
+    "Zahra Derakhshandeh": [
+      "A5030858126"
+    ],
+    "Zohir Bouzid": [
+      "A5025348904"
+    ]
+  },
+  "s2_author_ids": {
+    "Evangelos Kranakis": [
+      "1719732"
+    ],
+    "William K. Moses Jr.": [
+      "2688441",
+      "2273652213"
+    ],
+    "Alfredo Navarra": [
+      "143701240",
+      "2279904039"
+    ],
+    "Costas Busch": [
+      "1932642"
+    ],
+    "Reuven Cohen": [
+      "2114393081"
+    ],
+    "Euripides Markou": [
+      "1793949"
+    ],
+    "Naoki Kitamura": [
+      "2338999530"
+    ],
+    "Moumita Mondal": [
+      "50161258"
+    ],
+    "Caleb Jones": [
+      "2309114389"
+    ],
+    "Shoma Hiraoka": [
+      "2359258422"
+    ]
+  },
+  "last_author_sweep": null
 }

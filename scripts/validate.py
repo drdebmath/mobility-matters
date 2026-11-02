@@ -14,9 +14,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return DATA / "problems" / fam / f"{pid}.json" if fam else DATA / "problems" / f"{pid}.json"
 ROLES = {"introductory", "best", "other", "disputed"}
 STATUSES = {"tight", "near", "gap", "unknown", "impossible"}
 VSTATUS = {"verified", "draft"}
+# kinds of publication, ranked: a paper is cited by its highest-ranked version
+# (journal, else full conference paper, else brief announcement or short paper, else preprint)
+KINDS = {"journal": 4, "book": 4, "conference": 3, "chapter": 3, "thesis": 3, "brief": 2, "preprint": 1}
+REF_FIELDS = {"authors", "title", "kind", "venue", "year", "first_year", "doi", "arxiv", "pdf", "url", "versions", "read", "note", "short", "refcheck_ok", "cited_by_choice"}
+VERSION_FIELDS = {"kind", "venue", "year", "doi", "pdf", "url", "title", "authors"}
 
 errors, warnings = [], []
 err = lambda m: errors.append(m)
@@ -29,6 +39,75 @@ def load(path):
     except Exception as e:  # noqa: BLE001
         err(f"{path.relative_to(ROOT)}: cannot parse JSON: {e}")
         return None
+
+
+def arxiv_year(aid):
+    m = re.match(r"(\d{2})(\d{2})\.\d{4,5}", aid or "") or re.match(r"[a-z-]+(?:\.[A-Z]{2})?/(\d{2})(\d{2})\d{3}", aid or "")
+    return (1900 if int(m.group(1)) > 90 else 2000) + int(m.group(1)) if m else None
+
+
+def check_ref(k, r, refs, dois):
+    """One bibliography entry: fields, the ranking of its versions, and its first appearance."""
+    where = f"references.json: '{k}'"
+    for key in ("authors", "title", "venue", "year", "kind"):
+        if key not in r:
+            err(f"{where} missing '{key}'")
+    for key in sorted(set(r) - REF_FIELDS):
+        err(f"{where} has unknown field '{key}'")
+    if "kind" in r and r["kind"] not in KINDS:
+        err(f"{where}: kind '{r.get('kind')}' is not one of {sorted(KINDS)}")
+    if not (r.get("doi") or r.get("arxiv") or r.get("url") or r.get("pdf")):
+        warn(f"{where} has no doi/arxiv/url/pdf")
+    for key in ("pdf", "url"):
+        if r.get(key) and not str(r[key]).startswith("http"):
+            err(f"{where}: '{key}' must be a URL")
+    years, outranked = [r.get("year", 9999)], False
+    for v in r.get("versions", []):
+        if "ref" in v:
+            if v["ref"] not in refs or v["ref"] == k or len(v) > 1:
+                err(f"{where}: a version given by 'ref' must name another reference and nothing else: {v}")
+            else:
+                years.append(refs[v["ref"]].get("first_year") or refs[v["ref"]].get("year", 9999))
+            continue
+        for key in ("kind", "venue", "year"):
+            if key not in v:
+                err(f"{where}: version {v.get('venue', '?')} missing '{key}'")
+        for key in sorted(set(v) - VERSION_FIELDS):
+            err(f"{where}: version {v.get('venue', '?')} has unknown field '{key}'")
+        if v.get("kind") not in KINDS:
+            err(f"{where}: version {v.get('venue', '?')} has kind '{v.get('kind')}'")
+        elif r.get("kind") in KINDS and KINDS[v["kind"]] > KINDS[r["kind"]]:
+            outranked = True
+            if not r.get("cited_by_choice"):
+                err(f"{where}: version {v.get('venue')} ({v['kind']}) ranks above the cited version ({r['kind']}); cite it instead")
+        if v.get("doi"):
+            other = dois.get(v["doi"].lower())
+            if other:
+                err(f"{where}: version doi {v['doi']} is the doi of '{other}'; write {{\"ref\": \"{other}\"}} instead")
+        if isinstance(v.get("year"), int):
+            years.append(v["year"])
+    if r.get("cited_by_choice") and not outranked:
+        warn(f"{where}: 'cited_by_choice' is set but no version ranks above the cited one")
+    # a version listed twice: the same venue and year (publishers sometimes register two DOIs),
+    # or a version without links that repeats the venue and year of another
+    norm = lambda s: re.sub(r"[^a-z0-9]", "", str(s or "").lower())
+    link = lambda x: any(x.get(f) for f in ("doi", "pdf", "url"))
+    own = [v for v in r.get("versions", []) if "ref" not in v]
+    for i, v in enumerate(own):
+        for w in own[:i]:
+            if v.get("year") != w.get("year"):
+                continue
+            same = norm(v.get("venue")) == norm(w.get("venue"))
+            head = norm(re.split(r"[,(;]", str(v.get("venue")))[0]) == norm(re.split(r"[,(;]", str(w.get("venue")))[0])
+            if same or (head and not (link(v) and link(w))):
+                warn(f"{where}: version {v.get('venue')} ({v.get('year')}) looks like a repeat of {w.get('venue')}; keep one, or say in the venue how they differ")
+    if arxiv_year(r.get("arxiv")):
+        years.append(arxiv_year(r["arxiv"]))
+    first, fy = min(years), r.get("first_year")
+    if fy is None and first < r.get("year", 0):
+        err(f"{where}: a version or the arXiv id dates it to {first}, but it has no 'first_year'")
+    if fy is not None and (fy >= r.get("year", 0) or fy > first):
+        err(f"{where}: first_year {fy} must be the earliest appearance (before {r.get('year')}, at most {first})")
 
 
 def problem_prose(p):
@@ -225,12 +304,9 @@ def main():
     refs = load(DATA / "references.json") or {}
     if index is None:
         return finish()
+    dois = {r["doi"].lower(): k for k, r in refs.items() if r.get("doi")}
     for k, r in refs.items():
-        for key in ("authors", "title", "venue", "year"):
-            if key not in r:
-                err(f"references.json: '{k}' missing '{key}'")
-        if not (r.get("doi") or r.get("arxiv") or r.get("url")):
-            warn(f"references.json: '{k}' has no doi/arxiv/url")
+        check_ref(k, r, refs, dois)
     models = {}
     model_cites = set()
     for mid in index.get("models", []):
@@ -273,10 +349,14 @@ def main():
     for pid in index.get("problems", []):
         if index.get("families") and pid not in fam_of:
             warn(f"index.json: problem '{pid}' belongs to no family")
+    expected = {problem_file(index, pid) for pid in index.get("problems", [])}
+    for pf in sorted((DATA / "problems").rglob("*.json")):
+        if pf not in expected:
+            err(f"{pf.relative_to(ROOT)}: not a registered problem, or not in the folder of its family (data/problems/<family>/<id>.json)")
     used = set(model_cites)
     derived = {}
     for pid in index.get("problems", []):
-        path = DATA / "problems" / f"{pid}.json"
+        path = problem_file(index, pid)
         if not path.exists():
             err(f"index.json lists problem '{pid}' but {path.relative_to(ROOT)} does not exist")
             continue
@@ -356,7 +436,7 @@ def main():
                 if f"[{k}]" in blob:
                     used.add(k)
     for pid in index.get("problems", []):
-        pth = DATA / "problems" / f"{pid}.json"
+        pth = problem_file(index, pid)
         if pth.exists():
             for r in (load(pth) or {}).get("related", []):
                 if r.get("problem") not in index.get("problems", []) or not r.get("relation"):
@@ -378,7 +458,7 @@ def main():
                 if pid not in index.get("problems", []):
                     err(f"index.json: priority {i + 1} names unknown problem '{pid}'")
             for pid, vid in it.get("settings", []):
-                pf = DATA / "problems" / f"{pid}.json"
+                pf = problem_file(index, pid)
                 if not pf.exists() or vid not in [v["id"] for v in json.load(open(pf)).get("variants", [])]:
                     err(f"index.json: priority {i + 1} names unknown setting '{pid}/{vid}'")
             for k in re.findall(r"\[([A-Z][A-Za-z]+\d{4}[A-Za-z0-9]*)\]", it.get("question", "") + it.get("why", "")):
@@ -398,7 +478,7 @@ def main():
         nt = load(npath) or {}
         pm = {}
         for pid in index.get("problems", []):
-            pp = DATA / "problems" / f"{pid}.json"
+            pp = problem_file(index, pid)
             if pp.exists():
                 pm[pid] = (load(pp) or {}).get("model")
         for mid, rows in nt.get("models", {}).items():

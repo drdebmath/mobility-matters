@@ -235,8 +235,28 @@ ol.open li p { margin: 0; }
 .ref { padding: .65rem 0; border-bottom: 1px solid var(--line); scroll-margin-top: 5rem; }
 .ref .key { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
 .ref .title { font-weight: 500; }
-.ref .links a { margin-right: .8rem; font-size: .86rem; }
+.ref .links a { margin-right: .8rem; font-size: .86rem; overflow-wrap: anywhere; }
 .ref:target { background: var(--accent-soft); }
+.ref .versions { margin-top: .2rem; }
+.ref .versions .lbl { color: var(--muted); }
+.ref .versions ul { margin: .1rem 0 0; padding-left: 1.1rem; }
+.ref .versions .links a { font-size: .8rem; margin-right: .6rem; }
+.badge.preprint { background: var(--near-soft); color: var(--near); margin-left: .35rem; }
+.ref .kind { font-size: .74rem; color: var(--muted); margin-left: .45rem; }
+.ref .cats { margin-top: .3rem; }
+.ref .cat { margin: .12rem 0; }
+.ref .cat-model { font-weight: 600; }
+/* filters of the references page, and the paper lists of a model page */
+.ref-filters { display: grid; gap: .55rem; }
+.ref-facet { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .7rem; }
+.ref-facet .lbl { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); min-width: 3.4rem; }
+.chip .n { margin-left: .35em; color: var(--muted); font-size: .9em; }
+.chip.assume .n { color: inherit; opacity: .75; }
+.paper-groups details { border-bottom: 1px solid var(--line); padding: .4rem 0; }
+.paper-groups details:last-child { border-bottom: 0; }
+.paper-groups summary { cursor: pointer; }
+.paper-list { margin: .4rem 0 .5rem; padding-left: 1.2rem; }
+.paper-list li { margin: .25rem 0; }
 
 .axes td:first-child { white-space: nowrap; font-weight: 500; }
 
@@ -713,6 +733,13 @@ details.primer > summary h3 { margin: 0; }
 .foot-links { margin-top: .35rem; }
 .ack-list { margin: 0; padding-left: 1.1rem; }
 .ack-list li { margin: .3rem 0; }
+
+/* changelog: one panel per version, its date above what changed */
+.changelog h2 { font-size: 1.3rem; }
+.changelog h2 time { display: block; font-family: var(--sans); font-size: .76rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .3rem; }
+.changelog h3 { font-family: var(--sans); font-size: .95rem; margin: 1.3rem 0 .3rem; }
+.changelog ul { padding-left: 1.2rem; margin: .3rem 0 .6rem; }
+.changelog li { margin: .35rem 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
 /* ======================================================================

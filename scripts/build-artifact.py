@@ -21,6 +21,11 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return ROOT / "data" / "problems" / fam / f"{pid}.json" if fam else ROOT / "data" / "problems" / f"{pid}.json"
 CACHE = ROOT / "scripts" / ".cache" / "katex"
 KATEX = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11"
 MARKED = "https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"
@@ -59,7 +64,7 @@ def data_bundle():
     bundle = {
         "index": index,
         "models": {m: json.loads((ROOT / f"data/models/{m}.json").read_text(encoding="utf-8")) for m in index["models"]},
-        "problems": {p: json.loads((ROOT / f"data/problems/{p}.json").read_text(encoding="utf-8")) for p in index["problems"]},
+        "problems": {p: json.loads(problem_file(index, p).read_text(encoding="utf-8")) for p in index["problems"]},
         "references": json.loads((ROOT / "data/references.json").read_text(encoding="utf-8")),
     }
     if (ROOT / "data/acknowledgements.json").exists():
@@ -68,6 +73,8 @@ def data_bundle():
         bundle["notation"] = json.loads((ROOT / "data/notation.json").read_text(encoding="utf-8"))
     if (ROOT / "data/overviews").exists():
         bundle["overviews"] = {f.stem: json.loads(f.read_text(encoding="utf-8")) for f in sorted((ROOT / "data/overviews").glob("*.json"))}
+    if (ROOT / "CHANGELOG.md").exists():
+        bundle["changelog"] = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     return json.dumps(bundle, ensure_ascii=False).replace("</", "<\\/")
 
 

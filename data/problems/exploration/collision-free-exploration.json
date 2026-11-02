@@ -1,0 +1,3191 @@
+{
+  "id": "collision-free-exploration",
+  "model": "mobile-agents-on-graphs",
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "variant of",
+    "relation": "Every agent explores the graph as in exploration, and no two agents may ever be at the same node. A single-agent exploration procedure is the building block: with vision of radius 2, two agents run any such procedure with a slowdown of at most a factor $\\log n$ [Bhagat2025Deterministic] (a constant factor is claimed by [Papin2026Deterministic]). Lower bounds for exploring by one agent hold here whenever every agent must visit every node."
+  },
+  "related": [
+    {
+      "problem": "collaborative-exploration",
+      "relation": "When it suffices that every node is visited by some agent, the task is collaborative exploration with the added rule that agents never share a node [Das2025Collisionfree]."
+    }
+  ],
+  "name": "Collision-free exploration",
+  "origin": {
+    "ref": "Czyzowicz2017Collisionfree",
+    "year": 2012,
+    "note": "Formalised by Czyzowicz, Dereniowski, Gąsieniec, Klasing, Kosowski and Pająk for agents on graphs with labelled nodes (a 2012 report; LATIN 2014; Journal of Computer and System Sciences 2017); [Papin2026Deterministic] calls this the first formalisation. Bhagat and Pelc posed it for anonymous graphs [Bhagat2025Deterministic]."
+  },
+  "summary": "Agents start at distinct nodes of a graph and must explore it so that no two agents are ever at the same node; how long does it take, and what must the agents sense of each other?",
+  "statement": "$k \\ge 2$ **agents** start at distinct **nodes** of a connected undirected **graph** $G$ with $n$ nodes and move in synchronous **rounds**: in each round an agent stays or crosses one **edge**. A **collision** is two agents at the same node in the same round; two agents that cross one edge in opposite directions do not collide and do not notice it. Exploration is **collision-free** if no collision ever happens, also with an agent that an **adversary** has not yet woken up. Unless a setting says otherwise, every agent must visit every node and then stop. The agents run the same deterministic algorithm, cannot mark nodes and send no messages; what they perceive of each other (their **vision**) and what they know of $G$ are fixed by the setting, and in some settings an oracle places coloured **pebbles** on nodes before the start. **Time** is the number of rounds from the wake-up of the later agent until every agent has stopped. $X(n)$ is the time of a single-agent exploration procedure for graphs with at most $n$ nodes, used as a building block (polynomial in $n$, for instance with a universal exploration sequence).",
+  "primer": {
+    "intro": "Picture night guards in a museum who must each check every room, where no two guards may ever stand in the same room at the same moment. The museum is a **graph**: its rooms are **nodes** and the doorways between them are **edges**; it has $n$ nodes. The guards are **agents**. They start on distinct nodes and move in synchronous **rounds**: in each round an agent stays where it is or crosses one edge. A **collision** is two agents on the same node in the same round. Two agents that cross the same edge in opposite directions pass each other unnoticed, and that is not a collision. Every agent must visit every node and then stop, without any collision. An **adversary**, an opponent who knows the algorithm, chooses where the agents start and the round in which each one wakes up. The agents run the same deterministic algorithm, cannot mark nodes and send no messages. What they perceive of each other is their **vision**. In the standard version there are two identical agents that see everything within two edges of their node, and that know an upper bound on $n$. In other versions the nodes carry labels and the agents may have a map, or an oracle places coloured **pebbles** on some nodes before the start. We measure **time**: the number of rounds until all agents have stopped.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "One colour per round",
+        "variant": "map-trees",
+        "ref": "Czyzowicz2017Collisionfree",
+        "idea": "Suppose the graph is a tree (a graph without cycles), its nodes carry labels, and every agent has a map but does not know where the others are. Let $\\Delta$ be the largest number of edges at a node.\n1. Every agent computes the same colouring of the edges with $\\Delta$ colours in which no two edges at a node share a colour; a tree always has one.\n2. In round $r$ the colour is $1 + (r-1) \\bmod \\Delta$, so the rounds run through the colours $1, 2, \\dots, \\Delta$ and start again.\n3. In each round every agent crosses the edge of that round's colour at its node, if there is one, and otherwise waits.\n4. After $n\\Delta$ rounds every agent stops.",
+        "analysis": "Suppose two agents ended a round on the same node $w$. An agent that moved came along the only edge of that colour at $w$, and two agents cannot both have come along it, since they started on different nodes. An agent cannot have waited at $w$ either, since $w$ has an edge of that colour. So no collision ever happens (Lemma 3.1). Each agent's walk goes into every branch of the tree and back. After exactly $n\\Delta$ rounds it has visited every node and is back at its start node (Lemma 3.2) [Czyzowicz2017Collisionfree]. On any graph with labelled nodes and a map, the agents run the same procedure on a spanning tree whose largest degree $\\Delta^*$ is as small as possible, in $O(n\\Delta^*)$ rounds. That is optimal up to a constant factor. Finding that tree is NP-hard, but one of largest degree $\\Delta^* + 1$ can be found in polynomial time.",
+        "why_it_matters": "Colouring the edges turns a coordination problem into a timetable that every agent can follow alone, and it is exactly optimal on trees."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Congestion: $n\\Delta$ rounds on every tree",
+        "variant": "map-trees",
+        "ref": "Czyzowicz2017Collisionfree",
+        "idea": "Put an agent on every node of a tree and look at a node $u$ with $\\Delta$ edges.\n1. In each round at most one agent enters $u$, otherwise two would collide there.\n2. Every agent must visit all $\\Delta$ branches at $u$ and come back to its start node. In a tree each branch is reached only through $u$, so every agent enters $u$ at least $\\Delta$ times.\n3. Together the $n$ agents enter $u$ at least $n\\Delta$ times, at most once per round.",
+        "analysis": "So some agent is still moving in round $n\\Delta$, and the colouring algorithm is exactly optimal on every tree (Theorem 3.2) [Czyzowicz2017Collisionfree]. An agent does not know how many others there are, so its walk must also work when every node is occupied, and the bound applies to any number of agents. On a star, one node joined to $n-1$ others, it is $n(n-1)$ rounds. So agents that explore a tree with labelled nodes without a map in $O(n^2)$ rounds are optimal in the worst case.",
+        "why_it_matters": "The bottleneck is a single busy node, the same congestion argument that bounds routing in networks."
+      },
+      {
+        "kind": "impossibility",
+        "title": "With vision of radius 1, two agents collide on a star",
+        "variant": "two-radius-1",
+        "ref": "Bhagat2025Deterministic",
+        "idea": "Take a star: a centre node joined by edges to leaves, nodes with a single edge. Two identical agents start on two leaves and see only their own node, its neighbours and any agent there (vision of radius 1).\n1. From a leaf an agent sees only the centre, so it cannot see the other agent.\n2. The only way out of a leaf is the centre. The algorithm must tell each agent to wait some number of rounds after waking up and then step onto the centre; the number may depend on what the agent sees.\n3. The adversary wakes the agent with the shorter wait later, by the difference between the two waits.",
+        "analysis": "Both agents then step onto the centre in the same round and collide, whatever the algorithm [Bhagat2025Deterministic]. With vision of radius 2, an agent on a leaf also sees the other leaves and any agent on them. Bhagat and Pelc show that two identical agents that know an upper bound on $n$ then explore every graph with more than two nodes without collisions, at most a factor $\\log n$ slower than a single agent. A later preprint reports a flaw in their stopping procedure and gives a faster corrected algorithm [Papin2026Deterministic]. Neither claim is checked here, so the standard setting remains a draft.",
+        "why_it_matters": "It shows what vision buys: one more edge of sight separates impossible from possible for two agents."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected undirected graph $G$ with $n$ nodes that the agents explore",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $G$; nodes are anonymous unless a setting labels them",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a connection between two nodes; at a node $v$ its edges carry the port numbers $0, \\dots, \\deg(v) - 1$",
+      "avoid": [
+        "link",
+        "line"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that runs the common deterministic algorithm; agents are identical",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step, in which every awake agent stays or crosses one edge",
+      "avoid": []
+    },
+    {
+      "term": "collision",
+      "definition": "two agents at the same node in the same round",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "chooses the start nodes, the port numbers and the round in which each agent wakes up",
+      "avoid": []
+    },
+    {
+      "term": "vision",
+      "definition": "what an agent perceives of the other agents: nothing, their presence one edge away, or the nodes, ports and agents within distance 1 or 2",
+      "avoid": []
+    },
+    {
+      "term": "pebble",
+      "definition": "a coloured object that an oracle places on a node before the start, at most one per node",
+      "avoid": [
+        "marker",
+        "token"
+      ]
+    }
+  ],
+  "history": "Czyzowicz, Dereniowski, Gąsieniec, Klasing, Kosowski and Pająk asked how long any number of agents need to explore a graph with labelled nodes without ever sharing a node, every agent returning to its start node; with a map the answer is $n$ times the smallest maximum degree of a spanning tree, up to a constant factor [Czyzowicz2017Collisionfree]. Bhagat and Pelc took the problem to anonymous graphs with two identical agents, where vision of radius 2 is necessary and sufficient [Bhagat2025Deterministic]. Das, Dhar, Gorain and Mahawar replaced most of that vision by coloured pebbles placed by an oracle [Das2025Collisionfree], and Papin claims to remove the logarithmic slowdown of Bhagat and Pelc and to correct their algorithm [Papin2026Deterministic].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds from the wake-up of the later agent until all agents have stopped"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "number of pebble colours the oracle needs, when pebbles are used"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "initial",
+    "node-memory",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "node-ids",
+    "timing",
+    "team",
+    "coverage",
+    "knowledge",
+    "vision",
+    "help",
+    "start",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "team",
+      "name": "Number of agents",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number of agents",
+          "short": "any $k$",
+          "definition": "Any number $k$ of agents, $2 \\le k \\le n$, which they do not know."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two agents",
+          "short": "two agents",
+          "definition": "Exactly two agents."
+        }
+      ],
+      "origin": "Czyzowicz et al. allow any number of agents, unknown to them [Czyzowicz2017Collisionfree]. Bhagat and Pelc restrict to two agents and ask how to handle larger teams, for which symmetry breaking and synchronisation by observing moves become hard [Bhagat2025Deterministic]."
+    },
+    {
+      "id": "coverage",
+      "name": "What must be visited",
+      "values": [
+        {
+          "id": "each",
+          "level": 0,
+          "label": "every agent visits every node",
+          "short": "every agent",
+          "definition": "Every agent must visit every node and stop (in [Czyzowicz2017Collisionfree] also return to its start node)."
+        },
+        {
+          "id": "team",
+          "level": 1,
+          "label": "every node is visited by some agent",
+          "short": "the team",
+          "definition": "Every node must be visited by at least one agent, and all agents stop."
+        }
+      ],
+      "origin": "Czyzowicz et al. and Bhagat and Pelc require every agent to explore [Czyzowicz2017Collisionfree] [Bhagat2025Deterministic]; Bhagat and Pelc ask whether it helps that each node is visited by one agent only. Das et al. require only that the team visits every node [Das2025Collisionfree]."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the graph",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known",
+          "short": "nothing known",
+          "definition": "The agents know nothing about $G$, not even $n$."
+        },
+        {
+          "id": "bound-n",
+          "level": 1,
+          "label": "an upper bound on $n$",
+          "short": "bound on $n$",
+          "definition": "The agents know an upper bound on $n$ ([Das2025Collisionfree] give them $n$ itself)."
+        },
+        {
+          "id": "map",
+          "level": 2,
+          "label": "a map with their own position",
+          "short": "map",
+          "definition": "Every agent knows $G$ and its own start node in it, but not the number or the start nodes of the other agents."
+        }
+      ],
+      "origin": "Czyzowicz et al. compare agents with a map with agents that see only the identifiers of the current node and its neighbours [Czyzowicz2017Collisionfree]. In anonymous graphs an upper bound on $n$ is necessary: without it no team of agents can explore and stop, whatever their vision [Bhagat2025Deterministic]."
+    },
+    {
+      "id": "vision",
+      "name": "Vision of the other agents",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "none: agents never perceive each other",
+          "short": "no vision",
+          "definition": "An agent never perceives another agent."
+        },
+        {
+          "id": "presence",
+          "level": 1,
+          "label": "presence one edge away",
+          "short": "presence",
+          "definition": "An agent notices that the other agent is on a neighbouring node, but not on which one [Das2025Collisionfree]."
+        },
+        {
+          "id": "radius-1",
+          "level": 2,
+          "label": "radius 1",
+          "short": "radius 1",
+          "definition": "An agent sees the subgraph induced by the nodes at distance at most 1, with its port numbers and the agents on these nodes."
+        },
+        {
+          "id": "radius-2",
+          "level": 3,
+          "label": "radius 2",
+          "short": "radius 2",
+          "definition": "An agent sees the subgraph induced by the nodes at distance at most 2, with its port numbers and the agents on these nodes [Bhagat2025Deterministic]."
+        }
+      ],
+      "origin": "With labelled nodes and a map, agents can precompute routes that never meet, so they need not see each other [Czyzowicz2017Collisionfree]. In anonymous graphs, Bhagat and Pelc give vision of radius 2 and prove that radius 1 does not suffice; agents then also communicate by watching each other move [Bhagat2025Deterministic]. Das et al. weaken vision to the presence of the other agent one edge away and compensate with pebbles [Das2025Collisionfree]."
+    },
+    {
+      "id": "help",
+      "name": "Help from an oracle",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no help",
+          "short": "no help",
+          "definition": "Nothing is placed on the nodes."
+        },
+        {
+          "id": "pebbles",
+          "level": 1,
+          "label": "coloured pebbles placed by an oracle",
+          "short": "pebbles",
+          "definition": "Before the start an oracle that knows $G$, the start nodes and the wake-up rounds places at most one pebble on each node; pebbles have colours, and an agent sees the pebble of the node it is at [Das2025Collisionfree]."
+        }
+      ],
+      "origin": "Das, Dhar, Gorain and Mahawar let an oracle place coloured pebbles, as in advice-based models of mobile agents, and ask for the fewest colours [Das2025Collisionfree]."
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "values": [
+        {
+          "id": "delay",
+          "level": 0,
+          "label": "the adversary wakes the agents",
+          "short": "adversarial wake-up",
+          "definition": "Each agent starts in a round chosen by the adversary; until then it stays at its start node, where no other agent may enter."
+        },
+        {
+          "id": "simultaneous",
+          "level": 1,
+          "label": "simultaneous start",
+          "short": "simultaneous start",
+          "definition": "All agents start in the same round."
+        }
+      ],
+      "origin": "Czyzowicz et al. start all agents together [Czyzowicz2017Collisionfree]. Bhagat and Pelc let the adversary wake the agents; on the graph with two nodes this alone makes the task impossible [Bhagat2025Deterministic]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "map-trees",
+      "title": "Labelled trees, with a map, any number of agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "node-ids": "labelled",
+        "start": "simultaneous",
+        "knowledge": "map",
+        "topology": "tree"
+      },
+      "summary": "Agents that know the tree and their position explore it without collisions in exactly $n\\Delta$ rounds, using a colouring of the edges with $\\Delta$ colours.",
+      "statement": "Nodes carry the distinct identifiers $1, \\dots, n$, and an agent sees those of its node and of the neighbours. Every agent must return to its start node.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "n\\Delta",
+          "ref": "Czyzowicz2017Collisionfree",
+          "bottleneck": "congestion at a node",
+          "preconditions": [
+            "$n$ agents, one on every node",
+            "a node $u$ of degree $\\Delta$: in every round at most one agent enters $u$, and every agent enters $u$ at least $\\Delta$ times because its route is closed and $G$ is a tree (Theorem 3.2)"
+          ],
+          "note": "Theorem 3.2: the bound holds for every tree."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Collisionfree",
+          "role": "best",
+          "time": "n\\Delta",
+          "note": "Introductory and current best (Proposition 3.1, Theorem 3.2): from a colouring of the edges with $\\Delta$ colours, in each round the agents cross the edges of one colour class, which form a matching, so no two agents meet."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $n\\Delta$ rounds."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No pebbles."
+        }
+      },
+      "open": [],
+      "notes": "Up to constant factors the bounds also hold if agents need not return to their start nodes [Czyzowicz2017Collisionfree]. Checked against the full text (the 2012 report on HAL; theorem numbers refer to it).",
+      "status": "verified"
+    },
+    {
+      "id": "map-graphs",
+      "title": "Labelled graphs, with a map, any number of agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "node-ids": "labelled",
+        "start": "simultaneous",
+        "knowledge": "map"
+      },
+      "summary": "With a map, collision-free exploration of a graph takes $\\Theta(n\\Delta^*)$ rounds, where $\\Delta^*$ is the smallest maximum degree of a spanning tree; computing the exact optimum is NP-hard.",
+      "statement": "As in the setting on trees. $\\Delta^*$ is the smallest maximum degree of a spanning tree of $G$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n\\Delta^*)",
+          "ref": "Czyzowicz2017Collisionfree",
+          "bottleneck": "congestion at a node",
+          "preconditions": [
+            "$n$ agents, one on every node",
+            "the fractional relaxation of the linear program for a spanning tree of minimum degree bounds the number of rounds (Theorem 3.4)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Collisionfree",
+          "role": "best",
+          "time": "O(n\\Delta^*)",
+          "note": "Introductory and current best (Proposition 3.3, Theorem 3.4): explore a spanning tree of minimum degree as on trees. That tree is NP-hard to compute; one of degree at most $\\Delta^*+1$, computable in polynomial time, gives $n(\\Delta^*+1)$ rounds. Deciding whether the optimal time is at most a given number is NP-complete (Proposition 3.5)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n\\Delta^*)$ for every graph."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No pebbles."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text (the 2012 report on HAL).",
+      "status": "verified"
+    },
+    {
+      "id": "labelled-trees",
+      "title": "Labelled trees, no knowledge, any number of agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "node-ids": "labelled",
+        "start": "simultaneous",
+        "topology": "tree"
+      },
+      "summary": "Without a map or a bound on $n$, agents on a tree with labelled nodes explore without collisions in $O(n^2)$ rounds, which is optimal in the worst case.",
+      "statement": "Nodes carry the distinct identifiers $1, \\dots, n$, and an agent sees those of its node and of the neighbours; the agents are not told $n$ or anything else about the tree. Every agent must return to its start node.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Czyzowicz2017Collisionfree",
+          "bottleneck": "congestion at a node",
+          "preconditions": [
+            "a star: even with a map, $n\\Delta = n(n-1)$ rounds are needed (Theorem 3.2)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Collisionfree",
+          "role": "best",
+          "time": "O(n^2)",
+          "note": "Introductory and current best (Theorem 4.1): an edge is coloured by the sum of the identifiers of its ends, which every agent sees; in phases that double a bound on the identifiers, the agents cross the edges of one colour at a time, and at the end every agent retraces its moves."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ in the worst case over trees with $n$ nodes."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No pebbles."
+        }
+      },
+      "open": [],
+      "notes": "The lower bound specialises Theorem 3.2 to a star. Checked against the full text (the 2012 report on HAL).",
+      "status": "verified"
+    },
+    {
+      "id": "labelled",
+      "title": "Labelled graphs, no knowledge, any number of agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "node-ids": "labelled",
+        "start": "simultaneous"
+      },
+      "summary": "Without a map or a bound on $n$, agents on a graph with labelled nodes explore without collisions in $O(n^5\\log n)$ rounds, against $\\Omega(n^2)$.",
+      "statement": "As in the setting on trees, on any graph.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Czyzowicz2017Collisionfree",
+          "bottleneck": "congestion at a node",
+          "preconditions": [
+            "a star, as on trees (Theorem 3.2)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2017Collisionfree",
+          "role": "best",
+          "time": "O(n^5\\log n)",
+          "note": "Introductory and current best (Theorem 4.2): the tree algorithm with universal exploration sequences in place of the tree traversal."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(n^5\\log n)$ against $\\Omega(n^2)$."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No pebbles."
+        }
+      },
+      "open": [
+        "Close $O(n^5\\log n)$ against $\\Omega(n^2)$ for agents without a map on graphs with labelled nodes."
+      ],
+      "notes": "Checked against the full text (the 2012 report on HAL).",
+      "status": "verified"
+    },
+    {
+      "id": "anonymous-no-bound",
+      "title": "Anonymous graphs, nothing known",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "vision": "radius-2",
+        "start": "simultaneous"
+      },
+      "summary": "In anonymous graphs, agents that know no bound on $n$ cannot explore and stop, whatever their number and their vision.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Bhagat2025Deterministic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "a ring whose ports are numbered $0, 1, 0, 1, \\dots$ clockwise, with the agents started together, each one more than the vision radius away from the next: in every round all agents see the same thing and none sees another, so an algorithm that stops after a fixed number of rounds leaves nodes of large enough rings unvisited (Section 4)",
+            "holds for any number of agents and any vision radius"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "For every team and vision."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Impossible without pebbles."
+        }
+      },
+      "open": [],
+      "notes": "With labelled nodes the task is solvable without knowing $n$ [Czyzowicz2017Collisionfree]. Checked against the full text of [Bhagat2025Deterministic] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "two-radius-2",
+      "title": "Two agents, anonymous graphs, vision of radius 2",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "knowledge": "bound-n",
+        "vision": "radius-2"
+      },
+      "summary": "Two identical agents that see two edges around them and know a bound on $n$ explore any graph with more than two nodes without collisions, at most a factor $\\log n$ slower than one agent.",
+      "statement": "Nodes are anonymous, the adversary wakes the agents, and the graph has at least three nodes: on two nodes the adversary's wake-up alone forces a collision [Bhagat2025Deterministic].",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bhagat2025Deterministic",
+          "role": "introductory",
+          "time": "O(X(n)\\log n)",
+          "note": "Theorem 3.1: each agent follows a single-agent exploration walk; when the agents come within distance 2 they synchronise and then take turns, each step of the walk costing $O(\\log n)$ rounds of signalling by moves. Any single-agent procedure can be used."
+        },
+        {
+          "ref": "Papin2026Deterministic",
+          "role": "best",
+          "time": "O(X(n))",
+          "assumes": [
+            "vision of radius 2 (the model section says nodes at distance less than 2; see the notes)"
+          ],
+          "note": "Theorem 9.1: at most $6X(n) + O(1)$ rounds after the later wake-up, by a priority rule that lets both agents move in the same round. The paper also reports that the stopping procedure of [Bhagat2025Deterministic] can lead to a collision when the agents finish their walks in different rounds (Section 3). Not checked here."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound beyond exploring by one agent, which no collision-free algorithm can beat [Bhagat2025Deterministic]."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No pebbles."
+        }
+      },
+      "open": [
+        "Can two agents explore without collisions as fast as one agent explores alone? Asked by [Bhagat2025Deterministic]; [Papin2026Deterministic] claims a constant factor.",
+        "For which number of agents below $n$ is collision-free exploration of anonymous graphs feasible, and with which vision radius [Bhagat2025Deterministic]?"
+      ],
+      "notes": "Draft because the two papers disagree: Papin reports a collision in the stopping procedure of Bhagat and Pelc and gives a corrected algorithm, but his model section describes vision of the nodes at distance less than 2, under which two agents cannot explore a star [Bhagat2025Deterministic]; his algorithm reuses Bhagat and Pelc's synchronisation, which needs radius 2. Neither the reported collision nor the corrected algorithm was checked here. [Bhagat2025Deterministic] read in arXiv v1 (2024); [Papin2026Deterministic] is a preprint.",
+      "status": "draft"
+    },
+    {
+      "id": "two-radius-1",
+      "title": "Two agents, anonymous graphs, vision of radius 1",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "knowledge": "bound-n",
+        "vision": "radius-1"
+      },
+      "summary": "With vision of radius 1, two identical agents cannot explore a star without colliding.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Bhagat2025Deterministic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "any star, with the agents on two leaves: both see the same thing until one moves, and the adversary delays one agent's wake-up so that both reach the centre in the same round (Section 4)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "On every star."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Impossible without pebbles."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Bhagat2025Deterministic] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "two-presence",
+      "title": "Two agents sensing presence, no pebbles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "knowledge": "bound-n",
+        "coverage": "team",
+        "vision": "presence"
+      },
+      "summary": "Two identical agents that only sense each other's presence cannot explore even a path of three nodes without help.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Das2025Collisionfree",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "a path of three nodes with the agents on its ends, started together: they act alike, so they either collide in the middle or never visit it (Section 1.2)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Even with simultaneous start."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Impossible without pebbles."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Das2025Collisionfree] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "two-presence-pebbles",
+      "title": "Two agents sensing presence, with coloured pebbles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "knowledge": "bound-n",
+        "coverage": "team",
+        "vision": "presence",
+        "help": "pebbles"
+      },
+      "summary": "With pebbles placed by an oracle, two agents that only sense each other's presence explore any graph without collisions using three colours; one colour does not suffice.",
+      "statement": "The agents know $n$.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "Das2025Collisionfree",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "three graphs, each a 4-cycle with a chord between the two start nodes and differently numbered ports, which the agents cannot tell apart at the start: with pebbles of one colour, every algorithm collides or leaves a node unvisited in one of them (Lemma 2.1 for pebbles on both start nodes or on neither, Theorem 2.1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2025Collisionfree",
+          "role": "best",
+          "colours": "3",
+          "time": "O(\\Delta^D)",
+          "note": "Introductory and current best (Theorem 2.2): the pebbles break the symmetry between the start nodes and mark safe routes; the time is exponential in the diameter (Section 2.3)."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "2 or 3."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Exponential; no lower bound."
+        }
+      },
+      "open": [
+        "Do two colours suffice on every graph [Das2025Collisionfree]?",
+        "How fast can two agents explore with three colours [Das2025Collisionfree]?"
+      ],
+      "notes": "Read in arXiv v1 (2024); theorem numbers refer to it.",
+      "status": "verified"
+    },
+    {
+      "id": "two-presence-pebbles-bipartite",
+      "title": "Two agents sensing presence, with coloured pebbles, bipartite graphs",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "team": "two",
+        "knowledge": "bound-n",
+        "coverage": "team",
+        "vision": "presence",
+        "help": "pebbles",
+        "topology": "bipartite"
+      },
+      "summary": "On bipartite graphs two colours of pebbles suffice, in polynomial time, and then each agent even visits every node.",
+      "statement": "The agents know $n$.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "1",
+          "ref": "Das2025Collisionfree",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "without pebbles the path of three nodes, which is bipartite, cannot be explored (Section 1.2)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2025Collisionfree",
+          "role": "best",
+          "colours": "2",
+          "time": "\\mathrm{poly}(n)",
+          "note": "Introductory and current best (Theorem 2.3): the agents follow a universal exploration sequence for $n$ nodes, and the two colours and the bipartition keep them apart; every node is visited by both agents."
+        }
+      ],
+      "optimality": {
+        "colours": {
+          "status": "tight",
+          "note": "1 or 2."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound."
+        }
+      },
+      "open": [],
+      "notes": "Read in arXiv v1 (2024).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Collision-free exploration of a tree with a map, Algorithm Tree-Exploration of [Czyzowicz2017Collisionfree]: every agent computes the same colouring of the edges with $\\Delta = 3$ colours (no two edges at a node share a colour). In round $r$ the colour is $1 + (r-1) \\bmod \\Delta$ (thick edges), and every agent crosses the edge of that colour at its node if there is one, otherwise it waits. The edges of one colour share no node, so two agents can only swap across an edge, which is not a collision. After $n\\Delta = 18$ rounds every agent has visited every node and is back at its start node, and no algorithm is faster on this tree.",
+    "view": [
+      100,
+      50
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          12,
+          40
+        ],
+        "c": [
+          12,
+          12
+        ],
+        "b": [
+          36,
+          26
+        ],
+        "d": [
+          64,
+          26
+        ],
+        "e": [
+          88,
+          40
+        ],
+        "f": [
+          88,
+          12
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "b",
+          "d"
+        ],
+        [
+          "d",
+          "e"
+        ],
+        [
+          "d",
+          "f"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          22.39,
+          30.24
+        ],
+        "s": "1",
+        "c": "l1",
+        "size": 2.8
+      },
+      {
+        "t": "text",
+        "p": [
+          22.39,
+          21.76
+        ],
+        "s": "2",
+        "c": "l2",
+        "size": 2.8
+      },
+      {
+        "t": "text",
+        "p": [
+          50.0,
+          22.8
+        ],
+        "s": "3",
+        "c": "l4",
+        "size": 2.8
+      },
+      {
+        "t": "text",
+        "p": [
+          77.61,
+          30.24
+        ],
+        "s": "1",
+        "c": "l1",
+        "size": 2.8
+      },
+      {
+        "t": "text",
+        "p": [
+          74.39,
+          16.24
+        ],
+        "s": "2",
+        "c": "l2",
+        "size": 2.8
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "d",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "e",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 0",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 1 of 6,  agent 2: 1 of 6,  agent 3: 1 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ],
+        "label": "Start: a map with a 3-colouring of the edges; agents on three nodes"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "e",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 1, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 2 of 6,  agent 2: 2 of 6,  agent 3: 2 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ],
+        "label": "Round 1, colour 1: agents 2 and 3 cross the same edge; no collision"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "e",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "f",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 2, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 3 of 6,  agent 2: 2 of 6,  agent 3: 3 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ],
+        "label": "Round 2, colour 2: an agent with no edge of that colour waits"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "e",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "f",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 3, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 3 of 6,  agent 2: 2 of 6,  agent 3: 3 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "d",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "f",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 4, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 3 of 6,  agent 2: 2 of 6,  agent 3: 3 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "f",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 5, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 3 of 6,  agent 2: 3 of 6,  agent 3: 3 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "f",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 6, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 4 of 6,  agent 2: 3 of 6,  agent 3: 4 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "e",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "f",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 7, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 5 of 6,  agent 2: 3 of 6,  agent 3: 5 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "e",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "d",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 8, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 5 of 6,  agent 2: 3 of 6,  agent 3: 5 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "e",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 9, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 5 of 6,  agent 2: 4 of 6,  agent 3: 5 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 10, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 5 of 6,  agent 2: 5 of 6,  agent 3: 5 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "f",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 11, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 5 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "f",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 12, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 5 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "f",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 13, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 5 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 14, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 6 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 15, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 6 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "e",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 16, colour 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 6 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "e",
+            "k": "agent",
+            "l": "3",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 17, colour 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 6 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 2.4
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "d",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "e",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              46
+            ],
+            "s": "round 18, colour 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              4
+            ],
+            "s": "nodes visited:  agent 1: 6 of 6,  agent 2: 6 of 6,  agent 3: 6 of 6",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                12,
+                40
+              ],
+              [
+                36,
+                26
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                12,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                36,
+                26
+              ],
+              [
+                64,
+                26
+              ]
+            ],
+            "c": "l4",
+            "w": 2.4
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                40
+              ]
+            ],
+            "c": "l1",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                64,
+                26
+              ],
+              [
+                88,
+                12
+              ]
+            ],
+            "c": "l2",
+            "w": 1.0
+          }
+        ],
+        "label": "Final, round nΔ = 18: every agent visited all 6 nodes and is back home"
+      }
+    ]
+  }
+}

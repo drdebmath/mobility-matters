@@ -1,0 +1,1250 @@
+{
+  "id": "energy-delivery",
+  "model": "mobile-agents-on-graphs",
+  "name": "Delivery by energy-constrained agents",
+  "origin": {
+    "ref": "Chalopin2013Data",
+    "year": 2013,
+    "note": "Chalopin, Das, Mihalák, Penna and Widmayer first studied collaborative delivery, as [Chalopin2021Collaborative] reports (ALGOSENSORS 2013). Anaya et al. had treated the transfer between two points of a path as part of convergecast with equal budgets (DISC 2012) [Anaya2014Convergecast]."
+  },
+  "summary": "Agents with energy budgets, placed in a weighted graph, must carry a message from a source node to a target node, handing it over when they meet: when can a planner find a schedule quickly, and by how much must the budgets grow?",
+  "statement": "$k$ **agents** start at nodes of a connected undirected **graph** $G$ with $n$ **nodes** and $m$ **edges**; every edge $e$ has a positive **weight** $\\mathrm{wt}(e)$, its length. Agent $i$ has a **budget** $B_i$: it can travel a total distance of at most $B_i$, also along parts of edges. A **message** lies at a **source** node $v_s$ and must reach a **target** node $v_t$. An agent can pick the message up where it is, carry it, and drop it anywhere (at a node or inside an edge), where another agent can pick it up; agents need not return to their start nodes. A **planner** that knows $G$, the start nodes and the budgets computes a **schedule**: which agents move, and where each one picks up and drops the message. The task is to decide whether a schedule exists and to find one. **Time** is the running time of the planner. The **budget factor** $\\gamma$ is that of a planner that runs in polynomial time and either correctly reports that no schedule exists or finds one in which every agent may travel $\\gamma B_i$ (resource augmentation); with equal budgets $B_i = B$, it is the ratio between the budget the planner uses and the smallest budget that admits a schedule.",
+  "primer": {
+    "intro": "Picture couriers spread over a town, each able to walk only a limited total distance, who must carry a letter from one place to another, handing it over when two of them meet. The town is a **graph**: places are **nodes**, roads are **edges**, and each edge has a **weight**, its length. The couriers are **agents**, and agent $i$ has a **budget** $B_i$, the total distance it may travel. The letter is the **message**. It lies at the **source** node $v_s$ and must reach the **target** node $v_t$. An agent can pick the message up where it stands, carry it, and drop it anywhere, even partway along an edge, where another agent can pick it up. Agents need not go back to where they started. A **planner**, a program that knows the graph, the start nodes and the budgets, must decide whether a **schedule** exists and find one. A schedule says which agents move and where each one picks up and drops the message. We measure the planner's running **time**. For a fast planner that is allowed to enlarge the budgets, we also measure the **budget factor**: how much it must enlarge them. In the standard version the graph is arbitrary and every agent has its own budget.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "On a path with equal budgets, push the message as far as possible",
+        "variant": "path-uniform",
+        "ref": "Anaya2014Convergecast",
+        "idea": "Let the graph be a path, its nodes in a row, with $v_s$ to the left of $v_t$, and let all budgets be equal.\n1. Take the agents in the order of their start nodes, from left to right.\n2. The current agent walks to the message, picks it up and carries it to the right until its budget is used up, then drops it.\n3. If it reaches the start node of the next agent on the way, it hands the message over there instead. The next agent still has its whole budget, so it can carry the message at least as far.\n4. A schedule exists exactly when the message reaches $v_t$.",
+        "analysis": "Each agent is used once, so once the agents are sorted the planner needs $O(k)$ steps for $k$ agents [Anaya2014Convergecast]. The greedy schedule is enough because of an exchange argument (Lemma 1): if some schedule exists, then one exists in which the agents carry the message in order of position, each pushing it as far as possible. Equal budgets matter. When budgets differ, the planner must choose which agents to use, and delivery is NP-hard already on a path [Chalopin2014Line]. That hardness is weak: it needs budgets that are large numbers.",
+        "why_it_matters": "It is the building block on which [Anaya2014Convergecast] base convergecast and broadcast, and the easy case against which the hard ones are measured."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Triple the budgets: a chain of reaches",
+        "variant": "general",
+        "ref": "Chalopin2013Data",
+        "idea": "Call the **reach** of agent $i$ the set of all points within distance $B_i$ of its start node.\n1. Every hand-over point lies in the reach of both agents involved, $v_s$ in the reach of the first agent and $v_t$ in the reach of the last. So if no chain of agents, each reach meeting the next one, joins $v_s$ to $v_t$, no schedule exists, and the planner says so.\n2. Otherwise the planner takes such a chain and picks a meeting point in each pair of consecutive reaches.\n3. Each agent of the chain walks to the previous meeting point (or to $v_s$), picks up the message, walks back to its start node, and then walks to the next meeting point (or to $v_t$).",
+        "analysis": "Each of the three walks stays inside the agent's reach, so agent $i$ travels at most $3B_i$. Finding a chain is a search in a graph whose nodes are the agents, so it takes polynomial time. Whenever the original budgets allow a schedule, the planner succeeds with budgets three times larger [Chalopin2013Data]. Unless P = NP, no polynomial-time planner can make do with any smaller factor [Bartschi2020Collaborative]. When all budgets are equal, doubling them is enough.",
+        "why_it_matters": "It locates the difficulty: deciding whether agents can reach each other is easy, and only the exact use of every budget is hard."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Hard choice: who carries which stretch",
+        "variant": "general",
+        "ref": "Chalopin2013Data",
+        "idea": "Start from a puzzle known to be hard, **3-partition**: split $3z$ given numbers into $z$ groups of three with the same sum. Build a graph from it.\n1. A path from $v_s$ to $v_t$ is made of $z$ stretches whose length is that sum, separated by single edges. On each separating edge sits an extra agent with budget 1, which can carry the message across it.\n2. For each number $a$ there is one agent. It spends a fixed amount to reach any node of the path, and its budget then lets it carry the message at most $a$ edges further.\n3. The path is so long that every agent must spend its whole budget on it. So the agents that carry the message across each stretch have numbers adding up to its length, and a schedule exists exactly when the numbers can be split.",
+        "analysis": "A fast planner for delivery would therefore solve 3-partition, which is impossible unless P = NP [Chalopin2013Data]. The numbers in 3-partition can be kept small, so delivery stays hard when every edge has weight 1 (it is strongly NP-hard). Equal budgets do not help either: each agent first walks a private path whose length makes up the difference. The hard part is choosing the order of the agents. Once the order is fixed, a planner finds a schedule in polynomial time [Bartschi2020Collaborative].",
+        "why_it_matters": "It is the reason this problem is studied through budget factors and special graphs rather than exact fast planners."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected undirected graph $G$ with $n$ nodes and $m$ edges, known to the planner",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $G$; the agents start at nodes",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a connection between two nodes, with a weight",
+      "avoid": [
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "weight",
+      "definition": "the positive length $\\mathrm{wt}(e)$ of an edge; an agent spends that much of its budget to cross it",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity with a budget, moved according to the schedule",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "budget",
+      "definition": "$B_i$, the largest total distance agent $i$ may travel",
+      "avoid": [
+        "battery",
+        "power",
+        "range"
+      ]
+    },
+    {
+      "term": "message",
+      "definition": "the item to be carried from the source to the target",
+      "avoid": [
+        "package",
+        "packet"
+      ]
+    },
+    {
+      "term": "source",
+      "definition": "the node $v_s$ where the message lies at the start",
+      "avoid": []
+    },
+    {
+      "term": "target",
+      "definition": "the node $v_t$ that the message must reach",
+      "avoid": [
+        "destination"
+      ]
+    },
+    {
+      "term": "planner",
+      "definition": "a centralised algorithm that knows the graph, the start nodes and the budgets",
+      "avoid": [
+        "scheduler"
+      ]
+    },
+    {
+      "term": "schedule",
+      "definition": "which agents move, and where each one picks up and drops the message",
+      "avoid": [
+        "strategy"
+      ]
+    }
+  ],
+  "history": "Anaya, Chalopin, Czyzowicz, Labourel, Pelc and Vaxès studied agents with equal budgets that gather information (convergecast) or spread it (broadcast) by meeting, and, as a building block, carrying information between two points of a path [Anaya2014Convergecast]. Chalopin, Das, Mihalák, Penna and Widmayer posed delivery from a source to a target with individual budgets on arbitrary graphs, showed it strongly NP-hard even with equal budgets, gave resource-augmented planners and a 2-approximation of the smallest equal budget, and introduced delivery along a fixed path [Chalopin2013Data]; Chalopin, Jacob, Mihalák and Widmayer showed it weakly NP-hard already on a path [Chalopin2014Line]. Bärtschi et al. showed it strongly NP-hard on planar graphs, made the factor 3 tight, and introduced returning delivery [Bartschi2020Collaborative]. Later work fixed the path of the message [Chalopin2021Collaborative], let the agents exchange energy [Czyzowicz2016Communication], and minimised the total energy of agents with different consumption rates [Bartschi2017EnergyEfficient].",
+  "related": [
+    {
+      "problem": "collaborative-exploration",
+      "relation": "Energy-constrained agents also explore graphs together: with budgets in unknown trees [Bampas2017Maximal], and with energy sharing in known graphs [Czyzowicz2021Graph]; both are listed there as further reading."
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "running time of the planner"
+    },
+    {
+      "id": "budget",
+      "name": "Budget factor",
+      "description": "factor by which a polynomial-time planner enlarges the budgets (resource augmentation), or its approximation ratio for the smallest equal budget"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "algorithm",
+    "faults",
+    "communication",
+    "timing",
+    "node-memory",
+    "node-ids",
+    "initial",
+    "topology"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "graph",
+    "budgets"
+  ],
+  "axes": [
+    {
+      "id": "graph",
+      "name": "Graph class",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "any connected graph",
+          "short": "any graph",
+          "definition": "$G$ is any connected undirected graph with positive edge weights."
+        },
+        {
+          "id": "planar",
+          "level": 1,
+          "label": "planar graphs",
+          "short": "planar",
+          "definition": "$G$ is planar."
+        },
+        {
+          "id": "path",
+          "level": 2,
+          "label": "paths",
+          "short": "path",
+          "definition": "$G$ is a path, equivalently a segment of the line with the agents, $v_s$ and $v_t$ on it."
+        }
+      ],
+      "origin": "Chalopin, Das, Mihalák, Penna and Widmayer posed delivery on arbitrary graphs and left it open on paths with different budgets and on trees [Chalopin2013Data]. Anaya et al. carried information along a path with equal budgets and asked whether the task is hard on trees [Anaya2014Convergecast]; Chalopin, Jacob, Mihalák and Widmayer found it hard on a path once budgets differ [Chalopin2014Line], and Bärtschi et al. showed hardness on planar graphs [Bartschi2020Collaborative]."
+    },
+    {
+      "id": "budgets",
+      "name": "Budgets",
+      "values": [
+        {
+          "id": "individual",
+          "level": 0,
+          "label": "budgets may differ",
+          "short": "any budgets",
+          "definition": "Each agent $i$ has its own budget $B_i$."
+        },
+        {
+          "id": "uniform",
+          "level": 1,
+          "label": "equal budgets",
+          "short": "equal budgets",
+          "definition": "All agents have the same budget $B$."
+        }
+      ],
+      "origin": "Anaya et al. give all agents the same power [Anaya2014Convergecast]; Chalopin et al. allow different budgets [Chalopin2013Data], which alone makes delivery on a path NP-hard [Chalopin2014Line]. Chalopin, Das, Disser, Labourel and Mihalák call agents with equal budgets homogeneous [Chalopin2021Collaborative]."
+    }
+  ],
+  "further": [
+    {
+      "ref": "Bartschi2017EnergyEfficient",
+      "note": "Minimises the total energy of agents that spend energy at different rates, without budgets, for several messages: one message in $O(|V|^3)$ time, collaboration helps by at most a factor 2, and a $4\\max_{i,j} w_i/w_j$-approximation with unit capacities (their $w_i$ are rates). Model and contributions read (arXiv v1)."
+    },
+    {
+      "ref": "Czyzowicz2016Communication",
+      "note": "Agents that may hand over energy when they meet: delivery, convergecast and broadcast take linear time on paths and polynomial time on trees, and stay NP-complete on arbitrary graphs. Theorem statements read (arXiv v1); summarised in the notes of the general setting."
+    },
+    {
+      "ref": "Czyzowicz2019Energyoptimal",
+      "note": "Broadcast without budgets: $k$ agents at the root of an edge-weighted tree, one node holds a message that must reach every node, agents carry it on and need not return, and the total distance travelled is minimised. A greedy choice of the leaves where agents end computes the optimum in $O(n\\log n)$ time for any $k$ (Theorem 1), and in $O(n)$ time when $k$ is at least the number of leaves (Theorem 2); the same applies to exploration. Read (model and theorems)."
+    },
+    {
+      "ref": "Czyzowicz2021Gossiping",
+      "note": "Gossiping with energy exchange: every node of an edge-weighted tree holds a packet, $k$ agents placed anywhere with individual budgets carry copies of all packets they have seen and may hand over energy when they meet; can every packet reach every node? Some optimal strategy is a convergecast to one node followed by a broadcast (Theorem 7), and an $O(k^2n^2)$-time algorithm finds a cheapest strategy whenever one exists (Theorem 8). Read (model and theorems)."
+    }
+  ],
+  "variants": [
+    {
+      "id": "general",
+      "title": "Arbitrary graphs",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected"
+      },
+      "summary": "Deciding whether a schedule exists is strongly NP-hard; tripling the budgets makes it polynomial, and no smaller factor does unless P = NP.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{NP-hard}",
+          "ref": "Chalopin2013Data",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "strongly NP-complete (Theorem 1), by a reduction from 3-partition with polynomially bounded numbers",
+            "holds even on unweighted graphs and with equal budgets"
+          ]
+        },
+        {
+          "measure": "budget",
+          "bound": "3",
+          "ref": "Bartschi2020Collaborative",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "no polynomial-time planner with factor $3 - \\varepsilon$, for any $\\varepsilon > 0$, unless P = NP (Theorem 6), by a reduction from 3SAT built on the planar construction"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chalopin2013Data",
+          "role": "best",
+          "budget": "\\min\\{3,\\ 1+\\max_{i,j} B_i/B_j\\}",
+          "note": "Introductory and current best (Corollary 1). Call the points within distance $B_i$ of agent $i$'s start node its reach. If no chain of agents with overlapping reaches joins $v_s$ to $v_t$, no schedule exists; otherwise each agent of the chain fetches the message in the reach of the previous one, returns to its start node and carries the message into the reach of the next one, which costs at most $3B_i$ (Theorem 3). The factor $1+\\max_{i,j}B_i/B_j$ comes from the 2-approximation for equal budgets. Their $R_i$ is $B_i$ here, and their $\\Delta$ is $\\max_{i,j}B_i/B_j$."
+        },
+        {
+          "ref": "Bartschi2020Collaborative",
+          "role": "best",
+          "time": "\\text{poly}(n, m)",
+          "assumes": [
+            "$k$ constant (Corollary 1)"
+          ],
+          "note": "Theorem 7: if the order in which the agents carry the message is fixed, the planner computes, agent by agent, the points where the message can be, in $O(k(n+m)(n\\log n + m))$ time; trying every order gives Corollary 1. [Chalopin2013Data] had shown this when agents hand the message over only at nodes (Theorem 2). The hardness thus lies in choosing the order."
+        }
+      ],
+      "optimality": {
+        "budget": {
+          "status": "tight",
+          "note": "Factor 3 against $3-\\varepsilon$ (unless P = NP)."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Strongly NP-hard; exact planners are known to run in polynomial time only for a constant number of agents."
+        }
+      },
+      "open": [
+        "What is the complexity of delivering several messages at once, for instance on paths? Raised in [Bartschi2020Collaborative]."
+      ],
+      "notes": "**Returning delivery.** Bärtschi, Chalopin, Das, Disser, Geissmann, Graf, Labourel and Mihalák also require every agent to come back to its start node [Bartschi2020Collaborative]. This variant is not a setting here, since neither variant's schedules or hardness carry over to the other. On trees it takes $O(n + k\\log k)$ time: each agent is moved to the path between $v_s$ and $v_t$, and the path is covered greedily by intervals of length half the remaining budget (Theorem 1). It is strongly NP-hard on planar graphs (Theorem 5), and a factor 2 suffices and is best possible unless P = NP (Theorems 2 and 6); with equal budgets a factor $2 - 2/k$ suffices (Theorem 3). **Energy exchange.** If agents may hand over energy when they meet, delivery takes linear time on paths and trees but stays NP-complete on arbitrary directed and undirected graphs (Theorems 3, 7, 13 and 14 of [Czyzowicz2016Communication]). Theorem numbers of [Bartschi2020Collaborative] refer to its arXiv v1. Theorem numbers of [Chalopin2013Data] refer to the authors' copy.",
+      "status": "verified"
+    },
+    {
+      "id": "uniform",
+      "title": "Arbitrary graphs, equal budgets",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "budgets": "uniform"
+      },
+      "summary": "With equal budgets, deciding whether a schedule exists stays strongly NP-hard; the smallest budget that admits a schedule can be approximated within a factor 2, and no lower bound on the factor is known.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{NP-hard}",
+          "ref": "Chalopin2013Data",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "strongly NP-complete (Theorem 1), by a reduction from 3-partition",
+            "holds even on unweighted graphs: each agent's start node gets a pendant path of length $B - B_i$, and the agent starts at its end"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chalopin2013Data",
+          "role": "best",
+          "budget": "2",
+          "note": "Introductory and current best (Theorem 4). The planner tries every agent as the one that fetches the message, moves it to $v_s$, and computes the smallest budget $B'$ for which the reaches (the points within distance $B'$ of the start nodes, $B'$ minus the distance walked for the moved agent) form a chain from $v_s$ to $v_t$. The smallest budget that admits a schedule is at least $B'$, and letting each agent of the chain walk to the start node of the next costs at most $2B'$. The same idea gives budget factor 2 for the decision task."
+        }
+      ],
+      "optimality": {
+        "budget": {
+          "status": "unknown",
+          "note": "No inapproximability bound above 1 is known [Chalopin2021Collaborative]."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Strongly NP-hard, even on unweighted graphs (Theorem 1 of [Chalopin2013Data]) and on planar graphs (Theorem 5 of [Bartschi2020Collaborative])."
+        }
+      },
+      "open": [
+        "Is there a constant $c > 1$ such that the smallest equal budget cannot be approximated within $c$ in polynomial time unless P = NP? [Chalopin2021Collaborative] notes that no lower bound is known."
+      ],
+      "notes": "**Fixed path.** Chalopin, Das, Mihalák, Penna and Widmayer also fix in advance the path along which the message must travel, to keep it out of dangerous areas: the task stays NP-hard (Theorem 5, from 3SAT; the authors note that the reduction extends to equal budgets), and for some constant $\\gamma > 1$ no polynomial-time planner has budget factor $\\gamma$ unless P = NP (Corollary 2, whose proof is only sketched) [Chalopin2013Data]. Chalopin, Das, Disser, Labourel and Mihalák study it with equal budgets [Chalopin2021Collaborative]; one agent may now carry the message on several pieces of the path. The smallest equal budget can be approximated within 3 on directed graphs (Theorem 3), not within less than 2 unless P = NP (Theorem 1), and within 2.5 on undirected graphs (Theorem 4). If every agent picks the message up at most once, the factors become 2 on directed graphs and $2 - 1/2^k$ on undirected ones (Theorem 6), with a lower bound of 1.5 on directed graphs (Theorem 5). For two agents the fixed-path task is weakly NP-hard (Theorem 7, from subset sum); with hand-overs at nodes only, a dynamic program decides it in $O(k\\, n^{k+2} B^k)$ time for integer weights (Theorem 8) and yields a fully polynomial-time approximation scheme for a constant number of agents (Theorem 9). **Several sources.** With a constant number of sources, each holding data for $v_t$, the 2-approximation extends (Theorem 6 of [Chalopin2013Data]); with arbitrarily many sources, each holding an agent, delivery is NP-hard even with equal budgets, by the convergecast reduction of [Anaya2014Convergecast] (Section 3.2 of [Chalopin2013Data]). Theorem numbers of [Chalopin2013Data] refer to the authors' copy.",
+      "status": "verified"
+    },
+    {
+      "id": "planar-uniform",
+      "title": "Planar graphs, equal budgets",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph": "planar",
+        "budgets": "uniform"
+      },
+      "summary": "Delivery stays strongly NP-hard on planar graphs, even when all budgets are equal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{NP-hard}",
+          "ref": "Bartschi2020Collaborative",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "strongly NP-hard, by a reduction from planar 3SAT (Theorem 5)",
+            "equal budgets: an edge of length $B - B_i$ is added at each agent's start node, and the agent moved to its end"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Strongly NP-hard."
+        },
+        "budget": {
+          "status": "unknown",
+          "note": "A factor 2 holds as on arbitrary graphs; no lower bound is known."
+        }
+      },
+      "open": [
+        "Is there an inapproximability bound for the smallest equal budget, already on planar graphs? No lower bound above 1 is known for any graph class [Chalopin2021Collaborative]."
+      ],
+      "notes": "The same reduction shows returning delivery strongly NP-hard on planar graphs [Bartschi2020Collaborative]. Checked against the full text (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "path",
+      "title": "Paths",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph": "path"
+      },
+      "summary": "On a path, delivery with different budgets is weakly NP-complete; a quasi-pseudo-polynomial algorithm decides it.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{weakly NP-hard}",
+          "ref": "Chalopin2014Line",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "NP-complete even when all positions and budgets are integers (Theorem 3), by a reduction from a weighted variant of 4-partition (Theorem 2)",
+            "budgets differ: with equal budgets a path is easy [Anaya2014Convergecast]"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Chalopin2014Line",
+          "role": "best",
+          "time": "O\\big(\\mathrm{dist}(v_s,v_t)^2\\, k^{1+4\\log \\mathrm{dist}(v_s,v_t)}\\big)",
+          "assumes": [
+            "integer positions and budgets"
+          ],
+          "note": "Introductory and current best (Theorem 1): a dynamic program over normalised schedules; the paper also states the bound $O(\\mathrm{dist}(v_s,v_t)^2\\, k^{1+4\\log(B_{\\max}+1)})$, with $B_{\\max}$ the largest budget (their $n$ is $k$ here, and their $\\Delta$ is $\\mathrm{dist}(v_s,v_t)$)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Weakly NP-hard against a quasi-pseudo-polynomial algorithm; whether a pseudo-polynomial algorithm exists is open [Chalopin2014Line]."
+        },
+        "budget": {
+          "status": "unknown",
+          "note": "The factor $\\min\\{3,\\ 1+\\max_{i,j}B_i/B_j\\}$ of arbitrary graphs applies, as [Chalopin2013Data] notes; no lower bound is known, and finding better planners is open [Chalopin2014Line]."
+        }
+      },
+      "open": [
+        "Is there a pseudo-polynomial algorithm for delivery on a path? Posed in [Chalopin2014Line].",
+        "Find good resource-augmented planners for delivery on a path. Posed in [Chalopin2014Line]."
+      ],
+      "notes": "Chalopin, Jacob, Mihalák and Widmayer answered a question of Anaya et al. and note that the hardness surprised everyone they had asked [Chalopin2014Line]. No agent needs to carry the message twice, so a schedule is an order of agents. Returning delivery on a path (and on trees) takes $O(n + k\\log k)$ time (Theorem 1 of [Bartschi2020Collaborative]); with energy exchange delivery on a path takes linear time (Theorem 3 of [Czyzowicz2016Communication]). Checked against the authors' copy of [Chalopin2014Line].",
+      "status": "verified"
+    },
+    {
+      "id": "path-uniform",
+      "title": "Paths, equal budgets",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph": "path",
+        "budgets": "uniform"
+      },
+      "summary": "With equal budgets, a greedy schedule in which each agent pushes the message as far as it can decides delivery on a path in linear time.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Anaya2014Convergecast",
+          "role": "best",
+          "time": "O(k)",
+          "assumes": [
+            "agents sorted by position"
+          ],
+          "note": "Introductory and current best (Lemma 1 and Remark 1): if any schedule exists, so does a regular one in which the agents, in order of position, each push the message as far as their budget allows; computing it agent by agent decides the task, which the paper calls carry. It is a building block of convergecast and broadcast, for which the paper computes the smallest equal budget on a path in linear time (Theorems 1 and 2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Linear in the number of agents."
+        },
+        "budget": {
+          "status": "tight",
+          "note": "The planner is exact (factor 1)."
+        }
+      },
+      "open": [
+        "Is delivery with equal budgets between two nodes of a tree NP-hard or polynomial? Posed in [Anaya2014Convergecast] and again in [Chalopin2013Data]; [Chalopin2021Collaborative] states that on trees delivery is known to be weakly NP-hard, without a reference, in a paper about equal budgets."
+      ],
+      "notes": "Anaya, Chalopin, Czyzowicz, Labourel, Pelc and Vaxès also show that the smallest equal budget for convergecast and for broadcast is NP-hard to compute on trees, approximate it within 2 and 4 on arbitrary graphs, and give distributed algorithms on trees that need 2 and 4 times the budget of a planner, 2 being best possible already on paths [Anaya2014Convergecast]. Checked against the full text (arXiv v1). Chalopin, Das, Mihalák, Penna and Widmayer state the same greedy rule: start with the agent closest to $v_s$, never overtake an unused agent, and use the closest unused agent next [Chalopin2013Data].",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Delivery on a path with equal budgets, by the greedy schedule of [Anaya2014Convergecast]: the edges have weight 1, every agent has budget $B = 6$, and the message must go from $s$ to $t$. The agents are used from left to right. Each one walks to the message, picks it up and carries it to the right until its budget is used up, unless it reaches the start node of the next agent first, which then takes over with its whole budget. If any schedule exists, this one does (Lemma 1), so the planner decides the task in linear time. One frame per edge crossed; the numbers at the bottom are the budgets left.",
+    "view": [
+      100,
+      34
+    ],
+    "graph": {
+      "nodes": {
+        "p0": [
+          6.0,
+          20
+        ],
+        "p1": [
+          14.8,
+          20
+        ],
+        "p2": [
+          23.6,
+          20
+        ],
+        "p3": [
+          32.4,
+          20
+        ],
+        "p4": [
+          41.2,
+          20
+        ],
+        "p5": [
+          50.0,
+          20
+        ],
+        "p6": [
+          58.8,
+          20
+        ],
+        "p7": [
+          67.6,
+          20
+        ],
+        "p8": [
+          76.4,
+          20
+        ],
+        "p9": [
+          85.2,
+          20
+        ],
+        "p10": [
+          94.0,
+          20
+        ]
+      },
+      "edges": [
+        [
+          "p0",
+          "p1"
+        ],
+        [
+          "p1",
+          "p2"
+        ],
+        [
+          "p2",
+          "p3"
+        ],
+        [
+          "p3",
+          "p4"
+        ],
+        [
+          "p4",
+          "p5"
+        ],
+        [
+          "p5",
+          "p6"
+        ],
+        [
+          "p6",
+          "p7"
+        ],
+        [
+          "p7",
+          "p8"
+        ],
+        [
+          "p8",
+          "p9"
+        ],
+        [
+          "p9",
+          "p10"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          6.0,
+          15
+        ],
+        "s": "s",
+        "c": "fg"
+      },
+      {
+        "t": "text",
+        "p": [
+          94.0,
+          15
+        ],
+        "s": "t",
+        "c": "fg"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              6.0,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 6, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Start: equal budgets B = 6; the message (square) lies at s"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p1",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              6.0,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 5, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p0",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              6.0,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 4, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "a, the leftmost agent, walks back to the message and picks it up"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p1",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              14.8,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 3, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              23.6,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 2, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p3",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              32.4,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 1, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              41.2,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 6, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "a has used its budget: it drops the message"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p4",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              41.2,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 5, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "b walks back to the message and carries it to the right"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p5",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              50.0,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 4, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p6",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              58.8,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 3, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p7",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              67.6,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 2, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p8",
+            "k": "agent",
+            "l": "b",
+            "c": "accent"
+          },
+          {
+            "id": "c",
+            "at": "p8",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              76.4,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 1, c 6",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "b reaches c's node: c takes over with its whole budget"
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p8",
+            "k": "agent",
+            "l": "b",
+            "c": "muted"
+          },
+          {
+            "id": "c",
+            "at": "p9",
+            "k": "agent",
+            "l": "c",
+            "c": "accent"
+          },
+          {
+            "id": "m",
+            "p": [
+              85.2,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 1, c 5",
+            "c": "muted",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "muted"
+          },
+          {
+            "id": "b",
+            "at": "p8",
+            "k": "agent",
+            "l": "b",
+            "c": "muted"
+          },
+          {
+            "id": "c",
+            "at": "p10",
+            "k": "agent",
+            "l": "c",
+            "c": "tight"
+          },
+          {
+            "id": "m",
+            "p": [
+              94.0,
+              27.5
+            ],
+            "k": "exit",
+            "r": 1.4,
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              6
+            ],
+            "s": "budget left: a 0, b 1, c 4",
+            "c": "muted",
+            "size": 2.8
+          }
+        ],
+        "label": "Final: c brings the message to t; a schedule exists"
+      }
+    ]
+  }
+}

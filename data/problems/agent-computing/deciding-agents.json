@@ -1,0 +1,1099 @@
+{
+  "id": "deciding-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Deciding graph properties by mobile agents",
+  "origin": {
+    "ref": "Fraigniaud2017Decidability",
+    "year": 2010,
+    "note": "Fraigniaud and Pelc introduced decision problems for mobile agents and the classes $\\mathsf{MAD}$ and $\\mathsf{MAV}$, as [Bampas2018Mobile] reports (arXiv 2010; LATIN 2012; Journal of Parallel and Distributed Computing 2017)."
+  },
+  "summary": "Agents in an anonymous graph must decide together whether their starting configuration has a property, such as \"the graph is a tree\": which properties can they decide, with what help, and with how little memory?",
+  "statement": "$k \\ge 1$ **agents** start at **nodes** of a connected undirected **graph** $G$ with $n$ nodes; the nodes are anonymous, and at each node the **edges** carry distinct **port** numbers. Each agent has a distinct identifier and an input string, and several agents may start at the same node. The agents move in synchronous **rounds**, crossing at most one edge per round, cannot mark nodes unless a setting gives **whiteboards**, and exchange everything they know when they are at the same node; no agent knows anything else in advance. A **configuration** is the graph with the agents' start nodes and inputs. A **decision problem** $\\Pi$ is a set of configurations, closed under automorphisms of $G$ that preserve ports, whose membership a centralised algorithm that sees the whole configuration can decide. The agents **decide** $\\Pi$ if every agent eventually outputs yes or no, all agents output yes when the configuration is in $\\Pi$, and at least one outputs no when it is not [Fraigniaud2017Decidability]. In **verification** every agent also receives a **certificate**: for every configuration in $\\Pi$ some certificate makes all agents output yes, and for every other configuration no certificate does. The question is which decision problems the agents can decide, in particular whether all of them, and with how much memory. **Time** is in rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Imagine a few explorers lowered into a cave system they cannot see. Each must eventually answer yes or no to a question about the caves and the explorers in them, such as \"do the caves form a single corridor?\" The caves are a **graph**: chambers are **nodes** and tunnels are **edges**. The nodes have no names, but at each node the edges carry distinct **port** numbers, so an explorer can tell the exits apart. The explorers are **agents**, each with a distinct identifier and an input string; several may start on the same node. They move in synchronous **rounds**, crossing at most one edge per round. They cannot mark nodes, unless a setting gives every node a **whiteboard**, a small memory that agents there can read and write. They tell each other everything when they meet. The **configuration** is the graph with the agents' start nodes and inputs. A **decision problem** is a property of configurations that a computer seeing the whole configuration could check, such as \"the graph is a tree\". The agents **decide** it if every agent eventually answers, all agents answer yes when the configuration has the property, and at least one answers no when it does not. In **verification** every agent also receives a **certificate**, a string that can make all agents answer yes only when the true answer is yes. In the standard version the agents know nothing in advance, not even how many they are, and receive no certificate. The question is which decision problems they can decide, and with how much memory.",
+    "ideas": [
+      {
+        "kind": "impossibility",
+        "title": "A lone agent cannot tell a long path from a cycle",
+        "variant": "base",
+        "ref": "Fraigniaud2017Decidability",
+        "idea": "Take the decision problem \"is the graph a path?\", a path being nodes in a row. A computer that sees the graph answers it at once.\n1. Put a single agent on an endless path whose edges carry port 1 to the right and port 2 to the left at every node. Every algorithm must make the agent answer after some number of rounds $t$.\n2. Now place the agent at the middle node of a path of $2t+3$ nodes numbered the same way, or on a cycle with port 1 clockwise and port 2 counter-clockwise.\n3. The ends of the path are $t+1$ edges away, so in $t$ rounds the agent never reaches them. On both graphs it sees, round after round, a node with two edges numbered 1 and 2, exactly as on the endless path.\n4. It cannot wait for help either, since it cannot know whether other agents exist.",
+        "analysis": "So the agent gives the same answer, after the same $t$ rounds, on both graphs, and that answer is wrong on one of them [Fraigniaud2017Decidability]. The same holds for \"is the graph a tree?\" and \"does the graph have exactly $x$ nodes?\". Not every problem that a computer can decide can be decided by agents; Fraigniaud and Pelc call those that can be decided $\\mathsf{MAD}$. A certificate helps here: given the number of nodes as certificate, the agents can check that the graph is a path, so this problem can be verified though not decided.",
+        "why_it_matters": "It is the basic limit of agents in anonymous graphs: what they cannot reach they cannot see, and a lone agent cannot know when it has seen enough."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Knowing the number of agents: gather, draw a map, decide",
+        "variant": "known-team",
+        "ref": "Fraigniaud2017Decidability",
+        "idea": "Suppose every agent knows the number $k \\ge 2$ of agents.\n1. The agents gather on one node. They try ever larger guesses of $n$ and of the length of the identifiers, and for each guess run a procedure that makes agents meet. Since they know $k$, they know when all of them are together.\n2. The agent with the largest identifier draws a map of the graph, using another agent as a movable token, so that it recognises a node it has already seen.\n3. Now every agent knows the whole configuration and answers as the computer that sees it would.",
+        "analysis": "So agents that know $k \\ge 2$ decide every decision problem (proof of Theorem 3.2) [Fraigniaud2017Decidability]. The time is finite but huge, because the meeting procedure uses walks of up to $2n^n$ rounds. A lone agent has no partner to use as a token, which is exactly why it fails above. A lone agent given a map of the graph, without its start node marked, also decides everything, but one that knows only $n$ does not. Fraigniaud and Pelc conclude that knowing the number of agents is very powerful once it is larger than 1, which points to gathering as the key task.",
+        "why_it_matters": "It shows that gathering is not just one task among many: once agents can meet and count themselves, they can compute anything about where they are."
+      },
+      {
+        "kind": "algorithm",
+        "title": "One bit of memory is enough with whiteboards",
+        "variant": "single-whiteboards",
+        "ref": "Izumi2022Deciding",
+        "idea": "Now a single agent has very little memory, but every node has a whiteboard of a constant number of bits.\n1. The agent runs a depth-first search in port order that needs only a constant number of bits in its own memory and on each whiteboard (Theorem 3). This puts the nodes in a fixed order.\n2. Along that order, the whiteboards serve as the tape of a Turing machine, a model computer that reads and writes a long tape one cell at a time. So the agent can simulate an agent with $O(n)$ bits of memory.\n3. The constant number of bits the agent still carries is reduced to one. It keeps them on the whiteboard of its node and moves them to the next node one bit at a time, with one round trip per bit.",
+        "analysis": "So an agent with one bit of memory decides everything that an agent with $O(n)$ bits decides in polynomial time, with a polynomial slowdown (Theorem 1) [Izumi2022Deciding]. Planarity, being bipartite and bounds on the diameter are examples. Zero bits are not enough. Such an agent cannot explore every graph, so on some graph it answers without visiting a node, and adding a leaf there changes the answer to \"is $n$ odd?\" (Theorem 2).",
+        "why_it_matters": "It shows that the agent's own memory hardly matters once the graph can store information: the whiteboards together act as its memory."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected undirected graph $G$ with $n$ nodes in which the agents move",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $G$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "a connection between two nodes; an agent crosses at most one edge per round",
+      "avoid": [
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number that a node gives to each of its edges; the two ends of an edge may carry different numbers",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity with a distinct identifier, an input string and (unless a setting bounds it) unlimited memory",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step, in which each agent stays or crosses one edge",
+      "avoid": []
+    },
+    {
+      "term": "whiteboard",
+      "definition": "storage at a node that an agent there can read and write",
+      "avoid": [
+        "storage"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the graph together with the agents' start nodes and inputs",
+      "avoid": []
+    },
+    {
+      "term": "decision problem",
+      "definition": "a set $\\Pi$ of configurations, closed under port-preserving automorphisms, whose membership a centralised algorithm can decide",
+      "avoid": [
+        "language"
+      ]
+    },
+    {
+      "term": "certificate",
+      "definition": "a string given to each agent in verification, which can make all agents accept only in a configuration of $\\Pi$",
+      "avoid": [
+        "advice"
+      ]
+    }
+  ],
+  "history": "Fraigniaud and Pelc asked which properties of their starting configuration agents can decide in an anonymous graph, with the acceptance rule of distributed decision (all accept, or someone rejects), and set decision against verification with a certificate, by analogy with P and NP [Fraigniaud2017Decidability]. They found a complete problem for verification, built from the number of agents and the quotient graph, and showed that knowing the number of agents decides everything once there are at least two, while a lone agent depends on what it is told about the graph. Bampas and Ilcinkas refined the classes with unanimity and with certificates for no answers, using a mobile-agent analogue of dovetailing [Bampas2018Mobile]. Izumi, Kakizawa, Kawabata, Kitamura and Masuzawa turned to a single agent with little memory and constant-size whiteboards, where one bit of agent memory decides as much as $O(n)$ bits in polynomial time [Izumi2022Deciding].",
+  "related": [
+    {
+      "problem": "map-construction",
+      "relation": "Two or more agents that know their number decide every property by gathering and drawing a map, one agent using the others as a token; a lone agent with a map decides every property [Fraigniaud2017Decidability]."
+    },
+    {
+      "problem": "gathering-graphs",
+      "relation": "Gathering is what makes a known number of agents decisive: after it, the agents learn the whole configuration [Fraigniaud2017Decidability]."
+    },
+    {
+      "problem": "exploration",
+      "relation": "A lone agent with constant memory and constant-size whiteboards explores by a depth-first search in port order [Izumi2022Deciding]; without memory it cannot explore every graph [Cohen2008Label], which is why it cannot decide whether $n$ is odd."
+    }
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds until every agent has decided"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "algorithm",
+    "initial",
+    "topology"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "node-ids",
+    "ids",
+    "communication",
+    "timing",
+    "node-memory",
+    "team",
+    "certificate",
+    "knowledge"
+  ],
+  "axes": [
+    {
+      "id": "team",
+      "name": "Number of agents",
+      "values": [
+        {
+          "id": "unknown",
+          "level": 0,
+          "label": "any number of agents, unknown to them",
+          "short": "any $k$",
+          "definition": "Any number $k \\ge 1$ of agents; no agent knows $k$, so an agent cannot tell whether it is alone."
+        },
+        {
+          "id": "single",
+          "level": 1,
+          "label": "a single agent",
+          "short": "one agent",
+          "definition": "Exactly one agent, $k = 1$: configurations with more agents are excluded."
+        },
+        {
+          "id": "known",
+          "level": 1,
+          "label": "two or more agents that know their number",
+          "short": "known $k \\ge 2$",
+          "definition": "$k \\ge 2$ agents, and every agent knows $k$."
+        }
+      ],
+      "origin": "Fraigniaud and Pelc allow any number of agents, unknown to them, and show that knowing it is very powerful when it is larger than 1 but useless for a single agent [Fraigniaud2017Decidability]; they then study the single agent separately. Bampas and Ilcinkas name the inability to tell one agent from several as the main source of difficulty [Bampas2018Mobile]. Izumi et al. study a single agent [Izumi2022Deciding]."
+    },
+    {
+      "id": "certificate",
+      "name": "Certificates",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no certificate (decision)",
+          "short": "decide",
+          "definition": "The agents receive only their identifiers and inputs."
+        },
+        {
+          "id": "given",
+          "level": 1,
+          "label": "a certificate for yes answers (verification)",
+          "short": "verify",
+          "definition": "Each agent also receives a certificate string. For every configuration in $\\Pi$ some certificate makes all agents output yes; for every other configuration, whatever the certificate, some agent outputs no."
+        }
+      ],
+      "origin": "Fraigniaud and Pelc separate deciding from verifying, as P from NP, and motivate certificates by agents that repeatedly check a property [Fraigniaud2017Decidability]; Bampas and Ilcinkas add certificates for no answers and argue that verification lets agents check the assumptions of another algorithm, or its output, before relying on it [Bampas2018Mobile]."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the graph",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known",
+          "short": "no knowledge",
+          "definition": "The agents know nothing about $G$."
+        },
+        {
+          "id": "size",
+          "level": 1,
+          "label": "$n$ known",
+          "short": "knows $n$",
+          "definition": "The agents know $n$ (an oracle for the number of nodes in [Fraigniaud2017Decidability])."
+        },
+        {
+          "id": "map",
+          "level": 2,
+          "label": "a map of $G$",
+          "short": "map",
+          "definition": "The agents have a copy of $G$ with its ports, without their start nodes marked on it."
+        }
+      ],
+      "origin": "Fraigniaud and Pelc compare, for a single agent, three kinds of information given as oracles: the quotient graph, the number of nodes and a map; they note that the size of the graph and its topology are often given to agents in network tasks, while the quotient graph matters because it is all an agent can learn [Fraigniaud2017Decidability]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "base",
+      "title": "Any number of agents",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync"
+      },
+      "summary": "Not every decidable property can be decided: agents that may be alone cannot tell a long path from a cycle.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Fraigniaud2017Decidability",
+          "bottleneck": "locality",
+          "preconditions": [
+            "inherited from the single-agent setting: a configuration with one agent is a configuration of this setting",
+            "the problem whether $G$ is a path, which a centralised algorithm decides: a lone agent that decides after $t$ rounds behaves alike at the centre of a path of $2t+3$ nodes and on a cycle, both with ports $1$ in one direction and $2$ in the other (Section 2.2)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Some decidable problems cannot be decided, e.g. whether $G$ is a path, a tree, or has a given number of nodes [Fraigniaud2017Decidability]."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Impossible whatever the memory of the agents."
+        }
+      },
+      "open": [
+        "What is the least information about the number of agents that lets several agents reconstruct the whole configuration? Posed in [Fraigniaud2017Decidability]."
+      ],
+      "notes": "Fraigniaud and Pelc call the decidable problems of this setting $\\mathsf{MAD}$ (mobile agent decidable) and show that it is strictly contained in $\\mathsf{MAV}$, the problems that can be verified with a certificate [Fraigniaud2017Decidability]. Some global properties are decidable: whether $G$ is a tree with a given number $x$ of nodes, by a depth-first search of $2(x-1)$ steps that draws a map. Bampas and Ilcinkas refine the picture [Bampas2018Mobile]. Requiring every agent to be right also in no-instances gives a class equal to the problems in both $\\mathsf{MAD}$ and $\\text{co-}\\mathsf{MAD}$ (Theorem 1); $\\mathsf{MAD}$ and $\\text{co-}\\mathsf{MAD}$ differ (Proposition 4, with the problem whether all inputs are empty). Theorem 5 shows that every problem of $\\mathsf{MAD}$ also has certificates for its no-instances, which makes $\\mathsf{MAD}$ a part of $\\text{co-}\\mathsf{MAV}$. If only one agent must answer correctly, the class becomes too large: for every $j \\ge 1$ it contains a problem complete for the $j$-th level $\\Sigma^0_j$ of the arithmetic hierarchy (Theorem 6). Their main tool is a meta-protocol that runs infinitely many protocols in parallel, the mobile-agent analogue of dovetailing. Checked against the full texts ([Fraigniaud2017Decidability] in arXiv v1, [Bampas2018Mobile] in its HAL version).",
+      "status": "verified"
+    },
+    {
+      "id": "verification",
+      "title": "Any number of agents, with certificates",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "certificate": "given"
+      },
+      "summary": "Certificates verify strictly more problems than can be decided, and one problem is complete for them, but some decidable problems still cannot be verified.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Bampas2018Mobile",
+          "bottleneck": "locality",
+          "preconditions": [
+            "the problem whether every agent's input equals the number of agents: a lone agent on a ring accepts with some certificate; two such agents, placed at the roots of their truncated views joined by an edge, run as if alone, so both accept although there are two of them (Proposition 7)",
+            "the same argument shows that this problem cannot be verified for no-instances either"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Some decidable problems cannot be verified [Bampas2018Mobile]."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Impossible whatever the memory of the agents."
+        }
+      },
+      "open": [
+        "Do certificates that may depend on the agents' identifiers verify more problems? Raised in [Bampas2018Mobile].",
+        "Which problems become verifiable under the promise that there are at most two agents? Raised in [Bampas2018Mobile]."
+      ],
+      "notes": "Whether $G$ is a path is verifiable with the number of nodes as certificate, so $\\mathsf{MAV}$ is strictly larger than $\\mathsf{MAD}$; the problems 'some node has degree $d$', one for each $d$, form an infinite family of which none reduces to another [Fraigniaud2017Decidability]. Fraigniaud and Pelc's main result is a complete problem for $\\mathsf{MAV}$: the product of teamsize (are there more than a given number of agents?) and quotient (is the quotient graph of $G$, which merges nodes with the same view, different from a given graph?) (Theorem 3.2). Every verifiable problem reduces to it: with two or more agents, knowing their number lets them gather and draw a map; a lone agent learns the quotient graph, which is all it can ever learn. Bampas and Ilcinkas add certificates for no-instances and unanimous acceptance, and place the nine resulting classes in a complete diagram of inclusions (Table 1 and Figures 2–3 of [Bampas2018Mobile]); for example, whether some node has degree equal to an agent's input is verifiable, but not with unanimous rejection and not for no-instances (Proposition 6).",
+      "status": "verified"
+    },
+    {
+      "id": "known-team",
+      "title": "Two or more agents that know their number",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "team": "known"
+      },
+      "summary": "Agents that know their number $k \\ge 2$ gather, draw a map and decide every decidable property.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Fraigniaud2017Decidability",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "every decidable problem"
+          ],
+          "note": "Introductory and current best (proof of Theorem 3.2 and Section 4): the agents gather by rendezvous with growing guesses of $n$ and of the length of identifiers (Claim 3.3), the agent with the largest identifier draws a map of $G$ using the others as a movable token (Claim 3.4), and every agent then knows the whole configuration. The rendezvous runs DFS walks of up to $2n^n$ rounds each, so the time is finite but exponential."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only finiteness is shown; no time bound is studied."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "The agents have unlimited memory; no memory bound is studied."
+        }
+      },
+      "open": [],
+      "notes": "Fraigniaud and Pelc conclude that knowing the number of agents is very powerful when it is larger than 1, which points to gathering as the key task in mobile agent computing [Fraigniaud2017Decidability]. Bampas and Ilcinkas remark that the promise of two or more agents already suffices, the agents learning the configuration by rendezvous with growing guesses of $n$ [Bampas2018Mobile]; they state this in their discussion without a proof. Checked against the full text of [Fraigniaud2017Decidability] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "single",
+      "title": "One agent",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "team": "single"
+      },
+      "summary": "A lone agent can decide only what its view of the graph determines; deciding is then the same as verifying both yes and no answers.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Fraigniaud2017Decidability",
+          "bottleneck": "locality",
+          "preconditions": [
+            "the problem whether $G$ is a path, which a centralised algorithm decides: a lone agent that decides after $t$ rounds behaves alike at the centre of a path of $2t+3$ nodes and on a cycle, both with ports $1$ in one direction and $2$ in the other (Section 2.2)",
+            "Fraigniaud and Pelc state the same for whether $G$ is a tree and whether $G$ has a given number of nodes",
+            "configurations with a single agent; holds whatever the agents' memory"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Whether $G$ is a path, a tree, or has a given number of nodes cannot be decided [Fraigniaud2017Decidability]."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Impossible whatever the memory of the agents."
+        }
+      },
+      "open": [
+        "Give a combinatorial characterisation of the problems that a lone agent decides. Posed in [Fraigniaud2017Decidability].",
+        "Is it decidable whether a lone agent can decide a given problem: is there a Turing machine that, given a Turing machine deciding membership in $\\Pi$, decides whether a lone agent can decide $\\Pi$? Posed in [Fraigniaud2017Decidability]."
+      ],
+      "notes": "The quotient graph of $G$ merges nodes with the same view (the infinite tree of port-labelled walks from a node) and is the most a lone agent can learn about $G$ (Lemma 3.1 of [Fraigniaud2017Decidability], after Yamashita and Kameda). For one agent, the decidable problems are exactly those verifiable both for yes and for no answers (Theorem 4.1); they are strictly fewer than those verifiable for yes or for no answers, which are strictly fewer than those decidable when the agent is given its quotient graph (Theorem 4.2: the product of 'G is a consistently labelled cycle' and 'G is a sun' is decidable with the quotient graph but verifiable neither for yes nor for no answers). Bampas and Ilcinkas note that under this promise most of their classes coincide, and name the inability to tell one agent from several as the main source of difficulty [Bampas2018Mobile]. Checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "single-size",
+      "title": "One agent that knows $n$",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "team": "single",
+        "knowledge": "size"
+      },
+      "summary": "Knowing $n$ lets a lone agent learn its quotient graph, but not $G$ itself.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Fraigniaud2017Decidability",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "the problem whether $G$ is isomorphic to a given graph: two non-isomorphic graphs with the same number of nodes and the same quotient graph (Figure 1 (c) and (d)) look the same to the agent (Theorem 4.3)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Whether $G$ is a given graph cannot be decided [Fraigniaud2017Decidability]."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Impossible whatever the memory of the agents."
+        }
+      },
+      "open": [
+        "Is it decidable whether a lone agent that knows $n$ can decide a given problem? Posed in [Fraigniaud2017Decidability]."
+      ],
+      "notes": "With $n$ known, a view of depth $2(n-1)$ gives the quotient graph (by Norris's theorem), so the agent decides strictly more than with the quotient graph alone: the number of nodes is not determined by the quotient (all consistently labelled cycles have the same one) (Theorem 4.3 of [Fraigniaud2017Decidability]). Checked against the full text (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "single-map",
+      "title": "One agent with a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "team": "single",
+        "knowledge": "map"
+      },
+      "summary": "With a map of the graph, a lone agent decides every decidable property.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Fraigniaud2017Decidability",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "every decidable problem",
+            "the map does not show the agent's start node"
+          ],
+          "note": "Introductory and current best (Theorem 4.3): with the map the agent finds its start node up to a port-preserving automorphism and so knows the whole configuration."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Only finiteness is shown."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "The agents have unlimited memory; no memory bound is studied."
+        }
+      },
+      "open": [],
+      "notes": "The chain of Theorem 4.3 of [Fraigniaud2017Decidability]: a lone agent given its quotient graph decides strictly less than one that knows $n$, which decides strictly less than one with a map. Checked against the full text (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "single-whiteboards",
+      "title": "One agent with whiteboards and little memory",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "node-memory": "whiteboard",
+        "team": "single"
+      },
+      "statement": "One agent, no inputs, whiteboards of $O(1)$ bits that are all $0$ at the start. A decision problem is a set of graphs; the agent must stop within $\\mathrm{poly}(n)$ moves, with polynomial local computation in each step, and write the answer on the whiteboard of its final node. The question is how much memory the agent needs.",
+      "summary": "One bit of agent memory, with constant-size whiteboards, decides everything that $O(n)$ bits decide in polynomial time; zero bits do not.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "1",
+          "ref": "Izumi2022Deciding",
+          "bottleneck": "memory",
+          "preconditions": [
+            "the problem whether $n$ is odd: an agent without memory and with $O(1)$-bit whiteboards cannot explore every graph [Cohen2008Label], so on some graph it decides without visiting a node, and a leaf added there changes the answer (Theorem 2, Lemma 4)",
+            "whiteboards of $O(1)$ bits"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Izumi2022Deciding",
+          "role": "best",
+          "memory": "1",
+          "time": "\\text{poly}(n)",
+          "assumes": [
+            "every problem that an agent with $O(n)$ bits of memory decides in polynomial time with $O(1)$-bit whiteboards",
+            "no knowledge of $G$"
+          ],
+          "note": "Introductory and current best (Theorem 1): the agent orders the nodes by a depth-first search in port order that needs only $O(1)$ bits of memory and of whiteboard (Theorem 3), uses the whiteboards along that order as the tape of a Turing machine that simulates the $O(n)$-bit agent, and keeps paths between the positions it needs with $O(1)$ bits per node; $O(1)$ bits of agent memory are then reduced to one by carrying them across an edge one bit per round trip. The overhead is polynomial."
+        }
+      ],
+      "optimality": {
+        "memory": {
+          "status": "tight",
+          "note": "One bit suffices and zero bits do not."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Polynomial overhead; no lower bound."
+        }
+      },
+      "open": [],
+      "notes": "Izumi, Kakizawa, Kawabata, Kitamura and Masuzawa call the classes $\\mathsf{PAGT}(g(n), h(n))$: problems decidable in polynomial time with $g(n)$ bits of agent memory and $h(n)$ bits per whiteboard [Izumi2022Deciding]. They name planarity, bipartiteness and bounds on the diameter or the treewidth as examples of decision problems in this sense. Checked against the full text (arXiv v1, a preprint).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Why agents cannot decide whether the graph is a path [Fraigniaud2017Decidability]: a lone agent, which cannot know that it is alone, must answer after some number $t$ of rounds (here $t = 3$; the ports it takes stand for any algorithm). Placed at the middle of a path of $2t+3$ nodes with port 1 to the right and port 2 to the left, or on a cycle with port 1 clockwise and port 2 counter-clockwise, it sees exactly the same in every round, since the ends of the path are $t + 1$ edges away. So it gives the same answer on both graphs, and that answer is wrong on one of them. A certificate stating the number of nodes would let it check the answer.",
+    "view": [
+      100,
+      54
+    ],
+    "graph": {
+      "nodes": {
+        "p0": [
+          10,
+          41
+        ],
+        "p1": [
+          20,
+          41
+        ],
+        "p2": [
+          30,
+          41
+        ],
+        "p3": [
+          40,
+          41
+        ],
+        "p4": [
+          50,
+          41
+        ],
+        "p5": [
+          60,
+          41
+        ],
+        "p6": [
+          70,
+          41
+        ],
+        "p7": [
+          80,
+          41
+        ],
+        "p8": [
+          90,
+          41
+        ],
+        "c0": [
+          50.0,
+          29.0
+        ],
+        "c1": [
+          60.39,
+          23.0
+        ],
+        "c2": [
+          60.39,
+          11.0
+        ],
+        "c3": [
+          50.0,
+          5.0
+        ],
+        "c4": [
+          39.61,
+          11.0
+        ],
+        "c5": [
+          39.61,
+          23.0
+        ]
+      },
+      "edges": [
+        [
+          "p0",
+          "p1"
+        ],
+        [
+          "p1",
+          "p2"
+        ],
+        [
+          "p2",
+          "p3"
+        ],
+        [
+          "p3",
+          "p4"
+        ],
+        [
+          "p4",
+          "p5"
+        ],
+        [
+          "p5",
+          "p6"
+        ],
+        [
+          "p6",
+          "p7"
+        ],
+        [
+          "p7",
+          "p8"
+        ],
+        [
+          "c0",
+          "c1"
+        ],
+        [
+          "c1",
+          "c2"
+        ],
+        [
+          "c2",
+          "c3"
+        ],
+        [
+          "c3",
+          "c4"
+        ],
+        [
+          "c4",
+          "c5"
+        ],
+        [
+          "c5",
+          "c0"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          23.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          17.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          33.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          27.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          43.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          37.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          53.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          47.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          63.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          57.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          73.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          67.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          83.0,
+          43.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          77.0,
+          43.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          53.12,
+          27.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          46.88,
+          27.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          60.39,
+          19.4
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          57.27,
+          24.8
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          57.27,
+          9.2
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          60.39,
+          14.6
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          46.88,
+          6.8
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          53.12,
+          6.8
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          39.61,
+          14.6
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          42.73,
+          9.2
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          42.73,
+          24.8
+        ],
+        "s": "1",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          39.61,
+          19.4
+        ],
+        "s": "2",
+        "c": "muted",
+        "size": 2.2
+      },
+      {
+        "t": "text",
+        "p": [
+          10,
+          36
+        ],
+        "s": "path",
+        "c": "muted",
+        "size": 2.6
+      },
+      {
+        "t": "text",
+        "p": [
+          70,
+          24
+        ],
+        "s": "cycle",
+        "c": "muted",
+        "size": 2.6
+      }
+    ],
+    "frames": [
+      {
+        "label": "Start: the same agent at the middle of a path of 2t + 3 = 9 nodes, or on a cycle",
+        "ents": [
+          {
+            "id": "a",
+            "at": "p4",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "c0",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              50
+            ],
+            "s": "it sees: a node with 2 edges, ports 1 and 2",
+            "c": "muted",
+            "size": 2.5
+          }
+        ]
+      },
+      {
+        "label": "Round 1: port 1 in both graphs; it sees the same",
+        "ents": [
+          {
+            "id": "a",
+            "at": "p5",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "c1",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              50
+            ],
+            "s": "entered by port 2; this node has 2 edges, ports 1 and 2",
+            "c": "muted",
+            "size": 2.5
+          }
+        ]
+      },
+      {
+        "label": "Round 2: port 1 again; the ends of the path are still out of reach",
+        "ents": [
+          {
+            "id": "a",
+            "at": "p6",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "c2",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              50
+            ],
+            "s": "entered by port 2; this node has 2 edges, ports 1 and 2",
+            "c": "muted",
+            "size": 2.5
+          }
+        ]
+      },
+      {
+        "label": "Final, round t = 3: same view in both, so the same answer, wrong in one",
+        "ents": [
+          {
+            "id": "a",
+            "at": "p5",
+            "k": "agent",
+            "l": "a",
+            "c": "accent"
+          },
+          {
+            "id": "b",
+            "at": "c1",
+            "k": "agent",
+            "l": "a",
+            "c": "gap"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              50
+            ],
+            "s": "entered by port 1; this node has 2 edges, ports 1 and 2",
+            "c": "muted",
+            "size": 2.5
+          },
+          {
+            "t": "text",
+            "p": [
+              60,
+              35
+            ],
+            "s": "answers yes: right",
+            "c": "tight",
+            "size": 2.5
+          },
+          {
+            "t": "text",
+            "p": [
+              79,
+              14
+            ],
+            "s": "answers yes: wrong",
+            "c": "gap",
+            "size": 2.5
+          }
+        ]
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Pattanayak2023Computing",
+      "note": "Which functions $f : \\mathbb{N}^k \\to \\mathbb{N}$ teams of deterministic finite automata compute on the half-line, starting in groups at the arguments. A preprint; abstract read."
+    }
+  ]
+}

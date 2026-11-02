@@ -34,10 +34,23 @@
     return esc(text).replace(/\$([^$]+?)\$/g, (m, x) => tex(x.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')));
   }
 
-  function shortCite(key) {
+  // author-year label; papers that would share one get a letter after the year (2020a, 2020b), in the
+  // order of their keys, as in the book. With first = true the year is the first appearance (timeline).
+  function shortCite(key, first) {
     const r = state.refs[key];
     if (!r) return key;
     if (r.short) return r.short;
+    const field = first ? 'first' : 'year', year = rr => (first && rr.first_year) || rr.year || '';
+    if (!labelTags[field]) {
+      const groups = {};
+      Object.keys(state.refs).sort().forEach(k => { const g = `${citeWho(state.refs[k])} ${year(state.refs[k])}`; (groups[g] = groups[g] || []).push(k); });
+      labelTags[field] = {};
+      Object.values(groups).forEach(ks => ks.forEach((k, i) => { labelTags[field][k] = ks.length > 1 ? 'abcdefghijklmnopqrstuvwxyz'[i] : ''; }));
+    }
+    return `${citeWho(r)} ${year(r)}${labelTags[field][key]}`.trim();
+  }
+  const labelTags = {};
+  function citeWho(r) {
     const last = name => {
       const parts = name.trim().split(/\s+/);
       let s = parts[parts.length - 1];
@@ -48,8 +61,7 @@
       return s;
     };
     const a = (r.authors || []).map(last);
-    const who = a.length <= 1 ? (a[0] || '?') : a.length === 2 ? `${a[0]} & ${a[1]}` : `${a[0]} et al.`;
-    return `${who} ${r.year || ''}`.trim();
+    return a.length <= 1 ? (a[0] || '?') : a.length === 2 ? `${a[0]} & ${a[1]}` : `${a[0]} et al.`;
   }
 
   function isOwn(key) {
@@ -59,9 +71,26 @@
 
   function citeLink(key) {
     const r = state.refs[key];
-    const title = r ? esc(r.title) : 'unknown reference';
+    const title = r ? esc(r.title + ((r.versions || []).length ? ` (also ${r.versions.map(versionLabel).join('; ')})` : '')) : 'unknown reference';
     return `<a class="cite" href="${L('references', key)}" title="${title}">${esc(shortCite(key))}</a>`;
   }
+
+  // A reference is cited by its main version (journal, else full conference paper, else brief
+  // announcement, else preprint); `versions` lists the others, `first_year` the first appearance.
+  function versionLabel(v) {
+    if (v.ref) return shortCite(v.ref);
+    const s = (v.venue || '').split(/\s*[,(;]\s*/)[0].replace(/\s+\d+(:\S+)?$/, '');
+    return /\b(19|20)\d\d\b/.test(s) ? s : `${s} ${v.year || ''}`.trim();
+  }
+  const arxivPdf = id => `https://arxiv.org/pdf/${id}`;
+  function versionLinks(v, arxiv) {
+    return [v.doi ? `<a href="https://doi.org/${esc(v.doi)}" rel="noopener">doi:${esc(v.doi)}</a>` : '',
+      v.pdf ? `<a href="${esc(v.pdf)}" rel="noopener">pdf</a>` : '',
+      v.url ? `<a href="${esc(v.url)}" rel="noopener">link</a>` : '',
+      arxiv ? `<a href="https://arxiv.org/abs/${esc(arxiv)}" rel="noopener">arXiv:${esc(arxiv)}</a> <a href="${esc(arxivPdf(arxiv))}" rel="noopener">arXiv pdf</a>` : ''].filter(Boolean).join('');
+  }
+  // results whose paper exists only as a preprint are marked: not peer reviewed
+  const preprintTag = k => state.refs[k] && state.refs[k].kind === 'preprint' ? ' <span class="badge preprint" title="Only a preprint exists: not peer reviewed">preprint</span>' : '';
 
   // If the Markdown library could not be loaded (CDN down), keep the page readable: paragraphs, lists, bold, italics, links.
   function mdFallback(t) {
@@ -97,6 +126,17 @@
     if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
     return r.json();
   }
+  async function loadText(path) {
+    const r = await fetch(path, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+    return r.text();
+  }
+
+  // every problem file lives in the folder of its family: data/problems/<family>/<id>.json
+  function problemFolder(idx, pid) {
+    const f = (idx.families || []).find(f => f.problems.includes(pid));
+    return f ? f.id : '';
+  }
 
   async function loadAll() {
     const bundle = window.CATALOGUE_DATA; // set by scripts/build-artifact.py
@@ -106,22 +146,24 @@
       ? [idx.models.map(id => bundle.models[id]), idx.problems.map(id => bundle.problems[id]), bundle.references]
       : await Promise.all([
         Promise.all(idx.models.map(id => loadJSON(`data/models/${id}.json`))),
-        Promise.all(idx.problems.map(id => loadJSON(`data/problems/${id}.json`))),
+        Promise.all(idx.problems.map(id => loadJSON(`data/problems/${problemFolder(idx, id)}/${id}.json`))),
         loadJSON('data/references.json'),
       ]);
     state.refs = refs;
     state.notation = bundle ? (bundle.notation || null) : await loadJSON('data/notation.json').catch(() => null);
     state.acks = bundle ? (bundle.acknowledgements || null) : await loadJSON('data/acknowledgements.json').catch(() => null);
+    state.changelog = bundle ? (bundle.changelog || null) : await loadText('CHANGELOG.md').catch(() => null);
     const ovIds = idx.overviews || [];
     const ovs = bundle ? ovIds.map(id => bundle.overviews && bundle.overviews[id]).filter(Boolean)
       : await Promise.all(ovIds.map(id => loadJSON(`data/overviews/${id}.json`)));
     ovs.forEach(o => { state.overviews[o.id] = o; });
     models.forEach(m => { state.models[m.id] = m; });
+    state.cites = citationIndex(idx, models, problems, ovs);
     problems.forEach(p => { prepareProblem(p); state.problems[p.id] = p; });
     const ft = document.getElementById('footer-text');
     const ver = (idx.citation || {}).version;
     if (ft) ft.innerHTML = `${esc(idx.title)}${ver ? ` · last updated <time datetime="${esc(ver)}">${esc(longDate(ver))}</time>` : ''}${idx.owner ? ' · maintained by ' + (idx.owner_url ? `<a href="${esc(idx.owner_url)}" rel="noopener">${esc(idx.owner)}</a>` : esc(idx.owner)) : ''}${idx.license ? ' · ' + (idx.license_url ? `<a href="${esc(idx.license_url)}" rel="noopener">${esc(idx.license)}</a>` : esc(idx.license)) : ''}
-      <div class="foot-links">${idx.repo ? `<a href="${esc(issueUrl('new-result.yml', {}))}" rel="noopener">Suggest a result</a> · <a href="${esc(issueUrl('error.yml', {}))}" rel="noopener">Report an error</a> · <a href="${esc(issueUrl('new-problem.yml', {}))}" rel="noopener">Suggest a problem</a> · ` : ''}<a href="about.html">About</a> · <a href="${L('acknowledgements')}">Acknowledgements</a>${idx.changelog_url ? ` · <a href="${esc(idx.changelog_url)}" rel="noopener">Changelog</a>` : ''}${idx.repo ? ` · <a href="${esc(idx.repo)}" rel="noopener">Source</a>` : ''}</div>`;
+      <div class="foot-links">${idx.repo ? `<a href="${esc(issueUrl('new-result.yml', {}))}" rel="noopener">Suggest a result</a> · <a href="${esc(issueUrl('error.yml', {}))}" rel="noopener">Report an error</a> · <a href="${esc(issueUrl('new-problem.yml', {}))}" rel="noopener">Suggest a problem</a> · ` : ''}<a href="about.html">About</a> · <a href="${L('acknowledgements')}">Acknowledgements</a>${changelogLink('Changelog') ? ` · ${changelogLink('Changelog')}` : ''}${idx.repo ? ` · <a href="${esc(idx.repo)}" rel="noopener">Source</a>` : ''}</div>`;
     if (idx.repo) { const l = document.getElementById('repo-link'); l.href = idx.repo; l.hidden = false; }
   }
 
@@ -283,7 +325,7 @@
     return `<div class="kcell">
       <small>lower bound${lbs.length > 1 ? 's' : ''}</small>
       ${lbs.map(lb => `<div class="lb">
-        <div class="bound">${tex(lb.bound)}${lb.ref ? ` <span class="cite-after">${citeLink(lb.ref)}</span>` : ''}</div>
+        <div class="bound">${tex(lb.bound)}${lb.ref ? ` <span class="cite-after">${citeLink(lb.ref)}${preprintTag(lb.ref)}</span>` : ''}</div>
         ${lb.bottleneck ? `<div class="lb-row"><span class="lbl">bottleneck</span><span class="bottleneck">${fmt(lb.bottleneck)}</span></div>` : ''}
         ${lb.preconditions && lb.preconditions.length ? `<div class="lb-row"><span class="lbl">holds when</span><ul class="pre">${lb.preconditions.map(x => `<li>${mdInline(x)}</li>`).join('')}</ul></div>` : ''}
         ${lb.note ? `<div class="small muted">${mdInline(lb.note)}</div>` : ''}
@@ -295,7 +337,7 @@
     if (!r) return `<div class="kcell"><small>${label}</small><span class="muted">—</span></div>`;
     return `<div class="kcell"><small>${label}</small>
       <div class="bound">${tex(r[m.id])}</div>
-      <div>${citeLink(r.ref)}</div>
+      <div>${citeLink(r.ref)}${preprintTag(r.ref)}</div>
       ${r.assumes && r.assumes.length ? `<div class="chips tiny">${r.assumes.map(a => `<span class="chip assume">${fmt(a)}</span>`).join('')}</div>` : ''}
     </div>`;
   }
@@ -419,7 +461,7 @@
           <h1>${esc(idx.title)}</h1>
           ${idx.subtitle ? `<p class="subtitle">${esc(idx.subtitle)}</p>` : ''}
           <p class="tagline">${esc(idx.tagline)}</p>
-          ${(idx.citation || {}).version ? `<p class="updated"><span class="updated-tag">Last updated</span> <time datetime="${esc(idx.citation.version)}">${esc(longDate(idx.citation.version))}</time>${idx.changelog_url ? ` · <a href="${esc(idx.changelog_url)}" rel="noopener">what changed</a>` : ''}</p>` : ''}
+          ${(idx.citation || {}).version ? `<p class="updated"><span class="updated-tag">Last updated</span> <time datetime="${esc(idx.citation.version)}">${esc(longDate(idx.citation.version))}</time>${changelogLink('what changed') ? ` · ${changelogLink('what changed')}` : ''}</p>` : ''}
           ${aiNote('sub')}
           <p class="hh-intro">${mdInline(idx.intro || 'Every problem is a tree of settings. Its root assumes nothing; each edge adds one assumption, until it reaches the settings studied in the literature. Each setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.')}</p>
           <div class="hh-links"><a class="btn" href="${L('explore')}">Explore by assumptions</a><a class="btn" href="${L('open')}">Open questions</a><a class="btn ghost" href="${L('timeline')}">Timeline</a><a class="btn ghost" href="${L('references')}">References</a><a class="btn ghost" href="${esc((idx.citation || {}).pdf || 'mobility-matters.pdf')}">PDF</a></div>
@@ -440,11 +482,12 @@
 
   const homeSwitch = cur => `<div class="section-title viewhead"><h2>${cur === 'logical' ? 'Four models' : 'How the problems evolved'}</h2><nav class="viewswitch" aria-label="View"><a class="${cur === 'logical' ? 'on' : ''}" href="${L()}">Logical</a><a class="${cur === 'chrono' ? 'on' : ''}" href="${L('timeline')}">Chronological</a></nav></div>`;
   const refYear = k => { const r = state.refs[k]; return r ? (r.first_year || r.year) : null; };
-  // citation labelled with the year of first appearance (journal year in the tooltip)
+  // citation labelled with the year of first appearance (conference, journal or preprint; the cited version in the tooltip)
+  // (every label on the timeline is a first-appearance label, so no two papers there share one)
   const citeFirst = k => {
-    const r = state.refs[k]; if (!r || !r.first_year || r.first_year === r.year) return citeLink(k);
-    const label = shortCite(k).replace(new RegExp(String(r.year) + '$'), String(r.first_year));
-    return `<a class="cite" href="${L('references', k)}" title="${esc(r.title)} (journal version ${r.year})">${esc(label)}</a>`;
+    const r = state.refs[k]; if (!r) return citeLink(k);
+    const moved = r.first_year && r.first_year < r.year;
+    return `<a class="cite" href="${L('references', k)}" title="${esc(r.title)}${moved ? ` (first appeared ${r.first_year}; cited version: ${esc(versionLabel(r))})` : ''}">${esc(shortCite(k, true))}</a>`;
   };
 
   // Chronological view: when each problem was posed, and the papers that moved it
@@ -489,7 +532,7 @@
     const idx = state.index;
     return `<div class="hero"><h1>${esc(idx.title)}</h1><p class="tagline">${esc(idx.tagline)}</p>${aiNote('sub')}</div>
       ${homeSwitch('chrono')}
-      <p class="muted small">Each year lists the problems first posed then (highlighted) and the papers that introduced a setting, gave the current best result, or proved a lower bound, dated by their first appearance (usually the conference version). The logical view arranges the same problems by reduction; the two orders can disagree, and where a derived problem was posed before its logical parent the entry says so.</p>
+      <p class="muted small">Each year lists the problems first posed then (highlighted) and the papers that introduced a setting, gave the current best result, or proved a lower bound, dated by their first appearance in any form (conference, journal or arXiv preprint). The logical view arranges the same problems by reduction; the two orders can disagree, and where a derived problem was posed before its logical parent the entry says so.</p>
       <section class="panel timeline">${rows}</section>`;
   }
 
@@ -562,7 +605,21 @@
       ${axesTable(m.axes)}
       ${m.landscape ? `<h2 id="landscape">${esc(m.landscape.title || 'Model landscape')}</h2>${landscapeHtml(m)}` : ''}
       <h2>Problems in this model</h2>
-      ${probs.length ? familiesHtml(probs) : '<p class="empty">None yet.</p>'}`;
+      ${probs.length ? familiesHtml(probs) : '<p class="empty">None yet.</p>'}
+      ${modelPapers(id, probs)}`;
+  }
+  // the papers a model cites, by problem with their roles there, then those cited only in its description
+  function modelPapers(id, probs) {
+    const cites = state.cites || {}, year = k => state.refs[k].first_year || state.refs[k].year || 0;
+    const sorted = ks => ks.sort((a, b) => year(a) - year(b) || a.localeCompare(b));
+    const item = (k, roles) => `<li>${citeLink(k)}${preprintTag(k)} ${fmt(state.refs[k].title)}${roles ? ` <span class="small muted">${roles}</span>` : ''}</li>`;
+    const group = (title, ks, roles) => ks.length ? `<details><summary><b>${title}</b> <span class="muted small">${ks.length} paper${ks.length > 1 ? 's' : ''}</span></summary><ul class="paper-list">${ks.map(k => item(k, roles(k))).join('')}</ul></details>` : '';
+    const groups = probs.map(p => group(esc(p.name), sorted(Object.keys(cites).filter(k => cites[k].problems[p.id])),
+      k => REF_ROLES.filter(([r]) => cites[k].problems[p.id][r]).map(([, n]) => n).join(', ')));
+    groups.push(group('Cited only in the model description', sorted(Object.keys(cites).filter(k => cites[k].modelText.has(id) && !probs.some(p => cites[k].problems[p.id]))), () => ''));
+    const total = Object.keys(cites).filter(k => cites[k].models.has(id)).length;
+    return total ? `<h2 id="papers">Papers</h2><p class="muted small">${total} papers are cited in this model, listed under each problem that cites them, oldest first. <a href="${refFilterHref({ model: id })}">Filter the references by this model →</a></p>
+      <section class="panel paper-groups">${groups.join('')}</section>` : '';
   }
 
   /* ---------- problem figures: an animated scene (site) whose first and last frames are the TikZ figures (PDF) ---------- */
@@ -875,7 +932,7 @@
       <section class="panel">
         <h3 class="eyebrow">Results, in order of publication</h3>
         ${results.length ? results.map(r => `<div class="result">
-            <div class="who">${citeLink(r.ref)} <span class="badge ${r.role}">${ROLE_LABEL[r.role] || esc(r.role)}</span></div>
+            <div class="who">${citeLink(r.ref)}${preprintTag(r.ref)} <span class="badge ${r.role}">${ROLE_LABEL[r.role] || esc(r.role)}</span></div>
             <div class="bounds-inline">${p.measures.filter(mm => r[mm.id]).map(mm => `<span>${esc(mm.name)} <b>${tex(r[mm.id])}</b></span>`).join('')}</div>
             ${(r.assumes && r.assumes.length) || r.note ? `<div class="note">${r.assumes && r.assumes.length ? `<div class="chips tiny">${r.assumes.map(a => `<span class="chip assume">${fmt(a)}</span>`).join('')}</div>` : ''}${md(r.note)}</div>` : ''}
           </div>`).join('') : '<p class="empty">No result recorded yet.</p>'}
@@ -1112,18 +1169,73 @@
       ${sections || '<p class="empty">Nothing yet.</p>'}`;
   }
 
-  function referencesPage() {
-    const keys = Object.keys(state.refs).sort((a, b) => (state.refs[a].year || 0) - (state.refs[b].year || 0) || a.localeCompare(b));
-    const used = {};
-    Object.values(state.problems).forEach(p => p.variants.forEach(v => {
-      [...(v.results || []), ...(v.lower_bounds || [])].forEach(r => { if (r.ref) (used[r.ref] = used[r.ref] || new Set()).add(`${p.id}/${v.id}`); });
-    }));
-    return `<h1>References</h1><p class="muted lead">${keys.length} entries. Keys are used as <code>[Key]</code> citations throughout the catalogue.</p>
-      <section class="panel">${keys.map(k => { const r = state.refs[k]; return `<div class="ref" id="ref-${esc(k)}">
-        <div><span class="key">${esc(k)}</span></div>
-        <div>${esc((r.authors || []).join(', '))} (${esc(r.year)}). <span class="title">${fmt(r.title)}</span>. <i>${esc(r.venue || '')}</i>${r.journal ? `; journal version: <i>${esc(r.journal)}</i>` : ''}.</div>
-        <div class="links">${r.doi ? `<a href="https://doi.org/${esc(r.doi)}" rel="noopener">doi:${esc(r.doi)}</a>` : ''}${r.arxiv ? `<a href="https://arxiv.org/abs/${esc(r.arxiv)}" rel="noopener">arXiv:${esc(r.arxiv)}</a>` : ''}${r.url ? `<a href="${esc(r.url)}" rel="noopener">link</a>` : ''}
-          ${used[k] ? `<span class="small muted">cited in ${[...used[k]].map(x => `<a href="${L('problem', ...x.split('/'))}">${esc(x.split('/')[1])}</a>`).join(', ')}</span>` : ''}</div>
+  /* ---------- where the atlas cites each paper: model, problem, role, kind of publication ---------- */
+  const REF_ROLES = [['posed', 'posed the problem'], ['introductory', 'introductory result'], ['best', 'current best'], ['other', 'other result'], ['lower-bound', 'lower bound'], ['further', 'further reading'], ['text', 'cited in text'], ['background', 'background']];
+  const REF_KINDS = [['journal', 'journal'], ['conference', 'conference'], ['brief', 'brief announcement'], ['preprint', 'preprint'], ['book', 'book'], ['chapter', 'chapter'], ['thesis', 'thesis']];
+  const kindName = Object.fromEntries(REF_KINDS);
+  // per reference: the problems that cite it with its roles there (and the settings of its results and
+  // lower bounds), their models, and the model descriptions and perspectives that cite it; a paper cited
+  // by no problem is background
+  function citationIndex(idx, models, problems, ovs) {
+    const out = {};
+    const at = k => out[k] || (out[k] = { models: new Set(), problems: {}, roles: new Set(), modelText: new Set(), perspectives: new Set() });
+    const add = (k, p, role, vid) => {
+      if (!state.refs[k]) return;
+      const c = at(k), pr = c.problems[p.id] || (c.problems[p.id] = {}), vs = pr[role] || (pr[role] = []);
+      c.models.add(p.model); c.roles.add(role);
+      if (vid && !vs.includes(vid)) vs.push(vid);
+    };
+    const mentioned = o => [...JSON.stringify(o).matchAll(/\b([A-Za-z][A-Za-z-]*\d{4}[A-Za-z0-9]*)\b/g)].map(m => m[1]).filter(k => state.refs[k]);
+    problems.forEach(p => {
+      if (p.origin && p.origin.ref) add(p.origin.ref, p, 'posed');
+      (p.variants || []).forEach(v => {
+        (v.results || []).forEach(r => r.ref && add(r.ref, p, r.role === 'introductory' || r.role === 'best' ? r.role : 'other', v.id));
+        (v.lower_bounds || []).forEach(b => b.ref && add(b.ref, p, 'lower-bound', v.id));
+      });
+      (p.further || []).forEach(f => add(f.ref, p, 'further'));
+      mentioned(p).forEach(k => { if (!(out[k] && out[k].problems[p.id])) add(k, p, 'text'); });
+    });
+    models.forEach(m => mentioned(m).forEach(k => { const c = at(k); c.modelText.add(m.id); c.models.add(m.id); }));
+    ovs.forEach(o => mentioned(o).forEach(k => at(k).perspectives.add(o.id)));
+    mentioned({ intro: idx.intro, abstract: idx.abstract, priorities: idx.priorities }).forEach(at);
+    Object.values(out).forEach(c => { if (!Object.keys(c.problems).length) c.roles.add('background'); });
+    return out;
+  }
+  // a filter of the references is "facet~value,…" with the facets model, role and kind
+  const refFilter = s => Object.fromEntries(String(s || '').split(',').map(x => x.split('~')).filter(x => x.length === 2 && ['model', 'role', 'kind'].includes(x[0])));
+  const refFilterHref = f => { const s = Object.entries(f).map(([a, b]) => `${a}~${b}`).join(','); return s ? L('references', 'by', s) : L('references'); };
+  const refMatches = (k, f) => { const c = state.cites[k]; return (!f.model || !!c && c.models.has(f.model)) && (!f.role || !!c && c.roles.has(f.role)) && (!f.kind || state.refs[k].kind === f.kind); };
+  // where the atlas cites a paper: per model, the problems with its roles there; then perspectives
+  function refCategories(k) {
+    const c = state.cites[k]; if (!c) return '';
+    const byModel = {};
+    c.models.forEach(m => { byModel[m] = []; });
+    Object.entries(c.problems).forEach(([pid, roles]) => { const p = state.problems[pid]; if (p) byModel[p.model].push([p, roles]); });
+    const roleText = (p, roles) => REF_ROLES.filter(([id]) => roles[id]).map(([id, name]) => roles[id].length ? `${name} in ${roles[id].map(v => `<a href="${L('problem', p.id, v)}">${esc(v)}</a>`).join(', ')}` : name).join('; ');
+    const lines = Object.entries(byModel).map(([m, list]) => `<div class="cat"><a class="cat-model" href="${refFilterHref({ model: m })}">${esc(state.models[m] ? state.models[m].name : m)}</a> › ${[
+      ...list.map(([p, roles]) => `<a href="${L('problem', p.id)}">${esc(p.name)}</a> <span class="muted">(${roleText(p, roles)})</span>`),
+      ...(c.modelText.has(m) ? [`<a href="${L('model', m)}">model description</a>`] : [])].join(' · ')}</div>`);
+    if (c.perspectives.size) lines.push(`<div class="cat"><span class="cat-model">Perspectives</span> › ${[...c.perspectives].map(o => `<a href="${L('overview', o)}">${esc(state.overviews[o] ? state.overviews[o].title : o)}</a>`).join(' · ')}</div>`);
+    return lines.length ? `<div class="cats small">${lines.join('')}</div>` : '';
+  }
+  function refFacet(f, all, label, id, values) {
+    const href = v => { const g = { ...f }; if (v === null || g[id] === v) delete g[id]; else g[id] = v; return refFilterHref(g); };
+    const chips = values.map(([v, name]) => [v, name, all.filter(k => refMatches(k, { ...f, [id]: v })).length]).filter(x => x[2] || f[id] === x[0]);
+    return `<div class="ref-facet"><span class="lbl">${label}</span><div class="chips tiny"><a class="chip${f[id] ? '' : ' assume'}" href="${href(null)}">all</a>${chips.map(([v, name, n]) => `<a class="chip${f[id] === v ? ' assume' : ''}" href="${href(v)}">${esc(name)}<span class="n">${n}</span></a>`).join('')}</div></div>`;
+  }
+  function referencesPage(filter) {
+    const f = refFilter(filter);
+    const all = Object.keys(state.refs).sort((a, b) => (state.refs[a].year || 0) - (state.refs[b].year || 0) || a.localeCompare(b));
+    const keys = all.filter(k => refMatches(k, f));
+    return `<h1>References</h1><p class="muted lead">${keys.length === all.length ? `${all.length} entries` : `${keys.length} of ${all.length} entries`}. Keys are used as <code>[Key]</code> citations throughout the catalogue. Each entry says which models and problems cite it and in what role; filter by model, role and kind of publication.</p>
+      <section class="panel ref-filters">${refFacet(f, all, 'Model', 'model', state.index.models.map(m => [m, state.models[m].name]))}${refFacet(f, all, 'Role', 'role', REF_ROLES)}${refFacet(f, all, 'Kind', 'kind', REF_KINDS)}</section>
+      <section class="panel">${keys.length ? '' : '<p class="empty">No reference matches these filters.</p>'}${keys.map(k => { const r = state.refs[k]; const vs = r.versions || []; return `<div class="ref" id="ref-${esc(k)}">
+        <div><span class="key">${esc(k)}</span>${r.kind === 'preprint' ? preprintTag(k) : `<span class="kind">${esc(kindName[r.kind] || r.kind || '')}</span>`}</div>
+        <div>${esc((r.authors || []).join(', '))} (${esc(r.year)}). <span class="title">${fmt(r.title)}</span>. <i>${esc(r.venue || '')}</i>.</div>
+        <div class="links">${versionLinks(r, r.arxiv)}</div>
+        ${refCategories(k)}
+        ${vs.length ? `<div class="versions small"><span class="lbl">Other versions</span><ul>${vs.map(v => `<li>${v.ref ? citeLink(v.ref) + (state.refs[v.ref] ? ` <i>${esc(state.refs[v.ref].venue)}</i>, ${esc(state.refs[v.ref].year)}` : '') : `<i>${esc(v.venue)}</i>${String(v.venue).includes(String(v.year)) ? '' : `, ${esc(v.year)}`}${v.title && v.title !== r.title ? `, as “${fmt(v.title)}”` : ''}`} <span class="links">${v.ref ? '' : versionLinks(v)}</span></li>`).join('')}</ul></div>` : ''}
+        ${(r.first_year && r.first_year < r.year) || r.read ? `<div class="small muted">${r.first_year && r.first_year < r.year ? `First appeared in ${esc(r.first_year)}.` : ''}${r.read ? ` Read: ${mdInline(r.read)}.` : ''}</div>` : ''}
         ${r.note ? `<div class="small muted">${md(r.note)}</div>` : ''}</div>`; }).join('')}</section>`;
   }
 
@@ -1213,7 +1325,7 @@
     });
     if (state.notation) Object.entries(state.notation.models || {}).forEach(([mid, rows]) => rows.forEach(r => add('Symbol', plain('$' + r.symbol + '$'), `${state.models[mid] ? state.models[mid].name : mid}: ${plain(r.meaning)}`, L('notation'), [r.meaning, r.papers_write].join(' '))));
     Object.values(state.overviews).forEach(o => add('Perspective', o.title, plain(o.summary), L('overview', o.id), (o.sections || []).map(x => x.heading + ' ' + x.body).join(' ')));
-    Object.entries(state.refs).forEach(([k, r]) => add('Paper', r.title, `${(r.authors || []).join(', ')} · ${r.venue || ''} ${r.year || ''}`, L('references', k), [k, r.note].join(' ')));
+    Object.entries(state.refs).forEach(([k, r]) => add('Paper', r.title, `${(r.authors || []).join(', ')} · ${r.venue || ''} ${r.year || ''}`, L('references', k), [k, r.note, ...(r.versions || []).map(v => `${v.venue || ''} ${v.title || ''}`)].join(' ')));
     return out;
   }
   const TYPE_RANK = { Problem: 0, Model: 1, Assumption: 2, Symbol: 3, Perspective: 4, Setting: 5, 'Open question': 6, Paper: 7 };
@@ -1436,6 +1548,26 @@
       ${a.authors_note ? `<p class="small muted">${mdInline(a.authors_note)}</p>` : ''}</section>`;
   }
 
+  /* ---------- changelog: CHANGELOG.md, one panel per version ---------- */
+  // without CHANGELOG.md (not served, or not bundled) the link falls back to the copy in the repository
+  const changelogLink = text => state.changelog ? `<a href="${L('changelog')}">${esc(text)}</a>`
+    : state.index.changelog_url ? `<a href="${esc(state.index.changelog_url)}" rel="noopener">${esc(text)}</a>` : '';
+  function changelogPage() {
+    const t = state.changelog;
+    if (!t) return notFound('page', 'changelog');
+    const [head, ...versions] = t.replace(/\r/g, '').replace(/^# .*\n/, '').split(/^## /m);
+    return `<div class="crumbs"><a href="${L()}">Home</a><span class="sep">›</span><span>Changelog</span></div>
+      <h1>Changelog</h1>
+      ${head.trim() ? `<div class="lead muted">${md(head.trim())}</div>` : ''}
+      ${versions.map(s => {
+        // a version heading is "YYYY-MM-DD — what changed"
+        const [h, ...body] = s.split('\n');
+        const m = h.match(/^(\d{4}-\d{2}-\d{2})\s*[—–-]?\s*(.*)$/);
+        const title = m ? `<time datetime="${esc(m[1])}">${esc(longDate(m[1]))}</time>${m[2] ? `<span class="what">${mdInline(m[2])}</span>` : ''}` : mdInline(h);
+        return `<section class="panel prose changelog"><h2>${title}</h2>${md(body.join('\n'))}</section>`;
+      }).join('')}`;
+  }
+
   /* ---------- router ---------- */
   // underline the top-bar link of the current section
   function markNav(section) {
@@ -1462,11 +1594,12 @@
       else if (parts[0] === 'problem') html = (parts[2] === 'map' || parts[2] === 'graph') ? problemPage(parts[1], null, parts[2]) : problemPage(parts[1], parts[2]);
       else if (parts[0] === 'overview') html = overviewPage(parts[1]);
       else if (parts[0] === 'open') html = openPage();
-      else if (parts[0] === 'references') html = referencesPage();
+      else if (parts[0] === 'references') html = referencesPage(parts[1] === 'by' ? parts[2] : '');
       else if (parts[0] === 'cite') html = citePage();
       else if (parts[0] === 'explore') html = explorePage(parts);
       else if (parts[0] === 'notation') html = notationPage();
       else if (parts[0] === 'acknowledgements') html = acknowledgementsPage();
+      else if (parts[0] === 'changelog') html = changelogPage();
       else if (parts[0] === 'search') html = searchPage(route.replace(/^#\/?search[\/.]?/, ''));
       else html = notFound('page', parts.join('/'));
     } catch (e) { console.error(e); html = `<div class="error">Render error: ${esc(e.message)}</div>`; }
@@ -1476,7 +1609,7 @@
     markNav(parts[0] || '');
     fitGraph();
     initFigures();
-    if (parts[0] === 'references' && (parts[1] || /^#ref-/.test(location.hash))) {
+    if (parts[0] === 'references' && ((parts[1] && parts[1] !== 'by') || /^#ref-/.test(location.hash))) {
       const el = document.getElementById(parts[1] ? 'ref-' + parts[1] : location.hash.slice(1));
       if (el) el.scrollIntoView({ block: 'start' });
     } else if (parts[0] === 'problem' && parts[2] && sameProblem) {

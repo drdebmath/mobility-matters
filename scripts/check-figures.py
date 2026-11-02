@@ -17,6 +17,11 @@ import json, math, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return ROOT / "data" / "problems" / fam / f"{pid}.json" if fam else ROOT / "data" / "problems" / f"{pid}.json"
 MOVERS = {None, "robot", "agent", "particle", "tile", "crashed"}
 LAT_NB = {(1, 0), (-1, 0), (0, 1), (0, -1), (1, -1), (-1, 1)}
 
@@ -83,7 +88,7 @@ def main():
     ids = sys.argv[1:] or idx["problems"]
     total = 0
     for pid in ids:
-        p = json.loads((ROOT / f"data/problems/{pid}.json").read_text())
+        p = json.loads(problem_file(idx, pid).read_text())
         if not p.get("figure"):
             continue
         errs = check(pid, p["figure"], p["model"])

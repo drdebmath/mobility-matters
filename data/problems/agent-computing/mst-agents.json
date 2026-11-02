@@ -1,0 +1,2601 @@
+{
+  "id": "mst-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Minimum spanning tree by agents",
+  "origin": {
+    "ref": "Kshemkalyani2024AgentLE",
+    "year": 2024,
+    "note": "MST in the agent-based model appeared together with leader election (DISC 2024)."
+  },
+  "summary": "$n$ agents in an anonymous weighted graph must build a minimum spanning tree.",
+  "statement": "$n$ agents with distinct identifiers (IDs) are placed on the nodes of an anonymous port-labelled graph with $n$ nodes, $m$ edges and maximum degree $\\Delta$. The start is rooted (all agents on one node), dispersed (one agent on each node) or arbitrary. Agents compute only by moving and by talking with agents on the same node. The agents must build a minimum spanning tree of the edge-weighted graph, each agent knowing which incident edges belong to it: every agent (or node) learns its part of the output. **Time** is in synchronous rounds; **memory** in bits per agent.",
+  "primer": {
+    "intro": "Imagine $n$ **agents** (small mobile computers), one in each room of a building, who must choose which corridors to keep open so that every room can still reach every other, using the cheapest possible total length. The building is a **graph**: rooms are its **nodes** and corridors are its **edges**; there are $n$ nodes and $m$ edges, and from here on we say only node and edge. Two nodes joined by an edge are *neighbours*. Every edge has a **weight** (its cost), which the agents on its two ends can see; $\\Delta$ is the maximum degree (the largest number of edges at one node). Nodes have no names, but the edges at a node are numbered $1, 2, \\dots$; these numbers are **ports**. A *spanning tree* is a set of $n-1$ edges that connects all nodes without forming a cycle, and a **minimum spanning tree** (MST) is one with the smallest total weight. In the basic version the agents start one per node (a **dispersed** start), have distinct **identifiers** (IDs), move in synchronous **rounds** (talk to the agents on the same node, then move along at most one edge), and at the end every agent must know which of the edges at its node belong to the MST. We count rounds and bits of memory per agent. As for all problems in this family, the agents can imitate a message-passing algorithm by visiting their neighbours, the method explained under leader election by agents.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Grow fragments along their lightest outgoing edges",
+        "variant": "dispersed",
+        "ref": "Chand2025Trees",
+        "idea": "This is the classic Borůvka / Gallager-Humblet-Spira idea, carried out by agents. Assume all edge weights differ (agents can break ties using their IDs and ports).\n\n1. At the start every node is its own **fragment**: a set of nodes joined by edges already chosen for the tree, so a small tree.\n2. In each phase, every agent meets its neighbours by the **ID-bit schedule** (in block $i$ of $2\\Delta$ rounds, agents whose $i$-th ID bit is $1$ visit their neighbours one by one while the others wait; see leader election by agents) and learns which of the edges at its node leave its fragment and how heavy they are.\n3. The agents of each fragment pass the lightest such edge up their tree to the fragment's **leader** (one agent of the fragment that decides for it), which picks the **lightest outgoing edge** of the whole fragment: the edge of smallest weight with one end in the fragment and the other outside.\n4. Every fragment adds its lightest outgoing edge; fragments joined by these edges merge into one, with one leader.\n5. Repeat until one fragment remains: it is the MST, and its leader is also an elected leader for all agents.",
+        "analysis": "Step 4 is safe because of the *cut property*: the lightest edge leaving any group of nodes always belongs to the MST. Every fragment merges with at least one other in each phase, so the number of fragments at least halves, and $O(\\log n)$ phases suffice. In total this gives $O(n\\log n + \\Delta\\log^2 n)$ rounds with $O(\\log n)$ bits per agent, assuming the agents know $L$, the largest ID [Chand2025Trees]. The first agent algorithm handled the fragments one at a time and needed $O(m + n\\log n)$ rounds and $O(n\\log n)$ bits [Kshemkalyani2024AgentLE].",
+        "why_it_matters": "Halving the number of fragments in every phase is the standard way to build spanning trees in parallel, and the resulting tree gives agents a root and a structure for broadcasting, used afterwards for BFS and counting problems."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "On a ring, the heaviest edge is far away",
+        "variant": "dispersed",
+        "idea": "Information moves at most one edge per round, because it travels only inside agents and each agent moves along at most one edge per round. So after $t$ rounds, what the agent on node $y$ knows depends only on the part of the graph within distance $t$ of $y$.\n\nTake a ring of $n$ nodes with distinct weights. The MST of a ring is the ring minus its heaviest edge. Look at an edge $e = \\{u, v\\}$ and an edge $f$ on the opposite side of the ring, at distance about $n/2$ from $u$ and $v$. Give every edge other than $e$ and $f$ a weight below the weight of $e$. If $f$ is lighter than $e$, then $e$ is the heaviest edge and is not in the MST; if $f$ is heavier, $e$ is in the MST.",
+        "analysis": "Within fewer than about $n/2 - 1$ rounds the agents on $u$ and $v$ cannot tell these two rings apart, so they answer the same way and one answer is wrong. Hence any algorithm needs $\\Omega(n)$ rounds on a ring, and $\\Omega(D)$ rounds in general, where $D$ is the diameter (largest distance between two nodes). This is our own short argument; the catalogue records no lower bound. On a ring $\\Delta = 2$, so the best algorithm, $O(n\\log n + \\Delta\\log^2 n)$, is within a $\\log n$ factor of it there.",
+        "why_it_matters": "It shows that an MST is a global object: an edge's membership can depend on an edge at the other end of the graph."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ on which the agents move, with $n$ nodes and $m$ edges; it is anonymous: its nodes carry no names that an agent can read",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes are anonymous",
+      "avoid": [
+        "vertex",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes (which are then neighbours); an agent crosses one edge in one round",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "door",
+        "doors"
+      ]
+    },
+    {
+      "term": "weight",
+      "definition": "the cost of an edge, a number visible to the agents on both of its ends; ties are broken with IDs and ports so that all weights can be taken distinct",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile computing entity that moves along edges, talks only with the agents on its own node, and keeps its memory between rounds",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "identifier",
+      "definition": "the distinct positive integer, at most $L$, that each agent carries; written ID",
+      "avoid": [
+        "label"
+      ]
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous step in which every agent first talks with the agents on its node and then moves along at most one edge",
+      "avoid": []
+    },
+    {
+      "term": "dispersed",
+      "definition": "with exactly one agent on every node; a dispersed start begins so, and to disperse is to reach this configuration",
+      "avoid": [
+        "spread out"
+      ]
+    },
+    {
+      "term": "ID-bit schedule",
+      "definition": "the meeting schedule in which every agent writes its ID with the same number of bits and time is cut into blocks of $2\\Delta$ rounds; in block $i$ the agents whose $i$-th bit is $1$ visit their neighbours one by one (out along one edge, back along it) and the agents whose $i$-th bit is $0$ wait on their nodes, so any two neighbouring agents meet",
+      "avoid": [
+        "bit-by-bit meeting schedule"
+      ]
+    },
+    {
+      "term": "leader",
+      "definition": "the one agent that ends knowing it is elected, while every other agent ends knowing it is not",
+      "avoid": []
+    },
+    {
+      "term": "fragment",
+      "definition": "a set of nodes connected by edges already chosen for the minimum spanning tree, with one leader; initially every node is a fragment of its own",
+      "avoid": [
+        "component"
+      ]
+    },
+    {
+      "term": "lightest outgoing edge",
+      "definition": "of a fragment $F$, the edge of smallest weight with exactly one end in $F$",
+      "avoid": []
+    },
+    {
+      "term": "minimum spanning tree",
+      "definition": "a set of $n-1$ edges that connects all nodes, contains no cycle, and has the smallest total weight among all such sets; written MST",
+      "avoid": []
+    }
+  ],
+  "history": "Spanning trees were the first application of agent-based leader election [Kshemkalyani2024AgentLE]; the question since has been **rounds, then memory**, without knowledge of graph parameters [Chand2025Trees].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "knowledge",
+    "initial",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of graph parameters",
+          "short": "no knowledge",
+          "definition": "Agents know no graph parameter ($n$, $m$, $\\Delta$, $D$)."
+        },
+        {
+          "id": "n-delta",
+          "level": 1,
+          "label": "$n$ and $\\Delta$ are known",
+          "short": "knows $n$, $\\Delta$",
+          "definition": "Every agent knows $n$ and $\\Delta$ (upper bounds suffice where stated)."
+        }
+      ],
+      "origin": "Whether agents know global parameters is inherited from message passing, where nodes typically know $n$ or an upper bound on it, and possibly $\\Delta$ and $D$; Kshemkalyani, Kumar, Molla and Sharma set the agent-based model against this and asked for algorithms that rely on no such knowledge, \"neither exact nor an upper bound\" [Kshemkalyani2024AgentLE]. Knowing $n$ and $\\Delta$ tells an agent how long to wait: in the arbitrary-start minimal dominating set algorithm of Chand, Molla and Sivasubramaniam every robot waits $\\kappa n\\Delta$ rounds before leader election begins [Chand2023Cover], and the introductory maximal independent set algorithms assume both $n$ and $\\Delta$ when the agents start dispersed or arbitrarily placed, but need no knowledge from a rooted start [Pattanayak2024MIS]. Kshemkalyani et al. state the trade-off: solutions without knowledge \"are more resilient to network changes and device faults\", but \"algorithm design becomes challenging since devices may not know how long to run a procedure to guarantee a solution\" [Kshemkalyani2024AgentLE]. Later papers remove the assumption by first dispersing with termination detection and electing a leader, after which a spanning tree lets the agents compute $\\Delta$ and the largest identifier themselves [Chand2026Triangle]; knowing only that largest identifier $L$ is a weaker assumption, recorded on results rather than as a level of this axis [Chand2025Trees]. For minimum spanning trees, Kshemkalyani et al. need no parameter [Kshemkalyani2024AgentLE], and Chand, Kumar and Molla reduce memory to $O(\\log n)$ bits knowing only $L$ [Chand2025Trees]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "dispersed",
+      "title": "Dispersed start",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed"
+      },
+      "summary": "From a dispersed start, an MST takes $O(n\\log n+\\Delta\\log^2 n)$ rounds with $O(\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kshemkalyani2024AgentLE",
+          "role": "introductory",
+          "time": "O(m+n\\log n)",
+          "memory": "O(\\log n\\cdot\\min\\{\\Delta,\\log n\\})",
+          "note": "Theorem 3 of [Kshemkalyani2024AgentLE]: from a dispersed start the memory is $O(\\log n\\cdot\\min\\{\\Delta, \\log n\\})$ bits; $O(n\\log n)$ bits from rooted or arbitrary starts."
+        },
+        {
+          "ref": "Chand2025Trees",
+          "role": "best",
+          "time": "O(n\\log n+\\Delta\\log^2 n)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "agents know $L$, the largest identifier"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound stated."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "—"
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "arbitrary",
+      "title": "Arbitrary start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "arbitrary"
+      },
+      "summary": "From an arbitrary start without knowledge, an MST takes $O(m+n\\log n)$ rounds with $O(n\\log n)$ bits, or $O(m+n\\log^2 n)$ rounds with $O(\\Delta\\log n)$ bits.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kshemkalyani2024AgentLE",
+          "role": "introductory",
+          "time": "O(m+n\\log n)",
+          "memory": "O(n\\log n)",
+          "note": "Theorem 3: elect a leader in $O(m)$ rounds (Theorem 2), which also disperses the agents, then merge components along minimum outgoing edges; no knowledge of graph parameters."
+        },
+        {
+          "ref": "Kshemkalyani2025NearLinear",
+          "role": "best",
+          "time": "O(m+n\\log^2 n)",
+          "memory": "O(\\Delta\\log n)",
+          "note": "Theorem 4.4: elect a leader in $O(n\\log^2 n)$ rounds with $O(\\log n)$ bits (Theorem 1.1), then run the MST technique of [Kshemkalyani2024AgentLE]; no knowledge of graph parameters. Best in memory; it pays a $\\log n$ factor on the $n\\log n$ term of the time."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound stated; the two algorithms trade a $\\log n$ factor in time against memory."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "[Kshemkalyani2026Leader] call $O(\\Delta\\log n)$ bits memory optimal for MST (Remark 2), but from a dispersed start $O(\\log n)$ bits suffice when the largest identifier is known [Chand2025Trees]; no lower bound is recorded."
+        }
+      },
+      "open": [
+        "An MST from an arbitrary start in $O(m + n\\log n)$ rounds, or fewer, with $O(\\log n)$ bits per agent and no knowledge of graph parameters."
+      ],
+      "notes": "Knowing $n$ and $\\Delta$, [Kshemkalyani2026Leader] obtain $O(m+n\\log^2 n+D\\Delta\\log n)$ rounds with $O(\\Delta\\log n)$ bits (Theorem 2), which the algorithm of [Kshemkalyani2025NearLinear] matches or beats without knowledge. Checked against the full text of [Kshemkalyani2024AgentLE] (Theorem 3) and [Kshemkalyani2025NearLinear] (Theorem 4.4).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "MST by growing fragments along their lightest outgoing edges (Borůvka, Gallager-Humblet-Spira) [Chand2025Trees]: agents dispersed on a weighted cycle meet their neighbours with the ID-bit schedule (in each block of $2\\Delta = 4$ rounds, agents whose current ID bit is 1 visit each neighbour and come back, one edge per round). Each one-node fragment adds its lightest edge (weights 1 and 2), giving two fragments (colours) with leaders 3 and 2 (circled). In phase 2 the agents meet again with the same walks (shown round by round) and find the edges that leave their fragment (red); 5 and 6 walk to their leaders to report the lightest outgoing edge, both fragments pick weight 3 and merge into the minimum spanning tree (thick).",
+    "view": [
+      100,
+      46
+    ],
+    "static": [
+      {
+        "t": "text",
+        "p": [
+          10.5,
+          23.0
+        ],
+        "s": "1",
+        "c": "fg",
+        "size": 3.2
+      },
+      {
+        "t": "text",
+        "p": [
+          50.0,
+          39.2
+        ],
+        "s": "4",
+        "c": "fg",
+        "size": 3.2
+      },
+      {
+        "t": "text",
+        "p": [
+          89.5,
+          23.0
+        ],
+        "s": "2",
+        "c": "fg",
+        "size": 3.2
+      },
+      {
+        "t": "text",
+        "p": [
+          50.0,
+          6.8
+        ],
+        "s": "3",
+        "c": "fg",
+        "size": 3.2
+      }
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          14,
+          10
+        ],
+        "b": [
+          14,
+          36
+        ],
+        "c": [
+          86,
+          36
+        ],
+        "d": [
+          86,
+          10
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "d"
+        ],
+        [
+          "d",
+          "a"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: dispersed; every node its own fragment",
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "b",
+            "l": "6"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 1, block 1: 5, 6 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "d",
+            "l": "6"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "b",
+            "l": "6"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                14,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 1, block 2: 2, 3, 6 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "d",
+            "l": "6"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                10
+              ],
+              [
+                14,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": [],
+        "label": "Phase 1, block 3: 3, 5 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          }
+        ],
+        "label": "Each adds its lightest edge: fragments merge"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "b",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 2, block 1: 5, 6 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "d",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "c",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "b",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                14,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 2, block 2: 2, 3, 6 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "a",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "d",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                10
+              ],
+              [
+                14,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "a",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 2, block 3: 3, 5 visit neighbours"
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "c",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "d",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "accent",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ],
+        "label": "Phase 2: edges of weight 3, 4 leave fragments"
+      },
+      {
+        "label": "5 reports weight 3 to leader 3, 6 weight 4 to 2",
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "l2"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "l1"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "b",
+            "l": "5",
+            "c": "l1"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "d",
+            "l": "6",
+            "c": "l2"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              14,
+              36
+            ],
+            "r": 4.6,
+            "c": "l1",
+            "w": 0.9
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "l2",
+            "w": 0.9
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                36
+              ],
+              [
+                86,
+                36
+              ]
+            ],
+            "c": "gap",
+            "w": 1.0
+          }
+        ]
+      },
+      {
+        "label": "Final: both pick weight 3; one fragment, the MST",
+        "ents": [
+          {
+            "id": "2",
+            "k": "agent",
+            "at": "d",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "k": "agent",
+            "at": "b",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "k": "agent",
+            "at": "a",
+            "l": "5",
+            "c": "tight"
+          },
+          {
+            "id": "6",
+            "k": "agent",
+            "at": "c",
+            "l": "6",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                14,
+                36
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                86,
+                36
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                14,
+                10
+              ],
+              [
+                86,
+                10
+              ]
+            ],
+            "c": "tight",
+            "w": 1.8
+          },
+          {
+            "t": "circle",
+            "p": [
+              86,
+              10
+            ],
+            "r": 4.6,
+            "c": "tight",
+            "w": 0.9
+          }
+        ]
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Kshemkalyani2025Agentic",
+      "note": "Full version of [Kshemkalyani2024AgentLE], extended to $k < n$ agents, which build a minimum spanning tree of each maximal connected group of occupied nodes: without knowledge, stabilising after $O(\\Delta\\log^2 k + |C_{\\max}|(\\Delta + \\log|C_{\\max}|))$ rounds, $|C_{\\max}|$ the number of nodes of the largest group (their notation; Theorem 18); knowing $k$ and $\\Delta$, explicit in $O(k\\Delta)$ rounds (Theorem 19); memory $O(\\Delta\\log k)$ bits beyond that of the leader election. For $k = n$ it restates $O(m + n\\log n)$ rounds without knowledge (Theorem 20), as in [Kshemkalyani2024AgentLE]. Preprint. Read."
+    }
+  ]
+}

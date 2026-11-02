@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Writes a static, crawlable HTML page for every page of the atlas that a search engine or a
    language model should find: home, models, perspectives, problems, their progress maps and every
-   catalogued setting, the notation, open questions, references, timeline and citation pages.
+   catalogued setting, the notation, open questions, references, timeline, citation and changelog pages.
    Each page is the site shell with the page already rendered inside it (math as TeX between \( \),
    which crawlers and language models read), its own title, description and canonical address, and
    links between pages rewritten to real addresses (problem/dispersion/ instead of #/problem/dispersion).
@@ -27,10 +27,11 @@ const cut = (s, n = 300) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n 
 function routes(idx) {
   const out = [{ route: '#/', desc: plain(idx.abstract || idx.intro) }];
   for (const r of ['notation', 'open', 'references', 'timeline', 'cite', 'acknowledgements']) out.push({ route: `#/${r}` });
+  out.push({ route: '#/changelog', desc: 'What changed in each dated version of the atlas: new problems, settings and results, corrections, references, and changes to the site and the book.' });
   for (const m of idx.models) out.push({ route: `#/model/${m}`, desc: plain(J(`data/models/${m}.json`).summary) });
   for (const o of idx.overviews || []) out.push({ route: `#/overview/${o}`, desc: plain(J(`data/overviews/${o}.json`).summary) });
   for (const pid of idx.problems) {
-    const p = J(`data/problems/${pid}.json`);
+    const p = J(`data/problems/${idx.families.find(f => f.problems.includes(pid)).id}/${pid}.json`);
     out.push({ route: `#/problem/${pid}`, desc: plain(p.summary) });
     out.push({ route: `#/problem/${pid}/map`, name: `${p.name}: progress map`, desc: `Progress map of ${p.name}: the best lower and upper bounds in every catalogued setting.` });
     for (const v of p.variants) out.push({ route: `#/problem/${pid}/${v.id}`, name: `${p.name}: ${plain(v.title)}`, desc: plain(`${p.name}, ${v.title}: ${v.summary || ''}`) });
@@ -61,7 +62,7 @@ async function main() {
     // links between pages: real addresses (relative to <base>); other routes stay in the app
     const link = h => {
       const [rt, frag] = h.split('#ref-');
-      if (/^#\/references\/./.test(h)) return `references/#ref-${h.replace(/^#\/references\//, '')}`;
+      if (/^#\/references\/(?!by\/)./.test(h)) return `references/#ref-${h.replace(/^#\/references\//, '')}`;
       return pages.has(rt) ? (addr(rt) || './') + (frag ? '#ref-' + frag : '') : `./${h}`;
     };
     body = body.replace(/href="(#\/[^"]*)"/g, (_, h) => `href="${esc(link(h.replace(/&amp;/g, '&')))}"`);

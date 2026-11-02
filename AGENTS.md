@@ -83,7 +83,8 @@ assets/app.js              renderer (vanilla JS, hash routing, no framework)
 assets/style.css           styles (light and dark via prefers-color-scheme)
 data/index.json            registry: which model and problem files to load
 data/models/<id>.json      a computational model and its assumption axes
-data/problems/<id>.json    one problem: statement, variant tree, results
+data/problems/<family>/<id>.json   one problem: statement, variant tree, results
+                           (in the folder of its family in data/index.json)
 data/references.json       shared bibliography (one entry per paper)
 data/overviews/<id>.json   perspectives: essays connecting problems
 data/notation.json         symbols of each model and general conventions
@@ -237,7 +238,8 @@ gap; the `note` should name the gap ("factor $\Delta$", "$\log k$ factor").
 ## The PDF
 
 `scripts/build-pdf.py` turns the same JSON into a book (`mobility-matters.pdf`,
-linked from the site), in this order: title page with a *Cite this as* box,
+linked from the site), in this order: title page, an abstract page (the `abstract`
+of `data/index.json` with keywords, which Google Scholar reads), a *How to cite* page,
 contents, reading guide; Part *Models and their assumptions* (a Notation chapter,
 then one chapter per model: description, the `story`, the model's symbols, every
 axis with its `origin` and formal definitions, the landscape); Part *Perspectives* (one chapter per overview, in
@@ -251,7 +253,9 @@ with the ranked problems and the unnumbered sections of
 `consequential-open-problems`), the alphabetical *Index of assumptions*, the
 timeline and the bibliography. It must state exactly what
 the website states: when the renderer gains a field, the PDF builder shows it too.
-Rebuild the PDF after every data change. Citation metadata (authors,
+One exception, by the owner's decision (`reference-categories`): the site's paper lists
+by model and the filters of the references page are not in the book, which keeps one
+alphabetical bibliography. Rebuild the PDF after every data change. Citation metadata (authors,
 title, version, URL) lives in `data/index.json` under `citation`; the site shows it
 behind the ❝ Cite link and in the footer.
 
@@ -336,8 +340,8 @@ The home page has a **Logical** view (model › family › problem, with derived
 related problems) and a **Chronological** view (`#/timeline`). The timeline is
 built from each problem's `origin: {ref, year, note}` (the paper that first posed
 it, dated by first appearance) and from every result with role `introductory` or
-`best` and every lower bound, dated by the reference's `first_year` (the
-conference year, when earlier than the journal `year`) or `year`. The two orders
+`best` and every lower bound, dated by the reference's `first_year` (its first
+appearance in any form: conference, journal or arXiv) or `year`. The two orders
 may disagree; when a derived problem was posed before its logical parent the
 timeline says so. Every problem must have an `origin`.
 
@@ -480,16 +484,53 @@ source is said to be unverified in the text.
 
 ## References
 
-`data/references.json` maps a key to `{authors[], title, venue, year, doi, arxiv,
-url, note}`. Keys are `FirstAuthorYearWord`, e.g. `AugustineMosesJr2018`. Prefer the
-peer-reviewed version in `venue`; keep the arXiv link too. **Never invent a
-reference, a venue, or a bound.** If a bound cannot be checked against the paper,
-keep the variant `status: "draft"` and say what is unverified in `notes`.
+`data/references.json` maps a key to one paper, described by the version that is cited:
+
+| field | meaning |
+| --- | --- |
+| `authors`, `title` | of the cited version |
+| `kind` | `journal`, `conference` (a full paper), `brief` (brief announcement or short paper), `preprint` (arXiv, HAL, technical report: not peer reviewed), `book`, `chapter` or `thesis` |
+| `venue`, `year`, `doi`, `pdf` | the cited version: its venue alone (no other version in the text), its year (the year of the meeting for a conference paper), its DOI, and a direct link to an open PDF of it |
+| `arxiv` | the arXiv id; the site links its abstract and its PDF |
+| `url` | another page for it (a HAL record, an author page) |
+| `versions[]` | the other versions, best first: `{kind, venue, year, doi, pdf, url, title, authors}` (`title` and `authors` only where they differ), or `{ref}` when the other version is an entry of its own |
+| `first_year` | the year of its first appearance in any form (conference, journal or arXiv), when earlier than `year` |
+| `read` | the version that was read, when it is not the cited one, e.g. "arXiv v3 (2023)" |
+| `note` | how the entry was found or checked |
+| `cited_by_choice` | why a lower-ranked version is cited although a higher-ranked one is listed (an owner's decision, with its id); not shown to readers |
+
+**Which version is cited.** A result is cited by the journal version of its paper; without
+one, by the full conference version; with only a brief announcement or short paper, by
+that. A paper that exists only as a preprint is cited as one, and the site and the book
+mark every result and lower bound taken from it *preprint* (not peer reviewed). The
+validator rejects an entry that lists a higher-ranked version under `versions` than the
+one it cites, unless the owner chose otherwise (`cited_by_choice`). Citation labels use `year`; the timeline uses `first_year`. Papers that would share an author–year label get a letter after the year (2020a, 2020b) in the order of their keys, on the site and in the book alike; the timeline gives its first-year labels letters of their own. The validator warns when a reference lists one version twice (the same venue and year, or a version without links that repeats another). Every other
+version is listed with its own links, so a reader can open any of them. `pdf` links
+point only to open copies (LIPIcs, HAL, arXiv, open-access journals, author pages). A
+variant checked against another version than the cited one stays `verified`; `read`
+names that version, and theorem numbers in notes refer to it. When a journal version
+changes a result (weakens a bound, drops a theorem), keep both versions as entries of
+their own, linked through `{ref}`, and say what changed in `note`.
+
+The references page categorizes every entry, computed by the renderer (`citationIndex` in
+`assets/app.js`): the models and problems that cite it, its role in each (posed the
+problem, introductory result, current best, other result, lower bound, further reading,
+cited in text; *background* when only a model description or a perspective cites it),
+and its kind of publication. It filters by these on `#/references/by/<facet~value,...>`
+(facets `model`, `role`, `kind`); every model page ends with *Papers*, its papers by
+problem.
+
+Keys are `FirstAuthorYearWord`, e.g. `AugustineMosesJr2018`, and stay stable: the year
+in a key is the year the key was made and may differ from `year` once a journal
+version appears. **Never invent a reference, a venue, or a bound.** If a bound cannot
+be checked against the paper, keep the variant `status: "draft"` and say what is
+unverified in `notes`.
 
 ## Adding things
 
-* **New problem:** copy `data/problems/dispersion.json`, keep the same field names,
-  register it in `data/index.json` under `problems` and in one `families` entry, add
+* **New problem:** copy `data/problems/exploration/dispersion.json`, keep the same field
+  names, save it as `data/problems/<family>/<id>.json` in the folder of its family,
+  register it in `data/index.json` under `problems` and in that `families` entry, add
   references, run `scripts/validate.py`.
 * **New model:** add `data/models/<id>.json` with `axes`, register it. Every axis
   value needs a `level`, and every axis exactly one level-0 value. A problem may add problem-specific axes under its own
@@ -497,6 +538,9 @@ keep the variant `status: "draft"` and say what is unverified in `notes`.
 * **New variant:** add an entry with its `assumptions`; the tree places it. The
   validator rejects unknown axes or values, unknown references, and two variants
   with the same assumption set.
+* **New version of a paper:** when a cited conference paper or preprint gets a journal
+  (or full conference) version, cite the new version (`venue`, `year`, `doi`, `pdf`,
+  `kind`), move the old one into `versions`, and set `read` if the old one was read.
 * **Progress update:** when a result is improved, demote the old `best` to `other`
   (or drop it if it adds nothing), add the new one, update `optimality`, and move
   any resolved item out of `open` into `notes` with the resolving reference.
@@ -525,7 +569,10 @@ dependency-free except for the CDN-loaded KaTeX and Marked libraries pinned in
 Mac, so publisher pages open to the institute can be read, and it never commits):
 
 1. `scripts/discover.py` (no AI) queries the arXiv API (categories, topic phrases,
-   watched authors), OpenAlex (computer science only) and Google Scholar alert
+   watched authors), OpenAlex (computer science only), Crossref and DataCite (DOIs
+   registered since the last run, so journal, LNCS and LIPIcs papers that never reach
+   arXiv are found), every 28 days all works of the watched authors (OpenAlex and
+   Semantic Scholar author ids in `data/watch.json`), and Google Scholar alert
    e-mails saved in `updates/inbox/` (Scholar has no API and forbids scraping). It
    drops known papers and keeps those with a watched author, or a topic phrase
    together with theory signals, into `updates/<date>/candidates.md`.
@@ -559,7 +606,11 @@ at 09:00; `updates/` is git-ignored.
   (`LICENSE`). `data/index.json` carries `license`, `license_url`, `repo`,
   `changelog_url`.
 * **Versions.** `citation.version` in `data/index.json` is the release date; bump it
-  and add an entry to `CHANGELOG.md` for every published change. `CITATION.cff` and
+  and add an entry to `CHANGELOG.md` for every published change. The site renders
+  `CHANGELOG.md` on `#/changelog` (one panel per `## YYYY-MM-DD — Title` heading, with
+  `###` groups: New problems, New settings and results, Corrections, References, Site
+  and book); `changelog_url` is only the fallback when the file cannot be loaded. Write
+  entries for readers: what changed in the atlas, not how the work was done. `CITATION.cff` and
   `.zenodo.json` describe the work for GitHub and Zenodo (a GitHub release archived
   by Zenodo gets a DOI; put it in `citation.doi` once issued).
 * **Indexing.** `python3 scripts/sync-meta.py` regenerates, from `data/index.json`
@@ -576,7 +627,7 @@ at 09:00; `updates/` is git-ignored.
   static files and adds (1) `llms.txt` and `llms-full.txt` (`scripts/build-llms.py`: an
   index and the whole atlas as Markdown, for language models), (2) one prerendered page per
   route (`scripts/prerender.js`: home, models, perspectives, problems, progress maps, every
-  setting, notation, open questions, references, timeline, cite, acknowledgements) at a real
+  setting, notation, open questions, references, timeline, cite, acknowledgements, changelog) at a real
   address such as `problem/dispersion/base/`, with its own title, description, canonical
   link and JSON-LD, math as TeX, links between pages rewritten to these addresses; the
   renderer takes over in a browser (`<html data-route>`), and (3) `sitemap.xml` listing them

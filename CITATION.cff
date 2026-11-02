@@ -5,8 +5,8 @@ type: dataset
 authors:
   - family-names: Pattanayak
     given-names: Debasish
-version: "2026-10-14"
-date-released: "2026-10-14"
+version: "2026-11-02"
+date-released: "2026-11-02"
 url: "https://drdebmath.github.io/mobility-matters/"
 repository-code: "https://github.com/drdebmath/mobility-matters"
 license: CC-BY-4.0

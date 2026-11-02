@@ -1,0 +1,2027 @@
+{
+  "id": "online-exploration",
+  "model": "mobile-agents-on-graphs",
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "variant of",
+    "relation": "The same task for one agent (visit every node and return to the start node), in the tradition of online algorithms: nodes carry identifiers, edges carry weights, memory and computation are unbounded, and an algorithm is judged by its competitive ratio against a shortest tour rather than by its memory. Results do not transfer in either direction without care: the parent counts moves on anonymous unweighted graphs, this problem counts weight on labelled weighted graphs. The setting directed-labelled of the parent [Deng1999Exploring] is the analogue for unweighted directed graphs."
+  },
+  "related": [
+    {
+      "problem": "collaborative-exploration",
+      "relation": "Collective tree exploration also measures algorithms by their competitive ratio against the offline optimum, but for $k$ agents on unweighted trees and for time; here one agent explores a weighted graph and its cost is compared with a shortest tour."
+    }
+  ],
+  "name": "Online exploration of weighted graphs",
+  "origin": {
+    "ref": "Kalyanasundaram1994Constructing",
+    "year": 1993,
+    "note": "Posed by Kalyanasundaram and Pruhs at ICALP 1993 (journal version 1994), who asked whether a constant competitive ratio is possible and gave one for planar graphs, as reported by [Baligacs2026Lower] and [Baligacs2026Exploration]; the paper itself was not read."
+  },
+  "summary": "One agent must visit every node of an unknown weighted graph and return to its start node, learning the edges at each node only when it gets there; how close to a shortest tour can its cost be?",
+  "statement": "A single agent starts at a node $s$ of an unknown connected undirected **graph** $G=(V,E)$ with $n$ **nodes**; every **edge** $e$ has a non-negative **weight** $\\mathrm{wt}(e)$. Nodes and edges carry distinct identifiers. When the agent visits a node for the first time it learns the identifiers of its neighbours and the identifiers and weights of the edges to them. Crossing an edge has a **cost** equal to its weight. The agent must visit every node and return to the **start node** $s$; its walk is then a **tour**. An algorithm is measured by its **competitive ratio**: the supremum, over all graphs and start nodes, of the cost of its tour divided by $\\mathrm{OPT}$, the cost of a shortest closed walk that visits every node (an optimal travelling-salesperson tour of $G$); for a randomized algorithm the expected cost is used. Unless a setting says otherwise the algorithm is deterministic, the graph is arbitrary and nothing about it is known in advance. Memory and computation are unbounded: the question is what the lack of information costs. Since $\\mathrm{OPT}$ lies between the weight of a minimum spanning tree and twice that weight, a depth-first search that ignores the weights already explores trees optimally, and the difficulty lies in the cycles.",
+  "primer": {
+    "intro": "Imagine a courier in a city without a map. At each crossing the courier sees the roads that leave it, where they lead and how long they are, and must visit every crossing and come home, walking as little as possible. The city is a **graph**: crossings are **nodes** and roads are **edges**, and each edge has a **weight** $\\ge 0$, its length. The courier is an **agent** that starts at the **start node** $s$. Nodes and edges have distinct names. When the agent first visits a node, it learns the names of its neighbours and the weights of the edges to them. Crossing an edge costs its weight, and the **cost** of a walk is the total. The agent must visit every node and return to $s$, and its walk is then a **tour**. We compare it with $\\mathrm{OPT}$, the cost of a shortest tour, which someone who knew the graph could take. The **competitive ratio** is the worst case, over all graphs and start nodes, of the agent's cost divided by $\\mathrm{OPT}$. In the standard version the graph is arbitrary and the agent is deterministic: it tosses no coins. Memory and computation are unlimited, so the only difficulty is the missing information.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "On a cycle: go on, or turn back",
+        "variant": "cycles",
+        "ref": "Baligacs2026Randomization",
+        "idea": "Suppose the graph is a cycle. The explored part is then always a path, with a **boundary edge** at each end: an edge from a visited node to a node not yet visited. The agent stands at one end.\n1. First cross the lighter of the two edges at $s$.\n2. Let $b$ be the weight of the boundary edge ahead, $a$ the distance back to $s$, and $d$ the distance from $s$ to the far end of the other boundary edge. Going on costs $b$, and turning back to cross the other boundary edge costs $a + d$.\n3. Go on if $b \\le \\sqrt3\\, a + d$. Otherwise turn back and cross the other boundary edge.\n4. When every node has been visited, return to $s$ along a shortest path.",
+        "analysis": "The rule is HeavyTest of [Baligacs2026Randomization]. It weighs two risks: crossing a heavy edge that a shortest tour would avoid, and walking all the way back for an edge that a shortest tour would use. Their proof shows that the factor $\\sqrt3$ gives the competitive ratio $(1+\\sqrt3)/2 \\approx 1.366$. No deterministic agent does better on cycles [Miyazaki2009Restricted], whose algorithm reached the same ratio first with a rule that also uses the cost spent so far. An agent that tosses coins does better on cycles, at most $1.3144$.",
+        "why_it_matters": "It isolates the basic dilemma of online exploration, whether to pay for the edge in front or go back, and solves it exactly."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Depth-first search, and why weights make it hard",
+        "variant": "general",
+        "ref": "Miyazaki2009Restricted",
+        "idea": "**Depth-first search** ignores the weights: go to an unvisited neighbour while there is one, otherwise go back the way you came, and stop when you are back at $s$ with nothing left to try. The edges it uses to reach new nodes form a tree that contains every node, and it crosses each of them exactly twice.",
+        "analysis": "On a tree a shortest tour also crosses every edge twice, so depth-first search is optimal there. If every edge has weight 1, depth-first search costs $2(n-1)$, while any tour crosses at least $n$ edges, so the ratio is below 2 (Theorem 4 of [Miyazaki2009Restricted]). With weights it can be arbitrarily bad. On a cycle it may cross a very heavy edge twice, where a shortest tour goes out and back on the light side. A shortest tour costs between the weight of a minimum spanning tree (the lightest set of edges that connects all nodes) and twice that. The challenge is to explore at a cost close to that weight without knowing the graph.",
+        "why_it_matters": "It shows where the difficulty lies: not in visiting everything, but in avoiding heavy edges that are not yet known to be avoidable."
+      },
+      {
+        "kind": "algorithm",
+        "title": "Blocking: depth-first search that waits for lighter edges",
+        "variant": "minor-free",
+        "ref": "Baligacs2026Exploration",
+        "idea": "Fix a number $\\chi > 0$. A boundary edge of weight $w$ is **blocked** if some lighter boundary edge leads to an unvisited node at distance at most $(1+\\chi)\\,w$ from the visited end of the first edge, along visited nodes.\n1. Run depth-first search, but never cross a blocked edge.\n2. Whenever a blocked edge becomes unblocked, walk to it, cross it, and start a new depth-first search from there.\n3. Stop when every node has been visited, and return to $s$.",
+        "analysis": "Each boundary edge that the agent crosses pays for its own trip, at most $2(\\chi+2)$ times its weight (Observation 6). So the question is how heavy these edges are together compared with a minimum spanning tree. Baligács, Disser, Heinrich and Schweitzer show that they behave like a **light spanner**: a set of edges that keeps every distance within a factor $1+\\chi$ and weighs at most a constant times a minimum spanning tree. Every class of graphs that excludes a fixed minor, for example planar graphs, has light spanners, so there Blocking is constant-competitive [Baligacs2026Exploration]. On planar graphs the ratio is 16, the bound of Kalyanasundaram and Pruhs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Exploration]. On all graphs, with $\\chi = \\log n$, it is $O(\\log n)$-competitive, but no choice of $\\chi$ makes it constant. Whether any algorithm is constant-competitive on all graphs is open; no deterministic algorithm is better than 4 [Baligacs2026Lower].",
+        "why_it_matters": "It is the main tool for the central open question of Kalyanasundaram and Pruhs, and it ties online exploration to spanners, a basic object of graph theory."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected undirected graph $G = (V, E)$ to be explored, with $n$ nodes and edge weights",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$; nodes carry distinct identifiers",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes",
+      "avoid": [
+        "link"
+      ]
+    },
+    {
+      "term": "weight",
+      "definition": "$\\mathrm{wt}(e) \\ge 0$, the cost of crossing edge $e$ (its length)",
+      "avoid": []
+    },
+    {
+      "term": "agent",
+      "definition": "the single mobile entity that walks along edges; deterministic unless a setting says otherwise",
+      "avoid": [
+        "robot",
+        "salesman",
+        "salesperson"
+      ]
+    },
+    {
+      "term": "cost",
+      "definition": "the total weight of the edges the agent crosses, with repetitions",
+      "avoid": []
+    },
+    {
+      "term": "start node",
+      "definition": "the node $s$ where the agent is placed and to which it must return",
+      "avoid": []
+    },
+    {
+      "term": "tour",
+      "definition": "a closed walk from $s$ that visits every node; $\\mathrm{OPT}$ is the cost of a shortest one",
+      "avoid": []
+    },
+    {
+      "term": "competitive ratio",
+      "definition": "the supremum over graphs and start nodes of the agent's cost divided by $\\mathrm{OPT}$ (expected cost for a randomized agent)",
+      "avoid": []
+    }
+  ],
+  "history": "Kalyanasundaram and Pruhs posed the problem, asked whether some algorithm has a constant competitive ratio and gave one for planar graphs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Lower] and [Baligacs2026Exploration]. The question is still open. The nearest-neighbour rule (always go to the closest unvisited node), analysed as a travelling-salesperson heuristic by Rosenkrantz, Stearns and Lewis in 1977, is $\\Theta(\\log n)$-competitive, and no algorithm is known to do better on all graphs, as reported by [Baligacs2026Lower]. Megow, Mehlhorn and Schweitzer (2012) revisited the planar algorithm as Blocking and extended it to graphs of bounded genus (as reported by [Baligacs2026Exploration]); Baligács, Disser, Heinrich and Schweitzer extended it to every class that excludes a fixed minor, by relating Blocking to light spanners [Baligacs2026Exploration]. Lower bounds for deterministic algorithms rose from 2, which holds on unweighted planar graphs and is matched there by depth-first search [Miyazaki2009Restricted], through 2.5 (Dobrev, Královič and Markou, 2012, as reported by [Baligacs2026Lower]) and $10/3$, which also holds on planar graphs [Birx2021Improved], to 4 [Baligacs2026Lower]. On cycles the deterministic ratio is exactly $(1+\\sqrt3)/2$ [Miyazaki2009Restricted], and randomization was first shown to help there in 2026 [Baligacs2026Randomization]. Gehnen, Klasing and Naquin introduced a semi-online version in which the graph is known and only the weights are uncertain [Gehnen2025Graph].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Competitive ratio",
+      "description": "worst-case cost of the agent's tour divided by OPT, the cost of a shortest tour"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "faults",
+    "communication",
+    "timing",
+    "initial",
+    "node-memory"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "node-ids",
+    "algorithm",
+    "knowledge",
+    "minors",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the graph",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "nothing known in advance",
+          "short": "nothing known",
+          "definition": "The agent knows nothing about $G$ before it starts; the edges at a node and their weights are revealed when the agent first visits the node."
+        },
+        {
+          "id": "estimates",
+          "level": 1,
+          "label": "the graph is known, each weight only up to an interval",
+          "short": "weight estimates",
+          "definition": "The agent is given $G$ and, for every edge $e$, an interval $[\\mathrm{wt}^-(e), \\mathrm{wt}^+(e)]$ that contains $\\mathrm{wt}(e)$, with $\\mathrm{wt}^+(e) \\le \\vartheta\\,\\mathrm{wt}^-(e)$ for a factor $\\vartheta \\ge 1$ (their $\\alpha$); the exact weight of $e$ is revealed when the agent visits an end of $e$ [Gehnen2025Graph]."
+        }
+      ],
+      "origin": "Gehnen, Klasing and Naquin introduced weight estimates to model a traveller who knows the street map but learns the actual travel time of a road only on reaching it; the setting lies between the offline travelling-salesperson problem and online exploration [Gehnen2025Graph]. With $\\vartheta = 1$ it is the offline problem; as $\\vartheta$ grows it approaches online exploration, whose lower bounds apply once the intervals are wide enough (Section 2 of [Gehnen2025Graph])."
+    },
+    {
+      "id": "minors",
+      "name": "Excluded minors",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "any connected graph",
+          "short": "any graph",
+          "definition": "$G$ is any connected graph."
+        },
+        {
+          "id": "minor-free",
+          "level": 1,
+          "label": "excludes a fixed graph $H$ as a minor",
+          "short": "$H$-minor-free",
+          "definition": "For a fixed graph $H$, no graph obtained from $G$ by deleting nodes and edges and contracting edges is isomorphic to $H$. Graphs of bounded genus and of bounded treewidth are such classes; bounds may depend on $H$."
+        },
+        {
+          "id": "planar",
+          "level": 2,
+          "label": "planar",
+          "short": "planar",
+          "definition": "$G$ can be drawn in the plane without crossing edges; equivalently it has neither $K_5$ nor $K_{3,3}$ as a minor."
+        }
+      ],
+      "origin": "Restricting the graph class is how constant competitive ratios have been obtained: Kalyanasundaram and Pruhs for planar graphs [Kalyanasundaram1994Constructing], Megow, Mehlhorn and Schweitzer for graphs of bounded genus (2012, as reported by [Baligacs2026Exploration]), and Baligács, Disser, Heinrich and Schweitzer for every class with a forbidden minor, which they show subsumes all classes previously known to admit a ratio of $o(\\log n)$ [Baligacs2026Exploration]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "general",
+      "title": "Arbitrary weighted graphs",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled"
+      },
+      "summary": "The question of Kalyanasundaram and Pruhs: the competitive ratio is between 4 and $O(\\log n)$, and whether it is constant is open.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "4",
+          "ref": "Baligacs2026Lower",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "deterministic algorithms; the adversary builds the graph as the agent explores it",
+            "holds on subcubic planar graphs (Theorem 1)",
+            "holds even if the agent is told $n$, if it learns only the identifiers and weights of the edges at a node and not the identifiers of the neighbours, and if the weights satisfy the triangle inequality: none of these changes the competitive ratio (Proposition 2, Corollary 5)"
+          ],
+          "note": "Theorem 1, improving $10/3$ of Birx, Disser, Hopp and Karousatou (2021), as reported. Depth-first search that ignores the weights is 4-competitive on the construction, so its analysis is tight. Additive constants do not change the ratio of the problem (Observation 3)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Baligacs2026Exploration",
+          "role": "best",
+          "time": "O(\\log n)",
+          "note": "Theorem 2 (Corollary 13c): Blocking with parameter $\\log n$. The same ratio as the nearest-neighbour rule of Rosenkrantz, Stearns and Lewis (1977) and hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012), as reported; neither paper is in the bibliography."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$O(\\log n)$ against 4."
+        }
+      },
+      "open": [
+        "Is there a deterministic algorithm with a constant competitive ratio (Kalyanasundaram and Pruhs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Lower])?",
+        "Is there an $o(\\log n)$-competitive algorithm? Blocking with parameter $\\chi$ (their $\\delta$) is $\\Omega(\\log n)$-competitive for $\\chi = o(\\log n/\\log\\log n)$ and for $\\chi = \\Omega(\\log n)$, and $\\Omega(\\log n/\\log\\log n)$-competitive for every $\\chi$; the range in between is open [Baligacs2026Exploration].",
+        "Does randomization lower the competitive ratio on general graphs? It does on cycles [Baligacs2026Randomization]."
+      ],
+      "notes": "The restrictions of [Baligacs2026Lower] (Proposition 2) also say what a sensible algorithm may not need: the identifiers of unvisited neighbours, knowledge of $n$, degrees above 3 and weights that violate the triangle inequality do not change the ratio; they are lost when proving bounds that grow with $n$. Theorem 3 of [Baligacs2026Exploration] rules out Blocking with any parameter as a constant-competitive algorithm. Bounds checked against the full texts (arXiv versions).",
+      "status": "verified"
+    },
+    {
+      "id": "minor-free",
+      "title": "Graphs excluding a fixed minor",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "minors": "minor-free"
+      },
+      "summary": "Blocking is constant-competitive on every class of graphs that excludes a fixed minor, through light spanners.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "4",
+          "ref": "Baligacs2026Lower",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "planar bound: holds for every non-planar excluded minor $H$, since planar graphs have only planar minors",
+            "deterministic algorithms"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Baligacs2026Exploration",
+          "role": "best",
+          "time": "O(1)",
+          "assumes": [
+            "the constant depends on $H$ and on the parameter of Blocking"
+          ],
+          "note": "Introductory and current best (Theorem 1; Corollaries 11 and 13b). Blocking with parameter $\\chi$ (their $\\delta$) is $2(\\chi+2)\\Upsilon$-competitive on every class closed under subgraphs in which every graph has a $(1+\\chi)$-spanner of weight at most $\\Upsilon$ times that of a minimum spanning tree (Theorem 9), and $H$-minor-free graphs have such spanners with $\\Upsilon$ depending on $H$ and $\\chi$. On graphs of genus at most $\\mathfrak g$ the ratio is $16(1+\\tfrac23\\mathfrak g)$ (Corollary 13a), slightly better than $16(1+2\\mathfrak g)$ of Megow, Mehlhorn and Schweitzer, as reported."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Both constant: at least 4 for every non-planar $H$, at most a constant that depends on $H$."
+        }
+      },
+      "open": [
+        "How does the best constant depend on the excluded minor $H$, and on the genus for graphs of bounded genus [Baligacs2026Exploration]?"
+      ],
+      "notes": "Baligács, Disser, Heinrich and Schweitzer run the connection both ways: the exploration analysis also gives greedy $(1+\\varepsilon)$-spanners of lightness at most $(1+\\tfrac2\\varepsilon)(1+\\tfrac{2\\mathfrak g}{1+\\varepsilon})$ on graphs of genus $\\mathfrak g$ (Theorem 4), tight for planar graphs. They suggest that a non-constant lower bound for exploration may require dense graphs of high girth or expanders (Section 4). Checked against the full text (arXiv v1, 2023); the cited version is the JCSS article.",
+      "status": "verified"
+    },
+    {
+      "id": "planar",
+      "title": "Planar graphs",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "minors": "planar"
+      },
+      "summary": "The first class with a constant ratio: 16-competitive since 1993, against a lower bound of 4 that holds already on planar graphs.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "4",
+          "ref": "Baligacs2026Lower",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "deterministic algorithms",
+            "subcubic planar graphs (Theorem 1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kalyanasundaram1994Constructing",
+          "role": "best",
+          "time": "16",
+          "note": "Introductory and current best, as reported by [Baligacs2026Exploration] and [Gehnen2025Graph]; not read. Corollary 13a of [Baligacs2026Exploration] with genus 0 recovers 16 for Blocking with parameter 2, through planar spanners of lightness $1+2/\\chi$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Constants: between 4 and 16."
+        }
+      },
+      "open": [
+        "Close 4 against 16 on planar graphs."
+      ],
+      "notes": "Draft because the introductory paper was not read; the bound 16 was checked as a consequence of Corollary 10 of [Baligacs2026Exploration].",
+      "status": "draft"
+    },
+    {
+      "id": "cycles",
+      "title": "Weighted cycles",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "topology": "ring"
+      },
+      "summary": "On a cycle the deterministic competitive ratio is exactly $(1+\\sqrt3)/2 \\approx 1.366$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\tfrac{1+\\sqrt3}{2}",
+          "ref": "Miyazaki2009Restricted",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "deterministic algorithms",
+            "Theorem 1: no $((1+\\sqrt3)/2 - \\varepsilon)$-competitive algorithm, for every constant $\\varepsilon > 0$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Miyazaki2009Restricted",
+          "role": "best",
+          "time": "\\tfrac{1+\\sqrt3}{2}",
+          "note": "Theorem 2, algorithm Dist: at each step the agent crosses the boundary edge ahead if and only if its weight is at most $\\sqrt3$ times the known distance to the unvisited end of the other boundary edge, minus the cost so far less the distance back to $s$; otherwise it turns back. Its choices depend on the cost so far. Before it, Asahiro, Miyano, Miyazaki and Yoshimuta showed that the nearest-neighbour rule is $3/2$-competitive on cycles, against a lower bound of $5/4$ (SOFSEM 2007), as reported by [Miyazaki2009Restricted]."
+        },
+        {
+          "ref": "Baligacs2026Randomization",
+          "role": "other",
+          "time": "\\tfrac{1+\\sqrt3}{2}",
+          "note": "Theorem 1, algorithm HeavyTest: with $b$ the weight of the boundary edge at the agent, $a$ its distance back to $s$ and $d$ the distance from $s$ to the unvisited end of the other boundary edge (so turning back costs $a + d$), cross the edge ahead if and only if $b \\le \\sqrt3\\,a + d$. It depends only on the current state, and its analysis is shorter."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $(1+\\sqrt3)/2$ for deterministic algorithms."
+        }
+      },
+      "open": [],
+      "notes": "On a cycle the explored part is a path with two boundary edges, and the only decision is whether to continue or turn back; the difficulty is an edge heavier than all others together, which a shortest tour avoids. Trees are explored optimally by depth-first search [Baligacs2026Randomization].",
+      "status": "verified"
+    },
+    {
+      "id": "cycles-randomized",
+      "title": "Weighted cycles, randomized agent",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "algorithm": "randomized",
+        "topology": "ring"
+      },
+      "summary": "A randomized agent beats the deterministic ratio on cycles: at most $1.3144$, against a lower bound of $1.1155$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\tfrac{\\sqrt2}{8+3\\sqrt2}",
+          "ref": "Baligacs2026Randomization",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "any randomized algorithm, against an adversary that fixes the cycle in advance (oblivious)",
+            "Yao's principle on three cycles of four nodes that look the same from the start node (Theorem 3)"
+          ],
+          "note": "About $1.1155$."
+        },
+        {
+          "measure": "time",
+          "bound": "\\tfrac{1+\\sqrt2}{2}",
+          "ref": "Baligacs2026Randomization",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "only for forward-greedy algorithms: those that cross the edge ahead whenever its weight $b$ is at most $a + d$, the cost of turning back to the unvisited end of the other boundary edge; RandHeavyTest is one (Theorem 4)"
+          ],
+          "note": "About $1.2071$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Baligacs2026Randomization",
+          "role": "best",
+          "time": "1+\\tfrac{(3-\\sqrt2)^2}{8}",
+          "assumes": [
+            "oblivious adversary; the analysis also holds against an adversary that adapts in a limited way to the random choices"
+          ],
+          "note": "Introductory and current best (Theorem 2), about $1.3144$: RandHeavyTest with parameter $1/2$ crosses the edge ahead when $b \\le \\tfrac32 a + d$ and otherwise with probability $a/(2(b-d-a))$. The proof is a supermartingale argument with a stopping time."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Constants: between $1.1155$ and $1.3144$ (between $1.2071$ and $1.3144$ for forward-greedy algorithms)."
+        }
+      },
+      "open": [
+        "Determine the randomized competitive ratio on cycles: $1.1155$ against $1.3144$ [Baligacs2026Randomization].",
+        "Must an optimal randomized algorithm on cycles be forward-greedy [Baligacs2026Randomization]?"
+      ],
+      "notes": "Baligács, Hązła and Volk give the first proof that randomization helps in online graph exploration; Miyazaki, Morimoto and Okabe, who settled deterministic algorithms on cycles, name randomized algorithms as future work [Miyazaki2009Restricted]. The revealed part of the graph depends on the agent's earlier random choices, which is what makes randomized exploration hard to analyse. Checked against the full text (arXiv v1, 2026), a preprint.",
+      "status": "verified"
+    },
+    {
+      "id": "estimates",
+      "title": "Known graph, weight estimates",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "knowledge": "estimates"
+      },
+      "summary": "If the graph is known and every weight is known up to a factor $\\vartheta \\le 2$, following a shortest tour for the lower estimates is $\\vartheta$-competitive, and nothing does better.",
+      "statement": "The agent knows $G$ and, for each edge, an interval that contains its weight, with ratio at most $\\vartheta$ between the ends; the weight is revealed when the agent reaches an end of the edge. In [Gehnen2025Graph] the agent must walk from $s$ to a given node $t \\ne s$ through all nodes; the authors note that the bounds carry over to tours up to one edge.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\min(\\vartheta, 2)",
+          "ref": "Gehnen2025Graph",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "a recursive instance of paths whose weights are announced in $[1, \\vartheta]$; the adversary reveals each weight when the agent arrives (Theorem 3 for $\\vartheta \\le 2$; Remark 4 gives 2 for $\\vartheta \\ge 2$)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gehnen2025Graph",
+          "role": "best",
+          "time": "\\vartheta",
+          "assumes": [
+            "unbounded computation: the walk solves a travelling-salesperson problem in advance"
+          ],
+          "note": "Introductory and current best (Theorem 5): compute a shortest walk for the lower ends of the intervals and follow it, ignoring the revealed weights."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Exactly $\\vartheta$ for $\\vartheta \\le 2$; for $\\vartheta > 2$, $\\vartheta$ against 2."
+        }
+      },
+      "open": [
+        "Does every graph admit a $\\tfrac{1+\\vartheta}{2}$-competitive algorithm when all weights are announced in the same interval $[1, \\vartheta]$ with $\\vartheta \\le 2$? Conjectured by [Gehnen2025Graph]."
+      ],
+      "notes": "Gehnen, Klasing and Naquin. Lower-bound constructions for online exploration hide the structure of the graph (dead ends), which is impossible here; they transfer only when the intervals are wide (Section 2 of [Gehnen2025Graph]). Checked against the full text (arXiv v1, 2025); a LATIN 2026 version is cited by [Baligacs2026Randomization] and was not read.",
+      "status": "verified"
+    },
+    {
+      "id": "estimates-complete",
+      "title": "Complete graphs, uniform weight estimates",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "node-ids": "labelled",
+        "knowledge": "estimates",
+        "topology": "complete"
+      },
+      "summary": "On complete graphs whose weights all lie in $[1, \\vartheta]$ with $\\vartheta < 2$, recomputing the best walk after each step is $\\tfrac{1+\\vartheta}{2}$-competitive, which is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\tfrac{1+\\vartheta}{2}",
+          "ref": "Gehnen2025Graph",
+          "bottleneck": "online graph revelation",
+          "preconditions": [
+            "complete graph on $2j$ nodes, every weight announced in $[1, \\vartheta]$, $\\vartheta \\le 2$",
+            "edges at the first $j$ nodes visited have weight 1, edges revealed later weight $\\vartheta$ (Theorem 10); for $\\vartheta > 2$ the same construction gives $3/2$ (Remark 11), and an analogous one works on $K_{j,j}$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Gehnen2025Graph",
+          "role": "best",
+          "time": "\\tfrac{1+\\vartheta}{2}",
+          "assumes": [
+            "every weight announced in $[1, \\vartheta]$ with $\\vartheta < 2$",
+            "start and end nodes distinct",
+            "unbounded computation"
+          ],
+          "note": "Introductory and current best (Theorem 6, Corollary 8): after every step, recompute a walk through the unvisited nodes that is shortest when unrevealed weights take their upper ends. On such graphs it takes the cheapest edge to an unvisited node (Lemma 7). The same holds on every graph in which each path extends to a Hamiltonian path to the end node, including $K_{j,j}$ and $K_{j+1,j}$ (Corollary 9)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $\\tfrac{1+\\vartheta}{2}$ for $\\vartheta < 2$."
+        }
+      },
+      "open": [],
+      "notes": "On grids with uniform estimates and $\\vartheta < 2$ the recomputing algorithm is no better than $\\vartheta$-competitive (Theorem 12 of [Gehnen2025Graph]). Checked against the full text (arXiv v1, 2025).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Online exploration of a cycle by HeavyTest [Baligacs2026Randomization]: the agent learns an edge and its weight only when it reaches one of its ends (weights are shown once known; visited nodes are green). The explored part is a path with a boundary edge at each end. With $b$ the weight of the edge ahead, $a$ the distance back to $s$ and $d$ the distance from $s$ to the far end of the other boundary edge, the agent goes on if $b \\le \\sqrt3\\,a + d$ and otherwise turns back, crossing the other boundary edge. Here it refuses the edge of weight 10, which a shortest tour also avoids, and its cost equals the optimum of 12. In the worst case the ratio is $(1+\\sqrt3)/2$, the best possible for a deterministic agent on cycles [Miyazaki2009Restricted]. One frame per edge crossed.",
+    "view": [
+      100,
+      50
+    ],
+    "graph": {
+      "nodes": {
+        "s": [
+          33.0,
+          25.0
+        ],
+        "p1": [
+          41.5,
+          39.72
+        ],
+        "p2": [
+          58.5,
+          39.72
+        ],
+        "p3": [
+          67.0,
+          25.0
+        ],
+        "q2": [
+          58.5,
+          10.28
+        ],
+        "q1": [
+          41.5,
+          10.28
+        ]
+      },
+      "edges": [
+        [
+          "s",
+          "p1"
+        ],
+        [
+          "p1",
+          "p2"
+        ],
+        [
+          "p2",
+          "p3"
+        ],
+        [
+          "p3",
+          "q2"
+        ],
+        [
+          "q2",
+          "q1"
+        ],
+        [
+          "q1",
+          "s"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "s",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 0",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Start at s: the agent sees only the two edges at s; it takes the lighter one"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "p1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "p2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "b = 10 > √3·2 + 2 ≈ 5.5: the edge ahead is too heavy, so turn back"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "p1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "s",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 4",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "q1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 6",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "It crossed the other boundary edge; at q1, b = 1 ≤ √3·2 + 12, so go on"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "q2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              15.39
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 7",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "p3",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              67.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              15.39
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 8",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Every node visited: return to s along a shortest path"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "q2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              67.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              15.39
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 9",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "q1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              67.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              15.39
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "s",
+            "k": "agent",
+            "l": "A",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              41.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              67.0,
+              25.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              10.28
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              58.5,
+              39.72
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.35,
+            "w": 0.3
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              34.61
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              44.22
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              34.61
+            ],
+            "s": "10",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              66.65,
+              15.39
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50.0,
+              5.78
+            ],
+            "s": "1",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              33.35,
+              15.39
+            ],
+            "s": "2",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              92,
+              47
+            ],
+            "s": "cost 12",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              28.0,
+              25.0
+            ],
+            "s": "s",
+            "c": "fg",
+            "size": 2.8
+          }
+        ],
+        "label": "Final: cost 12, which equals the shortest tour here"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Brandt2020Online",
+      "note": "Tadpole graphs (a cycle with a path attached): the greedy nearest-neighbour rule is 2-competitive for any non-negative weights, matching the lower bound $2 - \\varepsilon$ obtained from the construction of [Miyazaki2009Restricted]; also advice complexity on cycles and tadpoles. Abstract read."
+    },
+    {
+      "ref": "vandenAkker2024Multiagent",
+      "note": "Online exploration by 2 to 4 agents that share what they see, on cycles and tadpole graphs, for the time and for the longest walk: optimal ratios in several cases (1 with two agents on cycles for the longest walk). Abstract read."
+    },
+    {
+      "ref": "Bockenhauer2018Graph",
+      "note": "Advice complexity of online exploration in the fixed graph scenario (directed or undirected, cyclic or not, unit or individual costs): how many bits of advice an optimal tour needs. A preprint; abstract read."
+    },
+    {
+      "ref": "Bockenhauer2016Online",
+      "note": "The agent knows the graph but sees edge weights (1 or $k$) only at their ends: lower bound $11/9$ and a 4-competitive algorithm on ladders; greedy has a linear ratio on directed ladders and grids. Abstract read."
+    }
+  ]
+}

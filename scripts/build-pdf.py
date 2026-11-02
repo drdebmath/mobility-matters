@@ -21,6 +21,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return DATA / "problems" / fam / f"{pid}.json" if fam else DATA / "problems" / f"{pid}.json"
 BUILD = ROOT / "build"
 
 # ---------------------------------------------------------------- data
@@ -40,7 +45,7 @@ def load(p):
 IDX = load(DATA / "index.json")
 REFS = load(DATA / "references.json")
 MODELS = {m: load(DATA / "models" / f"{m}.json") for m in IDX["models"]}
-PROBLEMS = {p: load(DATA / "problems" / f"{p}.json") for p in IDX["problems"]}
+PROBLEMS = {p: load(problem_file(IDX, p)) for p in IDX["problems"]}
 OVERVIEWS = [load(DATA / "overviews" / f"{o}.json") for o in IDX.get("overviews", [])]
 NOTATION = load(DATA / "notation.json") if (DATA / "notation.json").exists() else {}
 ACKS = load(DATA / "acknowledgements.json") if (DATA / "acknowledgements.json").exists() else {}
@@ -342,6 +347,10 @@ def lower_bounds(v, m):
 def cite(key):
     return r"\citealp{%s}" % key if key in REFS else esc_plain(key or "")
 
+def pretag(key):
+    """marks a result whose paper exists only as a preprint (not peer reviewed)"""
+    return r"~\pretag" if REFS.get(key, {}).get("kind") == "preprint" else ""
+
 def is_own(key):
     owner = IDX.get("owner", "")
     return owner and any(a.strip() == owner for a in REFS.get(key, {}).get("authors", []))
@@ -411,9 +420,9 @@ def known_table(p, v):
     for m in p["measures"]:
         mid = m["id"]
         lbs = lower_bounds(v, mid)
-        lb = "; ".join(r"%s~%s" % (math(b["bound"]), r"\citep{%s}" % b["ref"] if b.get("ref") in REFS else "") for b in lbs) or r"\textcolor{muted}{none known}"
+        lb = "; ".join(r"%s~%s" % (math(b["bound"]), r"\citep{%s}%s" % (b["ref"], pretag(b["ref"])) if b.get("ref") in REFS else "") for b in lbs) or r"\textcolor{muted}{none known}"
         br = best_result(v, mid)
-        bt = r"%s~\citep{%s}" % (math(br[mid]), br["ref"]) if br else r"\textcolor{muted}{---}"
+        bt = r"%s~\citep{%s}%s" % (math(br[mid]), br["ref"], pretag(br["ref"])) if br else r"\textcolor{muted}{---}"
         st = status_of(v, mid)
         note = ((v.get("optimality") or {}).get(mid) or {}).get("note")
         rows.append(r"\textbf{%s} & %s & %s & %s~%s \\" % (esc_plain(m["name"]), lb, bt, dot(st), STATUS_LABEL[st]))
@@ -448,7 +457,7 @@ def variant_section(p, v, n):
     items = []
     for b in v.get("lower_bounds", []):
         meas = next((m["name"] for m in p["measures"] if m["id"] == b["measure"]), b["measure"])
-        s = r"\item %s~\roletag{lb}: %s %s." % (r"\citet{%s}" % b["ref"] if b.get("ref") in REFS else "", esc_plain(meas).lower(), math(b["bound"]))
+        s = r"\item %s~\roletag{lb}: %s %s." % (r"\citet{%s}%s" % (b["ref"], pretag(b["ref"])) if b.get("ref") in REFS else "", esc_plain(meas).lower(), math(b["bound"]))
         if b.get("bottleneck"):
             s += r" \emph{Bottleneck:} %s." % inline(b["bottleneck"])
         if b.get("preconditions"):
@@ -458,7 +467,7 @@ def variant_section(p, v, n):
         items.append(s)
     for r in v.get("results", []):
         bounds = ", ".join(r"%s %s" % (esc_plain(m["name"]).lower(), math(r[m["id"]])) for m in p["measures"] if r.get(m["id"]))
-        s = r"\item \citet{%s}~\roletag{%s}" % (r["ref"], r["role"])
+        s = r"\item \citet{%s}%s~\roletag{%s}" % (r["ref"], pretag(r["ref"]), r["role"])
         if bounds:
             s += r": " + bounds + "."
         if r.get("assumes"):
@@ -907,7 +916,8 @@ def reading_guide():
            r"\paragraph{Status of a bound.} Each measure of each variant carries a status, judged against the best proven lower bound for that variant: " +
            "; ".join(r"%s~\emph{%s}" % (dot(k), v) for k, v in STATUS_LABEL.items()) + ". Within a variant, results are listed in order of publication and marked " +
            ", ".join(r"\roletag{%s}" % k for k in ROLE_LABEL) + ".",
-           r"\paragraph{Verification.} A variant marked \vstatus{verified} has its bounds checked against the papers; \vstatus{draft} marks entries with something not yet checked, which its notes name.",
+           r"\paragraph{Verification.} A variant marked \vstatus{verified} has its bounds checked against the papers; \vstatus{draft} marks entries with something not yet checked, which its notes name. A result or lower bound whose paper exists only as a preprint is marked \pretag: it has not been peer reviewed.",
+           r"\paragraph{Citations.} A paper is cited by its journal version, else by its full conference version, else by a brief announcement or short paper, else by its preprint. The bibliography lists the other versions with their links, the year of first appearance (which dates the paper in the timeline) and, where it differs, the version that was read.",
            r"\paragraph{Order of the book.} Part~\ref{part:models} opens with the notation (Chapter~\ref{ch:notation}), then introduces the four models and their assumption axes: where each assumption comes from, why the community studies it, and its formal definition. Part~\ref{part:perspectives} reads across problems and models. The remaining parts give the problems, one part per model and one chapter per family, each problem with its statement, assumption tree and every catalogued setting. The appendices collect the open questions, starting with the most consequential, an alphabetical index of every assumption with its definition, the timeline and the bibliography.",
            r"\paragraph{Two orders.} The parts arrange problems logically, by model and family; Appendix~\ref{app:timeline} lists the same material chronologically."]
     return "\n\n".join(out)
@@ -964,7 +974,7 @@ def timeline_appendix():
                     at(ref_year(b["ref"]))["papers"].setdefault(b["ref"], []).append((p, v, "lb"))
     ROLE = {"introductory": "introduced", "best": "current best", "lb": "lower bound"}
     out = [r"\chapter{Timeline}\label{app:timeline}\markright{Timeline}",
-           "Each year lists the problems first posed then and the papers that introduced a setting, gave the current best result, or proved a lower bound, dated by their first appearance (usually the conference version)."]
+           "Each year lists the problems first posed then and the papers that introduced a setting, gave the current best result, or proved a lower bound, dated by their first appearance in any form (conference, journal or arXiv preprint)."]
     for y in sorted(events):
         e = events[y]
         out.append(r"\timelineyear{%d}" % y)
@@ -995,6 +1005,22 @@ def timeline_appendix():
             out.append("\\begin{timelinelist}\n" + "\n".join(items) + "\n\\end{timelinelist}")
     return "\n\n".join(out)
 
+def href(url, text):
+    return r"\href{%s}{%s}" % (url.replace("\\", "/").replace("%", r"\%").replace("#", r"\#"), text)
+
+def version_links(v, arxiv=None):
+    """doi, pdf and other links of one version of a paper; the arXiv copy with its pdf."""
+    links = []
+    if v.get("doi"):
+        links.append(href("https://doi.org/" + v["doi"], "doi:" + esc_plain(v["doi"])))
+    if v.get("pdf"):
+        links.append(href(v["pdf"], "pdf"))
+    if v.get("url"):
+        links.append(href(v["url"], "link"))
+    if arxiv:
+        links.append(href("https://arxiv.org/abs/" + arxiv, "arXiv:" + esc_plain(arxiv)) + " (" + href("https://arxiv.org/pdf/" + arxiv, "pdf") + ")")
+    return ", ".join(links)
+
 def bibliography():
     keys = sorted(REFS, key=lambda k: (last_name(REFS[k]["authors"][0]) if REFS[k].get("authors") else "", REFS[k].get("year", 0), k))
     items = []
@@ -1003,21 +1029,32 @@ def bibliography():
         label = r"%s(%s)" % (esc_plain(cite_names(k)), YEAR_TAG[k])
         authors = ", ".join(r.get("authors", []))
         s = r"\bibitem[%s]{%s} %s%s \newblock %s. \newblock \emph{%s}, %s." % (label, k, esc_plain(authors), "" if authors.endswith(".") else ".", inline(r["title"]), esc_plain(r.get("venue", "")), r.get("year", ""))
-        if r.get("journal"):
-            s += r" Journal version: \emph{%s}." % esc_plain(r["journal"])
-        links = []
-        if r.get("doi"):
-            links.append(r"\href{https://doi.org/%s}{doi:%s}" % (r["doi"].replace("%", r"\%").replace("#", r"\#"), esc_plain(r["doi"])))
-        if r.get("arxiv"):
-            links.append(r"\href{https://arxiv.org/abs/%s}{arXiv:%s}" % (r["arxiv"], esc_plain(r["arxiv"])))
-        if r.get("url"):
-            links.append(r"\url{%s}" % r["url"])
+        links = version_links(r, r.get("arxiv"))
         if links:
-            s += " " + ", ".join(links) + "."
+            s += " " + links + "."
+        if r.get("versions"):
+            vs = []
+            for v in r["versions"]:
+                if v.get("ref"):
+                    vs.append(r"\citet{%s}" % v["ref"])
+                    continue
+                t = r"\emph{%s}" % esc_plain(v["venue"]) + ("" if str(v["year"]) in v["venue"] else ", %s" % v["year"])
+                if v.get("title") and v["title"] != r["title"]:
+                    t += ", as “%s”" % inline(v["title"])
+                links = version_links(v)
+                vs.append(t + (" (%s)" % links if links else ""))
+            s += r" \newblock {\footnotesize Other versions: %s.}" % "; ".join(vs)
         # notes on how a reference was found or checked belong to the site, not the book;
-        # only the publication status of a preprint is kept
-        if "preprint" in (r.get("note") or "").lower() or "preprint" in (r.get("venue") or "").lower():
-            s += r" \newblock {\footnotesize Preprint, not peer reviewed.}"
+        # the first appearance, the version read and the status of a preprint are kept
+        extra = []
+        if r.get("first_year") and r["first_year"] < r["year"]:
+            extra.append("First appeared in %d." % r["first_year"])
+        if r.get("read"):
+            extra.append("Read: %s." % inline(r["read"]))
+        if r.get("kind") == "preprint":
+            extra.append("Preprint, not peer reviewed.")
+        if extra:
+            s += r" \newblock {\footnotesize %s}" % " ".join(extra)
         items.append(s)
     return "\\begin{thebibliography}{99}\n" + "\n\n".join(items) + "\n\\end{thebibliography}"
 
@@ -1109,6 +1146,7 @@ PDFMETA
 \newcommand{\axisheading}[1]{\par\medskip{\sffamily\bfseries #1}\par\nopagebreak\smallskip}
 \newcommand{\stdtag}{\colorbox{accentsoft}{\sffamily\scriptsize\color{accent}STANDARD SETTING}}
 \newcommand{\vstatus}[1]{\colorbox{soft}{\sffamily\scriptsize\MakeUppercase{#1}}}
+\newcommand{\pretag}{{\sffamily\scriptsize\color{near}[preprint]}}
 \newcommand{\owntag}{\colorbox{soft}{\sffamily\scriptsize own work}}
 \newcommand{\roletag}[1]{{\sffamily\scriptsize\color{\csname rolecolor@#1\endcsname}[\csname rolename@#1\endcsname]}}
 \expandafter\def\csname rolecolor@introductory\endcsname{accent}\expandafter\def\csname rolename@introductory\endcsname{introductory}
@@ -1149,6 +1187,8 @@ def wrap_bibtex(width=64):
         out.append(cur)
     return out
 
+KEYWORDS = ["mobile agents", "mobile robots", "programmable matter", "distributed computing", "open problems", "survey"]  # as in scripts/sync-meta.py
+
 def title_page():
     c = IDX.get("citation", {})
     title = c.get("title", IDX["title"])
@@ -1166,6 +1206,11 @@ def title_page():
 \vspace{10mm}{\small\color{muted}\colorbox{accentsoft}{\sffamily\scriptsize\color{accent}AI USE} %s\par}
 \vspace*{15mm}
 \end{titlepage}
+\thispagestyle{empty}\vspace*{25mm}
+\noindent{\sffamily\bfseries\large\color{accent}Abstract}\par\medskip
+%s\par
+\medskip\noindent{\small\textbf{Keywords:} %s.\par}
+\clearpage
 \thispagestyle{empty}\vspace*{\fill}
 \noindent{\sffamily\bfseries\large\color{accent}How to cite}\par\medskip
 {\raggedright\urlstyle{same}\noindent %s\par}\bigskip
@@ -1177,13 +1222,14 @@ def title_page():
 \noindent{\small\color{muted}\raggedright\urlstyle{same}This is a living survey: the website and this book are generated from the same data, and each version is dated. The latest version is at \url{%s}.}
 \clearpage
 """ % (esc_plain(main.strip()), esc_plain(sub.strip()), esc_plain(IDX.get("tagline", "")), author,
-       esc_plain(long_date(c.get("version", ""))), esc_plain(IDX.get("ai_disclaimer", "")), citation_text(), bib, c.get("url", ""))
+       esc_plain(long_date(c.get("version", ""))), esc_plain(IDX.get("ai_disclaimer", "")), block(IDX.get("abstract", "")), esc_plain("; ".join(KEYWORDS)),
+       citation_text(), bib, c.get("url", ""))
 
 def main():
     pre = PREAMBLE.replace("AIFOOTER", esc_plain(IDX.get("ai_disclaimer", "")))
     c = IDX.get("citation", {})
-    pre = pre.replace("PDFMETA", r"\hypersetup{pdftitle={%s},pdfauthor={%s},pdfsubject={%s},pdfkeywords={mobile agents, mobile robots, programmable matter, distributed computing, open problems, survey},pdfcreator={scripts/build-pdf.py (version %s)}}" % (
-        esc_plain(c.get("title", IDX.get("title", ""))), esc_plain(", ".join(c.get("authors", []))), esc_plain(IDX.get("tagline", "")), esc_plain(c.get("version", ""))))
+    pre = pre.replace("PDFMETA", r"\hypersetup{pdftitle={%s},pdfauthor={%s},pdfsubject={%s},pdfkeywords={%s},pdfcreator={scripts/build-pdf.py (version %s)}}" % (
+        esc_plain(c.get("title", IDX.get("title", ""))), esc_plain(", ".join(c.get("authors", []))), esc_plain(IDX.get("tagline", "")), esc_plain(", ".join(KEYWORDS)), esc_plain(c.get("version", ""))))
     parts = [pre, title_page(), r"\frontmatter\tableofcontents", acknowledgements(), r"\mainmatter", reading_guide(),
              r"\part{Models and their assumptions}\label{part:models}" + "\n" + r"\noindent What an agent, a robot or a particle can see, remember and do, and what the adversary controls. Each chapter tells how the assumptions of one model fit together, then gives every axis with its origin and formal definitions."]
     parts.append(notation_chapter())

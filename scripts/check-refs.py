@@ -2,8 +2,9 @@
 """Check every reference against public metadata (stdlib only, network).
 
 For each entry of data/references.json:
-  * a DOI must resolve in Crossref (or DataCite for LIPIcs/arXiv DOIs), and its title
-    must match ours (case, punctuation and LaTeX ignored; a close match is reported);
+  * a DOI (of the cited version and of every other version) must resolve in Crossref (or
+    DataCite for LIPIcs/arXiv DOIs), and its title must match ours (case, punctuation and
+    LaTeX ignored; a close match is reported);
   * an arXiv id must exist (arXiv API);
   * no two entries may share a DOI, an arXiv id or a title.
 Writes build/refcheck.json and prints a summary. Usage: python3 scripts/check-refs.py [Key ...]
@@ -15,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 UA = {"User-Agent": "mobility-matters-atlas/1.0 (reference check; mailto via site)"}
-norm = lambda t: re.sub(r"[^a-z0-9]", "", re.sub(r"\$[^$]*\$|\\[a-zA-Z]+", "", (t or "").lower()))
+norm = lambda t: re.sub(r"[^a-z0-9]", "", re.sub(r"\$\$?[^$]*\$\$?|\\[a-zA-Z]+", "", (t or "").lower()))
 
 
 def get(url):
@@ -67,27 +68,32 @@ def main():
     refs = json.loads((ROOT / "data/references.json").read_text())
     keys = sys.argv[1:] or list(refs)
     issues, notes = defaultdict(list), defaultdict(list)
-    for field, f in (("doi", lambda r: (r.get("doi") or "").lower()), ("arxiv", lambda r: re.sub(r"v\d+$", "", r.get("arxiv") or "")), ("title", lambda r: norm(r.get("title")))):
+    all_dois = lambda r: [d.lower() for d in [r.get("doi")] + [v.get("doi") for v in r.get("versions", [])] if d]
+    for field, f in (("doi", all_dois), ("arxiv", lambda r: [re.sub(r"v\d+$", "", r["arxiv"])] if r.get("arxiv") else []), ("title", lambda r: [norm(r.get("title"))])):
         seen = defaultdict(list)
         for k, r in refs.items():
-            if f(r):
-                seen[f(r)].append(k)
+            for x in set(f(r)):
+                if x:
+                    seen[x].append(k)
         for v, ks in seen.items():
             if len(ks) > 1:
                 for k in ks:
                     issues[k].append(f"duplicate {field} with {', '.join(x for x in ks if x != k)}")
     for n, k in enumerate(keys, 1):
         r = refs[k]
-        if r.get("doi"):
-            t, src = doi_title(r["doi"])
+        for doi, title in [(r.get("doi"), r["title"])] + [(v.get("doi"), v.get("title") or r["title"]) for v in r.get("versions", [])]:
+            if not doi:
+                continue
+            t, src = doi_title(doi)
             if t is None:
-                issues[k].append(f"DOI {r['doi']} not found ({src})")
+                issues[k].append(f"DOI {doi} not found ({src})")
             else:
-                a, b = norm(t), norm(r["title"])
+                strip = lambda s: re.sub(r"^\s*brief announcement\s*:\s*|[\s:.]*\(?extended abstract\)?\s*$", "", s, flags=re.I)
+                a, b = norm(strip(t)), norm(strip(title))
                 if a != b:
                     ratio = difflib.SequenceMatcher(None, a, b).ratio()
                     if not (a in b or b in a) or ratio < 0.9:
-                        issues[k].append(f"title differs from {src} ({ratio:.2f}): {t!r}")
+                        issues[k].append(f"title of {doi} differs from {src} ({ratio:.2f}): {t!r}")
             time.sleep(0.15)
         if n % 50 == 0:
             print(f"... {n}/{len(keys)}", file=sys.stderr)

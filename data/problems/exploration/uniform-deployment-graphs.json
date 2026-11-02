@@ -1,0 +1,1661 @@
+{
+  "id": "uniform-deployment-graphs",
+  "model": "mobile-agents-on-graphs",
+  "name": "Uniform deployment on graphs",
+  "origin": {
+    "ref": "Shibata2018Uniform",
+    "year": 2016,
+    "note": "Agents that have memory but see only the node they are on, in asynchronous unidirectional rings (PODC 2016), as reported by [Shibata2022Almost]; not read. Look–Compute–Move robots that see several nodes had been deployed on rings and grids before, as listed in [Shibata2022Almost]."
+  },
+  "related": [
+    {
+      "problem": "dispersion",
+      "relation": "With $k = n$ agents, dispersion and uniform deployment ask for the same final configuration, one agent on every node; dispersion also allows agents to share nodes at the start, uniform deployment does not [Shibata2022Almost]."
+    },
+    {
+      "problem": "ring-deployment",
+      "relation": "The same task for robots on a continuous ring in the plane, where the target spacing is a length rather than a number of edges [Flocchini2008Deployment]."
+    }
+  ],
+  "summary": "Spread $k \\le n$ agents that start on distinct nodes of an $n$-node graph so that they end evenly spread, on a ring every two consecutive agents at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$, and stop.",
+  "statement": "$k$ agents start on distinct nodes of an anonymous graph $G$ with $n \\ge k$ nodes and must reach a configuration in which they are **evenly spread**, and stop there. On a **ring**, evenly spread means that every two agents that are consecutive along the ring are at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$; on other graphs the target is stated with each result (one side of a complete bipartite graph, or every node at chosen depths of a perfect tree). **Almost uniform deployment** asks this of all agents but one. Measures: **time** in rounds (ideal time units for asynchronous agents), the total number of **moves**, a move being the traversal of one edge by one agent, and **memory** in bits per agent.",
+  "primer": {
+    "intro": "Picture $k$ guards on a circular wall with $n$ towers, who must spread out so that the gaps between neighbouring guards are as equal as possible, and then stand still. The wall is a **ring**: a cycle of $n$ **nodes** (the towers), each joined by an **edge** (a stretch of wall) to the next. The guards are **agents**: mobile entities with memory that move along edges and see only the node they stand on. The nodes have no names and the agents are identical. The $k \\le n$ agents start on distinct nodes and must become **evenly spread**: every two agents that are consecutive along the ring are $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ edges apart. Then they stop. In the standard version each edge can be crossed in one direction only (the ring is unidirectional), the agents are asynchronous (each acts at its own unpredictable speed), and they know $k$ or $n$. We count **moves** (a **move** is one agent crossing one edge), time and memory. Time is counted in **rounds**; in a round every agent may cross one edge.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Go once around, then agree on a base node",
+        "variant": "dynamic-ring-almost",
+        "ref": "Shibata2022Almost",
+        "idea": "This version is harder. The ring is **dynamic**: in every round an **adversary**, an opponent who knows the algorithm, may remove one edge. An agent that tries to cross the missing edge is **blocked** and stays where it is. The agents move in synchronous rounds, know $n$, and agree on which way is clockwise. Each agent can count the agents on its node, and carries a **token**, a marker it can leave on a node. A token carries no name.\n1. Every agent leaves its token on its start node, its **home node**. It then walks clockwise for $3n$ rounds, waiting whenever it is blocked.\n2. On the way it writes down the distances between consecutive tokens. Once it has gone around, this list of gaps describes the start, read from its own home node.\n3. Every agent rotates its list to the rotation that comes first in dictionary order. That rotation starts at the same token for every agent, unless the start repeats itself around the ring (then there is one such token per repetition). The node of that token is the **base node**. The number of steps the agent rotated is its **rank** $r$.\n4. If missing edges stopped an agent from going once around, the agents notice it: they have all piled up on one node. They count themselves there and take ranks in the order in which they arrived; that node becomes the base node.\n5. The agent of rank $r$ walks clockwise to the node $r \\cdot n/k$ edges past the base node and stops there. If an edge stays missing, the agents still walking split into two groups that walk in opposite directions. The adversary can hold back only one group, so the other group arrives.",
+        "analysis": "In $3n$ rounds an agent either goes once around or is blocked more than $2n$ times. Only one edge is missing per round, so while it is blocked every other agent gets one edge closer to it; in the second case they all end on its node (Lemma 1). Splitting halves the number of agents still walking each time, so after about $\\log k$ phases of $O(n)$ rounds at most one agent is left out of place. The goal allows exactly that: **almost uniform deployment** asks that all agents but one be evenly spread. In total this takes $O(n \\log k)$ rounds and $O(kn)$ moves, since the walking agents halve from phase to phase; each agent needs $O(k \\log n)$ bits to store the list of gaps [Shibata2022Almost]. The moves are optimal, and the time is within a factor $\\log k$ of the lower bound $\\Omega(n)$. On a ring whose edges never go missing, the same idea of going once around and then choosing gives $\\Theta(n)$ time and $\\Theta(kn)$ moves [Shibata2018Uniform], as reported by [Shibata2022Almost].",
+        "why_it_matters": "Anonymous agents that see only their own node can still agree on a common reference point by reading the same circular list from different starting points. That is the core of deployment on rings."
+      },
+      {
+        "kind": "impossibility",
+        "title": "The adversary blocks the last agent",
+        "variant": "dynamic-ring-exact",
+        "ref": "Shibata2022Almost",
+        "idea": "Suppose some algorithm made all $k$ agents evenly spread on every dynamic ring, with $k$ dividing $n$.\n1. Run it on a ring whose edges never go missing. Let $a$ be the last agent to stop, at round $t$; the proof considers an $a$ that is still walking towards its place in its last rounds.\n2. When the agents stop, $a$'s neighbours are $n/k$ edges away. Two agents get at most two edges closer per round, so during its last $n/2k$ rounds $a$ shares a node with no other agent.\n3. Run the algorithm again, identically until $n/2k$ rounds before $t$. From then on the adversary removes the edge that $a$ tries to cross, so $a$ never moves again. One missing edge per round is allowed.\n4. No other agent meets $a$ in these rounds, so the others behave exactly as in the first run and stop at the same nodes.",
+        "analysis": "In the second run, $a$ stays on the node where it stood $n/2k$ rounds before $t$, short of the node where it stopped in the first run, while every other agent stops where it stopped before. So $a$ ends in the wrong place and the algorithm fails [Shibata2022Almost]. The argument still works when the agents know $n$ and $k$, agree on the clockwise direction, count the agents on their node and carry tokens. This is why the task on dynamic rings asks only for almost uniform deployment.",
+        "why_it_matters": "It shows the adversary's weapon, holding one agent where nobody can see it, and it fixes the relaxed goal that the algorithm above reaches."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Distance: $\\Omega(kn)$ moves",
+        "variant": "dynamic-ring-almost",
+        "ref": "Shibata2022Almost",
+        "idea": "Start the $k$ agents on $k$ consecutive nodes, with $k$ small compared with $n$. In the end, consecutive agents are about $n/k$ edges apart, so the agents are spread over the whole ring. The nodes at least $n/4$ edges from the starting block make up more than a third of the ring once $k$ is small. Spread evenly, the agents put a fixed fraction of themselves there.",
+        "analysis": "So a fixed fraction of the $k$ agents each cross at least $n/4$ edges, in total $\\Omega(kn)$ moves; leaving one agent out of place changes nothing. Such an agent needs $n/4$ rounds, which gives $\\Omega(n)$ time. [Shibata2022Almost] state these bounds for $k \\le pn$ with a constant $p < 1$, following [Shibata2018Uniform]. They already hold on a ring whose edges never go missing.",
+        "why_it_matters": "It shows that the $O(kn)$ moves of the algorithm above cannot be improved, so the remaining question is time: $O(n \\log k)$ against $\\Omega(n)$."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "agent",
+      "definition": "a mobile entity with memory that moves along edges; agents are anonymous unless a setting says otherwise (Look–Compute–Move robots that see several nodes are called robots)",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "a node of the graph; agents start on distinct nodes",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an edge of the graph; a move crosses one edge",
+      "avoid": [
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "a cycle of $n$ nodes",
+      "avoid": []
+    },
+    {
+      "term": "evenly spread",
+      "definition": "on a ring, every two consecutive agents at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$; elsewhere, the target stated with the result",
+      "avoid": []
+    },
+    {
+      "term": "almost uniform deployment",
+      "definition": "all agents but one are evenly spread",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "the traversal of one edge by one agent",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one synchronous step in which every agent may cross one edge",
+      "avoid": []
+    }
+  ],
+  "history": "Uniform deployment asks agents that start on distinct nodes to end evenly spread. Look–Compute–Move robots that see several nodes were deployed on rings and grids first; Shibata et al. studied agents that have memory but see only their own node, on asynchronous unidirectional rings, with $\\Theta(n)$ time and $\\Theta(kn)$ moves [Shibata2018Uniform] (as reported by [Shibata2022Almost]). On a dynamic ring the adversary can block one agent forever, so Shibata, Sudo, Nakamura and Kim ask for almost uniform deployment and reach it with an optimal number of moves [Shibata2022Almost]. Other graphs have their own targets: every node at chosen depths of a perfect tree [Shibata2022Semiuniform], and one side of a complete bipartite graph [Shibata2026Uniform].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (ideal time units for asynchronous agents) until the agents are evenly spread and have stopped"
+    },
+    {
+      "id": "moves",
+      "name": "Moves",
+      "description": "total number of edge traversals by all agents"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits of memory per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "node-memory",
+    "node-ids"
+  ],
+  "axes": [
+    {
+      "id": "goal",
+      "name": "Goal",
+      "origin": "Exact deployment cannot be reached on a dynamic ring, where the adversary may block one agent forever, so Shibata, Sudo, Nakamura and Kim relax it to all agents but one [Shibata2022Almost]. The relaxed goal is the weaker requirement, hence the higher level.",
+      "values": [
+        {
+          "id": "exact",
+          "level": 0,
+          "label": "uniform deployment",
+          "short": "all agents",
+          "definition": "Every agent ends evenly spread and stops."
+        },
+        {
+          "id": "almost",
+          "level": 1,
+          "label": "almost uniform deployment",
+          "short": "all but one",
+          "definition": "All agents but one end evenly spread and stop; the remaining agent may stop on any node."
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "static-ring",
+      "title": "Asynchronous unidirectional rings",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "directed",
+        "faults": "none",
+        "topology": "ring",
+        "initial": "dispersed",
+        "goal": "exact"
+      },
+      "summary": "On a static unidirectional ring, asynchronous agents that know $k$ or $n$ spread evenly in $\\Theta(n)$ time with $\\Theta(kn)$ moves, as reported.",
+      "lower_bounds": [
+        {
+          "measure": "moves",
+          "bound": "\\Omega(kn)",
+          "ref": "Shibata2018Uniform",
+          "bottleneck": "distance",
+          "preconditions": [
+            "as reported by [Shibata2022Almost] (Section 2 and Table 1); not read"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Shibata2018Uniform",
+          "bottleneck": "distance",
+          "preconditions": [
+            "as reported by [Shibata2022Almost]; not read"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Shibata2018Uniform",
+          "role": "best",
+          "time": "\\Theta(n)",
+          "moves": "\\Theta(kn)",
+          "memory": "O(k\\log n)",
+          "assumes": [
+            "$k$ or $n$ known"
+          ],
+          "note": "Introductory and current best, as reported by [Shibata2022Almost] (Table 1, Result 1); not read. Knowing $n$ and knowing $k$ are equivalent on static rings."
+        },
+        {
+          "ref": "Shibata2018Uniform",
+          "role": "other",
+          "time": "O(n\\log k)",
+          "moves": "\\Theta(kn)",
+          "memory": "O(\\log n)",
+          "assumes": [
+            "$k$ or $n$ known"
+          ],
+          "note": "Less memory at the price of a $\\log k$ factor in time, as reported by [Shibata2022Almost] (Table 1, Result 2); not read."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n)$, as reported."
+        },
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(kn)$, as reported."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No lower bound on memory is recorded."
+        }
+      },
+      "open": [],
+      "notes": "Draft: [Shibata2018Uniform] has no open copy and was not read; its bounds are taken from Table 1 of [Shibata2022Almost], which also reports algorithms without knowledge of $k$ or $n$ for agents that can communicate, and a follow-up on memory (Shibata, Kakugawa and Masuzawa, TCS 2020, not in this atlas).",
+      "status": "draft"
+    },
+    {
+      "id": "dynamic-ring-exact",
+      "title": "Dynamic rings, all agents",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "faults": "none",
+        "timing": "sync",
+        "topology": "ring",
+        "initial": "dispersed",
+        "goal": "exact"
+      },
+      "summary": "On a 1-interval connected ring, synchronous agents cannot all end evenly spread: the adversary can block one agent forever.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Shibata2022Almost",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "whenever $k$ divides $n$ (Theorem 1)",
+            "take a run with no missing edge and the last agent to stop; in a second run the adversary removes the edge in front of that agent during its last $n/2k$ rounds, in which no other agent sees it, so the others stop as before and it stops in the wrong place",
+            "holds even for agents that know $n$ and $k$, agree on the clockwise direction, count the agents on their node and carry tokens"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Whenever $k$ divides $n$; this is why the task is relaxed to almost uniform deployment."
+        },
+        "moves": {
+          "status": "impossible",
+          "note": "Whenever $k$ divides $n$; this is why the task is relaxed to almost uniform deployment."
+        },
+        "memory": {
+          "status": "impossible",
+          "note": "Whenever $k$ divides $n$; this is why the task is relaxed to almost uniform deployment."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Shibata2022Almost].",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-ring-almost",
+      "title": "Dynamic rings, all agents but one",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "faults": "none",
+        "timing": "sync",
+        "topology": "ring",
+        "initial": "dispersed",
+        "goal": "almost"
+      },
+      "summary": "If one agent may end out of place, synchronous agents that know $n$ spread evenly on a 1-interval connected ring in $O(n\\log k)$ rounds with $O(kn)$ moves, which is optimal in moves.",
+      "lower_bounds": [
+        {
+          "measure": "moves",
+          "bound": "\\Omega(kn)",
+          "ref": "Shibata2022Almost",
+          "bottleneck": "distance",
+          "preconditions": [
+            "when $k \\le pn$ for a constant $p < 1$ (Theorem 3)",
+            "already on a static ring, from a start with all agents close together, as in [Shibata2018Uniform]"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Shibata2022Almost",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Theorem 2",
+            "already on a static ring"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Shibata2022Almost",
+          "role": "best",
+          "time": "O(n\\log k)",
+          "moves": "O(kn)",
+          "memory": "O(k\\log n)",
+          "assumes": [
+            "$n$ known",
+            "agents agree on the clockwise direction",
+            "an agent counts the agents on its node (strong multiplicity detection)",
+            "each agent carries one token, which it may leave on a node",
+            "agents exchange no messages"
+          ],
+          "note": "Introductory and current best (Theorem 4, Section 3): each agent leaves its token at its start node and moves forward for $3n$ rounds. Either it goes once around the ring and reads the distances between tokens, from which all agents pick the same base node (one per period if the start is periodic), or missing edges have piled all agents on one node, which they detect by counting. Each agent then moves to its target relative to the base node; one agent may stay blocked, which almost uniform deployment allows."
+        },
+        {
+          "ref": "Shibata2022Almost",
+          "role": "other",
+          "time": "O(n^2)",
+          "moves": "O(n^2)",
+          "memory": "O(k\\log n)",
+          "assumes": [
+            "$k \\ge 4$ known, $n$ unknown",
+            "agents agree on the clockwise direction",
+            "an agent counts the agents on its node (strong multiplicity detection)",
+            "each agent carries one token, which it may leave on a node",
+            "agents exchange no messages"
+          ],
+          "note": "Theorem 5, Section 4: knowing $k$ instead of $n$ costs $O(n^2)$ rounds and moves; knowing $n$ and knowing $k$ are equivalent on static rings but not here."
+        }
+      ],
+      "optimality": {
+        "moves": {
+          "status": "tight",
+          "note": "$\\Theta(kn)$ moves when $n$ is known and $k \\le pn$."
+        },
+        "time": {
+          "status": "near",
+          "note": "$O(n\\log k)$ against $\\Omega(n)$: a $\\log k$ factor."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No lower bound on memory is recorded."
+        }
+      },
+      "open": [
+        "Is $O(n)$ time possible on a 1-interval connected ring? [Shibata2022Almost] reach $O(n\\log k)$ against $\\Omega(n)$ and leave the lower bound on time to future work.",
+        "Can almost uniform deployment be reached without chirality or without strong multiplicity detection [Shibata2022Almost]?"
+      ],
+      "notes": "Shibata, Sudo, Nakamura and Kim assume eight things (Section 1.3): anonymous agents, knowledge of $k$ or $n$, chirality, strong multiplicity detection, no messages, one token per agent, distinct start nodes and synchronous rounds, and show that anonymity, no messages, tokens and distinct starts are the weakest choices. Knowing $n$ and knowing $k$ are not equivalent here, unlike on static rings. Checked against the full text of [Shibata2022Almost].",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Almost uniform deployment on a dynamic ring, the algorithm of [Shibata2022Almost] for agents that know $n$: $k = 3$ identical agents on a ring of $n = 6$ nodes agree on the clockwise direction. In the selection phase each agent drops its token on its home node and walks clockwise for $3n$ rounds, blocked whenever the edge in front of it is missing (dashed red; at most one edge is missing per round). Having gone once around, it knows the gaps between consecutive tokens. The rotation of the gap sequence that is smallest in dictionary order, here $(1, 2, 3)$, starts at the same token for every agent: the base node. An agent whose own sequence must be rotated $r$ times to reach it has rank $r$ and walks to the node $r \\cdot n/k$ edges clockwise from the base node (green circles), where it stops (green). In this run no edge is missing after round 3; when one stays missing, the agents still walking split into two groups that walk in opposite directions, and at most one agent ends out of place. One frame per round.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "v0": [
+          50.0,
+          46.0
+        ],
+        "v1": [
+          66.45,
+          36.5
+        ],
+        "v2": [
+          66.45,
+          17.5
+        ],
+        "v3": [
+          50.0,
+          8.0
+        ],
+        "v4": [
+          33.55,
+          17.5
+        ],
+        "v5": [
+          33.55,
+          36.5
+        ]
+      },
+      "edges": [
+        [
+          "v0",
+          "v1"
+        ],
+        [
+          "v1",
+          "v2"
+        ],
+        [
+          "v2",
+          "v3"
+        ],
+        [
+          "v3",
+          "v4"
+        ],
+        [
+          "v4",
+          "v5"
+        ],
+        [
+          "v5",
+          "v0"
+        ]
+      ]
+    },
+    "static": [
+      {
+        "t": "rect",
+        "p": [
+          50.0,
+          51.0
+        ],
+        "wd": 2.4,
+        "ht": 2.4,
+        "c": "fg",
+        "w": 0.3,
+        "fill": "near"
+      },
+      {
+        "t": "rect",
+        "p": [
+          70.78,
+          39.0
+        ],
+        "wd": 2.4,
+        "ht": 2.4,
+        "c": "fg",
+        "w": 0.3,
+        "fill": "near"
+      },
+      {
+        "t": "rect",
+        "p": [
+          50.0,
+          3.0
+        ],
+        "wd": 2.4,
+        "ht": 2.4,
+        "c": "fg",
+        "w": 0.3,
+        "fill": "near"
+      }
+    ],
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v3",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "start",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "Start: A, B, C drop their tokens (squares) and walk clockwise for 3n = 18 rounds"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v2",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v4",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 1",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v4",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 2",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.55,
+                17.5
+              ],
+              [
+                33.55,
+                36.5
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          }
+        ],
+        "label": "Round 2: the edge in front of C is missing; C is blocked and waits"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v3",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v4",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 3",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                33.55,
+                17.5
+              ],
+              [
+                33.55,
+                36.5
+              ]
+            ],
+            "c": "gap",
+            "w": 1.4,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v4",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v5",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 4",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v5",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v0",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 5",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v1",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 6",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "Round 6: A and B have gone once around and know the gaps between tokens"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v2",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v2",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 7",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v3",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 8",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "Round 8: C has gone once around too; all keep walking until round 18"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v3",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v4",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 9",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v4",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v5",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 10",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v5",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v0",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 11",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v1",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 12",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v2",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v2",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 13",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v3",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 14",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v3",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v4",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 15",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v4",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v5",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 16",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v5",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v0",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 17",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v1",
+            "k": "agent",
+            "l": "C",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 18",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "selection",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              46.0
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.55,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              66.45,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          }
+        ],
+        "label": "Round 18: base node = A's home; ranks A 0, B 2, C 1; targets 0, 4, 2 edges past it"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "tight"
+          },
+          {
+            "id": "B",
+            "at": "v2",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v2",
+            "k": "agent",
+            "l": "C",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 19",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "deployment",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              46.0
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.55,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              66.45,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "tight"
+          },
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          },
+          {
+            "id": "C",
+            "at": "v2",
+            "k": "agent",
+            "l": "C",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 20",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "deployment",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              46.0
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.55,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              66.45,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "tight"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "tight"
+          },
+          {
+            "id": "C",
+            "at": "v2",
+            "k": "agent",
+            "l": "C",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              50,
+              30
+            ],
+            "s": "round 21",
+            "c": "muted",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              24.5
+            ],
+            "s": "deployment",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              50.0,
+              46.0
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              33.55,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          },
+          {
+            "t": "circle",
+            "p": [
+              66.45,
+              17.5
+            ],
+            "r": 3.1,
+            "c": "tight",
+            "w": 0.6
+          }
+        ],
+        "label": "Final: every two consecutive agents are n/k = 2 edges apart; all stop"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Shibata2022Semiuniform",
+      "note": "Semi-uniform deployment on a perfect tree (every internal node has the same number of children, all leaves at the same depth): $k$ opaque Look–Compute–Move robots with lights, on distinct nodes, must occupy every node at depths forming an arithmetic progression, $k$ being the number of such nodes, without collisions, and stop (Definition 1). With one colour, that is oblivious robots, no algorithm does so even under FSYNC (Theorem 2); with two colours a collision-free algorithm works under ASYNC in $O(kD)$ rounds (Theorem 3), against $\\Omega(D + k)$ (Theorem 1). Read in full."
+    },
+    {
+      "ref": "Shibata2026Uniform",
+      "note": "Uniform deployment on the complete bipartite graph $K_{k,k}$ (their $K_{n,n}$; anonymous nodes, local port numbers): $k$ oblivious, anonymous Look–Compute–Move robots without lights stand on distinct nodes and must occupy every node of one side, so that any two robots are at distance 2. A start with a bijection between the two sides that preserves what every node sees is unsolvable even under FSYNC (Theorem 2); with visibility range 1 the task cannot be solved even under FSYNC (Theorem 4); with visibility range $2\\lceil\\log k\\rceil + 2$ the robots detect the unsolvable starts (Theorem 7) and from every other one finish in $O(1)$ epochs, each robot moving at most once, even under ASYNC (Theorem 9). Whether a constant visibility range suffices is open (Section 6). Read."
+    }
+  ]
+}

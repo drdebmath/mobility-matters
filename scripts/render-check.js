@@ -41,7 +41,7 @@ function render(route, lib) {
     sandbox.fetch = async p => {
       const f = path.join(ROOT, p.split('?')[0]);
       if (!fs.existsSync(f)) return { ok: false, status: 404 };
-      return { ok: true, json: async () => JSON.parse(fs.readFileSync(f, 'utf8')) };
+      return { ok: true, json: async () => JSON.parse(fs.readFileSync(f, 'utf8')), text: async () => fs.readFileSync(f, 'utf8') };
     };
     sandbox.addEventListener = () => {}; sandbox.scrollTo = () => {};
     vm.runInContext(fs.readFileSync(path.join(ROOT, 'assets/app.js'), 'utf8'), sandbox);
@@ -58,9 +58,10 @@ async function main() {
   const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/index.json'), 'utf8'));
   let routes = process.argv.slice(2);
   if (!routes.length) {
-    routes = ['#/', '#/timeline', '#/cite', '#/open', '#/references', '#/notation', '#/acknowledgements', '#/search/dispersion', '#/search/byzantine%20gathering', ...index.models.flatMap(m => [`#/explore/${m}`, `#/explore/${m}/holds`]), '#/explore/mobile-agents-on-graphs/match/timing~async,faults~crash', '#/explore/mobile-agents-on-graphs/holds/timing~sync,ids~unique,initial~rooted,problem~dispersion', '#/explore/mobile-robots-in-the-plane/holds/scheduler~ssync,memory~lights', ...index.models.map(m => `#/model/${m}`), ...(index.overviews || []).map(o => `#/overview/${o}`)];
+    routes = ['#/', '#/timeline', '#/cite', '#/open', '#/references', '#/notation', '#/acknowledgements', '#/changelog', '#/references/by/model~programmable-matter', '#/references/by/role~lower-bound,kind~journal', '#/references/by/role~background', '#/search/dispersion', '#/search/byzantine%20gathering', ...index.models.flatMap(m => [`#/explore/${m}`, `#/explore/${m}/holds`]), '#/explore/mobile-agents-on-graphs/match/timing~async,faults~crash', '#/explore/mobile-agents-on-graphs/holds/timing~sync,ids~unique,initial~rooted,problem~dispersion', '#/explore/mobile-robots-in-the-plane/holds/scheduler~ssync,memory~lights', ...index.models.map(m => `#/model/${m}`), ...(index.overviews || []).map(o => `#/overview/${o}`)];
     for (const pid of index.problems) {
-      const p = JSON.parse(fs.readFileSync(path.join(ROOT, `data/problems/${pid}.json`), 'utf8'));
+      const fam = index.families.find(f => f.problems.includes(pid)).id;
+      const p = JSON.parse(fs.readFileSync(path.join(ROOT, `data/problems/${fam}/${pid}.json`), 'utf8'));
       routes.push(`#/problem/${pid}`, `#/problem/${pid}/map`, ...p.variants.map(v => `#/problem/${pid}/${v.id}`));
     }
   }

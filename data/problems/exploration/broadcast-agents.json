@@ -1,0 +1,1117 @@
+{
+  "id": "broadcast-agents",
+  "model": "mobile-agents-on-graphs",
+  "name": "Broadcast by agents in dynamic graphs",
+  "origin": {
+    "ref": "Das2026Broadcast",
+    "year": 2020,
+    "note": "Posed at OPODIS 2020; the journal version appeared in Discrete Applied Mathematics (2026)."
+  },
+  "related": [
+    {
+      "problem": "dynamic-exploration",
+      "relation": "The same adversary: in every round it may remove any edges as long as the snapshot stays connected (1-interval connectivity), and the primary measure is the number of agents needed in both problems."
+    },
+    {
+      "problem": "gathering-graphs",
+      "relation": "Every ignorant agent must meet a source agent, so any algorithm that gathers all agents on one node in a setting also solves broadcast there; broadcast asks only for the meetings that pass the message on."
+    }
+  ],
+  "summary": "One agent holds a message; an adversary changes the graph every round, keeping it connected. How many agents are needed so that the message always reaches every agent?",
+  "statement": "$k \\ge 2$ agents with distinct identifiers stand on distinct nodes, chosen by an **adversary**, of a connected undirected **graph** $G = (V, E)$ with $n$ nodes. One agent, the **source agent**, holds a **message**; the other $k - 1$ are **ignorant agents**. Time runs in synchronous **rounds**. At the start of every round the adversary chooses the **snapshot** $G_t$, any connected spanning subgraph of $G$ (the dynamic graph is 1-interval connected); every agent then sees $G_t$ and the position and status of every agent (**global visibility**), and moves along one edge of $G_t$ or stays. An ignorant agent that is on the same node as a source agent receives the message and becomes a source agent; no message travels in any other way. **Broadcast** is solved when every agent holds the message. The question is, for each graph $G$, the least $k$ with which the agents solve broadcast against every adversary and every initial placement; **time** is the number of rounds.",
+  "primer": {
+    "intro": "Picture a building whose rooms are joined by corridors, and a saboteur who, each minute, may lock any corridors, as long as every room can still be reached from every other. The building is a **graph**: rooms are its **nodes** and corridors its **edges**. A few **agents** (small mobile machines) stand in different rooms. One of them, the **source agent**, carries a **message**; the others are **ignorant agents**. Time runs in **rounds**. At the start of each round the saboteur, called the **adversary**, chooses which edges are open; the open edges form the **snapshot** of that round, and the snapshot must connect all nodes. Every agent sees the whole snapshot and where every agent is and whether it holds the message (**global visibility**). Then each agent crosses one open edge or stays. An ignorant agent learns the message only by standing on the same node as an agent that holds it, and then holds it too. **Broadcast** is solved when every agent holds the message. The adversary also chooses where the agents start. The question is how many agents $k$ (the source agent included) are needed on a given graph for the agents to always win.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Fill all but one node",
+        "variant": "dynamic",
+        "ref": "Das2026Broadcast",
+        "idea": "Suppose there are $k = n - 1$ agents on a graph with $n$ nodes, so at most one node is empty.\n1. In every snapshot there is a path from a source agent to an ignorant agent, because the snapshot connects all nodes.\n2. Take a shortest such path. Its inner nodes hold no agent that could shorten it, so at most one inner node, the empty one, lies on it: the source agent and the ignorant agent are at most two edges apart.\n3. Both step towards each other along that path (or one steps onto the other's node) and they meet in this round. Now there is one more source agent.\n4. Now two agents share a node, so two nodes may be empty. In the next snapshot, take a path from the shared node to an empty node; every agent on it moves one edge along it, so that again at most one node is empty. Repeat until no ignorant agent is left.",
+        "analysis": "Every repetition turns at least one more ignorant agent into a source agent, so the agents win. The argument works on every graph, so $n - 1$ agents always suffice [Das2026Broadcast]. On the complete graph $K_n$ this is also necessary: with only $n - 2$ agents two nodes are empty, and the adversary keeps open a spanning tree in which every ignorant agent is at least three edges from every source agent, so no meeting ever happens. On sparser graphs far fewer agents suffice: three on every ring with at least five nodes, two on every tree.",
+        "why_it_matters": "It gives the upper bound $n - 1$ that holds on every graph, and its counting (how close the source agent is forced to come to an ignorant agent) is the measure every later bound refines."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Two agents on a ring never meet",
+        "variant": "dynamic-ring",
+        "ref": "Das2026Broadcast",
+        "idea": "Take a ring with $n \\ge 5$ nodes, one source agent and one ignorant agent.\n1. In every round the adversary removes one edge of the shorter path between the two agents. The snapshot is still a path through all nodes, so it is connected.\n2. The two agents could meet in this round only if they were at most two edges apart along an open path.\n3. The open path between them is the longer way around the ring, which has at least three edges because $n \\ge 5$.\n4. So they never meet, whatever they do.",
+        "analysis": "With two agents broadcast is impossible on every ring with at least five nodes. A third agent defeats this adversary. The two ignorant agents walk towards the source agent from opposite sides; the adversary can remove only one edge of the ring per round, so one of them gets closer in every round and eventually meets the source agent. The two source agents then walk around the ring in opposite directions and one of them meets the last ignorant agent. So three agents always solve broadcast [Das2026Broadcast].",
+        "why_it_matters": "It shows the adversary's only weapon, cutting the short way between a source agent and an ignorant agent, and how extra agents beat it by approaching from several sides."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the connected, undirected graph $G = (V, E)$ with $n$ nodes on which the agents move; it is fixed, and the adversary only chooses which of its edges are open in each round",
+      "avoid": [
+        "network"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$; an agent crosses at most one open edge per round",
+      "avoid": [
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity with a distinct identifier that moves along open edges, sees the whole snapshot and every agent, and passes the message only to agents on its own node",
+      "avoid": [
+        "robot",
+        "robots",
+        "cop",
+        "cops"
+      ]
+    },
+    {
+      "term": "message",
+      "definition": "the information that must reach every agent",
+      "avoid": []
+    },
+    {
+      "term": "source agent",
+      "definition": "an agent that holds the message; there is one at the start",
+      "avoid": [
+        "knowledgeable agent"
+      ]
+    },
+    {
+      "term": "ignorant agent",
+      "definition": "an agent that does not yet hold the message",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "the opponent that places the agents at the start and chooses the snapshot of every round, knowing the algorithm",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "the connected spanning subgraph $G_t$ of $G$ whose edges are open in round $t$",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one step of time: the adversary chooses the snapshot, then every agent crosses at most one open edge",
+      "avoid": []
+    },
+    {
+      "term": "global visibility",
+      "definition": "every agent sees the snapshot and the position and status (source or ignorant) of every agent",
+      "avoid": []
+    },
+    {
+      "term": "broadcast",
+      "definition": "the task: every agent ends holding the message",
+      "avoid": []
+    }
+  ],
+  "history": "Broadcast by agents was posed for **dynamic graphs** by Das, Giachoudis, Luccio and Markou, who asked for the least number of agents per topology: two on trees, three on rings, linear in $n$ on grids, hypercubes and complete graphs, which suggested that the number of redundant edges decides the answer [Das2026Broadcast]. Moses, Redlich and Stock showed that **edge density does not decide it**, nor edge connectivity [Moses2025Broadcast], and recast the problem as a game between agents and adversary in the spirit of cops and robber, with general constructions for both winners and first bounds on the time [Moses2026Broadcasting].",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Agents",
+      "description": "the least number $k$ of agents, the source agent included, with which broadcast is solved against every adversary, in the worst case over the graphs of the setting with $n$ nodes"
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds until every agent holds the message"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "algorithm",
+    "faults",
+    "node-memory",
+    "node-ids"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "ids",
+    "communication",
+    "timing",
+    "initial",
+    "topology"
+  ],
+  "variants": [
+    {
+      "id": "static",
+      "title": "Static graph",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed"
+      },
+      "summary": "Without edge changes two agents suffice on every graph and broadcast takes $\\Theta(D)$ rounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\lceil D/2 \\rceil",
+          "ref": "Moses2026Broadcasting",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the adversary places the source agent and an ignorant agent at distance $D$",
+            "two agents close their distance by at most two per round"
+          ],
+          "note": "Lemma 22 and Theorem 23 (stated for the dynamic game; the argument uses only the placement)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "2",
+          "time": "O(D)",
+          "note": "Observation 3.1: every agent walks towards the source agent. Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents, the least possible."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(D)$ rounds."
+        }
+      },
+      "open": [],
+      "notes": "Global visibility makes the static case a shortest-path walk; the case is listed as the base against which the adversary's power is measured.",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic",
+      "title": "Dynamic graph, any topology",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed"
+      },
+      "summary": "On a 1-interval connected graph, $n - 1$ agents always suffice, and the complete graph needs them all; the least number for a given graph is not characterised.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "n-1",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "the complete graph $K_n$",
+            "with at most $n - 2$ agents (their $n - 3$ ignorant agents) two nodes stay empty, and the adversary keeps open a spanning tree in which every ignorant agent is at least three edges from every source agent (Lemma 6.1)"
+          ],
+          "note": "Theorem 6.1 (their $k = n - 2$ ignorant agents is $k = n - 1$ agents here)."
+        },
+        {
+          "measure": "agents",
+          "bound": "\\min_v \\deg(v)",
+          "ref": "Moses2025Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "a 3-vertex-connected graph",
+            "in every round the adversary connects the source agent's node to the rest only through a path of two empty nodes $u$, $r$ and a spanning tree of the graph without $u$ and the source agent's node, so every ignorant agent is at least three edges away"
+          ],
+          "note": "Theorem 11: $\\min_v \\deg(v) - 2$ ignorant agents fail (their $\\delta$ is $\\min_v \\deg(v)$ here)."
+        },
+        {
+          "measure": "agents",
+          "bound": "|B|",
+          "ref": "Moses2025Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "$B$ a bond of pairwise disjoint edges (a minimal cut that is a matching)",
+            "ignorant agents on one side, the source agent on the other; the adversary removes every edge of $B$ with an agent at an endpoint"
+          ],
+          "note": "Theorem 12 and Corollary 13 (their $k \\le |B| - 2$ ignorant agents fail)."
+        },
+        {
+          "measure": "time",
+          "bound": "\\lceil D/2 \\rceil",
+          "ref": "Moses2026Broadcasting",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the adversary places a source agent and an ignorant agent at distance $D$",
+            "holds whenever the agents win"
+          ],
+          "note": "Lemma 22; Theorem 25 replaces $D$ by the largest distance between a node and a set of nodes holding the source agents."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "n-1",
+          "note": "Observation 3.4: with at most one empty node some source agent and ignorant agent are within two edges in every snapshot, so one meeting happens per round. Introductory and current best in the worst case."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$n - 1$ in the worst case over graphs with $n$ nodes; for a given graph the least number lies between 2 and $n - 1$ and no characterisation is known."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time bound is stated for general graphs."
+        }
+      },
+      "open": [
+        "Which graph property determines the least number of agents that solve broadcast on a graph $G$? Edge density, edge connectivity and the number of redundant edges do not [Moses2025Broadcast]; is there an analogue of dismantlability, which characterises cop-win graphs? [Moses2026Broadcasting]",
+        "How many rounds do the agents need when they win, as a function of $n$ and $D$? Only lower bounds of order $D$ are known [Moses2026Broadcasting].",
+        "Can broadcast be solved with weaker agents than global visibility, for example agents that see only the source agent? [Das2026Broadcast]"
+      ],
+      "notes": "On a tree the adversary can remove no edge, so two agents suffice (Observation 3.2 of [Das2026Broadcast]) and the time is $\\Theta(D)$ as on a static graph; a tree of diameter $D$ forces $\\lceil D/2\\rceil$ rounds with two agents (Theorem 23 of [Moses2026Broadcasting]). On cactus graphs (every edge on at most one cycle) the least number of ignorant agents is the number of cycles shorter than 5 if there are no others, and otherwise the number of cycles plus one (Theorem 4.2 of [Das2026Broadcast]). An upper bound for a graph is also an upper bound for each of its connected spanning subgraphs (Observation 3.3 of [Das2026Broadcast]). Moses, Redlich and Stock show that no simple graph property decides the least number of agents [Moses2025Broadcast]: graphs with edge density (edges per node) $1 + O(1/\\log^* n)$ that need $\\Theta(n/\\log^* n)$ agents (Theorem 4, Corollary 6); for every number of agents and every density above 1, graphs below that density that need that many agents (Theorem 7); graphs with large edge connectivity, or with constant edge density and edge connectivity, that need a linear number of agents (Theorem 8, Corollaries 9–10); generalized theta graphs (two nodes joined by internally disjoint paths) need exactly one agent per path plus the source agent when every path has length at least 3 in their terms (Theorems 2–3). In [Moses2026Broadcasting] the winner is preserved by several constructions: adding edges cannot help the agents (Lemma 6); gluing a graph won by the adversary onto any graph at a cut node keeps it won by the adversary (Theorems 9–10); contracting cut edges does not change the winner (Theorem 14). If every set of $k$ nodes has a spanning tree whose one-step moves can always be mapped onto an isomorphic spanning tree (\"$k$-spanning tree symmetry\"), the adversary wins with $k$ agents even when the agents choose their start (Theorem 19). Das et al. and [Moses2025Broadcast] count ignorant agents with $k$ (their $k$ is $k - 1$ here); [Moses2026Broadcasting] counts all agents, as here.",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-ring",
+      "title": "Dynamic rings",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "ring"
+      },
+      "summary": "Three agents are necessary and sufficient on every ring with at least five nodes; two suffice on smaller rings.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "a ring with $n \\ge 5$ nodes",
+            "the adversary removes an edge of the shorter path between the two agents in every round"
+          ],
+          "note": "Theorem 4.1."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "3",
+          "note": "Theorem 4.1: if and only if, for $n \\ge 5$; two agents suffice for $n < 5$. Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Exactly 3 for $n \\ge 5$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-complete",
+      "title": "Dynamic complete graphs",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "complete"
+      },
+      "summary": "On $K_n$ exactly $n - 1$ agents are needed: all nodes but one occupied.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "n-1",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "with at most $n - 2$ agents two nodes are empty",
+            "the adversary keeps open a spanning tree with every ignorant agent at least three edges from every source agent"
+          ],
+          "note": "Theorem 6.1 with Lemma 6.1."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "n-1",
+          "note": "Theorem 6.1 (upper bound from Observation 3.4). Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Exactly $n - 1$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time bound is stated."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-bipartite",
+      "title": "Dynamic bipartite graphs",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "bipartite"
+      },
+      "summary": "On bipartite graphs whose two sides have at least three nodes each, $n - 3$ agents suffice, and complete bipartite graphs need them.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "n-3",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "the complete bipartite graph with both sides of at least three nodes",
+            "with fewer agents at least four nodes are empty"
+          ],
+          "note": "Lemma 6.3 and Theorem 6.3 (their $n - 4$ ignorant agents)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "n-3",
+          "assumes": [
+            "both sides have at least three nodes; with a side of at most two nodes, two agents suffice on the complete bipartite graph (Theorem 6.2)"
+          ],
+          "note": "Lemma 6.2 for complete bipartite graphs; every connected bipartite graph with these sides is a connected spanning subgraph of one, so the bound carries over (Observation 3.3). Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Exactly $n - 3$ in the worst case (complete bipartite graphs)."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-hypercube",
+      "title": "Dynamic hypercubes",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "hypercube"
+      },
+      "summary": "On $Q_j$ with $j \\ge 3$ between $n/2$ and $n - 3$ agents are needed; exactly $5$ on $Q_3$.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "n/2",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "$Q_j$ with $j \\ge 3$",
+            "the adversary places all ignorant agents in the half of the hypercube opposite the source agent"
+          ],
+          "note": "Theorem 6.4 (their $n/2 - 1$ ignorant agents); on $Q_3$ Lemma 6.4 raises it to 5 agents."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "n-3",
+          "note": "Hypercubes are bipartite, so the bipartite bound applies (Lemma 6.2 with Observation 3.3); on $Q_3$ it gives 5 agents, which is tight (Theorem 6.5). Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ both, but the exact number is open for $j \\ge 4$: between $n/2$ and $n - 3$."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [
+        "How many agents are needed on $Q_j$ for $j \\ge 4$: $n/2$, $n - 3$, or in between? [Das2026Broadcast]"
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-grid",
+      "title": "Dynamic grids",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "ids": "unique",
+        "communication": "local",
+        "timing": "sync",
+        "initial": "dispersed",
+        "topology": "grid"
+      },
+      "summary": "On a $\\sqrt n \\times \\sqrt n$ grid between $(\\sqrt n - 1)^2 + 1$ and $n - 3$ agents are needed; on a $2 \\times b$ grid, $b$ or $b + 1$.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "(\\sqrt n-1)^2+1",
+          "ref": "Das2026Broadcast",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "an $a \\times b$ grid with $a, b \\ge 2$ needs $(a - 1)(b - 1) + 1$ agents; the square grid is the case $a = b = \\sqrt n$",
+            "the adversary puts the source agent in the two bottom rows with too few ignorant agents, $b - 1$ ignorant agents on every other row, and opens an edge between the two parts only at an empty node (Lemmas 5.4–5.5)"
+          ],
+          "note": "Lemma 5.5 and Theorem 5.3: fewer than $(a - 1)(b - 1)$ ignorant agents cannot solve broadcast; on a $2 \\times b$ grid, $b$ agents (Theorem 5.1)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Das2026Broadcast",
+          "role": "best",
+          "agents": "n-3",
+          "note": "Grids are bipartite, so the bipartite bound applies (Lemma 6.2 with Observation 3.3); on a $2 \\times b$ grid $b + 1$ agents suffice (Theorem 5.2). Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Theta(n)$ both; the difference is $2\\sqrt n - 5$ agents on the square grid, and one agent on a $2 \\times b$ grid."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "Not analysed."
+        }
+      },
+      "open": [
+        "Close the gap between $(\\sqrt n - 1)^2 + 1$ and $n - 3$ agents on the $\\sqrt n \\times \\sqrt n$ grid [Das2026Broadcast]."
+      ],
+      "notes": "The grid of this setting is the model's square grid; the bounds hold for every $a \\times b$ grid with $a, b \\ge 2$ ($a$ rows, $b$ columns).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Broadcast with $n - 1$ agents [Das2026Broadcast] on the complete graph $K_5$, where $n - 1$ agents are also necessary. Agent 1 is the source agent (green), agents 2 to 4 are ignorant (grey), and one node is empty. In every round the adversary opens a snapshot (thick edges), here a path through all nodes chosen to keep the source agents away from the ignorant ones. With one empty node, some source agent and some ignorant agent are still at most two edges apart, and they meet. A meeting leaves two nodes empty, so in the next round the agents shift one edge along an open path to fill one of them. One frame per round.",
+    "view": [
+      100,
+      54
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          50.0,
+          48.0
+        ],
+        "b": [
+          69.97,
+          33.49
+        ],
+        "c": [
+          62.34,
+          10.01
+        ],
+        "d": [
+          37.66,
+          10.01
+        ],
+        "e": [
+          30.03,
+          33.49
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "a",
+          "c"
+        ],
+        [
+          "a",
+          "d"
+        ],
+        [
+          "a",
+          "e"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "b",
+          "d"
+        ],
+        [
+          "b",
+          "e"
+        ],
+        [
+          "c",
+          "d"
+        ],
+        [
+          "c",
+          "e"
+        ],
+        [
+          "d",
+          "e"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "label": "Start: n − 1 = 4 agents, one empty node; agent 1 is the source agent",
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "c",
+            "k": "agent",
+            "l": "2",
+            "c": "muted"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "at": "e",
+            "k": "agent",
+            "l": "4",
+            "c": "muted"
+          }
+        ],
+        "marks": []
+      },
+      {
+        "label": "Round 1: a path of two edges joins 1 and 2; they meet",
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "at": "e",
+            "k": "agent",
+            "l": "4",
+            "c": "muted"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                48.0
+              ],
+              [
+                69.97,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.97,
+                33.49
+              ],
+              [
+                62.34,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.34,
+                10.01
+              ],
+              [
+                37.66,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.66,
+                10.01
+              ],
+              [
+                30.03,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          }
+        ]
+      },
+      {
+        "label": "Round 2: two nodes are empty; agent 2 steps into one",
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "muted"
+          },
+          {
+            "id": "4",
+            "at": "e",
+            "k": "agent",
+            "l": "4",
+            "c": "muted"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                69.97,
+                33.49
+              ],
+              [
+                50.0,
+                48.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                48.0
+              ],
+              [
+                62.34,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.34,
+                10.01
+              ],
+              [
+                37.66,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.66,
+                10.01
+              ],
+              [
+                30.03,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          }
+        ]
+      },
+      {
+        "label": "Round 3: again a path of two edges; 1 and 3 meet",
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "a",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "e",
+            "k": "agent",
+            "l": "4",
+            "c": "muted"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                48.0
+              ],
+              [
+                69.97,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.97,
+                33.49
+              ],
+              [
+                62.34,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.34,
+                10.01
+              ],
+              [
+                37.66,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.66,
+                10.01
+              ],
+              [
+                30.03,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          }
+        ]
+      },
+      {
+        "label": "Round 4: agents shift along an open path to fill an empty node",
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "e",
+            "k": "agent",
+            "l": "4",
+            "c": "muted"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.03,
+                33.49
+              ],
+              [
+                37.66,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.66,
+                10.01
+              ],
+              [
+                69.97,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.97,
+                33.49
+              ],
+              [
+                50.0,
+                48.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                48.0
+              ],
+              [
+                62.34,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          }
+        ]
+      },
+      {
+        "label": "Final (round 5): 1 and 4 meet; every agent holds the message",
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "b",
+            "k": "agent",
+            "l": "2",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "d",
+            "k": "agent",
+            "l": "4",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                30.03,
+                33.49
+              ],
+              [
+                37.66,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                37.66,
+                10.01
+              ],
+              [
+                62.34,
+                10.01
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                62.34,
+                10.01
+              ],
+              [
+                50.0,
+                48.0
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                50.0,
+                48.0
+              ],
+              [
+                69.97,
+                33.49
+              ]
+            ],
+            "c": "accent",
+            "w": 1.5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,13 +2,17 @@
 """Weekly discovery of candidate papers for the atlas (no AI, stdlib only).
 
 Sources: the arXiv API (by category and keyword, and by watched author), OpenAlex
-(keyword search, for published versions and venues), and an inbox folder for
-Google Scholar alert e-mails that the owner saves or pastes (Scholar has no
-public API and forbids scraping, so it is read only from those alerts).
+(keyword search, for published versions and venues), Crossref (DOIs registered since
+the last run: journals and LNCS proceedings that never reach arXiv), DataCite (LIPIcs
+and other Dagstuhl proceedings), a monthly sweep of every watched author's works
+(OpenAlex and Semantic Scholar author ids kept in data/watch.json), and an inbox
+folder for Google Scholar alert e-mails that the owner saves or pastes (Scholar has
+no public API and forbids scraping, so it is read only from those alerts).
 
 Usage:
   python3 scripts/discover.py                  # since the last run (default: 8 days)
   python3 scripts/discover.py --days 30        # look further back
+  python3 scripts/discover.py --authors        # also sweep the watched authors now (otherwise every 28 days)
   python3 scripts/discover.py --init-watch     # (re)build data/watch.json from the bibliography
 
 Writes updates/<date>/candidates.json and candidates.md. After the agent has
@@ -82,6 +86,9 @@ def build_watch():
         "extra_authors": old.get("extra_authors", []),
         "homepages": old.get("homepages", {}),
         "min_score": old.get("min_score", 8),
+        "openalex_author_ids": old.get("openalex_author_ids", {}),
+        "s2_author_ids": old.get("s2_author_ids", {}),
+        "last_author_sweep": old.get("last_author_sweep"),
         "last_run": old.get("last_run"),
         "seen": old.get("seen", []),
     }
@@ -92,7 +99,7 @@ def build_watch():
 
 def known_ids():
     refs = json.loads((DATA / "references.json").read_text())
-    dois = {(r.get("doi") or "").lower() for r in refs.values() if r.get("doi")}
+    dois = {(v.get("doi") or "").lower() for r in refs.values() for v in [r] + r.get("versions", []) if v.get("doi")}
     arx = {re.sub(r"v\d+$", "", r.get("arxiv") or "") for r in refs.values() if r.get("arxiv")}
     titles = {norm(r.get("title"))[:80] for r in refs.values()}
     return dois, arx, titles
@@ -149,6 +156,88 @@ def openalex(keyword, start_day):
     return out
 
 
+def crossref(keyword, start_day):
+    """DOIs registered since start_day whose title (or abstract) contains every word of the keyword."""
+    url = "https://api.crossref.org/works?" + urllib.parse.urlencode({
+        "query.bibliographic": keyword, "rows": 100, "select": "DOI,title,author,issued,container-title,abstract,type",
+        "filter": f"from-created-date:{start_day},type:journal-article,type:proceedings-article,type:book-chapter,type:posted-content"})
+    raw = get(url)
+    time.sleep(1)
+    if not raw:
+        return []
+    words = [x for x in re.findall(r"[a-z0-9-]+", keyword.lower()) if x not in ("and", "of", "the", "by", "in", "a")]
+    out = []
+    for w in json.loads(raw).get("message", {}).get("items", []):
+        title = re.sub(r"<[^>]+>", "", (w.get("title") or [""])[0])
+        abstract = re.sub(r"<[^>]+>", " ", w.get("abstract") or "")
+        if not all(x.rstrip("s") in (title + " " + abstract).lower() for x in words):
+            continue
+        doi = w["DOI"].lower()
+        date = "-".join(f"{x:02d}" for x in ((w.get("issued") or {}).get("date-parts") or [[0]])[0] if x)
+        out.append({"source": "crossref", "id": "doi:" + doi, "doi": doi, "title": title,
+                    "authors": [" ".join(filter(None, [a.get("given"), a.get("family")])) for a in w.get("author", [])],
+                    "abstract": " ".join(abstract.split()), "date": date, "venue": (w.get("container-title") or [""])[0],
+                    "url": "https://doi.org/" + doi})
+    return out
+
+
+def datacite(keyword, start_day):
+    """LIPIcs and other Dagstuhl papers registered since start_day with every word of the keyword in the title."""
+    terms = " AND ".join(f"titles.title:{x}*" for x in re.findall(r"[a-z0-9]+", keyword.lower()) if x not in ("and", "of", "the", "by", "in", "a"))
+    url = "https://api.datacite.org/dois?" + urllib.parse.urlencode(
+        {"query": f"({terms}) AND publisher:*Dagstuhl* AND created:[{start_day} TO *]", "page[size]": 100})
+    raw = get(url)
+    time.sleep(1)
+    if not raw:
+        return []
+    out = []
+    for d in json.loads(raw).get("data", []):
+        at = d["attributes"]
+        doi = at["doi"].lower()
+        if ".vol" in doi or doi.endswith(".0"):  # whole volumes and front matter
+            continue
+        out.append({"source": "datacite", "id": "doi:" + doi, "doi": doi, "title": (at.get("titles") or [{}])[0].get("title", ""),
+                    "authors": [re.sub(r"^(.*?), (.*)$", r"\2 \1", c.get("name", "")) for c in at.get("creators", [])],
+                    "abstract": " ".join(x.get("description", "") for x in at.get("descriptions", [])), "date": str(at.get("publicationYear")),
+                    "venue": (at.get("container") or {}).get("title"), "url": "https://doi.org/" + doi})
+    return out
+
+
+def author_sweep(w, start_day):
+    """Every work of the watched authors published since start_day: OpenAlex by author id (50 ids per call),
+    Semantic Scholar for authors OpenAlex could not resolve."""
+    out = []
+    ids = sorted({i for v in w.get("openalex_author_ids", {}).values() for i in v})
+    for i in range(0, len(ids), 50):
+        raw = get("https://api.openalex.org/works?" + urllib.parse.urlencode({
+            "filter": f"author.id:{'|'.join(ids[i:i + 50])},from_publication_date:{start_day}", "per-page": 200,
+            "select": "id,doi,title,publication_date,authorships,primary_location,abstract_inverted_index"}))
+        time.sleep(0.5)
+        for x in json.loads(raw).get("results", []) if raw else []:
+            inv = x.get("abstract_inverted_index") or {}
+            doi = (x.get("doi") or "").replace("https://doi.org/", "").lower() or None
+            out.append({"source": "openalex-author", "id": "doi:" + doi if doi else x["id"], "doi": doi, "title": x.get("title") or "",
+                        "authors": [a["author"]["display_name"] for a in x.get("authorships", [])],
+                        "abstract": " ".join(t for _, t in sorted((p, t) for t, ps in inv.items() for p in ps)),
+                        "date": x.get("publication_date"), "venue": ((x.get("primary_location") or {}).get("source") or {}).get("display_name"),
+                        "url": "https://doi.org/" + doi if doi else x["id"]})
+    for name, sids in w.get("s2_author_ids", {}).items():
+        for sid in sids:
+            raw = get(f"https://api.semanticscholar.org/graph/v1/author/{sid}/papers?fields=title,publicationDate,year,venue,externalIds,authors,abstract&limit=100")
+            time.sleep(1.5)
+            for x in json.loads(raw).get("data", []) if raw else []:
+                date = x.get("publicationDate") or str(x.get("year") or "")
+                if date < start_day:
+                    continue
+                ex = x.get("externalIds") or {}
+                doi = (ex.get("DOI") or "").lower() or None
+                out.append({"source": "s2-author", "id": "doi:" + doi if doi else "s2:" + x["paperId"], "doi": doi,
+                            "arxiv": ex.get("ArXiv"), "title": x.get("title") or "", "authors": [a.get("name") for a in x.get("authors", [])],
+                            "abstract": x.get("abstract") or "", "date": date, "venue": x.get("venue"),
+                            "url": "https://doi.org/" + doi if doi else f"https://www.semanticscholar.org/paper/{x['paperId']}"})
+    return out
+
+
 def inbox(start_day):
     """Titles and links from Google Scholar alert e-mails saved under updates/inbox/ (.eml, .txt, .html)."""
     out = []
@@ -177,8 +266,11 @@ def score(c, w):
     au = [a for a in c.get("authors", []) if a.lower() in watched]
     c["matched_keywords"], c["matched_authors"], c["matched_theory"] = kw, au, th
     s = 3 * len(au) + 2 * len(kw) + 2 * sum(k.lower() in title for k in kw) + min(len(th), 4)
-    if not au and not (kw and len(th) >= 2):
+    title_only = c["source"] in ("crossref", "datacite") and not c.get("abstract")  # these rarely carry an abstract
+    if not au and not (kw and (len(th) >= 2 or (title_only and any(k.lower() in title for k in kw)))):
         s = 0
+    elif title_only and any(k.lower() in title for k in kw):
+        s = max(s, w.get("min_score", 8))  # a topic phrase in a newly registered title is enough for triage
     for bad in w.get("exclude", []):
         if bad in text:
             s -= 5
@@ -191,6 +283,8 @@ def main():
     ap.add_argument("--days", type=int, default=None)
     ap.add_argument("--init-watch", action="store_true")
     ap.add_argument("--no-openalex", action="store_true")
+    ap.add_argument("--no-crossref", action="store_true", help="skip the Crossref and DataCite queries")
+    ap.add_argument("--authors", action="store_true", help="sweep the watched authors' works now (otherwise every 28 days)")
     ap.add_argument("--record", metavar="CANDIDATES_JSON", help="mark these candidates as seen (after the agent has run)")
     a = ap.parse_args()
     if a.record:
@@ -215,6 +309,14 @@ def main():
         for k in w.get("openalex_queries", OPENALEX_QUERIES):
             found += openalex(k, start_day)
             time.sleep(0.2)
+    if not a.no_crossref:
+        for k in w.get("openalex_queries", OPENALEX_QUERIES):
+            found += crossref(k, start_day) + datacite(k, start_day)
+    last_sweep = w.get("last_author_sweep")
+    sweep = a.authors or not last_sweep or (today - dt.date.fromisoformat(last_sweep)).days >= 28
+    if sweep:  # journals index late, so look back 90 days before the previous sweep
+        since = (dt.date.fromisoformat(last_sweep) - dt.timedelta(days=90)).isoformat() if last_sweep else (today - dt.timedelta(days=120)).isoformat()
+        found += author_sweep(w, min(since, start_day))
     found += inbox(start_day)
     dois, arx, titles = known_ids()
     seen = set(w.get("seen", []))
@@ -229,7 +331,7 @@ def main():
     day = today.isoformat()
     d = ROOT / "updates" / day
     d.mkdir(parents=True, exist_ok=True)
-    (d / "candidates.json").write_text(json.dumps({"since": start_day, "run": day, "candidates": out}, indent=2, ensure_ascii=False) + "\n")
+    (d / "candidates.json").write_text(json.dumps({"since": start_day, "run": day, "author_sweep": sweep, "candidates": out}, indent=2, ensure_ascii=False) + "\n")
     lines = [f"# Candidates {day} (since {start_day})", "", f"{len(out)} candidates with score >= {w.get('min_score', 3)}.", ""]
     for c in out:
         lines.append(f"- **{c['title']}** ({c['score']}) — {', '.join(c['authors'][:6])}{' et al.' if len(c['authors']) > 6 else ''}; {c.get('venue') or c['source']} {c.get('date') or ''} <{c['url']}>"
@@ -245,6 +347,8 @@ def record(path):
     c = json.loads(Path(path).read_text())
     w["seen"] = sorted(set(w.get("seen", [])) | {x["id"] for x in c["candidates"]})
     w["last_run"] = c["run"]
+    if c.get("author_sweep"):
+        w["last_author_sweep"] = c["run"]
     WATCH.write_text(json.dumps(w, indent=2, ensure_ascii=False) + "\n")
     print(f"recorded {len(c['candidates'])} candidates as seen; last_run = {c['run']}")
 

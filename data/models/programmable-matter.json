@@ -3,7 +3,7 @@
   "name": "Programmable matter",
   "summary": "Many tiny particles with constant memory occupy nodes of the triangular lattice, move by expanding and contracting, and must self-organise into a shape or elect a leader.",
   "focus": "The first question was **what constant-memory, anonymous particles can do at all** (leader election, shapes, coating); then **rounds**, with matching lower bounds where possible, and how weak a scheduler and how little orientation the algorithms can tolerate.",
-  "description": "In the **amoebot model** [Derakhshandeh2014Amoebot] each particle occupies one node of the infinite triangular lattice (contracted) or two adjacent nodes (expanded). A particle moves by expanding into an empty neighbouring node and contracting into one of its two nodes. Particles are anonymous, have constant memory, and communicate only with neighbours; in the founding announcement each particle is a finite-state machine that reads and writes one flag per incident edge, and a pair of neighbours may combine an expansion and a contraction into a *handover* [Derakhshandeh2014Amoebot]. An adversarial scheduler activates particles; time is measured in **asynchronous rounds**: intervals of time in which every particle is activated at least once (the epochs of the other models; they need not be the shortest such intervals, and a bound holds for every division of the execution into consecutive rounds). The canonical amoebot model separates the core model from families of assumption variants, including concurrency [Daymude2023Canonical].\n\n**How the axes work.** As in the other models, level 0 assumes nothing and higher levels are stronger assumptions.",
+  "description": "In the **amoebot model** [Derakhshandeh2014Amoebot] each particle occupies one node of the infinite triangular lattice (contracted) or two adjacent nodes (expanded). A particle moves by expanding into an empty neighbouring node and contracting into one of its two nodes. Particles are anonymous, have constant memory, and communicate only with neighbours; in the founding announcement each particle is a finite-state machine that reads and writes one flag per incident edge, and a pair of neighbours may combine an expansion and a contraction into a *handover* [Derakhshandeh2014Amoebot]. In the circuit extension, particles also share reconfigurable circuits on which a beep reaches every particle of the circuit in the next round [Feldmann2022Coordinating]. An adversarial scheduler activates particles; time is measured in **asynchronous rounds**: intervals of time in which every particle is activated at least once (the epochs of the other models; they need not be the shortest such intervals, and a bound holds for every division of the execution into consecutive rounds). The canonical amoebot model separates the core model from families of assumption variants, including concurrency [Daymude2023Canonical].\n\n**How the axes work.** As in the other models, level 0 assumes nothing and higher levels are stronger assumptions.",
   "story": [
     {
       "heading": "Matter that computes",
@@ -16,6 +16,10 @@
     {
       "heading": "Weaker particles, looser structures",
       "body": "Two axes push below the original model. SILBOT particles keep no memory beyond being contracted or expanded, send no messages and act asynchronously with non-atomic actions, so a step depends only on what a particle sees within two hops [DAngelo2020Silent]; this is the *oblivious* memory level and the *weak* scheduler. The *connectivity* axis records that the requirement that the structure stays connected at every moment is a convention of the literature rather than of the model: Dufoulon, Kutten and Moses Jr. disconnected and reconnected the structure on purpose to elect a leader faster [Dufoulon2021Efficient]."
+    },
+    {
+      "heading": "Faster communication",
+      "body": "Reconfigurable circuits push the other way. Feldmann, Padalkin, Scheideler and Dolev observed that problems such as leader election need time of the order of the diameter of the structure, since \"information only travels particle by particle\", and let particles link pins on their edges into circuits on which a beep reaches every particle of the circuit in the next round [Feldmann2022Coordinating]. This is the *communication* axis. Circuit algorithms are stated for stationary particles that act in synchronous rounds, the *synchronous* value of the scheduler. With circuits a leader is elected in $\\Theta(\\log n)$ rounds with high probability [Feldmann2022Coordinating], and in $O(\\sqrt{\\log n}\\,\\log n)$ rounds even when each particle misses a beep with constant probability [Warner2026Leader]."
     },
     {
       "heading": "Other mechanisms",
@@ -82,9 +86,37 @@
           "label": "sequential: one particle active at a time",
           "short": "sequential",
           "definition": "At most one particle is active at any time."
+        },
+        {
+          "id": "synchronous",
+          "level": 2,
+          "label": "synchronous: every particle acts in every round",
+          "short": "synchronous",
+          "definition": "Time proceeds in rounds; in every round every particle executes one look–compute–act cycle, and what a particle sends in a round is received in the next [Feldmann2022Coordinating]. It is an alternative to the sequential scheduler: one activates every particle at once, the other one at a time."
         }
       ],
-      "origin": "The early amoebot papers assumed \"the standard asynchronous computation model, i.e., only one particle can be active at a time\" [Derakhshandeh2015Leader]; in the 2014 announcement, from the set of enabled actions \"a single action is arbitrarily chosen and executed\" [Derakhshandeh2014Amoebot]. Di Luna et al. dropped this for a strong scheduler that activates many particles but executes each activation atomically [DiLuna2020Shape]. Dufoulon, Kutten and Moses Jr. use *strong* for atomic activations and *weaker* for non-atomic ones, under which, they report, deterministic election of a unique leader becomes impossible in some cases (attributed by them to Bazzi and Briones and to Di Luna et al.) [Dufoulon2021Efficient] [Bazzi2019Stationary]. Daymude, Richa and Scheideler observed that \"much of the existing literature implicitly assumes amoebot actions are isolated and reliable, reducing analysis to the sequential setting\", whereas \"real programmable matter systems are concurrent\"; their canonical model orders the concurrency variants from asynchronous through synchronous and k-isolated to sequential [Daymude2023Canonical]. The fully asynchronous SILBOT model sits at the weak end: all operations are \"non-atomic\", with possible delays between sensing, computing and acting, so an action may be based on an obsolete observation [DAngelo2020Silent]."
+      "origin": "The early amoebot papers assumed \"the standard asynchronous computation model, i.e., only one particle can be active at a time\" [Derakhshandeh2015Leader]; in the 2014 announcement, from the set of enabled actions \"a single action is arbitrarily chosen and executed\" [Derakhshandeh2014Amoebot]. Di Luna et al. dropped this for a strong scheduler that activates many particles but executes each activation atomically [DiLuna2020Shape]. Dufoulon, Kutten and Moses Jr. use *strong* for atomic activations and *weaker* for non-atomic ones, under which, they report, deterministic election of a unique leader becomes impossible in some cases (attributed by them to Bazzi and Briones and to Di Luna et al.) [Dufoulon2021Efficient] [Bazzi2019Stationary]. Daymude, Richa and Scheideler observed that \"much of the existing literature implicitly assumes amoebot actions are isolated and reliable, reducing analysis to the sequential setting\", whereas \"real programmable matter systems are concurrent\"; their canonical model orders the concurrency variants from asynchronous through synchronous and k-isolated to sequential [Daymude2023Canonical]. The fully asynchronous SILBOT model sits at the weak end: all operations are \"non-atomic\", with possible delays between sensing, computing and acting, so an action may be based on an obsolete observation [DAngelo2020Silent]. In the circuit extension \"the amoebot structure is assumed to progress in synchronized rounds\" [Feldmann2022Coordinating]; this is the *synchronous* value."
+    },
+    {
+      "id": "communication",
+      "name": "Communication",
+      "values": [
+        {
+          "id": "local",
+          "level": 0,
+          "label": "local: only between neighbouring particles",
+          "short": "local communication",
+          "definition": "A particle exchanges constant-size information only with the particles on adjacent nodes, by messages or by reading and writing their memory, so information travels at most one particle per activation."
+        },
+        {
+          "id": "circuits",
+          "level": 1,
+          "label": "reconfigurable circuits",
+          "short": "circuits",
+          "definition": "Each particle has a constant number of **pins** on every incident edge, shared with the neighbour across that edge, and in every round it links its pins into groups. A **circuit** is a connected component of the resulting graph on pins. A particle may send a **beep** on any of its circuits; every particle on the circuit receives it in the next round, without learning who sent it or how many did [Feldmann2022Coordinating]. Local communication remains available."
+        }
+      ],
+      "origin": "Feldmann, Padalkin, Scheideler and Dolev introduced reconfigurable circuits, modelled on the nervous system, because leader election and similar problems need time of the order of the diameter when \"information only travels particle by particle\"; with circuits, stationary particles elect a leader in $\\Theta(\\log n)$ rounds with high probability [Feldmann2022Coordinating]. Circuit algorithms are stated for stationary particles in synchronous rounds. Warner and Scheideler let each particle miss a beep with constant probability and keep most of the speed-up [Warner2026Leader]."
     },
     {
       "id": "memory",

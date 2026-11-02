@@ -1,0 +1,2139 @@
+{
+  "id": "pattern-formation",
+  "model": "mobile-robots-in-the-plane",
+  "name": "Pattern formation",
+  "origin": {
+    "ref": "Suzuki1999Formation",
+    "year": 1999,
+    "note": "Suzuki and Yamashita characterised the patterns that anonymous robots can form in terms of their initial configuration."
+  },
+  "summary": "Robots start at distinct points and must form a given geometric pattern, up to similarity; which patterns are formable, and from which initial configurations?",
+  "statement": "$n$ robots start at distinct points of the plane. Each is given the same **pattern** $P$, a set (or multiset) of $n$ points in its own local coordinate system. The robots must reach a configuration similar to $P$ (equal up to translation, rotation, uniform scaling and, without **chirality** (a common clockwise direction), reflection) and stay there. The question is for which pairs (initial configuration, pattern) this is possible under the given assumptions, and at what cost in time and colours.",
+  "primer": {
+    "intro": "Picture drones at a light show that must arrange themselves into a picture, say a star, with no director and no radio. There are $n$ **robots**, tiny points at different places in the plane; the positions of all robots at one instant form a **configuration**. Each robot repeats a **Look–Compute–Move cycle**: it takes a **snapshot** of where the other robots are (Look), decides on a destination point (Compute) and moves towards it (Move). The robots are identical, silent and **oblivious** (they forget everything at the end of each cycle), and each one sees the world in its own **local coordinate system**, with its own origin, unit of length and directions. An adversary called the **scheduler** decides the **activation** of each robot, that is, when it performs a cycle; in the standard version (ASYNC) every phase may take any finite time, so a robot may look while others are still moving. All robots receive the same **pattern** $P$, a list of $n$ points, and must end in a configuration equal to $P$ up to shifting, turning, resizing and mirroring, and then stop; the question is from which initial configurations this is possible.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Elect a leader, then build a shared coordinate system from the smallest enclosing circle",
+        "variant": "chirality",
+        "ref": "Dieudonne2010Leader",
+        "idea": "1. Every robot computes the **smallest enclosing circle** (SEC): the smallest circle that contains all robots. It is the same circle for everyone, whatever their local coordinate systems.\n2. The centre of the SEC becomes the common origin and its radius the common unit of length.\n3. The robots elect a **leader**, a robot whose position in the configuration looks different from every other robot's (for example the only robot closest to the centre). The ray from the centre through the leader becomes the common \\\"east\\\"; because all robots agree on what clockwise means (**chirality**), this also fixes a common \\\"north\\\".\n4. Now all robots use the shared coordinate system, so they all place the pattern $P$ in the same spot (scaled to the circle) and compute the same assignment of robots to points of $P$; the point assigned to a robot is its **target point**.\n5. The robots move to their target points in a careful order that never changes the SEC and never lets another robot take over the leader's special position, so the shared coordinate system survives every move.",
+        "analysis": "Once everyone agrees on coordinates, the task is just \\\"walk to your target point\\\"; the difficulty is step 5, because an oblivious robot recomputes everything in every cycle, and one careless move (a robot on the circle stepping inwards, say) can change the circle or the leader and with them every robot's target point. Dieudonné, Petit and Villain used this plan to show that, with chirality, pattern formation is solvable exactly when leader election is, for $n \\ge 4$ robots in ASYNC [Dieudonne2010Leader]. The catalogue's current best drops chirality: arbitrary pattern formation is solvable exactly when a leader can be elected [Cicerone2019Asynchronous]. Running time is not analysed in these papers.",
+        "why_it_matters": "It turned a geometric problem into a symmetry-breaking problem: forming any pattern is as hard as choosing one leader."
+      },
+      {
+        "kind": "impossibility",
+        "title": "A symmetric initial configuration that the scheduler keeps symmetric forever",
+        "variant": "async-disoriented",
+        "ref": "Suzuki1999Formation",
+        "idea": "Place $n = 4$ robots on the corners of a square and ask for a pattern that does not look the same after a quarter turn, for example four points on a line. The adversary gives each robot a local coordinate system with its origin at the robot, the $x$-axis pointing to the centre of the square, and the same unit; the four systems are then copies of each other turned by $90^\\circ$. Every robot now gets exactly the same snapshot. The scheduler activates all four together. Identical robots with identical snapshots choose the same move in their own local coordinate systems, which in the real plane is the same move turned by $90^\\circ$. So after these cycles the robots again form a square (or all stand at its centre), and the scheduler repeats this forever. The line is never formed.",
+        "analysis": "The same argument works for any initial configuration that looks the same after some rotation: whatever the algorithm, the robots can only form patterns that keep at least that much symmetry. Suzuki and Yamashita measured this with the **symmetricity** of a configuration [Suzuki1999Formation]. The scheduler only needs to activate every robot at once, so the obstacle holds in the fully synchronous model (FSYNC) and therefore under every less synchronous scheduler. Hence, without any agreement between local coordinate systems, an arbitrary pattern cannot be formed from every initial configuration [Flocchini2008Arbitrary]; from a regular $n$-gon only a point and the regular $n$-gon itself can be formed [Flocchini2017Uniform].",
+        "why_it_matters": "It explains why every pattern-formation result is about breaking symmetry, and why leader election keeps appearing."
+      },
+      {
+        "kind": "algorithm",
+        "title": "With a common compass nobody is symmetric",
+        "variant": "compass",
+        "ref": "Flocchini2008Arbitrary",
+        "idea": "Suppose all robots agree on north and east (a **common compass**), though not on origin or unit.\n\n1. Each robot sorts all robots from west to east, and robots on the same north-south line from south to north. Since all robots agree on north and east, they all obtain the same order, even though their origins and units differ.\n2. Each robot sorts the points of the pattern $P$ in the same way. At first only the first robot moves: staying first in the order, it moves until the direction from it to the second robot is the direction from the first to the second point of $P$.\n3. Every robot now places $P$ so that its first two points fall on the first two robots. This fixes where $P$ lies and how large it is, so all robots compute the same target points.\n4. The other robots walk to the remaining target points one at a time, in an order chosen so that once a robot starts moving, no other robot moves until it has arrived.",
+        "analysis": "A common compass removes the adversary's trick: no rotation or mirror image can map a set of points to itself while keeping north and east fixed, so every configuration has a first robot that all robots recognise. Flocchini, Prencipe, Santoro and Widmayer showed that with a common compass any number of robots form any pattern in ASYNC, and that agreement on one axis, without a common handedness, suffices for an odd number of robots [Flocchini2008Arbitrary]. The steps above follow their algorithm for a common compass (Theorem 4.1 of [Flocchini2008Arbitrary]); the fact that a compass gives all robots the same order is also Lemma 2.1 of [Efrima2009Partition].",
+        "why_it_matters": "It shows that symmetry, not obliviousness or asynchrony, is the real obstacle to forming patterns."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a computing entity modelled as a point of the plane (a unit disc for fat robots); all robots run the same algorithm",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all $n$ robots at one instant, a multiset of points of the plane"
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: in Look it takes a snapshot, in Compute it determines a destination point from that snapshot alone (and its own light, where lights exist), in Move it travels towards that point",
+      "avoid": [
+        "Look-Compute-Move cycle"
+      ]
+    },
+    {
+      "term": "snapshot",
+      "definition": "the configuration as a robot observes it in Look (with the colours of the lights it sees, where lights exist), expressed in its local coordinate system"
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps no memory from one Look–Compute–Move cycle to the next: Compute uses only the current snapshot"
+    },
+    {
+      "term": "local coordinate system",
+      "definition": "the origin, axes, unit of length and handedness in which a robot expresses its snapshot and its destination; robots agree on none of these unless the setting assumes chirality, one common axis or a common compass",
+      "avoid": [
+        "private coordinate system"
+      ]
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot is activated: FSYNC activates every robot in every round, SSYNC a nonempty subset of the robots in each round, the sequential scheduler exactly one robot per round, and ASYNC lets each phase of each cycle take any finite time; every robot is activated infinitely often"
+    },
+    {
+      "term": "activation",
+      "definition": "the scheduler's choice to let a robot perform one Look–Compute–Move cycle; a robot that is not activated stays still",
+      "avoid": [
+        "wake",
+        "wakes",
+        "woken",
+        "awake"
+      ]
+    },
+    {
+      "term": "pattern",
+      "definition": "the set (or multiset) $P$ of $n$ points that every robot receives in its local coordinate system; it is formed when the configuration is similar to $P$, that is, equal up to translation, rotation, uniform scaling and, without chirality, reflection"
+    },
+    {
+      "term": "smallest enclosing circle",
+      "definition": "the unique smallest circle that contains a given finite set of points (by default the robots of the configuration), abbreviated SEC; it does not depend on any local coordinate system"
+    },
+    {
+      "term": "leader",
+      "definition": "a robot that every robot identifies as the same unique robot from its snapshot, whatever its local coordinate system (for example the only robot closest to the centre of the smallest enclosing circle)"
+    },
+    {
+      "term": "target point",
+      "definition": "the point of the pattern $P$, placed in the plane by a rule all robots compute alike, that the algorithm assigns to a robot as its final position",
+      "avoid": [
+        "pattern point"
+      ]
+    },
+    {
+      "term": "chirality",
+      "definition": "agreement of all robots on the clockwise direction (handedness) of their local coordinate systems, with no agreement on axes, unit or origin"
+    },
+    {
+      "term": "common compass",
+      "definition": "agreement of all robots on the direction and orientation of both axes of their local coordinate systems (north and east), not on unit or origin"
+    }
+  ],
+  "history": "The founding question was **which patterns robots can form at all** [Suzuki1999Formation]: Suzuki and Yamashita characterised formable patterns by the symmetry of the starting configuration, for SSYNC robots with unbounded memory and common handedness: only a point and a regular $n$-gon can be formed from every starting configuration. Flocchini, Prencipe, Santoro and Widmayer then asked the question that shaped the field, **how much agreement is needed**: none is not enough, one axis is enough for an odd number of robots, two axes for all [Flocchini1999Hard] [Flocchini2008Arbitrary]. The aim has been to remove assumptions one at a time (chirality, synchrony, rigidity), ending in the equivalence with leader election without chirality [Cicerone2019Asynchronous].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds (FSYNC, SSYNC) or epochs (ASYNC) until the task is done; \"finite\" when only solvability is known"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "colours of the light per robot (0 for oblivious robots)"
+    }
+  ],
+  "ignore_axes": [],
+  "axis_order": [
+    "body",
+    "visibility",
+    "opacity",
+    "faults",
+    "scheduler",
+    "memory",
+    "frames",
+    "movement",
+    "multiplicity",
+    "algorithm",
+    "ids"
+  ],
+  "variants": [
+    {
+      "id": "async-disoriented",
+      "title": "ASYNC, no agreement on coordinates",
+      "standard": true,
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "Without any common orientation, an arbitrary pattern can be formed exactly from the configurations in which a leader can be elected.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2008Arbitrary",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "for some initial configurations: symmetric configurations cannot be broken by oblivious deterministic robots",
+            "Theorem 7.1: from a regular $n$-gon whose local coordinate systems are rotated by $360^\\circ/n$ from one robot to the next, all robots keep the same view",
+            "holds in every scheduler"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2008Arbitrary",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introduces arbitrary pattern formation for asynchronous oblivious robots and shows that without agreement on both axes an arbitrary pattern cannot be formed in general (Theorem 7.1); also that forming arbitrary patterns implies leader election for $n \\ge 3$ (Theorem 2.1)."
+        },
+        {
+          "ref": "Cicerone2019Asynchronous",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Characterisation: arbitrary pattern formation is solvable exactly when leader election is, in ASYNC without chirality. The paper also states that earlier proofs ([Fujinaga2015Pattern], [Bramas2016Probabilistic], the arXiv version of [Dieudonne2010Leader]) are not correct."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time is not analysed in these papers."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Oblivious robots: no colours."
+        }
+      },
+      "open": [
+        "Bound the number of epochs needed by an arbitrary pattern formation algorithm in ASYNC; no time analysis is recorded."
+      ],
+      "notes": "Patterns are formed up to translation, rotation, scaling and reflection, starting from distinct positions. The four-robot case needed a separate geometric invariant, the H-segment of a quadrilateral, with or without chirality [Bramas2018Four]. The point (gathering) and the regular polygon (uniform circle) are the only patterns formable from every initial configuration [Flocchini2017Uniform].",
+      "status": "verified"
+    },
+    {
+      "id": "chirality",
+      "title": "ASYNC with common chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With common chirality, a pattern $F$ is formable from a configuration $R$ exactly when $\\rho(R)$ divides $\\rho(F)$; pattern formation and leader election are equivalent for $n \\ge 4$.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Cicerone2021Solving",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "global strong multiplicity detection",
+            "patterns may contain multiplicities, with $|F| = |R|$",
+            "ASYNC, oblivious robots"
+          ],
+          "note": "Current best, a characterisation (Theorem 6.12): an algorithm forms $F$ from $R$ if and only if $\\rho(R)$ divides $\\rho(F)$; necessity is the FSYNC bound of Suzuki and Yamashita (Theorem 3.3). The algorithm is split into eleven tasks, each with its precondition, and the proof checks the transitions between tasks, following the methodology of [Cicerone2020Methodology]. So ASYNC robots with chirality form exactly the patterns that FSYNC robots form."
+        },
+        {
+          "ref": "Cicerone2020Methodology",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "global strong multiplicity detection",
+            "patterns may contain multiplicities, with $|F| = |R|$",
+            "ASYNC, oblivious robots; the local coordinate system of a robot may change between cycles"
+          ],
+          "note": "Theorem 3 (arXiv version): an algorithm forms $F$ from $R$ if and only if $\\rho(R)$ divides $\\rho(F)$, where the symmetricity $\\rho$ is the largest $m$ such that the configuration splits into regular $m$-gons centred at the centre of its smallest enclosing circle; necessity is Suzuki and Yamashita's FSYNC bound. A new algorithm for the problem of [Fujinaga2015Pattern], whose authors, by personal communication, gave up fixing theirs. The case study of the authors' design methodology; the algorithm appeared in a journal as [Cicerone2021Solving]."
+        },
+        {
+          "ref": "Dieudonne2010Leader",
+          "role": "other",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 4$"
+          ],
+          "note": "The equivalence of pattern formation and leader election with chirality, for $n \\ge 4$."
+        },
+        {
+          "ref": "Fujinaga2015Pattern",
+          "role": "disputed",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Patterns formable by oblivious ASYNC robots are exactly those formable by non-oblivious FSYNC robots, except a point of multiplicity 2. Its proof is reported as not correct by [Cicerone2019Asynchronous]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "**Disputed:** the correctness of the proof of [Fujinaga2015Pattern] is questioned by [Cicerone2019Asynchronous]; it is shown as disputed and never as the current best. Cicerone, Di Stefano and Navarra design a new algorithm for the same problem with a structured correctness proof and so characterise it [Cicerone2020Methodology] (arXiv version read) [Cicerone2021Solving] (read in full).",
+      "status": "verified"
+    },
+    {
+      "id": "one-axis",
+      "title": "ASYNC with one common axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "one-axis",
+        "body": "point"
+      },
+      "summary": "With a common North but no common handedness, any odd number of robots forms any pattern; an even number cannot, in the worst case.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Flocchini2008Arbitrary",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "even $n$, for some initial configurations and patterns (Corollary 2.1)",
+            "leader election is impossible for even $n$ (Theorem 2.2): robots placed symmetrically about a line parallel to the common axis, with mirrored local coordinate systems and partners activated together, stay symmetric (an SSYNC scheduler, so it holds in ASYNC too)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2008Arbitrary",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "odd $n$"
+          ],
+          "note": "Introductory and current best (Result 2, Theorem 5.1): any pattern for odd $n$. For even $n$ the formable patterns are characterised exactly (Result 3, Theorem 6.2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "The robots of [Flocchini2008Arbitrary] agree on the direction and orientation of one axis but have no common handedness: \"knowing North does not distinguish East from West\". Checked against the full text of [Flocchini2008Arbitrary].",
+      "status": "verified"
+    },
+    {
+      "id": "compass",
+      "title": "ASYNC with a common compass",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "If robots agree on both axes, any number of robots forms any pattern.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Flocchini2008Arbitrary",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "note": "Introductory and current best (Theorem 4.1): any pattern, any $n$, collision-free, non-rigid moves; the pattern keeps the orientation in which it is given."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Flocchini2008Arbitrary].",
+      "status": "verified"
+    },
+    {
+      "id": "randomized",
+      "title": "Randomized, ASYNC, no agreement",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "algorithm": "randomized",
+        "body": "point"
+      },
+      "summary": "Randomness breaks symmetry: with one random bit per cycle, $n \\ge 5$ robots form any pattern except gathering.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bramas2016Probabilistic",
+          "role": "disputed",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$",
+            "one random bit per cycle"
+          ],
+          "note": "Patterns with multiplicity points are allowed, except gathering. Its proof is reported as not correct by [Cicerone2019Asynchronous]."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [],
+      "notes": "Yamauchi and Yamashita gave a randomized algorithm that forms any pattern from any initial configuration in ASYNC with non-rigid moves, for $n \\ge 5$ and patterns and initial configurations without multiplicities [Yamauchi2014Randomized]; their robots have right-handed local coordinate systems (chirality), so the result belongs to the setting *Randomized, ASYNC, chirality*, and its second phase runs the deterministic algorithm of [Fujinaga2015Pattern], whose proof [Cicerone2019Asynchronous] report as not correct. **Disputed:** the proof of [Bramas2016Probabilistic] is questioned by [Cicerone2019Asynchronous]; no undisputed result is recorded for this setting.",
+      "status": "verified"
+    },
+    {
+      "id": "randomized-chirality",
+      "title": "Randomized, ASYNC, chirality",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "algorithm": "randomized",
+        "frames": "chirality",
+        "body": "point"
+      },
+      "summary": "With random bits and common handedness, $n \\ge 5$ robots form any pattern without multiplicities from any initial configuration, with probability 1.",
+      "statement": "Robots may draw random bits in Compute. From any initial configuration of distinct points, the robots must form the given pattern with probability 1 and then stop moving.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Yamauchi2014Randomized",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$",
+            "neither the initial configuration nor the pattern has multiplicities",
+            "non-rigid moves"
+          ],
+          "note": "Theorem 5: forms any pattern from any initial configuration with probability 1. A randomized phase reaches a configuration with symmetricity 1 (Theorem 4); the robots then run the deterministic algorithm of [Fujinaga2015Pattern], whose proof [Cicerone2019Asynchronous] report as not correct, so this result depends on a disputed proof."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "A proof that does not rely on the disputed algorithm of [Fujinaga2015Pattern], for example by combining the symmetry-breaking phase of [Yamauchi2014Randomized] with the algorithm of [Cicerone2019Asynchronous]."
+      ],
+      "notes": "Yamauchi and Yamashita's local coordinate systems are all right-handed (chirality). Checked against the full text of [Yamauchi2014Randomized] (DISC 2014): the statements of Theorems 4 and 5 and the model; the combination with $\\psi_{CWM}$ rests on [Fujinaga2015Pattern].",
+      "status": "verified"
+    },
+    {
+      "id": "opaque-lights",
+      "title": "Opaque robots with lights, ASYNC, one axis, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "one-axis",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "Opaque point robots with lights that agree on one axis form any pattern from the starts the paper characterises, with 6 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bose2021Opaque",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "6",
+          "note": "Introductory and current best. Formation fails from starts symmetric about a robot-free line parallel to the agreed axis."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "No lower bound beyond trivial; the minimum is open."
+        }
+      },
+      "open": [
+        "The minimum number of colours, and formation with chirality only or with no agreement [Bose2021Opaque]."
+      ],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "limited",
+      "title": "Limited visibility",
+      "assumptions": {
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point"
+      },
+      "summary": "With limited visibility, oblivious robots form a pattern under the usual symmetry condition if they start within diameter 1; the general case is open.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Hahn2024Large",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "initial diameter at most 1 (the visibility range)"
+          ],
+          "note": "Introductory and current best for oblivious robots."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Arbitrary pattern formation by oblivious robots with limited visibility from a general (connected) initial configuration [Hahn2024Large]."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "opaque-lights-compass",
+      "title": "Opaque robots with lights, ASYNC, compass, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "compass",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "With a common compass, opaque robots with lights form any pattern with 3 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bose2021Opaque",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "The minimum is open."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "opaque-oblivious-compass",
+      "title": "Opaque oblivious robots, ASYNC, compass",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "frames": "compass",
+        "body": "point"
+      },
+      "summary": "Without lights, opaque robots cannot form arbitrary patterns in ASYNC, even with a common compass.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Bose2021Opaque",
+          "bottleneck": "obstruction",
+          "preconditions": [
+            "Theorem 1: oblivious opaque point robots, ASYNC",
+            "holds even with a common compass"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Unsolvable without lights."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Needs lights."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text.",
+      "status": "verified"
+    },
+    {
+      "id": "fat-lights",
+      "title": "Opaque fat robots with lights, ASYNC, one axis",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "memory": "lights",
+        "frames": "one-axis",
+        "body": "fat"
+      },
+      "summary": "Opaque fat robots with lights that agree on one axis form any pattern from every start not symmetric about a robot-free line parallel to that axis, with 10 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Bose2020Fat",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "10",
+          "note": "Introductory and current best. Theorem 1: solvable if and only if the start is not symmetric about a line parallel to the agreed axis through no robot centre. $\\Theta(n)$ moves in total (Theorem 8), analysed under SSYNC with rigid moves."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "—"
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "The minimum is open."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text (arXiv 1910.02706).",
+      "status": "verified"
+    },
+    {
+      "id": "fat-randomized-fsync",
+      "title": "Fat robots with lights, FSYNC, randomized, no agreement",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "none",
+        "body": "fat",
+        "memory": "lights",
+        "scheduler": "fsync",
+        "movement": "rigid",
+        "algorithm": "randomized"
+      },
+      "summary": "Randomized fat robots with lights and no common orientation form any pattern in FSYNC in $O(n)+O(\\kappa\\log n)$ rounds with probability at least $1-n^{-\\kappa}$, with 7 colours.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Alsaedi2025Pattern",
+          "role": "best",
+          "time": "O(n)+O(\\kappa\\log n)",
+          "colours": "7",
+          "assumes": [
+            "$n$ unknown",
+            "the pattern is scaled by a constant (8 colours without scaling)"
+          ],
+          "note": "Introductory and current best (Theorems 11, 16, 20, 21); with probability at least $1-n^{-\\kappa}$. Earlier versions used 10 and 11 colours."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "The minimum is open."
+        }
+      },
+      "open": [],
+      "notes": "With $O(1)$ words of $O(\\log n)$ bits of persistent memory instead of lights, the same bound holds (Alsaedi, Gudmundsson and van Renssen, Computational Geometry 2025). Checked against the full text of [Alsaedi2025Pattern].",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Pattern formation: $n$ oblivious robots at distinct points are given the same pattern $P$ in their local coordinate systems and must reach a configuration similar to $P$, up to translation, rotation and scaling [Suzuki1999Formation]. Shown, with chirality, the plan of [Dieudonne2010Leader] in SSYNC rounds: the smallest enclosing circle (dashed) gives the origin and unit, the ray to the leader $L$ (the robot nearest the centre) gives east; $P$ is placed accordingly (hollow points: the target points), and ringed (activated) robots walk to their target points one at a time without changing the circle or the leader; $L$ moves last.",
+    "view": [
+      100,
+      56
+    ],
+    "frames": [
+      {
+        "label": "Start: SEC = unit circle; leader L fixes east",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              23.5,
+              38.1
+            ]
+          },
+          {
+            "id": "3",
+            "p": [
+              30.1,
+              17.2
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              43.4,
+              23.9
+            ]
+          },
+          {
+            "id": "L",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "l": "L",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              23.5,
+              38.1
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                23.5,
+                38.1
+              ],
+              [
+                16.8,
+                30.7
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "One robot at a time walks to its target point",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              30.1,
+              17.2
+            ]
+          },
+          {
+            "id": "4",
+            "p": [
+              43.4,
+              23.9
+            ]
+          },
+          {
+            "id": "L",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "l": "L",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              30.1,
+              17.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                30.1,
+                17.2
+              ],
+              [
+                22.1,
+                16.2
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              43.4,
+              23.9
+            ]
+          },
+          {
+            "id": "L",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "l": "L",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              43.4,
+              23.9
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                43.4,
+                23.9
+              ],
+              [
+                44.4,
+                40.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              43.9,
+              32.2
+            ]
+          },
+          {
+            "id": "L",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "l": "L",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              43.9,
+              32.2
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                43.9,
+                32.2
+              ],
+              [
+                44.4,
+                40.4
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "L",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "l": "L",
+            "c": "near"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "muted",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          },
+          {
+            "t": "circle",
+            "p": [
+              35.1,
+              29.1
+            ],
+            "r": 3.4,
+            "c": "near",
+            "w": 0.5
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.1,
+                29.1
+              ],
+              [
+                38.2,
+                30.3
+              ]
+            ],
+            "c": "muted",
+            "dash": true,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "label": "Final: the robots form a copy of P",
+        "ents": [
+          {
+            "id": "0",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "1",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "c": "tight"
+          },
+          {
+            "id": "L",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "c": "tight",
+            "l": "L"
+          }
+        ],
+        "marks": [
+          {
+            "t": "circle",
+            "p": [
+              32,
+              28
+            ],
+            "r": 22,
+            "c": "muted",
+            "dash": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                32,
+                28
+              ],
+              [
+                52.7,
+                35.5
+              ]
+            ],
+            "c": "near",
+            "dash": true,
+            "arrow": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              24.5,
+              48.7
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              39.5,
+              7.3
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              16.8,
+              30.7
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              22.1,
+              16.2
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              44.4,
+              40.4
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              38.2,
+              30.3
+            ],
+            "r": 2.6,
+            "c": "tight",
+            "w": 0.4
+          },
+          {
+            "t": "circle",
+            "p": [
+              91.7,
+              36.2
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              76.3,
+              17.8
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              81.1,
+              34.9
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              75.7,
+              28.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              93.3,
+              24.5
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "circle",
+            "p": [
+              86.8,
+              24.7
+            ],
+            "r": 1.8,
+            "c": "muted",
+            "w": 0.5
+          },
+          {
+            "t": "text",
+            "p": [
+              84,
+              46
+            ],
+            "s": "pattern P",
+            "c": "muted"
+          }
+        ]
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Kojima2026Hardwired",
+      "note": "Hardwired pattern formation: the robots share a unit of distance and chirality, and must form the pattern at its given size, that is, reach a configuration congruent to it (translation and rotation, no scaling), from distinct starting points. For two oblivious robots, SSYNC with non-rigid moves suffices for every positive target distance (Theorem 1; distance 0 is rendezvous, impossible, Observation 1), ASYNC does not for any target distance above $\\delta$ (Theorem 2), and ASYNC robots with a light of two colours succeed by a self-stabilizing adaptation of a rendezvous algorithm of [Defago2023ModelChecking] (Theorem 3, Corollary 1). For $n \\ge 5$ oblivious SSYNC robots, a size-adjusting algorithm brings the smallest enclosing circle to the given size without increasing the symmetricity (Theorem 4); followed by the algorithm of [Fujinaga2015Pattern], which keeps the smallest enclosing circle fixed, it forms the pattern exactly when the symmetricity of the initial configuration divides that of the pattern (Theorem 5), so this result rests on [Fujinaga2015Pattern], whose proof is disputed (see the setting with chirality). A common unit of distance is not an axis of this model. Read (arXiv v1)."
+    },
+    {
+      "ref": "Mondal2024Arbitrary",
+      "note": "Arbitrary pattern formation on a circle: oblivious robots without chirality, confined to a circle, under SSYNC. Formable configurations are necessary, and from every one of them the robots form any pattern in $O(n)$ epochs without collisions (Theorem 36). Read (arXiv v2)."
+    },
+    {
+      "ref": "Sil2017Line",
+      "note": "Line formation by asynchronous oblivious fat robots with limited visibility that agree on both axes, without collisions (Theorem 1). Read (arXiv v1)."
+    },
+    {
+      "ref": "Krupke2015Parallel",
+      "note": "A robotics relative: $n$ robots with unique labels and a connected communication graph arrange themselves into a sorted, equally spaced array in $O(n)$ time with $O(n^2)$ messages and $O(nD)$ travel. Read (arXiv v1)."
+    },
+    {
+      "ref": "Bose2020Arbitrary",
+      "note": "Arbitrary pattern formation on the infinite grid by ASYNC oblivious robots without common coordinates or chirality, from every asymmetric configuration. Abstract read."
+    },
+    {
+      "ref": "Ghosh2022Move",
+      "note": "Arbitrary pattern formation on the infinite grid by ASYNC robots that align their axes with the grid lines, from asymmetric configurations, with an optimal number of moves and optimal time (improving on $O(D^2k)$ moves). Abstract read."
+    },
+    {
+      "ref": "Kundu2022Arbitrary",
+      "note": "Arbitrary pattern formation on the infinite grid by ASYNC opaque robots with lights and no common coordinates. A preprint; abstract read."
+    },
+    {
+      "ref": "Cicerone2023Arbitrary",
+      "note": "Arbitrary pattern formation on the square, triangular and hexagonal grids from asymmetric configurations. Abstract read."
+    },
+    {
+      "ref": "Alsaedi2025Formation",
+      "note": "Pattern formation by fat (unit-disc) robots with obstructed visibility and $O(1)$ bits of memory that is not communicated: mutual visibility, then leader election, then the pattern. Abstract read."
+    },
+    {
+      "ref": "Bose2022Pattern",
+      "note": "Approximate arbitrary pattern formation by robots whose moves err in direction and length: impossible without common coordinates from some symmetric configurations even in FSYNC, and solvable cases characterised. Abstract read."
+    },
+    {
+      "ref": "Pattanayak2020Conic",
+      "note": "FSYNC oblivious robots must form a conic through $f$ robots that crashed at the start (a line for $f = 2$, a circle for $f = 3$, a parabola for $f = 4$, an ellipse, parabola or hyperbola for $f = 5$): two rounds are needed and suffice, from asymmetric configurations with $n \\ge 2f + 1$ robots. Model and theorems read."
+    },
+    {
+      "ref": "Tomita2018Plane",
+      "note": "Plane formation in three-dimensional space by FSYNC oblivious robots without chirality. Abstract read."
+    },
+    {
+      "ref": "Coleman2020Minimizing",
+      "note": "Pattern formation that minimises the largest distance travelled: necessary conditions and a solution for three robots. A preprint; abstract read."
+    },
+    {
+      "ref": "Ehresmann2019Distributed",
+      "note": "Agents with $q$ colours on an $n$-node ring rearrange so that each block of $p$ nodes meets given colour counts; time bounds for two colours and more. Abstract read."
+    },
+    {
+      "ref": "Coppola2019Provable",
+      "note": "Automatic design and verification of stochastic local rules by which memoryless robots with local sensing and a common North form a desired pattern. Abstract read."
+    },
+    {
+      "ref": "Coppola2018Provable",
+      "note": "Preprint of the same line of work: a local proof procedure that a swarm of reactive robots reaches a desired pattern from any initial configuration. Abstract read."
+    },
+    {
+      "ref": "Ghosh2023Oblivious",
+      "note": "Two teams of oblivious robots on a grid, one gathering and one forming a pattern, without any robot knowing the team of another. Abstract read."
+    },
+    {
+      "ref": "Asahiro2022Monotonic",
+      "note": "Monotonic self-stabilization: from any configuration, robots move to a goal formation so that a quality measure chosen by the user (distance to the goal, accuracy of the formation) never gets worse. The robots have unique identifiers, chirality and a common unit of distance, know every robot's goal position, and move a bounded distance per cycle; parameterised algorithms for FSYNC (Theorems 2 and 10) and SSYNC (Theorems 13 and 26). Read (model and theorem statements)."
+    },
+    {
+      "ref": "Cicerone2021Breaking",
+      "note": "Symmetry breaking on the infinite square and triangular grids by oblivious, disoriented ASYNC robots with strong multiplicity detection (Theorem 13), used as a module for line formation, in which $n \\ge 3$ robots occupy $n$ consecutive nodes of a grid line: solvable exactly from starts with a leader and from one class of starts whose symmetry is a rotation by $180^\\circ$ without reflection (Theorem 31); from the others not even by FSYNC robots (Theorem 15). Read in full."
+    }
+  ]
+}

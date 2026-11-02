@@ -12,6 +12,7 @@
     "exploration",
     "collaborative-exploration",
     "dispersion",
+    "uniform-deployment-graphs",
     "treasure-hunt",
     "rendezvous",
     "pattern-formation",
@@ -59,7 +60,14 @@
     "bridging-amoebots",
     "energy-distribution-amoebots",
     "hybrid-shape-formation",
-    "centralised-transformations"
+    "centralised-transformations",
+    "online-exploration",
+    "gathering-oblivious-graphs",
+    "broadcast-agents",
+    "moving-target-search",
+    "collision-free-exploration",
+    "deciding-agents",
+    "energy-delivery"
   ],
   "families": [
     {
@@ -69,30 +77,37 @@
       "problems": [
         "exploration",
         "collaborative-exploration",
+        "collision-free-exploration",
         "dispersion",
+        "uniform-deployment-graphs",
         "treasure-hunt",
         "rendezvous",
         "black-hole-search",
         "gathering-graphs",
+        "gathering-oblivious-graphs",
         "map-construction",
         "dynamic-exploration",
+        "broadcast-agents",
+        "energy-delivery",
         "oblivious-exploration",
         "exploration-luminous",
         "exploration-recolourable",
-        "decontamination"
+        "decontamination",
+        "online-exploration"
       ]
     },
     {
       "id": "agent-computing",
       "name": "Computing with agents",
-      "summary": "Agents solve graph problems on the anonymous graph they move in: leader election, independent sets, dominating sets, spanning trees, subgraph counts. Most algorithms first disperse the agents, so that every node has an agent to compute for it.",
+      "summary": "Agents solve graph problems on the anonymous graph they move in: leader election, independent sets, dominating sets, spanning trees, subgraph counts, and decisions about the graph itself. Most algorithms first disperse the agents, so that every node has an agent to compute for it.",
       "problems": [
         "leader-election-agents",
         "mis-agents",
         "mds-agents",
         "subgraph-counting-agents",
         "mst-agents",
-        "bfs-agents"
+        "bfs-agents",
+        "deciding-agents"
       ],
       "related": [
         {
@@ -137,6 +152,7 @@
       "summary": "Find a target, or get every robot out through an exit, at an unknown point of a known continuous domain. Evacuation builds on linear search (the cow-path problem).",
       "problems": [
         "linear-search",
+        "moving-target-search",
         "evacuation",
         "chauffeuring",
         "patrolling"
@@ -181,7 +197,7 @@
     ],
     "title": "Mobility Matters: A Living Survey of Open Problems on Autonomous Agents, Robots and Particles",
     "year": 2026,
-    "version": "2026-10-22",
+    "version": "2026-11-02",
     "url": "https://drdebmath.github.io/mobility-matters/",
     "pdf": "mobility-matters.pdf"
   },
@@ -378,5 +394,5 @@
   "license": "Text and data: CC BY 4.0 · code: MIT",
   "license_url": "https://github.com/drdebmath/mobility-matters/blob/main/LICENSE-CONTENT.md",
   "changelog_url": "https://github.com/drdebmath/mobility-matters/blob/main/CHANGELOG.md",
-  "abstract": "Mobility Matters is a living survey of open problems in distributed computing by mobile entities: agents moving on graphs, robots in the plane, robots searching geometric domains, and programmable matter. Each problem is organised as a tree of settings: its root assumes nothing, and each edge adds one assumption (timing, faults, communication, symmetry breaking, knowledge, and so on), so that algorithms carry over to stronger assumptions and lower bounds to weaker ones. For every setting the survey records the proven lower bounds and what forces them, the paper that introduced the setting, the current best result, the gap between them, and the open questions, each checked against the cited papers. Every assumption comes with its origin and formal definition, every problem with a plain-language first look, and essays connect the problems across models. The survey is maintained as a website and regenerated as a book from the same data."
+  "abstract": "Mobility Matters is a living survey of open problems in distributed computing by mobile entities: agents moving on graphs, robots in the plane, robots searching geometric domains, and programmable matter. The settings of each problem form a directed acyclic graph: a setting is a set of assumptions (timing, faults, communication, symmetry breaking, knowledge, and so on), the setting that assumes nothing comes first, and each edge leads to a setting that assumes more, so that algorithms carry over to stronger settings and lower bounds to weaker ones. For every setting the survey records the proven lower bounds and what forces them, the paper that introduced the setting, the current best result, the gap between them, and the open questions, each checked against the cited papers. Every assumption comes with its origin and formal definition, every problem with a plain-language first look, and essays connect the problems across models. The survey is maintained as a website and regenerated as a book from the same data."
 }

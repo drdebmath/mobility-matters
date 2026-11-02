@@ -1,0 +1,2486 @@
+{
+  "id": "rendezvous",
+  "model": "mobile-agents-on-graphs",
+  "name": "Rendezvous",
+  "origin": {
+    "ref": "Dessmark2006Deterministic",
+    "year": 2003,
+    "note": "Deterministic rendezvous of labelled agents in arbitrary graphs was posed by Dessmark, Fraigniaud and Pelc at ESA 2003. Rendezvous itself is older (randomized search games); the catalogue covers the deterministic line [Pelc2019Survey]."
+  },
+  "derived_from": {
+    "problem": "exploration",
+    "kind": "subproblem of",
+    "relation": "If the agents can break symmetry (for example by their labels), one may wait while the other explores, so exploration solves rendezvous; the work is in doing better than that, or in meeting when neither knows who should wait [Pelc2019Survey]."
+  },
+  "summary": "Two agents start at different nodes of an unknown graph and must meet; how long does it take, and how much memory or symmetry breaking does it need?",
+  "statement": "Two mobile agents start at different nodes of an unknown connected port-labelled graph. Nodes are anonymous unless a setting gives them **node labels**: distinct positive integers that an agent reads when it is at the node. In the synchronous model they must be at the same node in the same round; in the asynchronous model an adversary controls their speeds and they may also meet inside an edge. Agents are either **labelled** (distinct labels from $\\{1,\\dots,L\\}$; $\\lambda$ is the smaller label) or **anonymous**. They may start at different times; $\\tau$ is the delay. **Time** is the number of rounds from the start of the later agent (synchronous) or the total number of moves, that is edge traversals (asynchronous cost). **Memory** is bits per agent.",
+  "primer": {
+    "intro": "Two friends lose each other in a city with no phones and want to meet at the same spot. The city is a **graph**: street corners are **nodes** and the streets between them are **edges**; the friends are two **agents** that start at different nodes of this unknown connected graph. At each node the edges at that node carry local numbers, its **ports**. Time passes in synchronous **rounds**; in each round an agent stays or makes a **move** along one edge, and the agents **meet** when they are on the same node in the same round (crossing inside an edge does not count). In the basic version each agent knows its own **label**, a distinct integer from $\\{1,\\dots,L\\}$, but not the other's label and nothing about the graph; $\\lambda$ is the smaller of the two labels, $n$ the number of nodes, and the later agent may start $\\tau$ rounds after the earlier one (the **delay**). The task is to meet, and the cost is the number of rounds from the start of the later agent.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Explore or wait, bit by bit (trees, simultaneous start)",
+        "variant": "labelled-trees",
+        "ref": "Dessmark2006Deterministic",
+        "idea": "If one agent knew it should wait, the other could simply search the graph (\"wait for mommy\" in [Dessmark2006Deterministic]). Without knowing the other label, use the bits of your own label to take turns. This is a simplified version of their idea, for a tree (no cycles), both agents starting in the same round.\n1. Explore the tree by depth-first search and return to your **start node** (the node where you began); you learn $n$, and this takes $2(n-1)$ rounds. Call $2(n-1)$ rounds a **block**.\n2. Write your label in binary, write every bit twice, and append $0\\,1$. For example $5 = 101$ becomes $11\\,00\\,11\\,01$.\n3. Go through this string one bit per block: on a bit 1, explore the tree and return to your start node; on a bit 0, wait at your start node for the whole block.",
+        "analysis": "Both agents compute the same block length, so their blocks start and end in the same rounds. Two different labels give strings that differ at some position before the shorter one ends (the final $0\\,1$ marks the end, and no doubled bit looks like it). In that block one agent explores while the other waits at its start node, so the exploring agent walks onto it. The cost is $O(\\log\\lambda)$ blocks of $O(n)$ rounds, $O(n\\log\\lambda)$ in all. [Dessmark2006Deterministic] reach $O(n+\\log\\lambda)$ on trees even with a delay $\\tau$, which is optimal; on general graphs the best known is $\\tilde O(n^5\\log\\lambda)$ [TaShma2014Deterministic], against a lower bound of $\\Omega(n^2)$.",
+        "why_it_matters": "Turning distinct labels into different move/wait patterns is the basic symmetry-breaking device of deterministic rendezvous."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Identical agents in symmetric positions",
+        "variant": "anonymous",
+        "ref": "Czyzowicz2012Forget",
+        "idea": "Take a ring of 6 nodes where at every node port 0 leads clockwise and port 1 counterclockwise. Put two agents without labels (**anonymous**: same algorithm, same initial memory) on opposite nodes, 3 edges apart, starting in the same round. Each agent sees exactly what the other sees: a node of **degree** 2 (two edges at it), the same entry ports, nobody else around. So in every round they make the same choice: both stay, both go clockwise, or both go counterclockwise.",
+        "analysis": "After any number of rounds they are still exactly 3 edges apart, so they never meet, whatever the algorithm and however much **memory** (bits kept between rounds) they have. Identical agents can meet only when their starting positions are not symmetric in this sense, and for those positions $\\Theta(\\log n)$ bits of memory are exactly what is needed [Czyzowicz2012Forget].",
+        "why_it_matters": "It explains why most rendezvous work gives the agents labels, and why for identical agents the question becomes which starting positions can be told apart."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Two nodes and the length of a label",
+        "variant": "labelled",
+        "ref": "Dessmark2006Deterministic",
+        "idea": "Take the smallest graph: two nodes joined by one edge, one agent at each end, both starting together. Until they meet, an agent sees nothing new (always degree 1, always port 0), so its behaviour in the first $t$ rounds is a string of $t$ choices, stay or move, fixed by its label alone. They meet in a round where exactly one of them moves; if both move they just swap ends.",
+        "analysis": "There are only $2^t$ strings of $t$ choices. Among $2^t + 1$ labels, two give the same string; give these labels to the two agents and they do the same thing in each of the first $t$ rounds, so they do not meet within $t$ rounds. Hence some pairs of labels need about $\\log$ (number of labels) rounds, which gives the $\\Omega(\\log\\lambda)$ bound of [Dessmark2006Deterministic]. Together with the $\\Omega(n)$ needed to cover the graph it shows their $O(n+\\log\\lambda)$ algorithm for trees is optimal.",
+        "why_it_matters": "It shows that the cost of breaking symmetry is the length of a label, a counting argument that recurs in every model with identifiers."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "graph",
+      "definition": "the unknown connected graph $G = (V, E)$ with $n$ nodes on which the two agents move",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "an element of $V$",
+      "avoid": [
+        "vertex",
+        "dot"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; in the asynchronous model agents may also meet inside an edge",
+      "avoid": [
+        "line",
+        "link"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "one of the two mobile entities, each running the same algorithm with its own label (if any)",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "port",
+      "definition": "the local number of an edge at a node $v$; the two ends of an edge may carry different numbers",
+      "avoid": [
+        "exit",
+        "door"
+      ]
+    },
+    {
+      "term": "degree",
+      "definition": "$\\deg(v)$, the number of edges at node $v$",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "a synchronous time step in which each agent stays or moves along one edge",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by one agent",
+      "avoid": []
+    },
+    {
+      "term": "meet",
+      "definition": "to be on the same node in the same round (synchronous), or at the same point, possibly inside an edge (asynchronous)",
+      "avoid": []
+    },
+    {
+      "term": "label",
+      "definition": "a distinct integer from $\\{1,\\dots,L\\}$ that an agent knows about itself; $\\lambda$ is the smaller of the two",
+      "avoid": [
+        "identifier",
+        "name"
+      ]
+    },
+    {
+      "term": "node label",
+      "definition": "a distinct positive integer attached to a node, which an agent reads when it is at that node; only settings with labelled nodes have them",
+      "avoid": []
+    },
+    {
+      "term": "anonymous",
+      "definition": "for agents: without labels, with the same algorithm and the same initial memory; for nodes: without names the agents can read",
+      "avoid": []
+    },
+    {
+      "term": "delay",
+      "definition": "$\\tau$, the number of rounds between the starts of the earlier and the later agent",
+      "avoid": []
+    },
+    {
+      "term": "start node",
+      "definition": "the node where an agent begins",
+      "avoid": [
+        "home"
+      ]
+    },
+    {
+      "term": "block",
+      "definition": "in the explore-or-wait algorithm on a tree, $2(n-1)$ consecutive rounds, one per bit of the transformed label",
+      "avoid": []
+    }
+  ],
+  "history": "Deterministic rendezvous in graphs started with the question of **feasibility and cost polynomial in the graph size and the label length**, for labelled agents that may start at different times [Dessmark2006Deterministic]. The community then removed the dependence on the delay [Kowalski2008Meet], made the algorithms constructive [TaShma2014Deterministic], asked how little **memory** anonymous agents need [Czyzowicz2012Forget] [Fraigniaud2013Delays], and moved to asynchronous agents, where even feasibility in every graph took years [DeMarco2006Asynchronous] [Czyzowicz2012Everywhere] [Dieudonne2015Polynomial]. Pelc's survey records this evolution [Pelc2019Survey]. Node labels are another source of symmetry breaking: on paths with labelled nodes, anonymous agents meet in time proportional to $d$ times the iterated logarithm of a nearby node label [Bourreau2026Optimal].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds after the later agent starts (synchronous); edge traversals (asynchronous)"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "bits per agent"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "faults",
+    "communication",
+    "initial",
+    "node-memory",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "graph-size",
+    "node-ids",
+    "ids",
+    "timing",
+    "start",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "graph-size",
+      "name": "Graph size",
+      "values": [
+        {
+          "id": "countable",
+          "level": 0,
+          "label": "finite or countably infinite, degrees may be infinite",
+          "short": "infinite degrees allowed",
+          "definition": "$G$ is finite or countably infinite; degrees may be infinite."
+        },
+        {
+          "id": "locally-finite",
+          "level": 1,
+          "label": "finite or countably infinite, every degree finite",
+          "short": "locally finite",
+          "definition": "$G$ is finite or countably infinite with finite degrees."
+        },
+        {
+          "id": "finite",
+          "level": 2,
+          "label": "finite",
+          "short": "finite graph",
+          "definition": "$G$ has finitely many nodes."
+        }
+      ],
+      "origin": "Deterministic rendezvous in graphs was posed for finite graphs, where an agent can afford to explore the whole graph and the cost is a function of $n$ [Dessmark2006Deterministic] [Pelc2019Survey]. Bhagat and Pelc argued that this approach \"is inefficient for very large graphs, and cannot be used for infinite graphs\", and gave the first synchronous algorithm for connected graphs with finite degrees and finitely or countably many nodes, with time polynomial in $d$, $\\log L$ and the number of paths of length $d$ from the starting nodes, a quantity that also bounds rendezvous from below in trees [Bhagat2022Meet]. For asynchronous agents, Czyzowicz, Labourel and Pelc had already shown that rendezvous is feasible in every connected countable graph [Czyzowicz2012Everywhere] (as summarised in [Pelc2019Survey]); like all earlier work it assumed finite degrees [Pattanayak2024Treasure]. Pattanayak and Pelc then allowed countably infinite degrees, where the path count is infinite, and obtained a universal synchronous algorithm with time polynomial in a weight of the path types between the starting nodes and in $\\log L$, matched up to a polynomial by a lower bound in the tree whose degrees are all infinite [Pattanayak2024Treasure]. The axis thus separates three cost measures: $n$, the local path count, and path-type weights."
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "values": [
+        {
+          "id": "delay",
+          "level": 0,
+          "label": "arbitrary delay between the two starts",
+          "short": "any delay",
+          "definition": "An adversary wakes the agents at times $t_1$ and $t_2$; the delay $\\tau=|t_1-t_2|$ is unknown."
+        },
+        {
+          "id": "simultaneous",
+          "level": 1,
+          "label": "simultaneous start",
+          "short": "simultaneous start",
+          "definition": "Both agents start in the same round ($\\tau=0$)."
+        }
+      ],
+      "origin": "Dessmark, Fraigniaud, Kowalski and Pelc treated two startup scenarios for deterministic rendezvous: simultaneous startup, and an arbitrary delay $\\tau$ chosen by the adversary, in which each agent counts rounds from its own wake-up without knowing $\\tau$ [Dessmark2006Deterministic]. The delay is the stronger adversary: it can delay one agent long enough that the other must find it while it sleeps, which is treasure hunt [Pelc2019Survey] [TaShma2014Deterministic]. It changes cost: on a ring simultaneous start gives $\\Theta(d\\log \\lambda)$, while with arbitrary delay $\\Omega(n+d\\log \\lambda)$ is a lower bound even when $n$ is known; and the first polynomial algorithm for arbitrary graphs had cost growing with $\\sqrt\\tau$, leaving open whether the dependence could be removed [Dessmark2006Deterministic], which Kowalski and Malinowski and then Ta-Shma and Zwick did [Kowalski2008Meet] [TaShma2014Deterministic]. It also changes memory: Fraigniaud and Pelc showed that identical agents need $\\Theta(\\log n)$ bits in trees with arbitrary delay, even on a line, but only $O(\\log\\nu+\\log\\log n)$ bits with simultaneous start in trees with $\\nu$ leaves, an exponential gap when $\\nu$ is small [Fraigniaud2013Delays]."
+    }
+  ],
+  "variants": [
+    {
+      "id": "labelled",
+      "title": "Labelled agents, arbitrary finite graphs",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "ids": "unique",
+        "timing": "sync"
+      },
+      "summary": "Polynomial in $n$ and $\\log \\lambda$ and independent of the delay, but far from the known lower bounds.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Dessmark2006Deterministic",
+          "bottleneck": "exploration",
+          "preconditions": [
+            "Theorem 4.4: for all $n$ and all pairs of labels, a regular graph made of two cliques of $n/2$ nodes joined by two swapped edges, ports equal at both ends of each edge",
+            "holds even with simultaneous start"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\log \\lambda)",
+          "ref": "Dessmark2006Deterministic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "the two-node graph, agents at both ends, simultaneous start: with fewer steps than label bits two labels produce the same move/stay sequence",
+            "extends to trees (Theorem 2.3)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dessmark2006Deterministic",
+          "role": "introductory",
+          "time": "O(n^5\\sqrt{\\tau\\log \\lambda}\\,\\log n+n^{10}\\log^2 n\\log \\lambda)",
+          "note": "Theorem 4.3: polynomial in $n$, $\\tau$ and $\\log\\lambda$. Not constructive in the computational sense: each agent finds, by exhaustive local search, a combinatorial object whose existence is proved by the probabilistic method; only moves are counted.",
+          "assumes": [
+            "memory unbounded; local computation free"
+          ]
+        },
+        {
+          "ref": "Kowalski2008Meet",
+          "role": "other",
+          "time": "O(\\log^3 \\lambda+n^{15}\\log^{12}n)",
+          "note": "Corollary 4.1; the first bound independent of $\\tau$, answering the question of [Dessmark2006Deterministic]. The cover walk it uses runs shorter cover walks recursively and goes back along them, so it needs backtracking (Section 4.1.2). Like [Dessmark2006Deterministic] it is deterministic but not explicit: each agent finds by exhaustive local search a walk whose existence is proved by the probabilistic method. The same algorithm gathers $k$ labelled agents.",
+          "assumes": [
+            "backtracking: the agent learns the port by which it entered",
+            "memory unbounded; local computation free"
+          ]
+        },
+        {
+          "ref": "TaShma2014Deterministic",
+          "role": "best",
+          "time": "\\tilde O(n^5\\log \\lambda)",
+          "note": "Independent of $\\tau$ and needs no backtracking, but not explicit: it relies on universal traversal sequences that are only known to exist. Checked in the paper. ([Xin2007Faster] wrongly says it uses backtracking.)"
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$\\tilde O(n^5\\log \\lambda)$ versus $\\Omega(n^2+\\log \\lambda)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded in these algorithms."
+        }
+      },
+      "open": [
+        "Find an optimal-time synchronous rendezvous algorithm for labelled agents in arbitrary graphs (open problem of [Pelc2019Survey])."
+      ],
+      "notes": "$\\ell$ in [TaShma2014Deterministic] is the length of the shorter label, our $\\log \\lambda$; $\\ell$ in [Kowalski2008Meet] is the smaller label itself, our $\\lambda$. Checked against the full texts of [Dessmark2006Deterministic], [Kowalski2008Meet] and [TaShma2014Deterministic]: agents know only their own label, learn the entry port and the degree at each node, and do not notice crossing inside an edge. With **simultaneous** start [Dessmark2006Deterministic] meets in $O(d\\Delta^{d}\\log\\lambda)$ rounds in any graph without knowing $\\Delta$ (Theorem 4.1), optimal when $d$ and $\\Delta$ are bounded.",
+      "status": "verified"
+    },
+    {
+      "id": "labelled-trees",
+      "title": "Labelled agents in trees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "ids": "unique",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "summary": "In trees, $O(n+\\log \\lambda)$ even with arbitrary delay, and this cannot be improved.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(n+\\log \\lambda)",
+          "ref": "Dessmark2006Deterministic",
+          "bottleneck": "distance",
+          "preconditions": [
+            "Theorem 2.3: two stars of $n/2-1$ leaves whose centres are joined, agents at the centres, for the $\\Omega(n)$ part; the two-node argument for the $\\Omega(\\log\\lambda)$ part",
+            "holds even with simultaneous start"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dessmark2006Deterministic",
+          "role": "best",
+          "time": "O(n+\\log \\lambda)",
+          "note": "Introductory and current best (Theorem 2.2), with arbitrary delay: explore by depth-first search, go to the central node or the central edge, and on a central edge run Procedure Extend-Labels, which meets on $K_2$ within $2\\log\\lambda+6$ rounds.",
+          "assumes": [
+            "agents know that the graph is a tree, but not its size"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n+\\log \\lambda)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dessmark2006Deterministic].",
+      "status": "verified"
+    },
+    {
+      "id": "labelled-infinite-trees",
+      "title": "Labelled agents in infinite trees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "locally-finite",
+        "ids": "unique",
+        "timing": "sync",
+        "topology": "tree"
+      },
+      "summary": "In infinite regular trees the time grows with the number of nodes within distance $d$: $O(\\mathrm{ball}(d)\\log L)$ against $\\Omega(\\mathrm{ball}(d)+d\\log L)$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\mathrm{ball}(d)+d\\log L)",
+          "ref": "Bhagat2024Deterministic",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "regular trees of degree $\\Delta \\ge 2$ with an adversarial port numbering, even with simultaneous start and known $d$ and $L$ (Theorem 2.2 and Corollary 2.3)",
+            "$\\mathrm{ball}(d)$ is the number of nodes within distance $d$ of a node, exponential in $d$ when $\\Delta > 2$",
+            "with arbitrary delay $\\Omega(\\mathrm{ball}(d))$ holds even in oriented trees, where a root is marked and port 0 leads towards it (Proposition 3.1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bhagat2024Deterministic",
+          "role": "best",
+          "time": "O(\\mathrm{ball}(d)\\log L)",
+          "assumes": [
+            "regular trees of constant degree",
+            "no knowledge of $L$ or $d$; any delay"
+          ],
+          "note": "Introductory and current best (Theorem 2.1, Algorithm URT): each agent explores balls of growing radius, at times set by its transformed label. Time is counted from the wake-up of the earlier agent."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "At most a factor $\\log L$; tight on the infinite path ($\\Delta = 2$), where $\\mathrm{ball}(d) = \\Theta(d)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [
+        "Close the gap between $O(\\mathrm{ball}(d)\\log L)$ and $\\Omega(\\mathrm{ball}(d)+d\\log L)$ in unoriented regular trees. Posed in [Bhagat2024Deterministic].",
+        "Find efficient rendezvous algorithms for arbitrary infinite graphs without extra knowledge such as the agents' positions. Posed in [Bhagat2024Deterministic]."
+      ],
+      "notes": "Bhagat and Pelc express the time in the initial distance $d$ instead of $n$, since the tree may be infinite; their algorithms work in finite trees as well. Exploring a ball takes time linear in its size in a tree, but no such exploration is known in anonymous graphs with cycles, which is why they restrict to trees. Checked against the full text (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "labelled-infinite-trees-simultaneous",
+      "title": "Labelled agents in infinite trees, simultaneous start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "locally-finite",
+        "ids": "unique",
+        "timing": "sync",
+        "start": "simultaneous",
+        "topology": "tree"
+      },
+      "summary": "With simultaneous start, orientation helps: $O(d\\log L)$ in oriented trees when a bound on $L$ or $d$ is known, $O(d^2+\\log^2 L)$ without; unoriented regular trees still need $\\Omega(\\mathrm{ball}(d))$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\mathrm{ball}(d)+d\\log L)",
+          "ref": "Bhagat2024Deterministic",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "regular trees of degree $\\Delta \\ge 2$ with an adversarial port numbering, even with simultaneous start and known $d$ and $L$ (Theorem 2.2 and Corollary 2.3)",
+            "$\\mathrm{ball}(d)$ is the number of nodes within distance $d$ of a node, exponential in $d$ when $\\Delta > 2$",
+            "in oriented trees only $\\Omega(d\\log L)$ is known, from [Dessmark2006Deterministic] (Section 3)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bhagat2024Deterministic",
+          "role": "best",
+          "time": "O(d\\log L)",
+          "assumes": [
+            "oriented trees: a root is marked and port 0 leads towards it; the tree need not be regular",
+            "a polynomial upper bound on $L$, or a linear upper bound on $d$, is known"
+          ],
+          "note": "Theorems 3.1 and 3.2; optimal."
+        },
+        {
+          "ref": "Bhagat2024Deterministic",
+          "role": "other",
+          "time": "O(d^2+\\log^2 L)",
+          "assumes": [
+            "oriented trees",
+            "no knowledge of $L$ or $d$"
+          ],
+          "note": "Theorem 3.3; optimal when $d$ and $\\log L$ are of the same order."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "Unoriented regular trees: within a factor $\\log L$, as with a delay. Oriented trees: $\\Theta(d\\log L)$ with a known bound on $L$ or $d$; without one, $O(d^2+\\log^2 L)$ against $\\Omega(d\\log L)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [
+        "In oriented trees with simultaneous start, can agents meet in time $O(d\\log L)$ without knowing anything about $d$ or $L$? Posed in [Bhagat2024Deterministic]."
+      ],
+      "notes": "Orientation has no axis here; it is recorded on the results. With arbitrary delay, orientation does not help (Proposition 3.1). Checked against the full text of [Bhagat2024Deterministic] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "labelled-rings-simultaneous",
+      "title": "Labelled agents in rings, simultaneous start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "ids": "unique",
+        "timing": "sync",
+        "start": "simultaneous",
+        "topology": "ring"
+      },
+      "summary": "With simultaneous start on a ring, rendezvous takes $\\Theta(d\\log \\lambda)$ for initial distance $d$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(d\\log \\lambda)",
+          "ref": "Dessmark2006Deterministic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "rings, for every initial distance $d$ (Theorem 3.1)",
+            "agents know that the graph is a ring"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dessmark2006Deterministic",
+          "role": "best",
+          "time": "O(d\\log \\lambda)",
+          "note": "Introductory and current best (Lemmas 3.1, 3.2 and Theorem 3.1).",
+          "assumes": [
+            "agents know that the graph is a ring, but not its size"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(d\\log \\lambda)$."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dessmark2006Deterministic]. With **arbitrary delay** on an $n$-node ring, $\\Omega(n+d\\log\\lambda)$ rounds are necessary even when $n$ is known (Proposition 3.1); $O(n\\log\\lambda)$ suffices for known $n$ (Theorem 3.2) and $O(\\lambda\\tau+\\lambda n^2)$ for unknown $n$ (Theorem 3.3) [Dessmark2006Deterministic]. The paper announces that a forthcoming paper reaches $O(n\\log\\lambda)$ with arbitrary delay; this is [Kowalski2008Meet] (Theorem 3.1), for unknown $n$, which with Proposition 3.1 of [Dessmark2006Deterministic] makes it optimal (their Corollary 3.1).",
+      "status": "verified"
+    },
+    {
+      "id": "node-labels-paths",
+      "title": "Anonymous agents on paths and rings with labelled nodes",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "locally-finite",
+        "node-ids": "labelled",
+        "timing": "sync",
+        "topology": "ring"
+      },
+      "summary": "On paths with labelled nodes, two anonymous agents meet in $O(d\\log^*\\sigma_{\\min})$ rounds, $\\sigma_{\\min}$ the smallest node label near their start nodes, and no algorithm is faster in the worst case.",
+      "statement": "The graph is a path or a ring, finite or infinite: in the main case the two-way infinite path, every node of degree 2. Every node $v$ carries a distinct node label $\\sigma(v)\\in\\{1,2,\\dots\\}$ that an agent reads when it is at $v$. The two agents are anonymous: they run the same deterministic algorithm and can break symmetry only through the node labels they see. An adversary wakes them at times of its choice; an awake agent that reaches the node of a sleeping agent meets it. They know neither $d$ (the distance between their start nodes) nor the delay $\\tau$, share no orientation, see the port by which they enter a node, and do not notice crossing inside an edge. $\\sigma_{\\max}$ is the larger node label of the two start nodes, and $\\sigma_{\\min}$ the smallest node label within distance $O(d)$ of the start nodes; $\\log^*$ is the iterated logarithm, taken to be at least 1.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(d\\log^*\\sigma_{\\max})",
+          "ref": "Miller2025Fast",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "an algorithm that always meets within $\\frac{1}{16\\kappa}\\log^*\\sigma_{\\max}$ rounds from adjacent start nodes would give a 3-colouring algorithm for labelled paths in the LOCAL model faster than Linial's lower bound allows ($\\kappa$ the constant of their colouring algorithm; Theorem 4.9); for $d > 1$, $d - 1$ nodes inserted between consecutive nodes reduce to $d = 1$ (Theorem 4.10)",
+            "a two-way infinite path made of consecutive segments, each labelled so that 3-colouring it needs time close to Linial's bound",
+            "holds even with simultaneous start, known $d$ and a global sense of direction"
+          ],
+          "note": "Theorems 4.9 and 4.10 of the arXiv version (their $D$ is $d$ and their $\\ell$ is $\\sigma_{\\max}$ here). On finite paths and rings with $n$ nodes the bound becomes $\\Omega(\\min(n, d\\log^*\\sigma_{\\max}))$ (Section 1.3)."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Miller2025Fast",
+          "role": "introductory",
+          "time": "O(d^2(\\log^*\\sigma_{\\max})^3)",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "Theorem 5.31 of the arXiv version: each agent knows only the node label of its start node. The algorithms 3-colour the path around the start nodes with an early-stopping version of the Cole–Vishkin algorithm, so that a node with a small node label stops early (Theorem 2.1), and let the colours decide which agent waits while the other searches. On finite paths and rings with $n$ nodes, $O(\\min(n, d^2(\\log^*\\sigma_{\\max})^3))$."
+        },
+        {
+          "ref": "Bourreau2026Optimal",
+          "role": "best",
+          "time": "O(d\\log^*\\sigma_{\\min})",
+          "assumes": [
+            "unbounded memory"
+          ],
+          "note": "Theorem 1.1 (arXiv v2), on the two-way infinite path, counting rounds from the wake-up of the earlier agent; Corollary 1.2 gives $O(\\min(n, d\\log^*\\sigma_{\\min}))$ on finite paths and rings with $n$ nodes, and Remark 5.1 a faster bound when a start node is near an end of a finite path. Since $\\sigma_{\\min}\\le\\sigma_{\\max}$ it is never slower than $O(d\\log^*\\sigma_{\\max})$. It improves the $O(d^2(\\log^*\\sigma_{\\max})^3)$ algorithm of [Miller2025Fast] for unknown $d$, and needs no knowledge of $d$ to match their $O(d\\log^*\\sigma_{\\max})$ algorithm for known $d$."
+        },
+        {
+          "ref": "Miller2025Fast",
+          "role": "other",
+          "time": "O(d\\log^*\\sigma_{\\max})",
+          "assumes": [
+            "knows $d$",
+            "unbounded memory"
+          ],
+          "note": "Theorem 4.2: optimal when $d$ is known. If each agent also knows its position relative to the node with the smallest node label, $O(d)$ rounds suffice for any delay (Theorem 3.4)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(d\\log^*\\sigma_{\\max})$ in the worst case: the lower bound uses paths whose node labels all have the same $\\log^*$, so there $\\sigma_{\\min}$ and $\\sigma_{\\max}$ give the same bound."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [],
+      "notes": "Bourreau, Narayanan and Nolin let each agent explore a growing interval around its start node and compute from the node labels it has seen a sparse set of nodes, a ruling set of the path with spacing $\\Theta(d)$, coloured with 17 colours so that nearby members get different colours (Lemma 3.5). Each agent walks to the nearest member and alternates searching and waiting according to the bits of its colour, so that one agent searches while the other waits (Algorithm 5, Lemmas 4.3 to 4.7). The computation is an early-stopping version of distributed colouring in the LOCAL model, in which a node with a small node label decides early; this is why the bound depends on $\\sigma_{\\min}$. Procedure CarefulWalk crosses an edge in 4 rounds, with moves that depend on whether the node label increases across the edge, so that two agents can no longer swap places inside an edge without meeting (Theorem 3.1). Without node labels, labelled agents on a ring with simultaneous start need $\\Theta(d\\log\\lambda)$ rounds [Dessmark2006Deterministic]; Bourreau et al. draw this contrast in their Table 1. Miller and Pelc left open the optimal time when $d$ is unknown [Miller2025Fast]; Bourreau, Narayanan and Nolin settled it. Miller and Pelc also separate three ways of learning the node labels when $d$ is known: $\\Theta(d)$ if the whole labelling is known in advance, $\\Theta(d\\log^*\\sigma_{\\max})$ if node labels are seen on visits, and $\\Theta(d\\log\\sigma_{\\max})$ if only the start node's label is seen, which is the case of labelled agents in an anonymous graph. [Bourreau2026Optimal] read in arXiv v2 (January 2026) and [Miller2025Fast] in arXiv v1 (2023); theorem numbers refer to these versions. Both bounds were checked against the full texts.",
+      "status": "verified"
+    },
+    {
+      "id": "infinite-degrees",
+      "title": "Labelled agents, graphs with infinite degrees",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "ids": "unique",
+        "timing": "sync"
+      },
+      "summary": "A universal algorithm works even when nodes have infinite degree; it is within a cubic factor of the lower bound.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\max(W,\\log L))",
+          "ref": "Pattanayak2024Treasure",
+          "bottleneck": "port addressing",
+          "preconditions": [
+            "$W=\\max(w(v_1,v_2),w(v_2,v_1))$, the path weight of the treasure-hunt variant",
+            "e.g. the infinite tree with all degrees infinite"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pattanayak2024Treasure",
+          "role": "best",
+          "time": "O((W\\log L)^3)",
+          "note": "Introductory and current best (Theorem 3.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Cubic."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [
+        "Find an optimal rendezvous algorithm, \"even for finite graphs\" [Pattanayak2024Treasure]."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "anonymous",
+      "title": "Anonymous agents: memory",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "timing": "sync"
+      },
+      "summary": "Identical agents can meet whenever their positions are not symmetric, or are symmetric but start with a long enough delay; $\\Theta(\\log n)$ bits suffice when the positions are not symmetric.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Czyzowicz2012Forget",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "rings",
+            "holds even with simultaneous start"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "2^{\\Omega(d)}",
+          "ref": "Pelc2019Time",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "symmetric start nodes at distance $d$ with a feasible delay, in a graph built from a regular tree whose ports give the agents no information (Theorem 4.1)",
+            "for an algorithm that meets for every such start, as a universal algorithm must"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2012Forget",
+          "role": "best",
+          "memory": "O(\\log n)",
+          "note": "Introductory and current best; any delay; also gives the first polynomial-time computation of a quotient graph."
+        },
+        {
+          "ref": "Pelc2019Time",
+          "role": "best",
+          "time": "(n+\\tau)^{O(n+\\tau)}",
+          "assumes": [
+            "every feasible start: nonsymmetric nodes with any delay, or symmetric nodes $u, v$ with delay $\\tau \\ge \\mathrm{Shrink}(u,v)$",
+            "no knowledge of $n$, $\\tau$ or the start nodes"
+          ],
+          "note": "Introductory and current best for starts with a delay. Corollary 3.1: a start is feasible if and only if the nodes are nonsymmetric or $\\tau \\ge \\mathrm{Shrink}(u,v)$, the smallest distance at which the same sequence of ports leads from $u$ and from $v$ (Lemma 3.1 proves necessity); Algorithm UniversalRV meets for every feasible start (Theorem 3.1). The time bound is derived in Section 4."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Exponential in $d$ (Theorem 4.1 of [Pelc2019Time]) against $(n+\\tau)^{O(n+\\tau)}$; whether a universal algorithm can run in time polynomial in $n$ and $\\tau$ is open."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$ bits."
+        }
+      },
+      "open": [
+        "Is there a universal algorithm that meets for every feasible start in time polynomial in $n$ and $\\tau$? Posed in [Pelc2019Time]."
+      ],
+      "notes": "With simultaneous start, rendezvous is feasible exactly when the two start nodes have different views. With a delay, symmetric start nodes become feasible once the delay reaches $\\mathrm{Shrink}(u,v)$ [Pelc2019Time]; Pelc and Yadav credit [Czyzowicz2012Forget] with the nonsymmetric case, for agents that know an upper bound on $n$ (as reported). Checked against the full text of [Pelc2019Time] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "anonymous-trees-simultaneous",
+      "title": "Anonymous agents in trees, simultaneous start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "timing": "sync",
+        "start": "simultaneous",
+        "topology": "tree"
+      },
+      "summary": "With simultaneous start, memory drops to $\\Theta(\\log \\nu+\\log\\log n)$ for trees with $\\nu$ leaves; with delay it is $\\Theta(\\log n)$, an exponential gap.",
+      "lower_bounds": [
+        {
+          "measure": "memory",
+          "bound": "\\Omega(\\log \\nu+\\log\\log n)",
+          "ref": "Fraigniaud2013Delays",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "trees of maximum degree 3",
+            "$\\nu$ = number of leaves"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Fraigniaud2013Delays",
+          "role": "best",
+          "memory": "O(\\log \\nu+\\log\\log n)",
+          "note": "Introductory and current best. With arbitrary delay, $\\Omega(\\log n)$ even on lines."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Not the focus."
+        },
+        "memory": {
+          "status": "tight",
+          "note": "Matching bounds."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "async",
+      "title": "Asynchronous labelled agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite",
+        "ids": "unique"
+      },
+      "summary": "An adversary controls speeds; agents may meet inside an edge. Feasible everywhere, and at polynomial cost, but with very large exponents.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DeMarco2006Asynchronous",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "assumes": [
+            "an upper bound on the size is known"
+          ],
+          "note": "On a ring of known size, cost $O(n\\log \\lambda)$, which is optimal."
+        },
+        {
+          "ref": "Czyzowicz2012Everywhere",
+          "role": "other",
+          "time": "\\text{finite}",
+          "note": "Feasible in every connected countable graph without any knowledge; cost at least exponential."
+        },
+        {
+          "ref": "Dieudonne2015Polynomial",
+          "role": "best",
+          "time": "\\text{poly}(n,\\log \\lambda)",
+          "note": "First polynomial cost."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound recorded for general graphs."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [
+        "Find an optimal-cost asynchronous rendezvous algorithm in arbitrary graphs (open problem of [Pelc2019Survey])."
+      ],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "async-anonymous",
+      "title": "Asynchronous anonymous agents",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "finite"
+      },
+      "summary": "Which pairs of starting nodes allow identical asynchronous agents to meet is characterised.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Guilbault2011Asynchronous",
+          "role": "best",
+          "time": "\\text{finite}",
+          "note": "Introductory and current best. Feasible if and only if the views from the two starting nodes differ or the nodes are joined by a path whose sequence of ports reads the same in both directions (Theorem 1), in finite or countably infinite graphs; randomized agents meet with probability 1 from any starting nodes (Theorem 2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Cost not studied."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "Memory is unbounded."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Rendezvous of two labelled agents in a tree, simultaneous start, by the explore-or-wait idea of [Dessmark2006Deterministic] (simplified): after one depth-first tour to learn $n$, each agent reads its label in binary with every bit doubled and $01$ appended, and spends one block of $2(n-1)$ rounds per bit, exploring and returning on a 1, waiting at its start node on a 0. Labels 1 and 3 give $11\\,01$ and $11\\,11\\,01$; in block 3 agent 3 explores while agent 1 waits, and they meet. One frame per round.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "a": [
+          14,
+          30
+        ],
+        "b": [
+          38,
+          30
+        ],
+        "c": [
+          62,
+          30
+        ],
+        "d": [
+          86,
+          30
+        ]
+      },
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ],
+        [
+          "c",
+          "d"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          }
+        ],
+        "label": "Start: agents 1 and 3 at the ends of a tree (n = 4)"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 0: both explore; they learn n (block = 6 rounds)"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 1: bits 1 and 1; both explore"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 2: bits 1 and 1; both explore"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "d",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                17.0,
+                30.0
+              ],
+              [
+                35.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "b",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                41.0,
+                30.0
+              ],
+              [
+                59.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "d",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "accent",
+            "w": 0.9,
+            "arrow": true
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                65.0,
+                30.0
+              ],
+              [
+                83.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "c",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                83.0,
+                30.0
+              ],
+              [
+                65.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Block 3: bits 0 and 1; agent 1 waits, agent 3 explores"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "b",
+            "k": "agent",
+            "l": "3",
+            "c": "disputed"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                59.0,
+                30.0
+              ],
+              [
+                41.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "a",
+            "k": "agent",
+            "l": "1",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "a",
+            "k": "agent",
+            "l": "3",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "text",
+            "p": [
+              30,
+              44
+            ],
+            "s": "agent 1: 11 01",
+            "size": 3,
+            "c": "accent"
+          },
+          {
+            "t": "text",
+            "p": [
+              70,
+              44
+            ],
+            "s": "agent 3: 11 11 01",
+            "size": 3,
+            "c": "disputed"
+          },
+          {
+            "t": "path",
+            "p": [
+              [
+                35.0,
+                30.0
+              ],
+              [
+                17.0,
+                30.0
+              ]
+            ],
+            "c": "disputed",
+            "w": 0.9,
+            "arrow": true
+          }
+        ],
+        "label": "Final: agent 3 walks onto the waiting agent 1 in round 21"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Kammer2026Weisfeiler",
+      "note": "Temporal rendezvous: two synchronous agents know the whole always-connected temporal graph but share no labelling of its nodes and cannot communicate; the adversary picks the starting nodes and the labellings. They meet within $O(n\\log^3 n)$ steps using polynomial computation, for a long enough lifetime (Theorem 1.4), against an $\\Omega(n\\log n)$ lower bound from the paper that posed the problem (Dogeas et al., ICALP 2024, not in the catalogue), as reported. Preprint; read."
+    },
+    {
+      "ref": "Das2026Universal",
+      "note": "Footprints: every node an agent visits keeps a permanent mark, the same for both agents, which an agent sees when it is at the node. For two anonymous agents with simultaneous start, Das gives a universal algorithm, which meets in every feasible instance (a graph and two start nodes), in every connected graph, finite or countably infinite with finite degrees (Theorem 2.1, Corollary 2.1); this answers an open question of Das and Pelc (SPAA 2026, not in the bibliography). By their Proposition 2.1, recalled here, an instance is feasible only if the views from the two start nodes differ or the footprints seen along some path differ. No bound on time is given. The problem has no axis for marking nodes yet. Preprint; read."
+    },
+    {
+      "ref": "Das2026Rendezvous",
+      "note": "Two anonymous agents modelled as copies of one deterministic finite automaton, synchronous, with arbitrary delay, in finite graphs whose degrees are bounded by a constant known to the designer; the automaton must meet in every feasible instance of a class. Without marking no such automaton exists even for paths (Proposition 2.1); with any finite number of pebbles that can be picked up again, none exists for all graphs (Proposition 2.2, through the graphs of [Rollik1980Planar]); with finitely many pebbles that cannot be picked up, none exists even for paths (Theorem 3.1, Corollary 3.1); with one pebble per agent that can be picked up, one automaton meets in every feasible instance on trees, within $O(n^2)$ rounds from the start of the earlier agent (Theorem 4.1, Corollary 4.1). Without pebbles, $\\Theta(\\log n)$ bits are needed in trees with delay [Fraigniaud2013Delays], so one pebble replaces them by constant memory. The problem has no axis for marking nodes yet. Preprint; read."
+    },
+    {
+      "ref": "Baaziz2026Asynchronous",
+      "note": "Rendezvous in the plane rather than in a graph. Two anonymous agents, copies of one deterministic finite automaton with a compass, see the disc of radius 1 around them before each move, move asynchronously (the adversary sets the speed during each move), and carry pebbles that they can pick up again and that the other agent can tell apart from its own. With at most 8 pebbles each they always meet, at cost (total length of both trajectories) $O(d^2)$ when the start points are at distance at most $d$ (their $D$) (Theorem 2); the authors argue in Section 5 that $\\Omega(d^2)$ is necessary, since the adversary can hold one agent back until the other finds it. The same algorithm elects a leader between the two agents. Read (LIPIcs version)."
+    },
+    {
+      "ref": "Gao2026Gathering",
+      "note": "Two labelled agents that are finite automata (states depending only on $L$), started in the same round on distinct nodes of the infinite oriented path, can be placed so that they never meet (Theorem 3.1, for any set of such agents); teams of two or more agents per starting node gather (Theorems 4.1–6.2). Read (arXiv v1)."
+    },
+    {
+      "ref": "Yamada2026Rendezvous",
+      "note": "A different model: two metamorphic robotic systems (connected oblivious modules on the square grid) without a common compass meet until every module sees all the others, then merge into one connected system; five modules per system suffice (Theorems 1 and 2) and are necessary for rendezvous (Theorem 3). Read (arXiv v1)."
+    },
+    {
+      "ref": "Bampas2019Asynchronous",
+      "note": "Characterises, in polynomial time, the pairs of walks that force rendezvous against an asynchronous adversary within a given number of edge traversals, with a certificate of why. Abstract read."
+    },
+    {
+      "ref": "Bouchard2018Deterministic",
+      "note": "Rendezvous at a node (not inside an edge) of labelled agents whose speed the adversary fixes per agent and per edge: polynomial in $n$, the smaller label and the largest traversal time. Abstract read."
+    },
+    {
+      "ref": "Chalopin2015Rendezvous",
+      "note": "Labelled agents with delay faults, measured by cost: polynomial cost with random faults; impossible with unbounded adversarial faults even on rings (cost $O(n\\lambda)$ on trees, $\\Omega(\\lambda)$ needed); polynomial with faults bounded by an unknown $c$. Abstract read."
+    },
+    {
+      "ref": "Dereniowski2015Rendezvous",
+      "note": "Agents that know the map but traverse edges at different, private speeds: $O(n\\,T_{\\mathrm{OPT}})$ in general, $\\Theta(T_{\\mathrm{OPT}})$ if they exchange $\\Theta(n)$ bits at the start, with $T_{\\mathrm{OPT}}$ the offline meeting time. Abstract read."
+    },
+    {
+      "ref": "Miller2015Time",
+      "note": "Trade-off between time and cost (edge traversals) for labelled agents, as functions of an exploration bound $E$: cost $O(E)$ with time $O(EL)$, or both $O(E\\log L)$, with lower bounds on the trade-off. Abstract and introduction read."
+    },
+    {
+      "ref": "Miller2015Fast",
+      "note": "How much advice gives rendezvous in time $O(d)$: $\\Theta(d\\log(n/d)+\\log\\log L)$ bits. Abstract and introduction read."
+    },
+    {
+      "ref": "Eguchi2022Fast",
+      "note": "Neighbourhood rendezvous (agents start at adjacent nodes) in $o(\\Delta)$ rounds, with randomisation, node identifiers, neighbourhood identifiers and bounded minimum degree. Abstract read."
+    },
+    {
+      "ref": "Cosson2024Ariadne",
+      "note": "Two agents with whiteboards: exploration in $m$ steps from a common start and rendezvous in at most $\\lceil 3m/2\\rceil$ steps, also against an asynchronous adversary, with matching lower bounds there. A preprint; abstract and main results read."
+    },
+    {
+      "ref": "Gao2025Sniffing",
+      "note": "Identical agents in the infinite oriented grid that mark the nodes they visit: time $O(D)$ if they know the distance bound $D$ or start together, and $O(D^2)$ with neither, where a superlinear lower bound separates the cases. Abstract read."
+    },
+    {
+      "ref": "Das2015Mobile",
+      "note": "Rendezvous of several asynchronous anonymous finite-state agents despite a fast malicious agent that blocks nodes: necessary conditions, solved on rings except for even numbers of agents on unoriented rings, and on oriented meshes iff agents see two hops. Abstract read."
+    },
+    {
+      "ref": "Dogeas2024Exploiting",
+      "note": "Temporal graphs with $r$ automorphism orbits are explored in $O(rn^{1+\\varepsilon})$ steps, with lower bounds; the paper also poses rendezvous in temporal graphs. Abstract read."
+    },
+    {
+      "ref": "Mironowicz2023Entangled",
+      "note": "Location-aware agents on small networks that share entangled quantum states: optimal strategies with a limited number of steps, with an advantage over classical agents on cubic graphs and cycles. Introduction read."
+    },
+    {
+      "ref": "Pelc2020Latecomers",
+      "note": "Gathering of anonymous agents in the plane with compasses and clocks, where delays can break symmetry: characterisation of gatherable configurations, no common algorithm for the 'bad' ones, and the knowledge of the team size needed for the others. Abstract read."
+    },
+    {
+      "ref": "Dieudonne2023Almost",
+      "note": "Rendezvous of two anonymous agents in the plane whose attributes (coordinates, clock rate, speed, wake-up) may differ: exact characterisation of feasible instances, no single algorithm for two small sets of them, and one algorithm for all others. Abstract read."
+    },
+    {
+      "ref": "Elouasbi2018Deterministic",
+      "note": "Labelled disc agents in the plane that sense their distance but not the direction to each other: deterministic rendezvous under two models of distance estimation. Abstract read."
+    },
+    {
+      "ref": "Czyzowicz2019Linear",
+      "note": "Two anonymous robots on the line whose speeds or clock units may differ: a universal algorithm meets whenever at least one parameter differs. Abstract read."
+    },
+    {
+      "ref": "Georgiou2018Symmetric",
+      "note": "Randomised symmetric rendezvous of two robots at distance 2 with a common reference point (in a disk): expected time below the 4.25 of the line. Abstract read."
+    },
+    {
+      "ref": "Chuangpishit2017Rendezvous",
+      "note": "Location-aware robots on a line, some of them Byzantine: a central authority plans trajectories with bounded competitive ratio, better when the number of faulty robots is bounded. Abstract read."
+    },
+    {
+      "ref": "Ozsoyeller2012Symmetric",
+      "note": "Symmetric rendezvous of two robots in planar environments with and without obstacles. Abstract read."
+    }
+  ]
+}

@@ -18,6 +18,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
+
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return DATA / "problems" / fam / f"{pid}.json" if fam else DATA / "problems" / f"{pid}.json"
 E = html.escape
 
 
@@ -58,7 +63,7 @@ def about(idx):
     c = idx["citation"]
     url = c["url"].rstrip("/") + "/"
     models = {m: load(DATA / "models" / f"{m}.json") for m in idx["models"]}
-    probs = {p: load(DATA / "problems" / f"{p}.json") for p in idx["problems"]}
+    probs = {p: load(problem_file(idx, p)) for p in idx["problems"]}
     n_set = sum(len(p["variants"]) for p in probs.values())
     n_ref = len(load(DATA / "references.json"))
     plain = lambda s: re.sub(r"\[([A-Z][A-Za-z]*\d{4}[A-Za-z0-9]*)\]", "", re.sub(r"\$([^$]*)\$", r"\1", s or "")).replace("**", "").replace("  ", " ")

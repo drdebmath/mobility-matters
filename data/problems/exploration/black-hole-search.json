@@ -1,0 +1,3008 @@
+{
+  "id": "black-hole-search",
+  "model": "mobile-agents-on-graphs",
+  "name": "Black hole search",
+  "origin": {
+    "ref": "Dobrev2007Ring",
+    "year": 2001,
+    "note": "Dobrev, Flocchini, Prencipe and Santoro introduced black hole search in rings (DISC 2001) and in arbitrary networks (PODC 2002) [Dobrev2006Searching]."
+  },
+  "derived_from": {
+    "problem": "collaborative-exploration",
+    "kind": "variant of",
+    "relation": "Locating the black hole means exploring every other node safely, so black hole search is exploration of a dangerous graph by a team, where agents can be lost."
+  },
+  "summary": "A black hole destroys every agent that enters it, without trace; a team must locate it, losing as few agents as possible.",
+  "statement": "A connected graph contains one **black hole**: a node that destroys any agent arriving there, leaving no trace. All other nodes are **safe**. Agents start at a safe node $s$ (the **home base**) and must determine the location of the black hole; at least one agent must survive and know it. The primary measure is the **team size** (number of agents needed); the secondary measure is the **cost** (total number of moves, a move being one traversal of one edge) or, for synchronous agents, the time. In most settings the black hole is present from the start; an **eventually emerging** black hole appears at an unknown time during the execution, and time is then counted from its appearance. Some papers also start the agents **scattered**, at distinct safe nodes; those results are recorded in the notes, because every catalogued variant starts at a home base.",
+  "primer": {
+    "intro": "Imagine a computer network in which one computer has been taken over: every travelling program that arrives there is deleted without a trace, and nobody outside can tell. Find that computer by sending such programs, while losing as few of them as possible. We model the network as a graph: computers are **nodes**, cables between them are **edges**, and each travelling program is an **agent**. In the basic version the graph has $n$ nodes and contains exactly one **black hole**, a node that destroys every agent that enters it; every other node is **safe**. A team of identical agents starts at a safe node $s$, the **home base**; they have no map, but they know $n$. At each node the edges leaving it are numbered $1, 2, \\dots$ (these numbers are called **ports**), each node has a **whiteboard** (a small memory on which agents can read and write notes), and the agents are **asynchronous**: every **move** (one traversal of one edge) takes a finite but unpredictable time, chosen by an **adversary** (an imagined opponent who picks the worst timing). The task: at least one agent must survive and know exactly which node is the black hole. We count the agents needed and the total number of moves.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Cautious walk and halving the unexplored ring",
+        "variant": "async-ring",
+        "ref": "Dobrev2007Ring",
+        "idea": "Two agents start together at $s$ on a ring of $n$ nodes (a cycle in which every node has two neighbours); they know $n$.\n\n1. **Cautious walk** (used for every step into the unknown): an agent that crosses an edge nobody has crossed before first writes *\\\"I am trying this edge\\\"* on the whiteboard where it starts. If it arrives safely, it immediately goes back and changes the note to *\\\"this edge is safe\\\"*, and only then continues. Nobody else ever enters an edge marked *\\\"trying\\\"*.\n2. The unexplored nodes form one stretch of the ring. A **phase** starts: cut it into two halves of almost equal length; one agent explores the left half, the other the right half, both by cautious walk.\n3. The black hole lies in at most one half, so one agent finishes its half. It walks through the explored part to the last safe edge of the other agent.\n4. What is still unexplored is again one stretch, at most about half as long. A new phase starts: the finishing agent cuts it in two again, writes the new plan on the whiteboard there for its partner (in case the partner is only slow and comes back), and takes the half on the far side, away from the edge its partner is trying.\n5. When only one unexplored node remains, that node is the black hole.",
+        "analysis": "Under cautious walk an agent that does not come back has died on the very first node beyond its last safe edge, so the black hole, if it has killed the partner, lies in the near half; the finishing agent always takes the far half and never enters an edge marked *\\\"trying\\\"*, so exactly one agent dies and the other survives. Each phase at least halves the unexplored stretch, so there are about $\\log n$ phases, and each phase costs $O(n)$ moves (walking around the explored part and exploring), giving $O(n\\log n)$ moves. [Dobrev2007Ring] show the exact cost $2n\\log n + O(n)$, and they prove that any algorithm, with any number of agents, needs at least $(n-1)\\log(n-1) + O(n)$ moves, so this simple plan is optimal up to a factor of two.",
+        "why_it_matters": "Cautious walk is the basic safety tool of almost every later black hole search algorithm, in rings and in arbitrary graphs."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Every unexplored port may lead to the black hole",
+        "variant": "async-whiteboards",
+        "ref": "Dobrev2006Searching",
+        "idea": "Without a map, the agents do not know where a port leads. The adversary may therefore decide, as the algorithm runs, that the **first** port tried out of a node is the one that leads to the black hole. Take a graph in which the black hole is a neighbour of many nodes, for example the black hole $0$ joined to every other node, with the home base at node $1$. The first agent leaving node $1$ through a new port is sent into the black hole. Some other agent must then reach node $2$; the first agent that leaves node $2$ through a new port is again sent into the black hole, and so on, node after node. Each such node costs one agent, and the search is not finished while two or more nodes are still unexplored, because a node that nobody has returned from may be the black hole or may simply be slow to reach.",
+        "analysis": "In this example the algorithm loses an agent at almost every node adjacent to the black hole, and the black hole can have up to $\\Delta$ neighbours, where $\\Delta$ is the largest number of edges at any node (the **maximum degree**). With a cleverer graph (a ring of nodes all joined to a central black hole, which the adversary later replaces by a graph of maximum degree $\\Delta$ that looks the same to the agents) [Dobrev2006Searching] prove that $\\Delta + 1$ agents are needed; the full proof is longer. The same paper gives an algorithm with exactly $\\Delta + 1$ agents and $O(n^2)$ moves, and shows that $\\Omega(n^2)$ moves are necessary for a team of this size, so both bounds are tight.",
+        "why_it_matters": "It shows that what limits a team without a map is the number of ports that can lead to the black hole, which is why a map or a sense of direction lowers the team to two agents."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Without knowing $n$, slow and dead look the same",
+        "variant": "async-whiteboards",
+        "ref": "Dobrev2006Searching",
+        "idea": "Because moves take unpredictable time, an agent that has not come back may be dead or just slow. Suppose the agents do not know $n$. Take a graph $G$ with the black hole at node $v$, and a second graph $G'$ in which $v$ is replaced by two nodes $v_1$ and $v_2$ joined to each other, sharing the edges that went to $v$. In $G'$ the adversary makes every edge into $v_1$ or $v_2$ extremely slow. Up to the moment the algorithm stops, the agents see exactly the same things in $G$ and in $G'$, so they stop in $G'$ too, with both $v_1$ and $v_2$ unexplored: they cannot know which one is the black hole.",
+        "analysis": "The same reasoning shows that the agents can never stop while two nodes are unexplored, and that the problem is unsolvable when the graph has a node (other than $s$) whose removal disconnects it: if that node is the black hole, everything behind it stays unexplored [Dobrev2006Searching]. This is why the basic version assumes that $n$ is known and that the graph stays connected after removing any one node (it is *2-connected*).",
+        "why_it_matters": "The indistinguishability of slow and dead agents is the reason asynchronous black hole search needs knowledge of $n$, and it reappears in every asynchronous lower bound for the problem."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "node",
+      "definition": "an element of $V$; the graph has $n$ nodes",
+      "avoid": [
+        "vertex",
+        "vertices",
+        "dot",
+        "dots"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an element of $E$, joining two nodes; agents move only along edges",
+      "avoid": [
+        "line",
+        "lines",
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "agent",
+      "definition": "a mobile entity that moves along edges; the agents of a team are identical and run the same algorithm",
+      "avoid": [
+        "robot",
+        "robots"
+      ]
+    },
+    {
+      "term": "black hole",
+      "definition": "the one node that destroys every agent arriving there, leaving no trace",
+      "avoid": []
+    },
+    {
+      "term": "safe node",
+      "definition": "a node other than the black hole",
+      "avoid": []
+    },
+    {
+      "term": "home base",
+      "definition": "the safe node $s$ at which all agents start",
+      "avoid": []
+    },
+    {
+      "term": "port",
+      "definition": "the local number $1, \\dots, \\deg(v)$ that a node $v$ gives to each edge incident to it",
+      "avoid": []
+    },
+    {
+      "term": "whiteboard",
+      "definition": "a small memory at each node on which agents there can read and write",
+      "avoid": []
+    },
+    {
+      "term": "asynchronous",
+      "definition": "every move of an agent takes a finite but unpredictable time, chosen by the adversary",
+      "avoid": []
+    },
+    {
+      "term": "adversary",
+      "definition": "an imagined opponent that picks the timing of moves and, where the agents have no map, where unexplored ports lead",
+      "avoid": []
+    },
+    {
+      "term": "move",
+      "definition": "one traversal of one edge by one agent; the cost of an algorithm is its total number of moves",
+      "avoid": []
+    },
+    {
+      "term": "cautious walk",
+      "definition": "the rule that an agent crossing an edge nobody has crossed before first marks it as being tried on the whiteboard, and after arriving safely returns to mark it safe before going on; no agent enters an edge marked as being tried",
+      "avoid": []
+    },
+    {
+      "term": "phase",
+      "definition": "in the ring algorithm, one split of the unexplored nodes into two halves and the exploration that follows",
+      "avoid": []
+    },
+    {
+      "term": "maximum degree",
+      "definition": "$\\Delta$, the largest number of edges at any node",
+      "avoid": []
+    }
+  ],
+  "history": "From the start the objective was the **minimum number of agents** that guarantees success, since every agent that enters the black hole is lost; the number of moves came second [Dobrev2006Searching]. Later work replaced whiteboards by tokens [Dobrev2013Tokens] [Flocchini2012PingPong] [Balamohan2016Tokens], turned to synchronous agents where time can be optimised [Czyzowicz2006Complexity] [Klasing2007Hardness], to dynamic graphs [DiLuna2025DynamicBHS] [Kaur2026Dynamic], and to Byzantine companions [DiLuna2025Byzantine]. Recent variants let the black hole appear only during the execution, on rings [Bonnet2026Searching] and on arbitrary graphs [Kaur2026Black], or destroy agents only in rounds chosen by the adversary [Bhattacharya2025Perpetual].",
+  "measures": [
+    {
+      "id": "agents",
+      "name": "Agents",
+      "description": "number of agents needed (team size)"
+    },
+    {
+      "id": "time",
+      "name": "Cost",
+      "description": "total moves (asynchronous) or rounds (synchronous)"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "ids",
+    "communication",
+    "initial",
+    "node-memory",
+    "node-ids",
+    "algorithm"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "faults",
+    "appearance",
+    "timing",
+    "knowledge",
+    "marking",
+    "topology"
+  ],
+  "axes": [
+    {
+      "id": "knowledge",
+      "name": "Knowledge of the graph",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no knowledge of the topology ($n$ is known)",
+          "short": "topology unknown",
+          "definition": "Agents know $n$ but not the topology of $G$."
+        },
+        {
+          "id": "sod",
+          "level": 1,
+          "label": "sense of direction",
+          "short": "sense of direction",
+          "definition": "Agents have a consistent sense of direction: a globally consistent labelling of edges from which they can tell whether two walks lead to the same node."
+        },
+        {
+          "id": "map",
+          "level": 2,
+          "label": "a map of the graph",
+          "short": "map",
+          "definition": "Agents have a map of $G$ and know their starting position on it."
+        }
+      ],
+      "origin": "Dobrev, Flocchini, Prencipe and Santoro organised black hole search in arbitrary networks around the agents' a priori knowledge: with topological ignorance, $\\Delta+1$ agents are necessary and sufficient and the cost is $\\Theta(n^2)$; with sense of direction two agents suffice, still at cost $\\Theta(n^2)$; with complete topological knowledge two agents suffice at cost $\\Theta(n\\log n)$ [Dobrev2006Searching]. Knowing $n$ is the floor of the axis, because they prove that asynchronous black hole search is unsolvable when $n$ is unknown [Dobrev2006Searching]. Sense of direction is the notion of Flocchini, Mans and Santoro: a globally consistent labelling of the ports from which one can decide, from the label sequences alone, whether two walks from a node end at the same node [Flocchini1998Direction] (as defined in [Dobrev2006Searching]); Dobrev et al. trace its effect on exploration back to Blum and Kozen's study of the power of a compass [Blum1978Compass]. The three levels thus separate team size (from $\\Delta+1$ down to $2$) and, independently, cost (from $n^2$ down to $n\\log n$)."
+    },
+    {
+      "id": "marking",
+      "name": "Marking nodes",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no marking",
+          "short": "no marking",
+          "definition": "Agents cannot leave information at nodes."
+        },
+        {
+          "id": "tokens",
+          "level": 1,
+          "label": "tokens (pebbles) that agents carry and drop",
+          "short": "tokens",
+          "definition": "Agents carry tokens (pebbles) they can place at nodes or on ports; tokens are identical and carry no other information."
+        },
+        {
+          "id": "whiteboards",
+          "level": 2,
+          "label": "whiteboards at the nodes",
+          "short": "whiteboards",
+          "definition": "Every node has a whiteboard that agents read and write under mutual exclusion."
+        }
+      ],
+      "origin": "The first black hole search papers gave the agents a whiteboard at every node [Dobrev2007Ring] [Dobrev2006Searching]. Flocchini, Ilcinkas and Santoro observe that whiteboards let a protocol assume FIFO links and break symmetry, whereas \"the theoretical quest, on the contrary, has been for the weakest interaction mechanism allowing the problem to be solved\"; that weaker mechanism is identical tokens, taken from the early work on exploring safe graphs [Flocchini2012PingPong]. Dobrev, Flocchini, Královič and Santoro showed that $\\Delta+1$ agents, each with a token that may be placed on a node or a port, locate the black hole without a map at polynomial cost [Dobrev2013Tokens] (as summarised in [Flocchini2012PingPong]); with a map, Flocchini, Ilcinkas and Santoro gave the first proof that one pebble per agent, on nodes only, matches the whiteboard bounds of two agents and $\\Theta(n\\log n)$ moves, even on non-FIFO links [Flocchini2012PingPong]. Without a map the equivalence fails for a constant number of tokens: Balamohan, Dobrev, Flocchini and Santoro show that $\\Delta+2$ agents with three tokens are necessary and sufficient, one agent more than with whiteboards [Balamohan2016Tokens]."
+    },
+    {
+      "id": "appearance",
+      "name": "Black hole appearance",
+      "values": [
+        {
+          "id": "eventual",
+          "level": 0,
+          "label": "the black hole may appear at any time, at any node (at the home base only after the start)",
+          "short": "eventually emerging",
+          "definition": "There is a time $t \\ge 0$ and a node $u$ such that from time $t$ on $u$ destroys every agent on it or entering it, and stays a black hole. If $t = 0$ then $u \\ne s$; the home base may become the black hole after the first round (after one epoch for asynchronous agents). Time is counted from $t$ [Bonnet2026Searching]."
+        },
+        {
+          "id": "initial",
+          "level": 1,
+          "label": "the black hole is present from the start",
+          "short": "present from the start",
+          "definition": "The black hole is present at time 0, and the home base $s$ is safe throughout."
+        }
+      ],
+      "origin": "Bonnet, Bramas and Lamani let the black hole appear at any time during the execution: \"To the best of our knowledge, all previous investigations of the basic Black Hole Search problem assume that the black hole is present in the initial configuration\" [Bonnet2026Searching]. An emerging black hole defeats the cautious walk alone, because agents that gather on a node to coordinate may all be destroyed when the black hole appears there [Bonnet2026Searching]. Kaur, Saxena, Mandal and Mondal carried the question from rings to arbitrary graphs [Kaur2026Black]. Every other setting of this problem has the black hole present from the start."
+    }
+  ],
+  "variants": [
+    {
+      "id": "async-whiteboards",
+      "title": "Asynchronous agents with whiteboards",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "Without a map, $\\Delta+1$ asynchronous agents are necessary and sufficient, and they need $\\Theta(n^2)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Delta+1",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "generic algorithms without topological knowledge",
+            "even if $\\Delta$ and $n$ are known"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2)",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "size-optimal generic solutions"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "if $n$ is unknown, or the graph is not 2-connected"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "\\Delta+1",
+          "time": "O(n^2)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Delta+1$."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$ moves."
+        }
+      },
+      "open": [],
+      "notes": "The anonymous ring was treated first [Dobrev2007Ring]; see the variant for rings.",
+      "status": "verified"
+    },
+    {
+      "id": "async-ring",
+      "title": "Asynchronous agents with whiteboards in a ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "faults": "none",
+        "topology": "ring",
+        "appearance": "initial"
+      },
+      "summary": "In an anonymous ring of known size, two co-located asynchronous agents are necessary and sufficient, at optimal cost $\\Theta(n\\log n)$.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "at least one agent enters the black hole"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n\\log n)",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "Theorem 1: $(n-1)\\log(n-1)+O(n)$ moves, whatever the number of agents",
+            "an adversarial scheduler delays moves along edges",
+            "holds also for dispersed agents in oriented rings (Theorem 8)"
+          ]
+        },
+        {
+          "measure": "agents",
+          "bound": "\\text{impossible}",
+          "ref": "Dobrev2007Ring",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "if $n$ is unknown: no deterministic protocol always terminates correctly"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2007Ring",
+          "role": "best",
+          "agents": "2",
+          "time": "2n\\log n+O(n)",
+          "assumes": [
+            "co-located agents",
+            "$n$ known",
+            "$O(\\log n)$-bit whiteboards"
+          ],
+          "note": "Introductory and current best (Algorithm DIVIDE, Theorems 2 and 3), size-optimal and cost-optimal within a factor of two; works in unoriented rings, since co-located agents agree on a direction through the whiteboard."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n\\log n)$ moves; the constants differ by a factor of two."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Dobrev2007Ring]. Agents are anonymous and asynchronous, and the problem is solved when at least one agent survives and all survivors know the location of the black hole. In ideal time (every move one time unit) $2n-4$ units are necessary whatever the number of agents (Theorem 4) and $n-1$ co-located agents achieve it (Theorems 5 and 6); $n^{1/q}+1$ agents need $2(q+1)n-q-o(n)$ time for $1\\le q\\le\\log n$ (Theorem 7). With **dispersed** agents the cost is $\\Omega(n\\log n)$, or $\\Omega(n\\log(n-k))$ when the number $k$ of agents is known (Theorems 8 and 9); in an oriented ring two dispersed agents are necessary and sufficient at cost $O(n\\log n)$ (Theorem 10), and in an unoriented ring three are necessary and sufficient at the same cost (Theorem 13).",
+      "status": "verified"
+    },
+    {
+      "id": "async-sod",
+      "title": "Whiteboards and sense of direction",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "knowledge": "sod",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "With sense of direction two agents suffice, still with $\\Theta(n^2)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "2",
+          "time": "O(n^2)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^2)$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "async-map",
+      "title": "Whiteboards and a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "whiteboards",
+        "knowledge": "map",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "With a map, two agents locate the black hole in $\\Theta(n\\log n)$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2006Searching",
+          "role": "best",
+          "agents": "2",
+          "time": "\\Theta(n\\log n)",
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n\\log n)$."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tokens-map",
+      "title": "Tokens and a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "tokens",
+        "knowledge": "map",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "Whiteboards can be replaced by one pebble per agent: two agents, $\\Theta(n\\log n)$ moves, even on non-FIFO edges.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "2",
+          "ref": "Dobrev2006Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "a single agent never suffices"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Flocchini2012PingPong",
+          "role": "best",
+          "agents": "2",
+          "time": "\\Theta(n\\log n)",
+          "assumes": [
+            "one identical pebble per agent"
+          ],
+          "note": "Introductory and current best."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "tight",
+          "note": "Same as with whiteboards."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "tokens",
+      "title": "Tokens, no map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "marking": "tokens",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "With a constant number of tokens and no map, $\\Delta+2$ agents and 3 tokens are necessary and sufficient.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "\\Delta+2",
+          "ref": "Balamohan2016Tokens",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "$O(1)$ tokens",
+            "$\\Delta+1$ agents are not enough; 2 tokens never suffice"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^2/\\Delta)",
+          "ref": "Balamohan2016Tokens",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "teams of $(2-\\varepsilon)\\Delta$ agents"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2013Tokens",
+          "role": "introductory",
+          "agents": "\\Delta+1",
+          "assumes": [
+            "enhanced tokens"
+          ],
+          "note": "First token-based exploration of an unknown dangerous graph; polynomial cost."
+        },
+        {
+          "ref": "Balamohan2016Tokens",
+          "role": "best",
+          "agents": "\\Delta+2",
+          "time": "O(mn)",
+          "assumes": [
+            "3 tokens; the number of agents is known (5 tokens otherwise)"
+          ]
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "$\\Delta+2$ with $O(1)$ tokens."
+        },
+        "time": {
+          "status": "gap",
+          "note": "$O(mn)$ versus $\\Omega(n^2/\\Delta)$; move-optimal in sparse graphs."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "sync-map",
+      "title": "Synchronous agents with a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "knowledge": "map",
+        "faults": "none",
+        "appearance": "initial"
+      },
+      "summary": "With synchrony, two agents and a map, the question becomes the fastest exploration schedule, which is NP-hard to find.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{NP-hard}",
+          "ref": "Klasing2007Hardness",
+          "bottleneck": "combinatorial hardness",
+          "preconditions": [
+            "computing an optimal schedule for two agents",
+            "no $389/388$-approximation unless P = NP (APX-hard)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Czyzowicz2006Complexity",
+          "role": "introductory",
+          "agents": "2",
+          "time": "9.3\\text{-approx.}"
+        },
+        {
+          "ref": "Klasing2007Hardness",
+          "role": "best",
+          "agents": "2",
+          "time": "3\\tfrac{3}{8}\\text{-approx.}"
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Two agents."
+        },
+        "time": {
+          "status": "gap",
+          "note": "Approximation ratio $3\\frac38$ versus inapproximability $389/388$."
+        }
+      },
+      "open": [],
+      "notes": "On trees the problem has a $5/3$-approximation (CPC 2007, not yet in the bibliography).",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-ring",
+      "title": "Dynamic rings",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "faults": "none",
+        "timing": "sync",
+        "marking": "tokens",
+        "topology": "ring",
+        "appearance": "initial"
+      },
+      "summary": "In a 1-interval-connected ring three agents are necessary and sufficient; with pebbles they need $\\Theta(n^{1.5})$ moves.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "DiLuna2025DynamicBHS",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "fewer agents fail even when co-located with whiteboards and identifiers",
+            "$n$ must be known"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n^{1.5})",
+          "ref": "DiLuna2025DynamicBHS",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "co-located agents, whiteboards"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DiLuna2025DynamicBHS",
+          "role": "best",
+          "agents": "3",
+          "time": "O(n^{1.5})",
+          "assumes": [
+            "co-located start, pebbles"
+          ],
+          "note": "Introductory and current best; with face-to-face communication or vision $\\Theta(n^2)$."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Three."
+        },
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(n^{1.5})$."
+        }
+      },
+      "open": [],
+      "notes": "The ring is oriented and each agent carries one pebble; $n$ must be known [DiLuna2025DynamicBHS]. With **scattered** agents (distinct arbitrary starting nodes, with visible identifiers) three agents with pebbles are still necessary and sufficient, and the cost rises to $\\Theta(n^2)$ moves and rounds; the lower bound holds even with whiteboards. With only face-to-face communication, three scattered agents fail even on a static oriented ring [DiLuna2024Hole] (Theorems 4 to 7 of its 2026 arXiv version; the OPODIS version, and Section 6 of the 2020 arXiv version of [DiLuna2025DynamicBHS], state this impossibility for any constant number of agents). Arbitrary dynamic graphs with whiteboards [Kaur2026Dynamic] are a setting of their own.",
+      "status": "verified"
+    },
+    {
+      "id": "dynamic-whiteboards",
+      "title": "Dynamic graphs with whiteboards",
+      "assumptions": {
+        "dynamics": "1-interval",
+        "direction": "undirected",
+        "faults": "none",
+        "timing": "sync",
+        "marking": "whiteboards",
+        "appearance": "initial"
+      },
+      "summary": "In an arbitrary dynamic graph from which at most one edge is missing per round, six co-located synchronous agents with whiteboards locate the black hole in $O(m^2)$ rounds, and three are not enough.",
+      "statement": "The graph is the footprint $G$ (with $n$ nodes and $m$ edges) of a dynamic graph that is connected in every round; the results below assume in addition that at most $\\mu$ edges are missing in each round, mostly $\\mu = 1$. An agent at node $v$ sees $\\deg(v)$ in $G$ but not which incident edges are missing, and learns that an edge is missing only when its attempt to cross it fails. Agents are synchronous, have distinct identifiers, read the memory of the agents at the same node, and every node has a whiteboard. The black hole is located when an agent terminates at a safe node next to it and outputs the port that leads to it.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "4",
+          "ref": "Kaur2026Dynamic",
+          "bottleneck": "adversarial edge changes",
+          "preconditions": [
+            "Theorem 4.1 with $\\mu = 1$: three agents co-located at a safe node of $K_3$, one node of which is the black hole, fail",
+            "holds even with unbounded agent memory and unbounded whiteboards",
+            "agents that know neither $n$ nor $\\mu$ and learn that an edge is missing only by failing to cross it",
+            "with up to $\\mu$ missing edges per round, $2\\mu+1$ co-located agents fail"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kaur2026Dynamic",
+          "role": "best",
+          "agents": "6",
+          "time": "O(m^2)",
+          "assumes": [
+            "$\\mu = 1$",
+            "co-located agents with distinct identifiers",
+            "$O(\\log n)$ bits per agent and per whiteboard",
+            "no knowledge of $n$"
+          ],
+          "note": "Introductory and current best (Theorem 6.3 of arXiv v2). Theorem 3.3 gives nine agents in the same time; [Kaur2026Black] and [Bileski2026Don] cite this nine-agent algorithm from the ICDCN 2025 version."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Between 4 and 6 agents when at most one edge is missing per round; with up to $\\mu$ missing edges, between $2\\mu+2$ and $6\\mu$, the upper bound in exponential time."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "$O(m^2)$ rounds; no lower bound on time."
+        }
+      },
+      "open": [
+        "With at most one missing edge per round, do four or five co-located agents suffice? Three do not [Kaur2026Dynamic].",
+        "With scattered agents and at most one missing edge per round, do $2\\deg(v_{BH})+1$ or $2\\deg(v_{BH})+2$ agents suffice? $2\\deg(v_{BH})$ do not [Kaur2026Dynamic] and $2\\deg(v_{BH})+3$ do [Bileski2026Don].",
+        "With up to $\\mu$ missing edges per round, can $O(\\mu)$ co-located agents locate the black hole in polynomial time? The known algorithm with $6\\mu$ agents takes exponential time [Kaur2026Dynamic]."
+      ],
+      "notes": "Checked against the full texts of [Kaur2026Dynamic] (arXiv v2), [Kaur2026Black] (arXiv v2) and [Bileski2026Don] (arXiv v1). The three papers share the model: nodes are anonymous, ports are local, an agent at node $v$ sees $\\deg(v)$ in the footprint $G$ but not which incident edges are missing, and learns that an edge was missing only when its move fails; Kaur, Saxena, Mandal and Mondal contrast this with the dynamic rings, cactuses and tori of earlier work, where an agent sees which incident edge is missing [Kaur2026Dynamic]. Co-located agents read each other's memory. Kaur et al. first give nine co-located agents in $O(m^2)$ rounds (Theorem 3.3) and then six (Theorem 6.3), both with $O(\\log n)$ bits per agent and per whiteboard [Kaur2026Dynamic]. With at most $\\mu$ missing edges per round (their $f$ is $\\mu$ here), $2\\mu+1$ co-located agents fail even with unbounded memory and whiteboards (Theorem 4.1), and $6\\mu$ agents succeed in exponential time (Theorem 5.2) [Kaur2026Dynamic].\n\n**Scattered agents** (every agent starts at an arbitrary safe node; several agents may share a node), with $\\mu = 1$ and $O(\\log n)$ bits per agent and per whiteboard: $2\\deg(v_{BH})$ agents cannot solve the problem (Theorem 2.1 of [Kaur2026Dynamic]), where $\\deg(v_{BH})$ is the degree of the black hole in $G$. Kaur, Saxena, Mandal and Mondal solve it with $2\\deg(v_{BH})+17$ agents in $O(m^2)$ rounds (Theorem 2.2 of [Kaur2026Black], the extended version of [Kaur2025Scattered]): every agent runs a depth-first search and crosses each new edge by a cautious walk of its own, writing its outgoing port on the whiteboard before leaving and erasing it after coming back; two marks for the same port reveal the black hole, so at most $2\\deg(v_{BH})$ agents die, and a group of nine agents that meets switches to the algorithm for co-located agents. Bileski and Miller drop the switch: all agents run one exploration in which at most two agents wait at a missing edge, so once $2\\deg(v_{BH})$ agents have died a survivor reaches a revealing mark; $2\\deg(v_{BH})+3$ agents suffice in $O(m^2\\deg(v_{BH}))$ rounds (Theorem 1 of [Bileski2026Don], a preprint that gives proof sketches and defers the full proofs to a journal version). For rings with pebbles see the setting for dynamic rings.",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine",
+      "title": "Byzantine companions, with a map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "knowledge": "map",
+        "faults": "weak-byzantine",
+        "appearance": "initial"
+      },
+      "summary": "If up to $f$ agents are Byzantine (they collude with the black hole and survive it), $2f+2$ agents suffice with a map.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DiLuna2025Byzantine",
+          "role": "best",
+          "agents": "2f+2",
+          "time": "O(n+f)",
+          "note": "Introductory and current best; also with face-to-face communication. The agent counts are asymptotically optimal."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "near",
+          "note": "Asymptotically optimal."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound recorded."
+        }
+      },
+      "open": [],
+      "notes": "The Byzantine agents are weakly Byzantine: they cannot forge identities (confirmed by the catalogue owner, a co-author).",
+      "status": "verified"
+    },
+    {
+      "id": "byzantine-whiteboards",
+      "title": "Byzantine companions, whiteboards, no map",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "timing": "sync",
+        "marking": "whiteboards",
+        "faults": "weak-byzantine",
+        "appearance": "initial"
+      },
+      "summary": "Without a map but with whiteboards, $(f+1)(\\Delta+1)$ agents locate the black hole in $O(m+f)$ rounds.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "DiLuna2025Byzantine",
+          "role": "best",
+          "agents": "(f+1)(\\Delta+1)",
+          "time": "O(m+f)",
+          "note": "With face-to-face communication instead: $(f+1)(\\Delta+1)+3f+1$ agents, $O(mn+f)$ rounds."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "near",
+          "note": "Asymptotically optimal."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound recorded."
+        }
+      },
+      "open": [],
+      "notes": "",
+      "status": "verified"
+    },
+    {
+      "id": "emerging-ring-sync",
+      "title": "Eventually emerging black hole, synchronous agents, oriented ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "appearance": "eventual",
+        "timing": "sync",
+        "knowledge": "sod",
+        "topology": "ring"
+      },
+      "summary": "If the black hole may appear at any time, even at the home base after the first round, three synchronous agents are necessary and sufficient on an oriented ring, and they find it within $4n$ rounds of its appearance.",
+      "statement": "The black hole appears at an unknown round and node (at the home base only after round 0) and stays. Agents have distinct identifiers, unbounded memory and face-to-face communication, and the ring is oriented. Time is counted from the appearance of the black hole.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Bonnet2026Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "two agents may be together only at the home base, or one appearance destroys both; one agent then cannot tell whether the other died at distance 1 or at distance 2 from the home base (Theorem 1)",
+            "a ring of $n \\ge 5$ nodes",
+            "holds even with a safe home base, whiteboards, knowledge of $n$ and implicit termination"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bonnet2026Searching",
+          "role": "best",
+          "agents": "3",
+          "time": "O(n)",
+          "assumes": [
+            "knows $n$ (level 0 of this problem)",
+            "$n \\ge 5$; smaller rings are handled separately"
+          ],
+          "note": "Introductory and current best (Algorithm A3, Theorem 4): at most $4n$ rounds after the appearance. Without knowing $n$, three agents need $O(n^2)$ rounds (Algorithm A4, Theorem 5); three agents with one pebble need $4n$ rounds (Algorithm A2, Theorem 3); four agents need $3n$ rounds, as two pairs that never meet, each performing a cautious walk (Algorithm A1, Theorem 2)."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "Exactly 3."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "$4n$ rounds; no time lower bound is proved."
+        }
+      },
+      "open": [
+        "Is one algorithm optimal in every respect at once: three agents, no knowledge of $n$, no pebble and $O(n)$ rounds? Left open by [Bonnet2026Searching]."
+      ],
+      "notes": "Bonnet, Bramas and Lamani. Since the home base may become the black hole, it is not a safe meeting point, and agents that gather anywhere risk being destroyed together. Checked against the full text of [Bonnet2026Searching] (SAND 2026), which omits some proofs and pseudo-code for space.",
+      "status": "verified"
+    },
+    {
+      "id": "emerging-ring-async",
+      "title": "Eventually emerging black hole, asynchronous agents, oriented ring",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "appearance": "eventual",
+        "timing": "async",
+        "knowledge": "sod",
+        "topology": "ring"
+      },
+      "summary": "With asynchronous agents no algorithm can announce the location of an eventually emerging black hole once and for all; with implicit termination, $n$ agents that never communicate locate it within $2n$ epochs.",
+      "statement": "As in the synchronous setting, but agents are asynchronous. No algorithm with explicit termination exists (Theorem 6 of [Bonnet2026Searching]): a node through which every agent is delayed long enough looks like a black hole. The task is therefore **implicit termination**: eventually every surviving agent that suspects a node suspects the black hole and never changes its suspicion, and at least one agent does. Time is counted in epochs from the appearance of the black hole.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Bonnet2026Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "synchronous bound (Theorem 1), which holds with implicit termination and therefore for asynchronous agents"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Bonnet2026Searching",
+          "role": "best",
+          "agents": "n",
+          "time": "O(n)",
+          "assumes": [
+            "implicit termination",
+            "time in epochs, not moves"
+          ],
+          "note": "Introductory and current best without pebbles (Algorithm A5, Theorem 7): agent $i$ tours the ring back and forth avoiding node $u_i$ and always suspects $u_i$; once the black hole appears, every agent except the one assigned to it is eventually destroyed. At most $2n$ epochs, without communication."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "gap",
+          "note": "$n$ against 3; with two pebbles four agents suffice."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "$2n$ epochs; [Bonnet2026Searching] call $O(n)$ asymptotically optimal without stating a lower bound."
+        }
+      },
+      "open": [
+        "How many asynchronous agents without pebbles are needed with implicit termination: between 3 and $n$? With two pebbles four suffice [Bonnet2026Searching]."
+      ],
+      "notes": "With two pebbles, four agents that do not know $n$ locate the black hole within $5n$ epochs by cautious walks in pairs (Algorithm A6, Theorem 8). The impossibility of explicit termination does not hold for a black hole present from the start, where the last unexplored node can be isolated once all others are known to be safe [Bonnet2026Searching]. Checked against the full text of [Bonnet2026Searching] (SAND 2026).",
+      "status": "verified"
+    },
+    {
+      "id": "emerging-sync",
+      "title": "Eventually emerging black hole, synchronous agents, arbitrary graphs",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "appearance": "eventual",
+        "timing": "sync"
+      },
+      "summary": "On arbitrary graphs four co-located synchronous agents locate an eventually emerging black hole by moving in a cautious chain along a universal exploration sequence; whether three suffice is open.",
+      "statement": "The black hole appears at an unknown round and node (at the home base only after round 0) and stays. Agents have distinct identifiers and face-to-face communication, and use neither pebbles nor whiteboards. Time is counted from the appearance of the black hole.",
+      "lower_bounds": [
+        {
+          "measure": "agents",
+          "bound": "3",
+          "ref": "Bonnet2026Searching",
+          "bottleneck": "agents lost in the black hole",
+          "preconditions": [
+            "ring bound (Theorem 1 of [Bonnet2026Searching]): a ring is a graph, and the bound holds even with whiteboards, knowledge of $n$ and an oriented ring"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kaur2026Black",
+          "role": "best",
+          "agents": "4",
+          "time": "\\mathrm{poly}(n)",
+          "assumes": [
+            "knows $n$ (level 0 of this problem); without it, polynomial time if the black hole appears within polynomial time (Remark 3.1)",
+            "$O(\\log n)$ bits of memory per agent"
+          ],
+          "note": "Introductory and current best (Theorem 3.1, Remark 3.2): the agents follow a universal exploration sequence and replace each move by a cautious chain movement, after which the two pairs of agents stand on two adjacent nodes; the time is the length of a universal exploration sequence for $n$ nodes. Any single-agent exploration can be simulated in the same way (Remark 3.3); with depth-first search and $O(\\log\\Delta)$ bits of storage per node it takes $O(m)$ rounds. A preprint."
+        }
+      ],
+      "optimality": {
+        "agents": {
+          "status": "tight",
+          "note": "3 or 4."
+        },
+        "time": {
+          "status": "unknown",
+          "note": "No time lower bound."
+        }
+      },
+      "open": [
+        "Do three synchronous agents suffice on arbitrary graphs [Kaur2026Black]?"
+      ],
+      "notes": "Kaur, Saxena, Mandal and Mondal extend the model of [Bonnet2026Searching] from rings to arbitrary static graphs. Checked against Section 3 of the full text of [Kaur2026Black] (arXiv v2).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Black hole search on a ring by two agents with cautious walk [Dobrev2007Ring] (the problem: [Dobrev2006Searching]). Agents A and B start at the safe home base $s$ of a ring of six nodes; one node (black) destroys every agent that enters it. Each explores half of the unexplored nodes: before crossing a new edge it marks it *trying* on the whiteboard (dashed), and after arriving it returns to mark it *safe* (green) before going on. A dies on its second new edge; B finishes its half, walks back through the explored part and finds the edge still marked *trying*: the one unexplored node beyond it is the black hole. One agent survives and knows it.",
+    "view": [
+      100,
+      56
+    ],
+    "graph": {
+      "nodes": {
+        "v0": [
+          31.0,
+          26.0
+        ],
+        "v1": [
+          40.5,
+          42.45
+        ],
+        "v2": [
+          59.5,
+          42.45
+        ],
+        "v3": [
+          69.0,
+          26.0
+        ],
+        "v4": [
+          59.5,
+          9.55
+        ],
+        "v5": [
+          40.5,
+          9.55
+        ]
+      },
+      "edges": [
+        [
+          "v0",
+          "v1"
+        ],
+        [
+          "v1",
+          "v2"
+        ],
+        [
+          "v2",
+          "v3"
+        ],
+        [
+          "v3",
+          "v4"
+        ],
+        [
+          "v4",
+          "v5"
+        ],
+        [
+          "v5",
+          "v0"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          }
+        ],
+        "label": "Start: agents A, B at s; ring of 6"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "Cautious walk: mark the edge trying, cross, return, mark it safe"
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v0",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v1",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "A",
+            "at": "v2",
+            "k": "agent",
+            "l": "A",
+            "c": "accent"
+          },
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "A enters the black hole and is destroyed; B goes on"
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v3",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ],
+        "label": "B has explored its half; it walks to A's last safe edge"
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v4",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v5",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v0",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "B",
+            "at": "v1",
+            "k": "agent",
+            "l": "B",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "node",
+            "n": "v2",
+            "fill": "fg",
+            "r": 2.4
+          },
+          {
+            "t": "text",
+            "p": [
+              62.5,
+              47.65
+            ],
+            "s": "black hole",
+            "c": "fg",
+            "size": 2.8
+          },
+          {
+            "t": "text",
+            "p": [
+              25.0,
+              26.0
+            ],
+            "s": "s",
+            "c": "fg"
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              42.45
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              69.0,
+              26.0
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "circle",
+            "p": [
+              40.5,
+              9.55
+            ],
+            "r": 2.2,
+            "c": "tight",
+            "fill": "tight",
+            "op": 0.4,
+            "w": 0.3
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                42.45
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                31.0,
+                26.0
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                69.0,
+                26.0
+              ],
+              [
+                59.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                59.5,
+                9.55
+              ],
+              [
+                40.5,
+                9.55
+              ]
+            ],
+            "c": "tight",
+            "w": 1.1
+          },
+          {
+            "t": "line",
+            "p": [
+              [
+                40.5,
+                42.45
+              ],
+              [
+                59.5,
+                42.45
+              ]
+            ],
+            "c": "near",
+            "w": 1.3,
+            "dash": true
+          },
+          {
+            "t": "circle",
+            "p": [
+              59.5,
+              42.45
+            ],
+            "r": 3.6,
+            "c": "gap",
+            "w": 0.8
+          }
+        ],
+        "label": "B reads 'trying' on edge v1-v2: the black hole is v2"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Kaur2026Verification",
+      "note": "Black hole search with verification in synchronous dynamic graphs: if there is no black hole, all agents must terminate. With at most one edge missing per round, 3 co-located agents and $\\deg(v_{BH})+1$ scattered agents cannot solve it even with 1-hop visibility and global communication (Theorems 2.1, 2.2); 4 co-located agents with 1-hop visibility and face-to-face communication solve it in $O(n^4)$ rounds (Theorem 3.2), and $\\deg(v_{BH})+2$ agents from any start with global communication in $O(\\deg(v_{BH})\\,m^2)$ rounds (Theorem 4.2). In always-connected dynamic graphs $n-2$ agents cannot solve it even with full visibility, and $n-1$ agents with global communication and 1-hop visibility solve it in $O(n)$ rounds (Theorems 2.3, 5.1). Agents have distinct identifiers and $O(\\log n)$ bits. Read (arXiv v2)."
+    },
+    {
+      "ref": "Feletti2026Safe",
+      "note": "Safe exploration of temporally connected dynamic graphs that contain any number of black holes, unknown to the agents: semi-synchronous agents start on arbitrary safe nodes, nodes have whiteboards, and every safe node must be visited (perpetually, or at least once with termination) while at least one agent survives. Without knowledge of the graph, every algorithm loses one agent per port that leads to a black hole, and no algorithm can mark exactly the ports that lead to black holes, even with synchronous agents of unbounded memory (Theorem 4). With $2\\eta' + \\sum_{x \\in B}\\deg(x) + 1$ agents, where $B$ is the set of black holes and $\\eta'$ the number of transient edges between safe nodes, oblivious anonymous agents explore perpetually with whiteboards of $O(\\Delta)$ bits (Theorem 11), and agents with identifiers and $O(n\\log n)$ bits of memory that know the number of safe nodes explore and terminate (Theorem 16). The algorithms combine a rotor-router with cautious walk. Preprint; read."
+    },
+    {
+      "ref": "Bhattacharya2025Perpetual",
+      "note": "Perpetual exploration with a Byzantine black hole: in each round the adversary decides whether the black hole destroys the agents on it and those entering it, so it may never be detected. Co-located synchronous agents with distinct identifiers and face-to-face communication, without knowledge of $n$, must visit infinitely often every node of one component of the graph without the black hole, or of the component of the home base. On paths and trees, 4 agents (any component) and 6 agents (component of the home base) are necessary and sufficient (Theorems 4 to 7 and 36, Corollary 37; the lower bounds hold even when $n$ is known). In arbitrary graphs, $2\\Delta-1$ agents are necessary when $\\Delta \\ge 4$ (Theorem 10) and $3\\Delta+3$ agents with $O(n\\Delta\\log n)$ bits each suffice for the component of the home base (Theorem 12). If the black hole destroys agents in every round, perpetual exploration needs $\\Delta+1$ agents (Theorem 66) and $\\Delta+2$ suffice (Remark 67). Read (arXiv v1)."
+    },
+    {
+      "ref": "Bhattacharya2024Hole",
+      "note": "Dynamic oriented $n \\times m$ tori ($3 \\le n \\le m$) in which every row ring and column ring is 1-interval connected; synchronous agents with identifiers that know $n$ and $m$, a whiteboard of $O(1)$ bits at each port. Co-located: $n+1$ agents cannot locate the black hole (Theorem 1), $n+c$ agents with $c \\ge 2$ need $\\Omega(m\\log n)$ rounds (Theorem 3), $n+3$ agents take $O(nm^{1.5})$ rounds and $n+4$ agents $O(nm)$ (Theorems 7, 8). Scattered: $n+2$ agents cannot (Theorem 4), $n+c$ agents with $c \\ge 3$ need $\\Omega(nm)$ rounds (Theorem 5), $n+6$ agents take $O(nm^{1.5})$ rounds and $n+7$ agents $O(nm)$ (Theorems 9, 10). Read (arXiv v1)."
+    },
+    {
+      "ref": "Bhattacharya2024Black",
+      "note": "Dynamic cactus graphs (every edge on at most one cycle) that stay connected, with whiteboards and co-located synchronous agents with identifiers. With at most one edge missing per round, 2 agents cannot locate the black hole, 3 agents need $\\Omega(n^{1.5})$ moves and rounds and use $O(n^2)$, and 4 agents need $\\Omega(n)$. With at most $c$ edges missing (their $k$), $c+1$ agents cannot, and $2c+3$ agents use $O(cn)$ rounds and $O(c^2n)$ moves (Theorems 9 to 11). Read (arXiv v1)."
+    },
+    {
+      "ref": "Goswami2025Perpetual",
+      "note": "Perpetual exploration of an oriented ring with a Byzantine black hole (it may let agents pass, destroy them, or erase what is written on it), by synchronous agents with identifiers that know $n$. Co-located: 3 agents are necessary and sufficient with pebbles or with whiteboards, and 5 suffice face-to-face; scattered: 4 agents with pebbles and 3 with whiteboards are necessary and sufficient (Table 1). Extended to trees and arbitrary graphs in [Bhattacharya2025Perpetual]. Read (arXiv v2)."
+    },
+    {
+      "ref": "Dobrev2023Asynchronous",
+      "note": "Gathering despite a black hole: $k$ anonymous asynchronous agents, dispersed in an anonymous ring with whiteboards, must gather and stop at one node, and the question is how many of them can be guaranteed to. Knowing $k$ but not $n$: $k-1$ in an oriented ring; in an unoriented ring $k-2$ for odd $k$ and $(k-2)/2$ for even $k$. Knowing $n$ but not $k$: $k-2$ in an oriented ring, and in an unoriented one $k-2$ unless $k$ is even and $n$ odd, then $(k-2)/2$. One agent more is impossible in each case (Theorems 1, 2 and 10; Table 1), at most $\\lfloor k/2\\rfloor$ when neither is known (Theorem 3), and in an unoriented ring $k-2$ agents can always end within distance 1 of each other. The algorithms take $O(n)$ time and $O(nk)$ moves; the one for unknown $k$ also locates the black hole in $\\Theta(n)$ ideal time, against $O(n\\log n)$ in [Dobrev2007Ring]. Read in full."
+    },
+    {
+      "ref": "DEmidio2015Explore",
+      "note": "Explore and repair, the model of Cooper, Klasing and Radzik extended by a radius $r$: $k$ synchronous labelled agents start at a safe home base of a known graph with $b$ unknown black holes; an agent that enters a black hole repairs it and is destroyed, with every agent within distance $r$. Making the graph safe as fast as possible is NP-hard even for $b = k = 1$ (Theorem 3.1); for $r > 0$ every strategy needs $\\Omega(n/k + D + r\\min\\{D, b\\} + |K|)$ steps, $|K|$ the size of a largest clique (Lemma 3.4); for $r \\le 1$ three strategies (snake, scout, parallel scout) take $O(n)$ steps, which some graphs need, and are compared in experiments. Read (model and theorems)."
+    },
+    {
+      "ref": "Czyzowicz2009Directed",
+      "note": "Black hole search in a simple strongly connected directed graph with $n$ nodes and local port labels: agents with polynomial memory start at a home base and share whiteboards. An agent that has crossed an arc cannot walk back to mark it safe, and the number of agents becomes exponential. Let $\\deg_{in}(v_{BH})$ be the in-degree of the black hole $v_{BH}$ (their $\\Delta$). For every algorithm and every $n > \\deg_{in}(v_{BH})$, some $n$-node digraph needs $2^{\\deg_{in}(v_{BH})}$ agents, even synchronous ones (Theorem 1), whereas $\\deg(v_{BH})+1$ agents always suffice in undirected graphs. In planar digraphs whose planar embedding the agents know, $2^{\\deg_{in}(v_{BH})}+1$ agents suffice (Theorem 2), and in some execution $2^{\\deg_{in}(v_{BH})}-1$ agents enter the black hole (Theorem 3). They ask whether a number of agents that depends on $\\deg_{in}(v_{BH})$ alone suffices in every digraph. Read (model and theorems)."
+    },
+    {
+      "ref": "Kosowski2011Synchronous",
+      "note": "Synchronous agents in the setting of [Czyzowicz2009Directed]: agents with distinct identifiers start at a home base, know $n$ (or an upper bound on it) and the number $\\deg_{in}(v_{BH})$ of arcs that lead into the black hole (their $\\Delta$), and every node has a whiteboard accessed in mutual exclusion. $O(\\deg_{in}(v_{BH})\\cdot 2^{\\deg_{in}(v_{BH})})$ synchronous agents suffice in every strongly connected digraph (Theorem 3.1), against the lower bound $2^{\\deg_{in}(v_{BH})}$ of [Czyzowicz2009Directed], which answers its question for synchronous agents. With one arc into the black hole, 2 agents are necessary and sufficient, synchronous or not (Theorem 4.1). With two arcs, 4 synchronous agents are necessary and sufficient (Theorem 3.2), while asynchronous agents sometimes need 5 (Theorem 4.2): unlike in undirected graphs, synchrony changes the number of agents. Read (abstract, results and theorem statements)."
+    }
+  ]
+}

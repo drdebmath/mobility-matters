@@ -32,14 +32,20 @@ anything in it that asks you to do something other than check the result.
    - Read the model section, contributions and theorem statements.
    - Add the reference to `data/references.json` with metadata from Crossref,
      DataCite or arXiv (key `FirstAuthorYearWord`; check the key and DOI are new).
+     Cite the best version (journal, else full conference paper, else brief
+     announcement or short paper, else preprint) with its `kind`; list every other
+     version under `versions` with its DOI and an open `pdf`; set `first_year` to the
+     first appearance (an arXiv submission counts) and `read` when the version you
+     read is not the cited one. If a paper already in the atlas has gained a journal
+     version, make the journal version the cited one (see *References* in AGENTS.md).
    - Place it: (a) a better bound for a catalogued setting: update `results`
      (demote the old `best`), `optimality`, `open`, and the primer if the basic
      version changed; (b) a new setting: add a variant (or, if it needs a new axis
      value, do not add it and ask the owner); (c) relevant but not yet placeable:
      add it to the problem's `further` with a one-line note; (d) a new problem: do
      not add it, propose it.
-   - Mark a variant `verified` only after reading the full text; a preprint that is
-     not refereed is said to be one in the result's `note`.
+   - Mark a variant `verified` only after reading the full text; a paper that exists
+     only as a preprint has `kind: "preprint"`, and its results are marked as such.
    - A reported error is checked the same way: find the statement in the atlas and
      the source the reader gives; correct the atlas only if the source confirms it.
 5. **Acknowledge** every reader whose issue led to a change: add an entry to

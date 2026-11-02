@@ -123,7 +123,7 @@
           "definition": "**LUMI**: each robot has a light with $c$ colours, set at the end of Compute, visible to all robots including itself; it is both memory and communication. Also called *luminous* robots, or a *full* light."
         }
       ],
-      "origin": "Suzuki and Yamashita model a robot as \"a mobile processor with infinite memory\" and call an algorithm *oblivious* when the new position depends only on the current observation, noting that \"oblivious algorithms are self-stabilizing by definition\" [Suzuki1999Formation]. Obliviousness then became the default, partly because \"any algorithm proved correct in this model is also self-stabilizing\" [Clement2010Cost] [Defago2006Fault]; oblivious, silent robots communicate only by moving, \"reminiscent of bees in a bee dance\" [Flocchini1999Hard] [Prencipe2007Impossibility]. Unbounded memory was compared early: two non-oblivious robots can rendezvous in SSYNC and oblivious ones cannot [Suzuki1999Formation] (Theorems 3.1 and 3.3) [Izumi2012TwoRobots]. Lights were \"initially suggested by Peleg\" [Das2016Lights] [DiLuna2014Robots]: his survey proposes giving robots \"a small amount (say, O(1) bits) of stable memory\" and \"marking (at least some of) the robots with colors, flags or visible indicator lights\" [Peleg2005Swarms] (Efrima and Peleg likewise give each robot a two-state light bulb, \"in effect amounting to one bit of memory and communication\", to partition robots by a randomized algorithm [Efrima2007Models]); Das, Flocchini, Prencipe, Santoro and Yamashita [Das2016Lights] turned them into the LUMI model, a constant-size register that is persistent and visible to all, so that a robot can remember and communicate a constant number of bits per cycle. Their main results are that LUMI under ASYNC is equivalent to LUMI under SSYNC and strictly stronger than OBLOT under SSYNC [Das2016Lights]. To separate the two roles of a light, Flocchini, Santoro, Viglietta and Yamashita [Flocchini2016Constant] defined FSTA (a robot sees only its own light: constant memory, no communication) and FCOM (it sees only the others' lights: constant communication, no memory), and showed that FSTA robots with rigid moves rendezvous in SSYNC and FCOM robots even in ASYNC. The question \"is it better to remember or to communicate\" then became a programme comparing the four models under every scheduler [Flocchini2019Synchronous] [Flocchini2023Asynchrony] [Das2024Visibility]."
+      "origin": "Suzuki and Yamashita model a robot as \"a mobile processor with infinite memory\" and call an algorithm *oblivious* when the new position depends only on the current observation, noting that \"oblivious algorithms are self-stabilizing by definition\" [Suzuki1999Formation]. Obliviousness then became the default, partly because \"any algorithm proved correct in this model is also self-stabilizing\" [Clement2010Cost] (see also [Defago2006Fault]); oblivious, silent robots communicate only by moving, \"reminiscent of bees in a bee dance\" [Flocchini1999Hard] [Prencipe2007Impossibility]. Unbounded memory was compared early: two non-oblivious robots can rendezvous in SSYNC and oblivious ones cannot [Suzuki1999Formation] (Theorems 3.1 and 3.3) [Izumi2012TwoRobots]. Lights were \"initially suggested by Peleg\" [Das2016Lights] [DiLuna2014Robots]: his survey proposes giving robots \"a small amount (say, O(1) bits) of stable memory\" and \"marking (at least some of) the robots with colors, flags or visible indicator lights\" [Peleg2005Swarms] (Efrima and Peleg likewise give each robot a two-state light bulb, \"in effect amounting to one bit of memory and communication\", to partition robots by a randomized algorithm [Efrima2007Models]); Das, Flocchini, Prencipe, Santoro and Yamashita [Das2016Lights] turned them into the LUMI model, a constant-size register that is persistent and visible to all, so that a robot can remember and communicate a constant number of bits per cycle. Their main results are that LUMI under ASYNC is equivalent to LUMI under SSYNC and strictly stronger than OBLOT under SSYNC [Das2016Lights]. To separate the two roles of a light, Flocchini, Santoro, Viglietta and Yamashita [Flocchini2016Constant] defined FSTA (a robot sees only its own light: constant memory, no communication) and FCOM (it sees only the others' lights: constant communication, no memory), and showed that FSTA robots with rigid moves rendezvous in SSYNC and FCOM robots even in ASYNC. The question \"is it better to remember or to communicate\" then became a programme comparing the four models under every scheduler [Flocchini2019Synchronous] [Flocchini2023Asynchrony] [Das2024Visibility]."
     },
     {
       "id": "frames",
@@ -277,7 +277,7 @@
           "definition": "All robots follow the algorithm forever."
         }
       ],
-      "origin": "Agmon and Peleg [Agmon2006Fault] (SODA 2004) brought crash and Byzantine robots into the Look–Compute–Move model, requiring the algorithm \"to successfully gather the nonfaulty robots, independently of the behavior of the faulty ones\". They observed that most existing algorithms fail with a single crash, gathered $n \\ge 3$ robots with one crash in SSYNC (Theorem 3.8), proved that three robots cannot gather, or even converge, in SSYNC if one may be Byzantine (Theorem 4.4; hence also in ASYNC, which their abstract states), and gathered $n \\ge 3f+1$ robots with $f$ Byzantine faults in FSYNC (Theorem 5.10) [Agmon2006Fault]. Their robots share handedness, see multiplicities (a Look returns a multiset) and make non-rigid moves of at least a fixed distance [Agmon2006Fault]. The motivation is deployment in adverse environments, where a swarm must \"ensure coordination in spite of faulty robots\" [Clement2010Cost], and oblivious algorithms are already self-stabilizing, so transient faults come for free and permanent ones are the question [Defago2006Fault]. Défago, Gradinariu, Messika and Raipin-Parvédy [Defago2006Fault] extended the feasibility study to bounded schedulers and to probabilistic gathering under crash and Byzantine faults. A crashed robot \"simply stops moving\" and, since correct robots may also stay still, cannot be identified [Efrima2009Partition]; crash-tolerant gathering of many faults was obtained with strong multiplicity detection [Bouzid2013Crash] and with weak multiplicity detection [Pattanayak2019Crash]."
+      "origin": "Agmon and Peleg [Agmon2006Fault] (SODA 2004) brought crash and Byzantine robots into the Look–Compute–Move model, requiring the algorithm \"to successfully gather the nonfaulty robots, independently of the behavior of the faulty ones\". They observed that most existing algorithms fail with a single crash, gathered $n \\ge 3$ robots with one crash in SSYNC (Theorem 3.8), proved that three robots cannot gather, or even converge, in SSYNC if one may be Byzantine (Theorem 4.4; hence also in ASYNC, which their abstract states), and gathered $n \\ge 3f+1$ robots with $f$ Byzantine faults in FSYNC (Theorem 5.10) [Agmon2006Fault]. Their robots share handedness, see multiplicities (a Look returns a multiset) and make non-rigid moves of at least a fixed distance [Agmon2006Fault]. The motivation is deployment in adverse environments, where a swarm must \"ensure coordination in spite of faulty robots\" [Clement2010Cost], and oblivious algorithms are already self-stabilizing, so transient faults come for free and permanent ones are the question [Defago2006Fault]. Défago et al. [Defago2006Fault] extended the feasibility study to bounded schedulers and to probabilistic gathering under crash and Byzantine faults. A crashed robot \"simply stops moving\" and, since correct robots may also stay still, cannot be identified [Efrima2009Partition]; crash-tolerant gathering of many faults was obtained with strong multiplicity detection [Bouzid2013Crash] and with weak multiplicity detection [Pattanayak2019Crash]."
     },
     {
       "id": "algorithm",
@@ -298,7 +298,7 @@
           "definition": "Robots may use random bits in Compute; guarantees hold with probability 1 or in expectation, as stated per result."
         }
       ],
-      "origin": "The classical model is deterministic: in CORDA the Compute phase runs \"a deterministic algorithm\" [Prencipe2007Impossibility], so a configuration that looks the same to two anonymous, disoriented robots makes them act alike forever. Randomization was introduced to escape such impossibilities: Dieudonné and Petit [Dieudonne2009Scatter] proved that scattering cannot be solved deterministically in SSYNC and gave a randomized algorithm, and Défago, Gradinariu, Messika and Raipin-Parvédy [Defago2006Fault] studied deterministic gathering under bounded schedulers and probabilistic gathering, with and without crash and Byzantine faults (most proofs are omitted in the conference version). Clément et al. note that work around the impossibilities had focused on additional assumptions, \"less attention being shown to the use of randomization\", and analyse probabilistic gathering and scattering with Markov chains [Clement2010Cost]. Yamauchi and Yamashita [Yamauchi2014Randomized] formed any pattern in ASYNC without a common coordinate system by randomization, for $n \\ge 5$ robots with common handedness, and patterns without multiplicities; Bramas and Tixeuil then treated randomness as a resource, using one random bit per cycle for pattern formation [Bramas2016Probabilistic] and proving that $n \\log n$ random bits are necessary to scatter $n$ robots [Bramas2017RandomBit]. What the adversary may learn about the coin flips (adaptive or not) is part of the model and is fixed per paper [Efrima2009Partition]."
+      "origin": "The classical model is deterministic: in CORDA the Compute phase runs \"a deterministic algorithm\" [Prencipe2007Impossibility], so a configuration that looks the same to two anonymous, disoriented robots makes them act alike forever. Randomization was introduced to escape such impossibilities: Dieudonné and Petit [Dieudonne2009Scatter] proved that scattering cannot be solved deterministically in SSYNC and gave a randomized algorithm, and Défago et al. [Defago2006Fault] studied deterministic gathering under bounded schedulers and probabilistic gathering, with and without crash and Byzantine faults. Clément et al. note that work around the impossibilities had focused on additional assumptions, \"less attention being shown to the use of randomization\", and analyse probabilistic gathering and scattering with Markov chains [Clement2010Cost]. Yamauchi and Yamashita [Yamauchi2014Randomized] formed any pattern in ASYNC without a common coordinate system by randomization, for $n \\ge 5$ robots with common handedness, and patterns without multiplicities; Bramas and Tixeuil then treated randomness as a resource, using one random bit per cycle for pattern formation [Bramas2016Probabilistic] and proving that $n \\log n$ random bits are necessary to scatter $n$ robots [Bramas2017RandomBit]. What the adversary may learn about the coin flips (adaptive or not) is part of the model and is fixed per paper [Efrima2009Partition]."
     },
     {
       "id": "ids",
@@ -390,7 +390,7 @@
       {
         "id": "general",
         "title": "Any number of robots",
-        "assumptions": "Most results assume chirality and rigid moves; separators use small teams (often $n \\le 4$). Sources: [Das2016Lights] [Flocchini2019Synchronous] [Buchin2022Energy] [Flocchini2023Asynchrony] [Das2021FiniteMemory] [Naito2025Beyond] [Flocchini2026Universal] [Kirkpatrick2024Separating].",
+        "assumptions": "Most results assume chirality and rigid moves; separators use small teams (often $n \\le 4$). Sources: [Das2016Lights] [Flocchini2019Synchronous] [Buchin2022Energy] [Flocchini2023Asynchrony] [Das2021FiniteMemory] [Naito2025Beyond] [Flocchini2026Universal] [Kirkpatrick2024Separating] [Feletti2026Computational]. The sequential-scheduler relations of [Feletti2026Computational] assume variable disorientation (no chirality, no common unit) and strong multiplicity detection.",
         "relations": [
           {
             "a": "OBLOT^F",
@@ -1217,6 +1217,166 @@
             ],
             "ref": "Buchin2022Energy",
             "thm": "Thm 7"
+          },
+          {
+            "a": "OBLOT^RROBIN",
+            "rel": ">",
+            "b": "OBLOT^RPERM",
+            "sep": [
+              "Fan"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 6 (Lemmas 4, 5)",
+            "note": "Variable disorientation (no chirality, no common unit) and strong multiplicity detection."
+          },
+          {
+            "a": "FSTA^RROBIN",
+            "rel": ">",
+            "b": "FSTA^RPERM",
+            "sep": [
+              "Fan"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 6 (Lemmas 4, 5)",
+            "note": "The only relation the paper proves for FSTA under sequential schedulers."
+          },
+          {
+            "a": "FCOM^RROBIN",
+            "rel": ">",
+            "b": "FCOM^RPERM",
+            "sep": [
+              "Fan"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 6 (Lemmas 4, 5)"
+          },
+          {
+            "a": "LUMI^RROBIN",
+            "rel": ">",
+            "b": "LUMI^RPERM",
+            "sep": [
+              "Fan"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 6 (Lemmas 4, 5)"
+          },
+          {
+            "a": "LUMI^SEQ",
+            "rel": "≡",
+            "b": "LUMI^RPERM",
+            "sep": [],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 7 (simulator in LUMI^SEQ of any LUMI^R-PERM algorithm)"
+          },
+          {
+            "a": "LUMI^SEQ",
+            "rel": "≡",
+            "b": "LUMI^PERM",
+            "sep": [],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 7 with Thm 1",
+            "note": "First shown in the authors' SSS 2025 paper on sequential schedulers (their reference [14])."
+          },
+          {
+            "a": "LUMI^SEQ",
+            "rel": "≡",
+            "b": "LUMI^RSEQ",
+            "sep": [],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 7 with Thm 1"
+          },
+          {
+            "a": "OBLOT^RPERM",
+            "rel": ">",
+            "b": "OBLOT^PERM",
+            "sep": [
+              "SquareCenter"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 11 (Lemmas 9, 10)",
+            "caveat": "Lemma 10 uses the symmetry of the square together with disorientation: the robot that has just moved takes the same snapshot as the three others."
+          },
+          {
+            "a": "OBLOT^RSEQ",
+            "rel": ">",
+            "b": "OBLOT^SEQ",
+            "sep": [
+              "SquareCenter"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 11 (Lemmas 9, 10)"
+          },
+          {
+            "a": "OBLOT^PERM",
+            "rel": ">",
+            "b": "OBLOT^SEQ",
+            "sep": [
+              "Pinwheel"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 15 (Lemmas 13, 14)",
+            "note": "Lemma 13 (Pinwheel in OBLOT^PERM) is taken from the authors' SSS 2025 paper."
+          },
+          {
+            "a": "OBLOT^RPERM",
+            "rel": ">",
+            "b": "OBLOT^RSEQ",
+            "sep": [
+              "Pinwheel"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 15 (Lemmas 13, 14)"
+          },
+          {
+            "a": "OBLOT^PERM",
+            "rel": "⊥",
+            "b": "OBLOT^RSEQ",
+            "sep": [
+              "Pinwheel",
+              "SquareCenter"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 16"
+          },
+          {
+            "a": "FCOM^RPERM",
+            "rel": "≡",
+            "b": "FCOM^RSEQ",
+            "sep": [],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 17 (simulator with a shared parity light)"
+          },
+          {
+            "a": "FCOM^PERM",
+            "rel": ">",
+            "b": "FCOM^SEQ",
+            "sep": [
+              "HalveTwice"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 21 (Lemmas 19, 20)",
+            "caveat": "Lemma 20 needs the unit of distance of a robot to change between activations (variable disorientation)."
+          },
+          {
+            "a": "FCOM^RPERM",
+            "rel": ">",
+            "b": "FCOM^PERM",
+            "sep": [
+              "HalveOnce"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Thm 25 (Lemmas 23, 24)",
+            "caveat": "Lemma 24 needs the unit of distance of a robot to change between activations (variable disorientation)."
+          },
+          {
+            "a": "FCOM^RSEQ",
+            "rel": ">",
+            "b": "FCOM^SEQ",
+            "sep": [
+              "HalveTwice"
+            ],
+            "ref": "Feletti2026Computational",
+            "thm": "Table 1 (from Thms 1, 17, 21)"
           }
         ]
       },
@@ -2126,6 +2286,46 @@
         "refs": [
           "Ninomiya2026Disjunctive"
         ]
+      },
+      {
+        "abbrev": "Fan",
+        "name": "Fan",
+        "definition": "$n + 2$ robots on a scalene right triangle, $n > 3$ of them on the right-angle vertex and one on each other vertex: forever, the robots on the right-angle vertex must move to distinct points and come back, each robot returning every time to the same point; the robots on the other two vertices never move.",
+        "refs": [
+          "Feletti2026Computational"
+        ]
+      },
+      {
+        "abbrev": "SquareCenter",
+        "name": "Square Center",
+        "definition": "Four robots a, b, c, d on a kite with symmetry axis ad, a right angle at a and an acute angle at d: d moves along the axis to complete a square with a, b, c, then one robot other than d moves to the centre of the square; no other move is allowed.",
+        "refs": [
+          "Feletti2026Computational"
+        ]
+      },
+      {
+        "abbrev": "Pinwheel",
+        "name": "Pinwheel",
+        "definition": "Two similar acute scalene triangles with the same orientation and circumcentre, the inner one with one robot per vertex, the outer one with $m \\ge 3$ robots in total on its vertices, and $m + 1$ robots on the circumcentre: forever, the robots on the outer triangle move along its edges to the next vertex in the clockwise order fixed by the inner triangle, without stopping on the way; no other move is allowed.",
+        "refs": [
+          "Feletti2026Computational"
+        ]
+      },
+      {
+        "abbrev": "HalveTwice",
+        "name": "Halve Twice",
+        "definition": "Three collinear robots, two on one point and the third at distance d0 from it: the third robot must move along the line and stop forever at distance d0/2 or d0/4, stopping at no other distance; no other move is allowed.",
+        "refs": [
+          "Feletti2026Computational"
+        ]
+      },
+      {
+        "abbrev": "HalveOnce",
+        "name": "Halve Once",
+        "definition": "As HalveTwice, but the third robot must stop forever at distance d0/2, with no other stop.",
+        "refs": [
+          "Feletti2026Computational"
+        ]
       }
     ],
     "other": [
@@ -2133,7 +2333,8 @@
       "**Opaque robots.** For every memory model and scheduler, opaque robots are weaker than transparent ones; for opaque robots, OBLOT and FSTA are stronger under SSYNC than under ASYNC, and whether LUMI is equally strong under SSYNC and ASYNC is open [Feletti2025Transparency].",
       "**Robots on graphs.** On graphs embedded in the plane the FSYNC/SSYNC landscape is mapped; one separator uses a crash fault [Sharma2025Discrete].",
       "**Bounded asynchrony.** With limited visibility and imprecise measurements, oblivious robots are stronger under k-bounded asynchrony (k-ASYNC) than under ASYNC, separated by cohesive convergence; whether k-bounded asynchrony is weaker than SSYNC is open [Kirkpatrick2024Separating].",
-      "**Sequential schedulers.** Oblivious robots activated one at a time are stronger than under SSYNC and incomparable with FSYNC [Flocchini2026Universal]."
+      "**Sequential schedulers.** Oblivious robots activated one at a time are stronger than under SSYNC and incomparable with FSYNC [Flocchini2026Universal]. Among sequential schedulers (any order SEQ, permutations PERM, round-robin RROBIN, and the restricted R-SEQ and R-PERM, which never activate a robot twice in a row), round-robin is strictly the strongest for every memory model; with full lights all the others are equivalent; for oblivious robots each further restriction (to permutations, or to never activating a robot twice in a row) strictly adds power, and the same holds with external lights except that R-SEQ and R-PERM are equivalent [Feletti2026Computational].",
+      "**Robots on graphs: computation.** For oblivious FSYNC robots with strong multiplicity detection on a finite graph, unlimited local computation gives one algorithm that, for every formation problem given by its set of final configurations, decides whether the current configuration is solvable and, if it is, reaches a final configuration in the minimum number of rounds that the adversary can force; the authors argue that the method does not carry over to SSYNC (fairness) or ASYNC (pending moves), and that algorithms on graphs should be required to run in polynomial time [Cicerone2025Impact]."
     ],
     "conflicts": [
       "Rendezvous by FSTA robots in SSYNC [Flocchini2016Constant] needs each robot's unit of distance to stay fixed; several separations use it, and under variable disorientation it is impossible [Masuzawa2026Disorientation].",
@@ -2149,7 +2350,8 @@
       "Can FSTA robots solve rendezvous in ASYNC with a fixed unit of distance [Flocchini2016Constant] [Masuzawa2026Disorientation]?",
       "Is LUMI equally strong under SSYNC and ASYNC for opaque robots [Feletti2025Transparency]?",
       "Which model classes have no problem solvable there but in no strictly weaker model (the \"white regions\") [Naito2025Beyond]? For two robots with variable disorientation, chirality and rigid moves there are none: every upward-closed set of the 13 classes is the exact solvability set of some task [Ninomiya2026Disjunctive], a preprint (the exactness proofs, its Appendices F and G, were not checked here). The question is open for three or more robots.",
-      "Schedulers beyond the atomicity-defined ones, and robots with energy constraints [Flocchini2023Asynchrony] [Buchin2022Energy]."
+      "Schedulers beyond the atomicity-defined ones, and robots with energy constraints [Flocchini2023Asynchrony] [Buchin2022Energy].",
+      "The relations of FSTA under the sequential schedulers other than RROBIN, and the relations across memory models among sequential settings, e.g. FSTA under R-SEQ against OBLOT under R-PERM [Feletti2026Computational]."
     ]
   }
 }

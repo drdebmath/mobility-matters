@@ -17,6 +17,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 
+def problem_file(idx, pid):
+    """data/problems/<family>/<id>.json: every problem file lives in the folder of its family."""
+    fam = next((f["id"] for f in idx.get("families", []) if pid in f["problems"]), None)
+    return DATA / "problems" / fam / f"{pid}.json" if fam else DATA / "problems" / f"{pid}.json"
+
 
 def load(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
@@ -33,7 +38,7 @@ def main():
     c = idx["citation"]
     site = c["url"].rstrip("/") + "/"
     models = {m: load(DATA / "models" / f"{m}.json") for m in idx["models"]}
-    probs = {p: load(DATA / "problems" / f"{p}.json") for p in idx["problems"]}
+    probs = {p: load(problem_file(idx, p)) for p in idx["problems"]}
     ovs = {o: load(DATA / "overviews" / f"{o}.json") for o in idx.get("overviews", [])}
     refs = load(DATA / "references.json")
     cite = f'{", ".join(c["authors"])}. {c["title"]}. Living survey, version {c.get("version", "")}. {c["url"]}'
@@ -130,7 +135,25 @@ def main():
     for k in sorted(refs):
         r = refs[k]
         link = f" https://doi.org/{r['doi']}" if r.get("doi") else (f" https://arxiv.org/abs/{r['arxiv']}" if r.get("arxiv") else (f" {r['url']}" if r.get("url") else ""))
-        f.append(f"- [{k}] {', '.join(r.get('authors', []))}. {r.get('title', '')}. {r.get('venue', '')}, {r.get('year', '')}.{link}")
+        if r.get("pdf"):
+            link += f" (pdf: {r['pdf']})"
+        line = f"- [{k}] {', '.join(r.get('authors', []))}. {r.get('title', '')}. {r.get('venue', '')}, {r.get('year', '')}.{link}"
+        if r.get("arxiv") and r.get("doi"):
+            line += f" arXiv:{r['arxiv']}."
+        if r.get("kind") == "preprint":
+            line += " Preprint, not peer reviewed."
+        others = []
+        for v in r.get("versions", []):
+            if v.get("ref"):
+                others.append(f"[{v['ref']}]")
+            else:
+                others.append(f"{v.get('venue', '')}, {v.get('year', '')}" + (f" (as \"{v['title']}\")" if v.get("title") and v["title"] != r.get("title") else "")
+                              + (f" https://doi.org/{v['doi']}" if v.get("doi") else "") + (f" (pdf: {v['pdf']})" if v.get("pdf") else ""))
+        if others:
+            line += " Other versions: " + "; ".join(others) + "."
+        if r.get("first_year") and r["first_year"] < r.get("year", 0):
+            line += f" First appeared in {r['first_year']}."
+        f.append(line)
     (out / "llms-full.txt").write_text("\n".join(f) + "\n", encoding="utf-8")
     print(f"wrote {out / 'llms.txt'} and {out / 'llms-full.txt'} ({(out / 'llms-full.txt').stat().st_size / 1024:.0f} KB)")
 

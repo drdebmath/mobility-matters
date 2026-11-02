@@ -1,0 +1,1839 @@
+{
+  "id": "gathering-oblivious-graphs",
+  "model": "mobile-agents-on-graphs",
+  "name": "Gathering by oblivious robots on graphs",
+  "origin": {
+    "ref": "Klasing2008Ring",
+    "year": 2006,
+    "note": "Gathering of asynchronous oblivious robots on a ring (ISAAC 2006)."
+  },
+  "derived_from": {
+    "problem": "gathering-graphs",
+    "kind": "variant of",
+    "relation": "The task is that of gathering in graphs, all entities on one node, but the entities are oblivious Look–Compute–Move robots, as in exploration by oblivious robots: they see the positions of all robots, remember nothing, carry no labels and send no messages. Whether a start can be gathered then depends on the symmetries of the configuration, on what a robot sees of robots sharing a node, and on the scheduler. Results do not transfer directly in either direction."
+  },
+  "related": [
+    {
+      "problem": "gathering",
+      "relation": "The same robots moving freely in the plane. On a graph a robot moves one edge per cycle, and the symmetries of the graph add to those of the configuration."
+    },
+    {
+      "problem": "oblivious-exploration",
+      "relation": "The same robots and schedulers on graphs, with exploration as the task."
+    }
+  ],
+  "summary": "Oblivious Look–Compute–Move robots must all reach one node of a graph and stay there; which starts can be gathered depends on the symmetries of the graph, on multiplicity detection and on the scheduler.",
+  "statement": "$k \\ge 2$ anonymous, oblivious robots stand on the nodes of a connected anonymous graph $G$ with $n$ nodes, which every robot sees whole. A robot runs Look–Compute–Move cycles: in a Look it takes a snapshot of the graph with its occupied nodes, it computes from that snapshot only, and it stays or moves to a neighbour; moves are instantaneous, so robots are always seen on nodes. A node with two or more robots is a **tower**. With **multiplicity detection** a snapshot shows which nodes are towers (weak) or how many robots each node holds (strong); without it a tower looks like one robot. The robots must reach a configuration in which all of them are on one node and none moves again. A setting fixes the scheduler, the multiplicity detection, whether towers may exist at the start, and the graph class; an algorithm must gather from every start of the setting except the starts listed as unsolvable. Under **round robin** the scheduler activates one robot at a time in a fixed cyclic order. **Time** is counted in epochs: an epoch is an interval in which every robot completes at least one cycle (under round robin, $k$ consecutive activations).",
+  "primer": {
+    "intro": "Imagine identical toy trains on a rail network that must all meet at one station, although none of them remembers anything and none can tell how many trains already stand at a station. The network is a **graph**: stations are **nodes**, and two nodes joined by an edge are **neighbours**. The $k \\ge 2$ trains are **robots**. They are **anonymous** (the robots are identical and the nodes carry no names) and **oblivious** (a robot keeps nothing from one activation to the next). Each activation is a **Look–Compute–Move cycle**. The robot takes a **snapshot** of the whole graph showing which nodes are occupied, computes from that snapshot alone, and then stays or moves to a neighbour. A node with two or more robots is a **tower**. With **multiplicity detection** a snapshot shows the towers; without it a tower looks like a single robot. The **scheduler**, an adversary, decides when each robot runs its cycle. The robots must reach a **configuration** (the positions of all of them) in which they all stand on one node, and then never move again. In the standard version the graph is a ring and the robots cannot see towers. Towers may already exist at the start, and the scheduler is **round robin**: it activates one robot at a time, in a cyclic order that it fixes once and for all. Time is counted in **epochs**, intervals in which every robot completes at least one cycle.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "On a tree, walk to the centre",
+        "variant": "tree-async-blind",
+        "ref": "DAngelo2016Gathering",
+        "idea": "A tree is a graph without cycles. A **centre** of a tree is a node whose largest distance to the other nodes is as small as possible; a tree has one centre or two neighbouring centres. The scheduler is asynchronous: Look, Compute and Move take finite but unpredictable times, so a robot may move on the basis of an old snapshot. The robots start on distinct nodes and cannot see towers.\n1. If the tree has one centre, every robot walks to it, one edge per cycle.\n2. If it has two centres, remove the edge between them. This splits the tree into two halves, each holding one centre.\n3. If one half has fewer occupied nodes, its robots walk to the centre of the other half, and the robots of the other half wait.\n4. When that half is empty, every robot walks to the remaining centre.\n5. If the halves have equal numbers of occupied nodes, a fixed way of writing each half as a string, occupied nodes included, picks the half that moves first.",
+        "analysis": "Each rule depends only on the tree and on which nodes are occupied, so towers that look like single robots do no harm [DAngelo2016Gathering]. While a half empties, its number of occupied nodes can only fall and the other half's can only rise, so the robots never change their choice, even when they act on an old snapshot. The robots gather from every start except those in which the two halves are mirror images of each other, robots included (Theorem 6). There the scheduler can activate two mirror-image robots together forever, and the configuration stays symmetric. The paper does not analyse the time.",
+        "why_it_matters": "It shows the method of this problem in its simplest form: the robots agree on a node that the snapshot determines, and the only obstacle is a symmetry that the scheduler can preserve."
+      },
+      {
+        "kind": "impossibility",
+        "title": "Two robots at odd distance never meet",
+        "variant": "ring-ssync-blind",
+        "ref": "Klasing2008Ring",
+        "idea": "Put two robots on a ring (a cycle of nodes) at odd distance, and let the scheduler activate both of them in every round.\n1. Two robots on a ring see the same snapshot, up to a reflection, so they make the same decision: both stay or both move.\n2. Fix one of the two arcs of the ring between them and count its edges. A move of one robot changes that count by one, so when both move it changes by two or not at all.\n3. The count starts odd, so it stays odd and never reaches 0.",
+        "analysis": "So two robots never gather on a ring, whatever the algorithm [Klasing2008Ring]. Without multiplicity detection the same holds for any number of robots. Let a single robot create the first tower alone. From then on every snapshot looks like one with fewer robots, and by induction they never gather. This is why Klasing, Markou and Pelc assume multiplicity detection.",
+        "why_it_matters": "It is the basic obstacle on rings: what the robots cannot see or tell apart, the scheduler can keep symmetric."
+      },
+      {
+        "kind": "impossibility",
+        "title": "One robot at a time is not enough unless the order is fixed",
+        "variant": "ring-sequential",
+        "ref": "Navarra2025Oblivious",
+        "idea": "Let the scheduler activate one robot at a time but choose the order freely, on a ring with robots that cannot see towers. Just before gathering, all robots stand on two neighbouring nodes. A snapshot shows only two occupied neighbours, so the only useful move is onto the other occupied node (Lemma III.1).\n1. Take robots $r_1$ and $r_2$ on node $u$ and $r_3$ on node $v$.\n2. The scheduler activates $r_1$, which moves to $v$.\n3. It activates $r_3$, which moves back to $u$; then $r_2$, which moves to $v$.\n4. It goes on like this, always taking a robot from the node that holds more, so neither node ever empties, and every robot is activated again and again.",
+        "analysis": "So with such a scheduler $k \\ge 3$ robots that cannot see towers never gather on a ring (Theorem III.1) [Navarra2025Oblivious]. Round robin removes the scheduler's freedom: the order is fixed once and for all. Navarra and Piselli first make the robots choose an empty gathering node between two groups of robots, then move both groups next to it and finally onto it. Every robot is activated once before any robot is activated again, so the last step works. Their algorithm gathers from every start except a few listed ones, in at most $n-3$ epochs, which is optimal up to a constant factor.",
+        "why_it_matters": "It shows how much the scheduler matters for robots that cannot count: a fixed order of activations replaces multiplicity detection."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "an anonymous, oblivious Look–Compute–Move entity on a node of the graph; $k \\ge 2$ is their number",
+      "avoid": [
+        "agent"
+      ]
+    },
+    {
+      "term": "graph",
+      "definition": "the connected anonymous graph $G$ with $n$ nodes on which the robots move; every robot sees it whole",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "a node of the graph; robots stand on nodes",
+      "avoid": [
+        "vertex"
+      ]
+    },
+    {
+      "term": "neighbour",
+      "definition": "a node joined by an edge to the given node; a robot moves only to a neighbour",
+      "avoid": []
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: Look (take a snapshot), Compute (apply the algorithm to it), Move (stay or move to a neighbour)",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the graph with its occupied nodes and, with multiplicity detection, its towers",
+      "avoid": [
+        "picture"
+      ]
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions of all robots at a time; the start is the configuration at time 0",
+      "avoid": [
+        "placement"
+      ]
+    },
+    {
+      "term": "tower",
+      "definition": "a node with two or more robots",
+      "avoid": [
+        "stack"
+      ]
+    },
+    {
+      "term": "multiplicity detection",
+      "definition": "what a snapshot shows of towers: nothing, which nodes are towers (weak), or how many robots each node holds (strong)",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary that decides when each robot runs its cycle",
+      "avoid": []
+    },
+    {
+      "term": "round robin",
+      "definition": "a scheduler that activates one robot at a time in a fixed cyclic order",
+      "avoid": []
+    },
+    {
+      "term": "epoch",
+      "definition": "an interval in which every robot completes at least one cycle; under round robin, $k$ consecutive activations",
+      "avoid": []
+    },
+    {
+      "term": "oblivious",
+      "definition": "a robot keeps nothing from one cycle to the next",
+      "avoid": []
+    },
+    {
+      "term": "anonymous",
+      "definition": "robots are identical and nodes carry no names",
+      "avoid": []
+    }
+  ],
+  "history": "Klasing, Markou and Pelc posed the problem on rings for asynchronous robots and showed that it needs multiplicity detection: without it, $k \\ge 2$ robots cannot gather on any ring; with weak detection an odd number of robots gathers exactly from the starts that are not periodic [Klasing2008Ring]. Later work kept these assumptions (no towers at the start, multiplicity detection) and solved one graph class at a time, as listed in [Cicerone2025NonVertexTransitive]. A recent series drops multiplicity detection and allows towers at the start, and makes up for it with round robin: rings [Navarra2025Oblivious], graphs that are not vertex-transitive [Cicerone2025NonVertexTransitive], and hypercubes and infinite grids [Cicerone2025Gathering].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "epochs until all robots are on one node and no robot moves again"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "communication",
+    "node-memory",
+    "node-ids",
+    "timing",
+    "algorithm",
+    "ids",
+    "topology"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "faults",
+    "network",
+    "multiplicity",
+    "initial",
+    "scheduler",
+    "order"
+  ],
+  "axes": [
+    {
+      "id": "scheduler",
+      "name": "Scheduler",
+      "values": [
+        {
+          "id": "async",
+          "level": 0,
+          "label": "asynchronous (ASYNC)",
+          "short": "ASYNC",
+          "definition": "**ASYNC**: each robot's Look, Compute and Move phases take finite but unbounded, adversarially chosen time; a robot may Look while others are between phases, so it may move on an outdated snapshot. A robot is always seen on a node (moves are instantaneous). The scheduler is fair: every robot is activated infinitely often."
+        },
+        {
+          "id": "ssync",
+          "level": 1,
+          "label": "semi-synchronous (SSYNC)",
+          "short": "SSYNC",
+          "definition": "**SSYNC**: time is divided into rounds; in each round a fair adversary chooses a non-empty subset of robots, which execute one atomic Look–Compute–Move cycle together."
+        },
+        {
+          "id": "sequential",
+          "level": 2,
+          "label": "sequential: exactly one robot is activated per round",
+          "short": "sequential",
+          "definition": "**Sequential**: an SSYNC scheduler that activates exactly one robot per round, fairly; which robot is the adversary's choice unless the activation order is fixed (see the order axis)."
+        },
+        {
+          "id": "fsync",
+          "level": 2,
+          "label": "fully synchronous (FSYNC)",
+          "short": "FSYNC",
+          "definition": "**FSYNC**: in every round every robot executes one atomic Look–Compute–Move cycle."
+        }
+      ],
+      "origin": "The schedulers come from robots in the plane (see the plane model). On graphs gathering was posed under ASYNC [Klasing2008Ring]. A sequential scheduler activates one robot at a time, so no two robots with the same snapshot move together; it was used for universal pattern formation in the plane, as reported by [Navarra2025Oblivious], and on rings, where a general sequential scheduler still defeats every algorithm for $k \\ge 3$ robots without multiplicity detection, while round robin does not [Navarra2025Oblivious]."
+    },
+    {
+      "id": "order",
+      "name": "Activation order",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any order the scheduler chooses",
+          "short": "any order",
+          "definition": "The adversary chooses which robots to activate, subject only to the scheduler's fairness."
+        },
+        {
+          "id": "round-robin",
+          "level": 1,
+          "label": "round robin: one robot per round in a fixed cyclic order",
+          "short": "round robin",
+          "definition": "With the sequential scheduler: the robots are activated one per round in a cyclic order that the adversary fixes at the start, that the robots do not know, and that repeats forever; an epoch is $k$ consecutive rounds, one activation per robot."
+        }
+      ],
+      "origin": "Navarra and Piselli took round robin from work on distinct gathering in the plane (as they report) to rings, where it separates the solvable from the unsolvable: under a general sequential scheduler gathering is impossible for $k \\ge 3$ robots without multiplicity detection, under round robin it is characterised [Navarra2025Oblivious]. Cicerone, Di Fonso, Di Stefano and Navarra call it favourable, since it breaks every symmetry by activating a single robot, and use it to compensate for the loss of multiplicity detection [Cicerone2025Gathering]; their algorithms for graphs that are not vertex-transitive also work if the order changes in every epoch [Cicerone2025NonVertexTransitive]. The order is a separate axis because round robin is a special case of the sequential scheduler only, and says nothing about FSYNC."
+    },
+    {
+      "id": "multiplicity",
+      "name": "Multiplicity detection",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "none: a tower looks like one robot",
+          "short": "no multiplicity detection",
+          "definition": "A snapshot shows which nodes are occupied, not how many robots each holds."
+        },
+        {
+          "id": "weak",
+          "level": 1,
+          "label": "global weak: a robot sees which nodes are towers",
+          "short": "weak detection",
+          "definition": "A snapshot marks every occupied node as holding one robot or more than one."
+        },
+        {
+          "id": "strong",
+          "level": 2,
+          "label": "global strong: a robot sees how many robots each node holds",
+          "short": "strong detection",
+          "definition": "A snapshot gives the number of robots on every node."
+        }
+      ],
+      "origin": "Klasing, Markou and Pelc proved that without multiplicity detection $k \\ge 2$ robots cannot gather on any ring, and assumed the weak form [Klasing2008Ring]. Cicerone, Di Fonso, Di Stefano and Navarra note that most work assumes some multiplicity detection and starts without towers, and drop both under round robin [Cicerone2025Gathering] [Cicerone2025NonVertexTransitive]. Strong detection is used where robots must count, as in gathering at a meeting node that minimises the total distance despite crashes [Maiti2026When]. Local forms, in which a robot sees only the multiplicity of its own node, are stated per result."
+    },
+    {
+      "id": "network",
+      "name": "Network",
+      "values": [
+        {
+          "id": "arbitrary",
+          "level": 0,
+          "label": "any connected graph",
+          "short": "any graph",
+          "definition": "Any connected anonymous graph, finite unless stated; robots see it whole but share no orientation."
+        },
+        {
+          "id": "ring",
+          "level": 1,
+          "label": "ring",
+          "short": "ring",
+          "definition": "An anonymous, unoriented ring of $n$ nodes."
+        },
+        {
+          "id": "complete",
+          "level": 1,
+          "label": "complete graph",
+          "short": "complete graph",
+          "definition": "$K_n$: every two nodes are neighbours."
+        },
+        {
+          "id": "hypercube",
+          "level": 1,
+          "label": "hypercube",
+          "short": "hypercube",
+          "definition": "The hypercube of dimension $\\log n$: nodes are the $n$ binary strings of length $\\log n$, neighbours when they differ in one bit. Its diameter is $D = \\log n$."
+        },
+        {
+          "id": "infinite-grid",
+          "level": 1,
+          "label": "infinite square grid",
+          "short": "infinite grid",
+          "definition": "The infinite square grid: nodes are the points of $\\mathbb Z^2$, neighbours at Manhattan distance one; finitely many robots."
+        },
+        {
+          "id": "finite-grid",
+          "level": 1,
+          "label": "finite grid",
+          "short": "finite grid",
+          "definition": "An anonymous $a \\times b$ grid without orientation: nodes are the points $(i, j)$ with $1 \\le i \\le a$ and $1 \\le j \\le b$, neighbours at distance one."
+        },
+        {
+          "id": "tree",
+          "level": 1,
+          "label": "tree",
+          "short": "tree",
+          "definition": "An anonymous tree of $n$ nodes without orientation."
+        },
+        {
+          "id": "non-vertex-transitive",
+          "level": 1,
+          "label": "finite graphs that are not vertex-transitive",
+          "short": "not vertex-transitive",
+          "definition": "A finite connected graph whose nodes fall into at least two **orbits**, an orbit being a class of nodes that automorphisms of $G$ map onto each other."
+        }
+      ],
+      "origin": "Gathering was solved graph class by graph class: rings first [Klasing2008Ring], then trees, finite and infinite grids, tori, hypercubes, complete and complete bipartite graphs and butterflies, as listed in [Cicerone2025NonVertexTransitive]. On finite grids and trees no multiplicity detection is needed: in ASYNC every start can be gathered unless a symmetry of the graph and the robots forbids it [DAngelo2016Gathering]. Classes matter through their symmetries: the more automorphisms a graph has, the fewer nodes robots can tell apart. Under round robin without multiplicity detection, every start on a graph that is not vertex-transitive can be gathered [Cicerone2025NonVertexTransitive], vertex- and edge-transitive graphs need algorithms specific to the class, and complete graphs cannot be gathered at all [Cicerone2025Gathering]. This axis replaces the model's topology axis because the infinite grid and the graphs that are not vertex-transitive are not among the model's values."
+    }
+  ],
+  "variants": [
+    {
+      "id": "ring-rr",
+      "title": "Rings, round robin, no multiplicity detection",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "Under round robin, robots that cannot see towers gather on a ring from every start except a few listed ones, in at most $n-3$ epochs, which is optimal up to a constant factor.",
+      "statement": "Towers may exist at the start and are invisible. The unsolvable starts are those whose occupied nodes are exactly two adjacent nodes or three consecutive nodes, those with every node occupied, and on the 5-node ring some starts with three or four occupied nodes [Navarra2025Oblivious].",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Navarra2025Oblivious",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "$k \\ge 3$ robots whose occupied nodes are exactly two adjacent nodes, three consecutive nodes, or all $n$ nodes (Theorem III.2)",
+            "on the 5-node ring with $k \\ge 5$ robots: three occupied nodes with a tower next to another occupied node (Theorem III.3), or four occupied nodes (Corollary III.1)",
+            "the adversary chooses where the hidden towers are and the cyclic order; on two adjacent occupied nodes every robot must move to the other node (Lemma III.1), and an order that alternates between the two nodes never empties either"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Navarra2025Oblivious",
+          "bottleneck": "distance",
+          "preconditions": [
+            "a solvable start with $n-1$ occupied nodes, $n \\ge 6$: every node is at distance at least $\\lfloor n/2 \\rfloor - 1$ from some robot",
+            "under round robin a robot moves at most one edge per epoch",
+            "the paper argues with the fully occupied ring (Section V), which can be gathered only when it starts with one robot per node"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Navarra2025Oblivious",
+          "role": "best",
+          "time": "O(n)",
+          "assumes": [
+            "the start is not one of the unsolvable starts"
+          ],
+          "note": "Introductory and current best: at most $n-3$ epochs (Theorem V.1); no earlier round-robin result on rings was found. Read in the arXiv version (v2)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$n-3$ epochs against about $n/2$."
+        }
+      },
+      "open": [
+        "Which sequential schedulers between round robin and an arbitrary sequential scheduler still allow gathering on rings without multiplicity detection? [Navarra2025Oblivious] ask about other sequential schedulers; on graphs that are not vertex-transitive, a new order in every epoch suffices [Cicerone2025NonVertexTransitive]."
+      ],
+      "notes": "Navarra and Piselli build the algorithm from tasks that a robot recognises in its snapshot: first form two groups of consecutive occupied nodes separated by one empty node on one side and by at least two on the other; that empty node becomes the gathering node; then shrink the two groups onto its two neighbours and move the robots onto it. Round robin makes the last step safe: once the gathering node is fixed, every robot is activated once before any robot is activated again [Navarra2025Oblivious]. The same algorithm solves the setting with one robot per node at the start. Checked against the full text of [Navarra2025Oblivious] (arXiv v2).",
+      "status": "verified"
+    },
+    {
+      "id": "ring-rr-distinct",
+      "title": "Rings, round robin, one robot per node at the start",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "multiplicity": "none",
+        "initial": "dispersed",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "With one robot per node at the start, only three robots on three consecutive nodes and the full 4-node and 5-node rings cannot be gathered; every other start is gathered in at most $n-3$ epochs.",
+      "statement": "Every node holds at most one robot at the start; towers formed later are invisible. [Navarra2025Oblivious] call this *distinct gathering*.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Navarra2025Oblivious",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "three robots on three consecutive nodes, for every $n$ (Theorem III.2)",
+            "the 4-node and 5-node rings with every node occupied (Lemmas III.2, III.3)",
+            "the adversary chooses the cyclic order"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(n)",
+          "ref": "Navarra2025Oblivious",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the fully occupied ring with $n \\ge 6$: whatever the gathering node, some robot is at distance $\\lfloor n/2 \\rfloor$ from it (Section V)",
+            "a robot moves at most one edge per epoch"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Navarra2025Oblivious",
+          "role": "best",
+          "time": "O(n)",
+          "assumes": [
+            "the start is not one of the three unsolvable kinds"
+          ],
+          "note": "Introductory and current best as far as found: at most $n-3$ epochs (Theorem V.1), with the algorithm of the setting that allows towers at the start."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$n-3$ epochs against $\\lfloor n/2 \\rfloor$."
+        }
+      },
+      "open": [],
+      "notes": "Allowing towers at the start adds two adjacent occupied nodes, every node occupied and two kinds of starts on the 5-node ring to the unsolvable starts, since hidden towers can sit anywhere. Checked against the full text of [Navarra2025Oblivious] (arXiv v2).",
+      "status": "verified"
+    },
+    {
+      "id": "ring-sequential",
+      "title": "Rings, sequential scheduler, no multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential"
+      },
+      "summary": "If the scheduler may activate the robots one at a time in any fair order, $k \\ge 3$ robots that cannot see towers never gather on a ring.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Navarra2025Oblivious",
+          "bottleneck": "adversarial activation",
+          "preconditions": [
+            "$k \\ge 3$ (Theorem III.1)",
+            "just before gathering, all robots are on two adjacent nodes and one of them is a tower; every robot must move to the other node (Lemma III.1), and the adversary alternates between the two nodes"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "For every $k \\ge 3$."
+        }
+      },
+      "open": [],
+      "notes": "The proof uses only the last step of an execution, which also arises from starts with one robot per node; the paper states the result for starts that may contain towers. Round robin, which fixes the order, makes the problem solvable. Checked against the full text of [Navarra2025Oblivious] (arXiv v2).",
+      "status": "verified"
+    },
+    {
+      "id": "ring-ssync-blind",
+      "title": "Rings, SSYNC, no multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "multiplicity": "none",
+        "initial": "dispersed",
+        "scheduler": "ssync"
+      },
+      "summary": "Without multiplicity detection, $k \\ge 2$ robots cannot gather on any ring when the scheduler may activate several robots in the same round.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Klasing2008Ring",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "every $k \\ge 2$ and every ring, from some start with one robot per node (Proposition 2.1)",
+            "two robots at odd distance activated together stay at odd distance; with more robots, the adversary lets one robot create the first tower alone, after which the snapshots are those of $k-1$ robots, and induction applies",
+            "stated for ASYNC; the adversary's schedules are semi-synchronous, so the proof holds under SSYNC (not stated in the paper)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "For every $k \\ge 2$."
+        }
+      },
+      "open": [],
+      "notes": "Proposition 2.1 is why [Klasing2008Ring] assume multiplicity detection. Round robin avoids the impossibility for most starts [Navarra2025Oblivious]. Checked against the model section and the proof of Proposition 2.1 in [Klasing2008Ring].",
+      "status": "verified"
+    },
+    {
+      "id": "ring-async-weak",
+      "title": "Rings, ASYNC, weak multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "ring",
+        "multiplicity": "weak",
+        "initial": "dispersed",
+        "scheduler": "async"
+      },
+      "summary": "With weak multiplicity detection, an odd number of asynchronous robots gathers on a ring exactly from the starts that are not periodic; two robots never gather.",
+      "statement": "Starts have one robot per node. A start is **periodic** if a rotation of the ring other than the identity maps the occupied nodes onto themselves.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Klasing2008Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "periodic starts (Theorem 3.1)",
+            "starts of an even number of robots on a ring of even size that are symmetric about an axis through the middles of two edges (Theorem 3.2)",
+            "the adversary activates all robots together, so the symmetry persists; holds even under FSYNC"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Klasing2008Ring",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "$k = 2$, from a start at odd distance (Proposition 2.1)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "DEmidio2018Characterizing",
+          "bottleneck": "asynchrony",
+          "preconditions": [
+            "$k = 4$ robots on a ring of 7 nodes, from a symmetric start whose axis passes through a node (start (i) of their Fig. 3; Theorem 3.5)",
+            "computer-assisted: Lemmas 3.2–3.4 restrict the moves any algorithm may make, and all 57 600 remaining strategies were explored and fail",
+            "the same robots gather in SSYNC (Theorem 4.2), so asynchrony is the obstacle"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Klasing2008Ring",
+          "role": "introductory",
+          "time": "\\text{finite}",
+          "assumes": [
+            "odd $k \\ge 3$",
+            "the start is not periodic"
+          ],
+          "note": "Theorem 6.1; with Theorem 3.1 this settles odd $k$. Time is not analysed. For even $k$ the paper leaves open the symmetric starts whose axis passes through a node (Section 7)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Time not analysed in [Klasing2008Ring]; later work on even $k$ was not read."
+        }
+      },
+      "open": [
+        "Even $k$: which symmetric starts whose axis passes through a node can be gathered? Left open by [Klasing2008Ring]; four robots on rings of seven and nine nodes cannot gather from some of them [DEmidio2018Characterizing], and the proofs do not extend to other ring sizes. Later ring papers listed in [Cicerone2025NonVertexTransitive] were not read here."
+      ],
+      "notes": "Read: the model section, Proposition 2.1, Theorems 3.1, 3.2 and 6.1 and the conclusion of [Klasing2008Ring]; the algorithms were not checked in detail. D'Emidio, Di Stefano, Frigioni and Navarra show, with a computer-assisted search, that four robots on a ring of seven nodes cannot gather in ASYNC from a symmetric start whose axis passes through a node (Theorem 3.5), which disproves conjectures of [Klasing2008Ring] and of Koren about which starts can be gathered; four robots on nine nodes are ungatherable too (the IWOCA 2015 version, as reported), and the unified ring algorithm of D'Angelo, Di Stefano and Navarra, which delegates four robots to Koren's algorithm, does not cover these starts [DEmidio2018Characterizing]. On rings, FSYNC robots are strictly stronger than SSYNC ones, which are strictly stronger than ASYNC ones: four robots on a ring of five nodes gather in FSYNC but not in SSYNC (Theorem 4.1, Corollary 4.3). Model checking found deadlocks in the ring-gathering algorithm of D'Angelo, Di Stefano and Navarra (Distributed Computing 2014) for symmetric configurations with two multiplicities [Doan2018Model].",
+      "status": "draft"
+    },
+    {
+      "id": "non-vertex-transitive-rr",
+      "title": "Graphs that are not vertex-transitive, round robin",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "non-vertex-transitive",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "Under round robin, robots that cannot see towers gather from every start on a finite graph that is not vertex-transitive; time is optimal when the graph has a terminal orbit.",
+      "statement": "An orbit $O$ is **terminal** if every node of $O$ can be reached from every node outside $O$ by a path that meets $O$ only at its end. $\\ell$ is the number of initially occupied nodes and $d$ the largest distance between two of them. Robots compute the orbits from their snapshot by canonical labelling of the graph.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(d)",
+          "ref": "Cicerone2025NonVertexTransitive",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the two robots at distance $d$ must meet, and each moves at most one edge per epoch (Lemma 1)",
+            "for a worst-case start, $d = D$"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cicerone2025NonVertexTransitive",
+          "role": "best",
+          "time": "O(\\ell\\,d + n)",
+          "assumes": [
+            "unbounded local computation (canonical labelling of the snapshot)"
+          ],
+          "note": "Introductory and current best (Theorem 5, graphs without a terminal orbit). With a terminal orbit, a simple algorithm gathers in $O(D)$ epochs (Theorem 1): robots leave the smallest terminal orbit until one of its nodes is occupied, then all walk to that node without entering the orbit elsewhere. Graphs with a universal node, a cut node or an orbit of twins have a terminal orbit (Theorem 3); butterflies and a family of circular graphs have none (Theorem 4). The algorithms also work if the adversary changes the order in every epoch. Read in the arXiv version (v1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Factor $\\ell$, plus an additive $n$, without a terminal orbit; $\\Theta(D)$ in the worst case with one."
+        }
+      },
+      "open": [
+        "Can robots gather in $O(d)$ epochs on every graph that is not vertex-transitive and has no terminal orbit? Asked in [Cicerone2025NonVertexTransitive]."
+      ],
+      "notes": "There are no unsolvable starts: the orbits of the graph, which every robot computes, break the symmetry that defeats robots on rings. Checked against the full text of [Cicerone2025NonVertexTransitive] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "hypercube-rr",
+      "title": "Hypercubes, round robin",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "hypercube",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "On hypercubes of dimension at least 3, robots that cannot see towers gather under round robin in $O(\\log n)$ epochs from every start except two adjacent occupied nodes, three occupied nodes forming a path, and every node occupied.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Cicerone2025Gathering",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "starts whose occupied nodes are two adjacent nodes or all $n$ nodes (Theorem 1, for every vertex- and edge-transitive graph)",
+            "starts whose occupied nodes form a path of three nodes (Corollary 1): every algorithm must reach an empty node with all robots on its neighbours (Theorem 3) and then a path of three occupied nodes, and in a hypercube all such paths look alike",
+            "the adversary chooses the hidden towers and the order"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\log n)",
+          "ref": "Cicerone2025Gathering",
+          "bottleneck": "distance",
+          "preconditions": [
+            "two robots at distance $D = \\log n$ must meet, and each moves at most one edge per epoch (Lemma 1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cicerone2025Gathering",
+          "role": "best",
+          "time": "O(\\log n)",
+          "assumes": [
+            "dimension at least 3",
+            "the start is not one of the unsolvable ones"
+          ],
+          "note": "Introductory and current best (Theorem 4): the algorithm shrinks the smallest subcube containing all robots by one dimension at a time, in $O(1)$ epochs per dimension. Preprint. Read in the arXiv version (v1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(\\log n)$ epochs."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of [Cicerone2025Gathering] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "infinite-grid-rr",
+      "title": "Infinite grid, round robin",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "infinite-grid",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "On the infinite grid, robots that cannot see towers gather under round robin in a number of epochs linear in their largest distance, from every start except two adjacent occupied nodes and one kind of three-node path.",
+      "statement": "$d$ is the largest distance between two initially occupied nodes.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Cicerone2025Gathering",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "two adjacent occupied nodes (Theorem 1)",
+            "one of the two kinds of three-node paths must also be excluded (Corollary 1): the algorithm of Theorem 5 excludes three occupied nodes of a $2 \\times 2$ square; a variant that is only sketched excludes three consecutive nodes of a row instead (Theorem 6)"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(d)",
+          "ref": "Cicerone2025Gathering",
+          "bottleneck": "distance",
+          "preconditions": [
+            "the two robots at distance $d$ must meet, and each moves at most one edge per epoch (proof of Lemma 1)"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cicerone2025Gathering",
+          "role": "best",
+          "time": "O(d)",
+          "assumes": [
+            "the start is neither two adjacent occupied nodes nor three occupied nodes of a $2 \\times 2$ square"
+          ],
+          "note": "Introductory and current best (Theorem 5): shrink the smallest rectangle enclosing the robots, keeping a corner empty, down to two opposite nodes of a $2 \\times 2$ square, then gather on one of its two empty nodes within one epoch. Stated as $O(n+m)$ epochs for the $m \\times n$ enclosing rectangle (their $m$, $n$ count rows and columns), which is $O(d)$. Preprint. Read in the arXiv version (v1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(d)$ epochs."
+        }
+      },
+      "open": [],
+      "notes": "The characterisation of Theorem 6 (exactly one of the two kinds of three-node paths must be excluded) depends on the sketched variant of the algorithm. Checked against the full text of [Cicerone2025Gathering] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "grid-async-blind",
+      "title": "Finite grids, ASYNC, no multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "multiplicity": "none",
+        "initial": "dispersed",
+        "scheduler": "async",
+        "network": "finite-grid"
+      },
+      "summary": "On a finite grid, ASYNC robots that cannot see towers gather from every start except those invariant under a rotation of a grid with an even side, those symmetric about an axis through edges, and every start on the $2 \\times 2$ grid.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "DAngelo2016Gathering",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "starts invariant under a rotation by 90 or 180 degrees about the centre of the grid, or symmetric about an axis that passes through edges (Theorem 2); on a grid with both sides odd the centre is a node and every start is solvable (Theorem 1)",
+            "every start with two or more occupied nodes on the $2 \\times 2$ grid, which behaves as a ring of four nodes (Theorem 4)",
+            "the adversary activates symmetric robots together, so every move keeps the symmetry"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DAngelo2016Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "the start is not one of the unsolvable ones"
+          ],
+          "note": "Introductory and current best (Theorems 1, 3 and 5): on a grid with both sides odd every robot moves to the central node; otherwise the robots read the configuration as strings from the corners and agree on a gathering node, which stays the same while robots move toward it, and towers formed on the way do no harm. Time is not analysed."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Finite time only; no bound on epochs is recorded."
+        }
+      },
+      "open": [
+        "How many epochs does gathering on finite grids without multiplicity detection take?"
+      ],
+      "notes": "D'Angelo, Di Stefano, Klasing and Navarra show that the unsolvable starts are exactly those listed here: a start is unsolvable if and only if it is invariant under a rotation on a grid with at least one even side, symmetric about an axis through edges, or on the $2 \\times 2$ grid (Section 5). With local multiplicity detection the $2 \\times 2$ grid can be gathered exactly from the starts with three occupied nodes (Theorem 4). On rings no robots gather without multiplicity detection [Klasing2008Ring]; on grids and trees they do. Checked against the full text of [DAngelo2016Gathering].",
+      "status": "verified"
+    },
+    {
+      "id": "tree-async-blind",
+      "title": "Trees, ASYNC, no multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "multiplicity": "none",
+        "initial": "dispersed",
+        "scheduler": "async",
+        "network": "tree"
+      },
+      "summary": "On a tree, ASYNC robots that cannot see towers gather from every start except those in which removing the edge between the two centres leaves two isomorphic halves, robots included.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "DAngelo2016Gathering",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "a tree with two centres such that removing the edge between them leaves two subtrees that are isomorphic, occupied nodes mapped to occupied nodes (Theorem 6)",
+            "every move of a robot in one subtree may be mirrored by the adversary in the other, so the robots never pick one node"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "DAngelo2016Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "the start is not one of the unsolvable ones"
+          ],
+          "note": "Introductory and current best (Section 4): if the tree has one centre, every robot moves to it. With two centres, removing the edge between them splits the tree into two subtrees; the robots of the subtree with fewer occupied nodes move to the other centre, and once their subtree is empty all robots move there. When both subtrees hold as many occupied nodes, a string encoding of the subtrees with their robots picks the side whose robots move first, which breaks the tie. Time is not analysed."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Finite time only; no bound on epochs is recorded."
+        }
+      },
+      "open": [],
+      "notes": "The unsolvable starts of Theorem 6 are the only ones: every other start on a tree is gathered without multiplicity detection (Section 5 of [DAngelo2016Gathering]). Checked against the full text of [DAngelo2016Gathering].",
+      "status": "verified"
+    },
+    {
+      "id": "complete-rr",
+      "title": "Complete graphs, round robin",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "complete",
+        "multiplicity": "none",
+        "initial": "arbitrary",
+        "scheduler": "sequential",
+        "order": "round-robin"
+      },
+      "summary": "On a complete graph, robots that cannot see towers never gather under round robin once two nodes are occupied.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Cicerone2025Gathering",
+          "bottleneck": "indistinguishable multiplicities",
+          "preconditions": [
+            "every start with at least two occupied nodes (Theorem 2)",
+            "a robot can only move to an occupied or to an empty node, all alike; moving to empty nodes eventually occupies every node (unsolvable by Theorem 1), and with a hidden tower on every occupied node the adversary's order never empties a node",
+            "the same holds on complete bipartite graphs with equal sides when both sides are occupied (Theorem 2)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "From every start with two or more occupied nodes."
+        }
+      },
+      "open": [],
+      "notes": "With all robots on one side of a complete bipartite graph, one epoch suffices: the first robot crosses and every later one joins it [Cicerone2025Gathering]. Checked against the full text of [Cicerone2025Gathering] (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "complete-fsync-strong",
+      "title": "Complete graphs, FSYNC, strong multiplicity detection",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "network": "complete",
+        "multiplicity": "strong",
+        "initial": "dispersed",
+        "scheduler": "fsync"
+      },
+      "summary": "On a complete graph, FSYNC robots that start on distinct nodes and see how many robots each node holds gather exactly when the least prime factor of $k$ exceeds the number $n-k$ of empty nodes, in $O(\\log k)$ epochs.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Cicerone2021Gathering",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "every start with $k = n$, and every start in which the least prime factor $p$ of $k$ is at most $n-k$ (Theorems 1 and 10)",
+            "all nodes of a complete graph look alike, so an algorithm must send moving robots to empty nodes (Corollary 3); the adversary sends them to $p$ empty nodes, $k/p$ robots on each, and every later move rebuilds such a configuration",
+            "holds even with strong multiplicity detection and FSYNC"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(\\log k)",
+          "ref": "Cicerone2021Gathering",
+          "bottleneck": "symmetric splitting",
+          "preconditions": [
+            "a complete graph with $F_{\\ell+1}$ nodes and $k = F_\\ell$ robots, $F_\\ell$ a Fibonacci number, on distinct nodes (Theorem 16, Corollary 17)",
+            "the adversary keeps the nodes in classes of equivalent nodes, each of Fibonacci size and holding equal towers, and the smallest class loses at most two Fibonacci indices per round",
+            "by Theorem 10 this start is solvable only when $F_\\ell$ is prime"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Cicerone2021Gathering",
+          "role": "best",
+          "time": "O(\\log k)",
+          "assumes": [
+            "the start is not one of the unsolvable ones"
+          ],
+          "note": "Introductory and current best (Theorems 10 and 11): in the first round every robot moves to an empty node; from then on, the robots outside the smallest class of nodes holding equal towers (the class of larger towers on a tie) move into it. As $p > n-k$, two classes remain until all robots are on one node, and the adversary can do no better than halve the class each round, so $O(\\log(n-k)) = O(\\log k)$ rounds."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "near",
+          "note": "$O(\\log k)$ against $\\Omega(\\log k)$ for $k$ a Fibonacci prime: a $\\log k$ factor for other $k$. [Cicerone2021Gathering] call the algorithm asymptotically optimal (Corollary 18), but their lower-bound starts are solvable only when $k = F_\\ell$ is prime, and it is not known whether there are infinitely many Fibonacci primes. Own observation of this catalogue, not taken from a paper."
+        }
+      },
+      "open": [
+        "Does every algorithm need $\\Omega(\\log k)$ epochs on complete graphs for infinitely many $k$, without assuming infinitely many Fibonacci primes? The lower bound of [Cicerone2021Gathering] uses $k = F_\\ell$ robots and $F_{\\ell-1}$ empty nodes, solvable only when $F_\\ell$ is prime."
+      ],
+      "notes": "Cicerone, Di Stefano and Navarra also give a condition for general graphs: a start of $k$ SSYNC robots with strong multiplicity detection is solvable if the graph has a minimal recognizable subgraph $H$ (an induced subgraph that every automorphism maps onto itself, minimal with this property) whose number of connected components and their size are both smaller than the least prime factor of $k$ (Theorem 9). On complete bipartite graphs with $k_1$ and $k_2$ robots on the two sides, they characterise the solvable starts for FSYNC robots (Theorem 13; for instance, every start with both sides occupied and $k_1$, $k_2$ coprime) and gather in $O(\\log k + \\delta(k))$ rounds, $\\delta(k)$ the number of divisors of $k$ (Corollary 14). Diameter is the general lower bound on time. Checked against the full text of [Cicerone2021Gathering] (journal pre-proof).",
+      "status": "verified"
+    }
+  ],
+  "figure": {
+    "caption": "Gathering on a tree by asynchronous oblivious robots that cannot see towers, the algorithm of [DAngelo2016Gathering]: this tree has two centres, $c_1$ and $c_2$, and removing the edge between them (dashed) leaves two halves. The robots of the half with fewer occupied nodes walk towards the other centre while the others wait; when that half is empty, every robot walks to $c_2$. A tower looks like a single robot, which only lowers the count of the half that is emptying, so the robots never change their choice. One Move per frame, in an order chosen by the scheduler.",
+    "view": [
+      100,
+      50
+    ],
+    "graph": {
+      "nodes": {
+        "c1": [
+          42,
+          26
+        ],
+        "c2": [
+          58,
+          26
+        ],
+        "x1": [
+          28,
+          36
+        ],
+        "x2": [
+          14,
+          44
+        ],
+        "y1": [
+          28,
+          14
+        ],
+        "z1": [
+          72,
+          36
+        ],
+        "z2": [
+          86,
+          44
+        ],
+        "w1": [
+          72,
+          14
+        ]
+      },
+      "edges": [
+        [
+          "c1",
+          "c2"
+        ],
+        [
+          "c1",
+          "x1"
+        ],
+        [
+          "x1",
+          "x2"
+        ],
+        [
+          "c1",
+          "y1"
+        ],
+        [
+          "c2",
+          "z1"
+        ],
+        [
+          "z1",
+          "z2"
+        ],
+        [
+          "c2",
+          "w1"
+        ]
+      ]
+    },
+    "frames": [
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "x2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "y1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 2, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "Start: two centres; the left half has fewer occupied nodes (2 against 3)"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "x2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 2, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "x1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 2, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 1, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "A tower forms, but it looks like one robot: the left half shows 1 occupied node"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 1, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 0, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "The left half is empty: now the right half walks to its centre"
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "w1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 0, right 3",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "3",
+            "at": "z1",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "4",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "accent"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 0, right 2",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ]
+      },
+      {
+        "ents": [
+          {
+            "id": "1",
+            "at": "c2",
+            "k": "robot",
+            "c": "tight"
+          },
+          {
+            "id": "2",
+            "at": "c2",
+            "k": "robot",
+            "c": "tight"
+          },
+          {
+            "id": "3",
+            "at": "c2",
+            "k": "robot",
+            "c": "tight"
+          },
+          {
+            "id": "4",
+            "at": "c2",
+            "k": "robot",
+            "c": "tight"
+          },
+          {
+            "id": "5",
+            "at": "c2",
+            "k": "robot",
+            "c": "tight"
+          }
+        ],
+        "marks": [
+          {
+            "t": "line",
+            "p": [
+              [
+                42,
+                26
+              ],
+              [
+                58,
+                26
+              ]
+            ],
+            "c": "muted",
+            "w": 0.8,
+            "dash": true
+          },
+          {
+            "t": "text",
+            "p": [
+              50,
+              47
+            ],
+            "s": "occupied nodes in the snapshot: left 0, right 1",
+            "c": "muted",
+            "size": 2.7
+          },
+          {
+            "t": "text",
+            "p": [
+              42,
+              21
+            ],
+            "s": "c1",
+            "c": "muted",
+            "size": 2.6
+          },
+          {
+            "t": "text",
+            "p": [
+              58,
+              21
+            ],
+            "s": "c2",
+            "c": "muted",
+            "size": 2.6
+          }
+        ],
+        "label": "Final: all robots on one node"
+      }
+    ]
+  },
+  "further": [
+    {
+      "ref": "Maiti2026When",
+      "note": "Asynchronous oblivious robots on the infinite grid, with no common orientation or chirality, global visibility and global strong multiplicity detection, starting on distinct nodes, must gather despite up to $k-2$ crash faults at a meeting node (one of finitely many designated nodes) that minimises the sum of distances from the initial positions (their $n$ is $k$ here): impossible from some symmetric starts when the robots on the axis or at the centre of symmetry crash (Theorem 1) and, by the authors' argument, with only weak multiplicity detection even under FSYNC (Theorem 2); an algorithm gathers the robots that do not crash from every other start in finite time (Theorem 3); time is not analysed. Preprint. Read."
+    },
+    {
+      "ref": "Maiti2026Surplus",
+      "note": "Surplus parking gathering on the infinite grid: asynchronous oblivious disoriented robots with global strong multiplicity detection, starting on distinct nodes, must fill designated parking nodes exactly to given capacities and gather all other robots at one node; unsolvable starts, mostly adapted from parking and meeting-node gathering (Theorems 1–5, Corollaries 1, 2), an algorithm for every other start (Theorem 6), and a number of moves of the order of $k$ times the perimeter of the smallest rectangle enclosing the robots, plus $k^2$, against a worst case of $k$ times that perimeter (Theorems 7, 8; their $n$ is $k$ here). Preprint. Read."
+    },
+    {
+      "ref": "Kamei2025Rings",
+      "note": "Gathering on rings by myopic ASYNC robots with lights: feasible with three or four colours whenever one of two parameters of the initial configuration is odd. Abstract read."
+    },
+    {
+      "ref": "Goswami2025Time",
+      "note": "Oblivious robots on the infinite triangular grid that see only adjacent nodes: gathering is impossible without agreement on an axis, even under FSYNC (Theorem 1); every algorithm takes $\\Omega(k)$ epochs (Theorem 3; their $n$ is $k$ here); with one axis agreed and SSYNC, $O(k)$ epochs suffice (Theorem 4). Read (arXiv v4)."
+    },
+    {
+      "ref": "Doan2018Model",
+      "note": "A Maude model of oblivious ASYNC robots on rings with multiplicity detection; model checking the gathering algorithm of D'Angelo, Di Stefano and Navarra (Distributed Computing 2014) finds counterexamples in which the robots deadlock. Read (LIPIcs version)."
+    },
+    {
+      "ref": "Gupta2024Tolerance",
+      "note": "The triangular-grid gathering algorithm of Goswami et al. [Goswami2025Time] is lattice-linear, so it also works under ASYNC and with robots that see in one direction only. Read (arXiv v2)."
+    },
+    {
+      "ref": "Bhagat2022Meeting",
+      "note": "Asynchronous oblivious robots in the infinite grid must gather at one of some marked meeting nodes: unsolvable configurations characterised, an algorithm for the others, and a lower bound on the number of moves. Abstract read."
+    },
+    {
+      "ref": "Goswami2023Rendezvous",
+      "note": "Two fully synchronous oblivious robots entering a finite unoriented grid through a corner must meet at a resource that moves until a robot reaches it: an algorithm, a time lower bound, and impossibility under a semi-synchronous scheduler. A brief announcement; abstract read."
+    },
+    {
+      "ref": "Bose2017Crash",
+      "note": "Crash-tolerant gathering on a finite grid by ASYNC oblivious robots with weak multiplicity detection. Abstract read."
+    },
+    {
+      "ref": "Kamei2022Asynchronous",
+      "note": "Gathering on a torus by ASYNC oblivious robots with local weak multiplicity detection. Abstract read."
+    },
+    {
+      "ref": "Castenow2020Gathering",
+      "note": "Gathering on the grid by oblivious robots with constant viewing radius and no compass, faster than the $O(n^2)$ rounds of the Euclidean algorithm. Abstract read."
+    },
+    {
+      "ref": "CordLandwehr2016Asymptotically",
+      "note": "Local gathering of a connected swarm on the grid into a $2\\times 2$ area in $O(n)$ FSYNC rounds, which is optimal, with constant vision and no compass. Abstract read."
+    },
+    {
+      "ref": "Abshoff2016Gathering",
+      "note": "A closed chain of robots on the grid, which must stay connected, is gathered into a $2\\times 2$ area with local vision in FSYNC. Abstract read."
+    },
+    {
+      "ref": "Chakraborty2024MinMax",
+      "note": "Gathering on the infinite grid while minimising the largest distance any robot travels: unsolvable configurations characterised and an algorithm for the rest. Abstract read."
+    },
+    {
+      "ref": "Shibata2022Visibilityoptimal",
+      "note": "Gathering of seven robots on a triangular grid into a hexagon: the visibility range needed. Abstract read."
+    },
+    {
+      "ref": "Bramas2024Standup",
+      "note": "Stand-up indulgent gathering on rings: if robots crash at one node, the others must gather there. Abstract read."
+    },
+    {
+      "ref": "DAngelo2016Unified",
+      "note": "A unified approach to gathering and exclusive searching on rings by ASYNC oblivious robots, for more initial configurations than earlier work. Abstract read."
+    },
+    {
+      "ref": "Cicerone2025Optimal",
+      "note": "Gathering on butterfly networks by FSYNC robots with weak multiplicity detection (global), starting on distinct nodes. A placement-based leader election works exactly in the leader configurations, where one robot can be told apart, through an embedding of the butterfly in the plane; from every such start the robots gather in $\\Theta(\\log n)$ epochs on a butterfly with $n$ nodes (Theorem 1; their $\\Theta(d)$, $d$ the dimension), which is optimal. Read in full."
+    },
+    {
+      "ref": "Ooshita2015Selfstabilization",
+      "note": "Self-stabilizing gathering on rings, from every start, towers included. No randomized algorithm gathers from every such start in ASYNC, even with strong multiplicity detection on an oriented ring (Theorem 1), nor in SSYNC with only local strong and global weak detection (Theorem 2); so the usual assumption that robots start on distinct nodes is a strong one. With global strong detection, a randomized SSYNC algorithm gathers in $O(n\\log k)$ expected rounds and $O(kn)$ expected moves (Theorem 3), and also orients the ring and forms sets of nodes (Theorems 4, 5). Read (model and theorems)."
+    }
+  ]
+}
