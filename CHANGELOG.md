@@ -3,6 +3,67 @@
 What changed in each version of the atlas, newest first. Versions are dated; the website
 footer and the book's title page show the current one.
 
+## 2026-11-11 — A new home page and a new address
+
+The atlas now lives at https://debasishpattanayak.com/mobility-matters/; the old address
+redirects there.
+
+### Site and book
+
+- **Home page.** The home page opens with a drawing of a problem as a graph of settings,
+  the counts of the atlas and how close its bounds are. Each model has a row with its
+  families and problems, and the six highest-ranked open questions are listed before the
+  perspectives, which are numbered in reading order.
+- **Address.** The citation, the BibTeX entry, the book and the metadata for search
+  engines give the new address.
+- **Simulator.** The pages of convergence, gathering, circle formation and uniform circle
+  formation embed runs of the LCM Simulator: the centre-of-gravity rule, go-to-centre with
+  limited visibility, gathering under a sequential scheduler, the smallest enclosing circle
+  and uniform circle formation. The book links to the same runs.
+- **Book.** Perspectives open with a drop cap and close with an ornament; each part has a
+  drawing on its title page and a coloured tab on the outer edge of its pages; each problem
+  carries the glyph of its model beside its section number; the title page shows a problem
+  as a graph of settings.
+- **Perspectives.** Each perspective now reads as one continuous essay, on the site and in
+  the book: the headings inside it are gone. The ranked list of open problems keeps its
+  numbered headings.
+- **Citations in the book.** Neighbouring citations share one pair of parentheses, and every
+  bibliography entry ends with the pages that cite it.
+
+### New problems
+
+- **Search with segment visibility.** Robots start at one point of the plane and find a target
+  when it lies on the segment joining two of them (Kranakis, a preprint; 4 settings). With
+  $k \ge 3$ robots the optimal competitive ratio is exactly $\sec(\pi/k)$, with or without
+  knowing the distance; two robots that know the distance need exactly $1+\sqrt3+\pi/6$, and
+  for two robots that do not, the ratio lies between about 3.29 and 8.93.
+
+### New settings and results
+
+- **Treasure hunt.** A preprint of Xin finds a treasure that may appear after the agent starts
+  within $O(n^{\theta}\log n\,(\log\log n)^{1+\varepsilon})$ steps on graphs whose nodes all
+  have the same degree, against $O(n^{\theta(1+1/a)})$ before. All three bounds of the setting
+  now state that they are proved for such graphs.
+- **Exploration of temporal graphs with a known schedule.** Bastide, Groenland, Michel,
+  Rambaud and Smolarova (a preprint) bound exploration by $O(n^{3/2}\sqrt{\overline{\Delta}\log n})$
+  in the average temporal maximum degree $\overline{\Delta}$: $O(n^{3/2}\sqrt{\log n})$ for
+  bounded degree and for planar underlying graphs.
+
+### Corrections
+
+- **Temporal exploration.** Bounds quoted from Bastide et al. had the logarithm outside the
+  square root; they read $\sqrt{\Delta\log n}$. The planar $\Omega(n\log n)$ example has
+  maximum degree 3 and path snapshots, not maximum degree 4.
+
+### References
+
+- Saxena, Molla, Mondal and Sharma's exploration of dynamic graphs under a semi-synchronous
+  scheduler is now cited by its DISC 2026 version, *Dynamic Graph Exploration: Semi-Synchrony
+  and Dynamic Port Labeling*.
+- Two preprints follow their new arXiv versions: Sudo et al. is now titled *Online Graph
+  Exploration under T-Interval Connectivity*, and the rendezvous paper on variable
+  disorientation lists Wada first.
+
 ## 2026-11-02 — Every version of every paper, eight new problems
 
 References now list every version of a paper with its own links, eight problems are new,

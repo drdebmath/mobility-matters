@@ -227,34 +227,47 @@
         "direction": "undirected",
         "graph-size": "finite"
       },
-      "summary": "If the treasure is present from the start, concatenating universal traversal sequences finds it in polynomial time; if it may appear later, explicit solutions need backtracking and are polynomial with a huge exponent.",
+      "summary": "If the treasure is present from the start, concatenating universal traversal sequences finds it in polynomial time; if it may appear later, explicit solutions need backtracking and take the length of a universal exploration sequence, polynomial with a huge exponent, times a polylogarithmic factor.",
       "lower_bounds": [],
       "results": [
         {
           "ref": "TaShma2014Deterministic",
           "role": "introductory",
           "time": "O(n^{2\\theta})",
-          "note": "Theorem 3.2: an infinite strongly universal exploration sequence with cover time $O(n^{2\\theta})$, $\\theta$ the exponent of Reingold's universal exploration sequences; explicit when those are.",
+          "note": "Theorem 3.2: an infinite strongly universal exploration sequence with cover time $O(n^{2\\theta})$, $\\theta$ the exponent of Reingold's universal exploration sequences; explicit when those are. Proved for $\\Delta$-regular graphs; arbitrary degrees are reduced to them by adding self-loops up to degree $n$ (Section 1.5), which needs sequences for $n$-regular graphs.",
           "assumes": [
             "the treasure may appear after the agent starts",
-            "backtracking: the agent sees its entry port"
+            "backtracking: the agent sees its entry port",
+            "$\\Delta$-regular graphs, $\\Delta \\ge 3$ fixed"
           ]
         },
         {
           "ref": "Xin2007Faster",
-          "role": "best",
+          "role": "other",
           "time": "O(n^{\\theta(1+1/a)})",
-          "note": "For any fixed integer $a \\gg 1$; with backtracking (the agent sees the entry port).",
+          "note": "For any fixed integer $a \\gg 1$; with backtracking (the agent sees the entry port). Proved for $\\Delta$-regular graphs (Theorem 4); arbitrary degrees by a remark. The best peer-reviewed bound; recovered as Corollary 7.1 of [Xin2026Faster].",
           "assumes": [
             "the treasure may appear after the agent starts",
-            "backtracking: the agent sees its entry port"
+            "backtracking: the agent sees its entry port",
+            "$\\Delta$-regular graphs, $\\Delta \\ge 3$ fixed"
+          ]
+        },
+        {
+          "ref": "Xin2026Faster",
+          "role": "best",
+          "time": "O(n^{\\theta}\\log n\\,(\\log\\log n)^{1+\\varepsilon})",
+          "note": "Preprint. Theorem 1.1 and Corollary 8.1: one explicit infinite strongly universal exploration sequence, for every fixed $\\varepsilon > 0$; the agent knows neither $n$ nor when the treasure appears. Theorem 6.1 gives the same with any fixed number of iterated logarithms, and the simpler periods of Section 6.1 give $O(n^{\\theta}\\log^2 n)$. Arbitrary degrees (Proposition 8.2): the agent simulates the sequence on the cubic multigraph with $2m$ nodes that replaces each node by a cycle of $\\deg(v)$ nodes, one move or stay per step, and finds the treasure within $O(m^{\\theta_3}\\log m\\,(\\log\\log m)^{1+\\varepsilon})$ steps, $\\theta_3$ the exponent of universal exploration sequences for cubic multigraphs; $O(n^{2\\theta_3}\\log n\\,(\\log\\log n)^{1+\\varepsilon})$ on simple graphs.",
+          "assumes": [
+            "the treasure may appear after the agent starts",
+            "backtracking: the agent sees its entry port",
+            "$\\Delta$-regular graphs, $\\Delta \\ge 3$ fixed"
           ]
         }
       ],
       "optimality": {
         "time": {
           "status": "unknown",
-          "note": "No lower bound in terms of $n$ is recorded."
+          "note": "No lower bound in terms of $n$ is recorded. The best upper bound exceeds the length $O(n^{\\theta})$ of one ordinary universal exploration sequence by a factor $\\log n\\,(\\log\\log n)^{1+\\varepsilon}$ (preprint) [Xin2026Faster]."
         },
         "memory": {
           "status": "unknown",
@@ -263,9 +276,10 @@
       },
       "open": [
         "Treasure hunt when the treasure may appear after the agent starts and the agent does **not** see its entry port: \"We do not know if an efficient solution is possible when backtracking is not allowed\" [TaShma2014Deterministic].",
-        "Do strongly universal traversal sequences exist? They exist if and only if treasure hunt has a solution independent of the start time [TaShma2014Deterministic]."
+        "Do strongly universal traversal sequences exist? They exist if and only if treasure hunt has a solution independent of the start time [TaShma2014Deterministic].",
+        "Is there a strongly universal exploration sequence with cover time $O(n^{\\theta})$, or $O(n^{\\theta}\\log n)$, for fixed-degree graphs? [Xin2026Faster] (preprint) reaches $O(n^{\\theta}\\log n\\,(\\log\\log n)^{1+\\varepsilon})$ and shows that its recurrence cannot keep linear length with periods $\\Theta(2^j j)$ (Corollary 10.2), which is \"not a lower bound for arbitrary SUESs\"."
       ],
-      "notes": "For a treasure present when the agent starts, Ta-Shma and Zwick note that following $U_1U_2U_4\\dots$, universal traversal sequences of doubling length, solves the problem in polynomial time [TaShma2014Deterministic]. The bounds above are for the harder case. Checked against the full texts.",
+      "notes": "For a treasure present when the agent starts, Ta-Shma and Zwick note that following $U_1U_2U_4\\dots$, universal traversal sequences of doubling length, solves the problem in polynomial time [TaShma2014Deterministic]. The bounds above are for the harder case. All three are proved for $\\Delta$-regular graphs with fixed $\\Delta \\ge 3$, where $\\theta$ is defined; Ta-Shma and Zwick reach arbitrary degrees by self-loops up to degree $n$ [TaShma2014Deterministic], and Xin by a cubic simulation whose bound is in $m$ [Xin2026Faster], so the three exponents compare directly only on regular graphs. Ta-Shma and Zwick build the strongly universal exploration sequence by inserting, after the $i$-th symbol of an ordinary one, a forward and a backward copy of a much shorter prefix whose length is about the square root of the 2-adic part of $i$; walking a sequence and then its reverse returns the agent to where it was, so every window of length $O(n^{2\\theta})$ contains a full universal sequence for $n$ nodes [TaShma2014Deterministic]. Xin first shrank the inserted prefixes to a $1/a$ power [Xin2007Faster], and later chose them by periods $q_j \\approx 2^j j(\\log j)^{1+\\varepsilon}$ with $\\sum_j 2^j/q_j$ finite, which keeps the whole sequence within a constant factor of the ordinary one and gives windows of length $O(n^{\\theta}\\log n\\,(\\log\\log n)^{1+\\varepsilon})$ (preprint) [Xin2026Faster]. In that preprint the agent computes the $t$-th instruction with $O(\\log(t+2))$ bits of memory, so its memory grows with the time since it started, not with the graph [Xin2026Faster]. Checked against the full texts ([Xin2026Faster]: arXiv v1).",
       "status": "verified"
     },
     {

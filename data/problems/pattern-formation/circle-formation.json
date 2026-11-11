@@ -37,6 +37,13 @@
       }
     ]
   },
+  "simulator": [
+    {
+      "title": "Walk out to the smallest enclosing circle",
+      "query": "algorithm=SEC&robots=24&seed=7",
+      "note": "Each robot moves onto the smallest circle enclosing the robots it sees. Here 24 robots see everyone and run under the simulator's asynchronous scheduler."
+    }
+  ],
   "glossary": [
     {
       "term": "robot",

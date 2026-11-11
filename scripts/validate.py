@@ -396,6 +396,15 @@ def main():
             for k in re.findall(r"\[([A-Z][A-Za-z]+\d{4}[A-Za-z0-9]*)\]", fig.get("caption", "")):
                 if k not in refs:
                     err(f"{rel}: figure caption cites unknown reference '{k}'")
+        for i, c in enumerate(p.get("simulator", []) or []):
+            if not (c.get("title") and c.get("query") and c.get("note")):
+                err(f"{path.relative_to(ROOT)}: simulator case {i} needs 'title', 'query' and 'note'")
+            if not (index.get("simulator") or {}).get("url"):
+                err(f"{path.relative_to(ROOT)}: lists simulator cases but index.json has no simulator.url")
+            for k in re.findall(r"\[([A-Z][A-Za-z]+\d{4}[A-Za-z0-9]*)\]", c.get("note", "")):
+                if k not in refs:
+                    err(f"{path.relative_to(ROOT)}: simulator case '{c.get('title')}' cites unknown reference '{k}'")
+                used.add(k)
         for f in p.get("further", []) or []:
             if f.get("ref") not in refs:
                 err(f"{path.relative_to(ROOT)}: further reading cites unknown reference '{f.get('ref')}'")

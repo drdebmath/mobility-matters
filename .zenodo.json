@@ -2,7 +2,7 @@
   "title": "Mobility Matters: A Living Survey of Open Problems on Autonomous Agents, Robots and Particles",
   "upload_type": "publication",
   "publication_type": "other",
-  "description": "A living survey and atlas of open problems on autonomous mobile agents, robots and particles in distributed computing: problems, assumption trees, bounds, sources and open questions. Website: https://drdebmath.github.io/mobility-matters/",
+  "description": "A living survey and atlas of open problems on autonomous mobile agents, robots and particles in distributed computing: problems, assumption trees, bounds, sources and open questions. Website: https://debasishpattanayak.com/mobility-matters/",
   "creators": [
     {
       "name": "Pattanayak, Debasish"
@@ -19,7 +19,7 @@
   ],
   "related_identifiers": [
     {
-      "identifier": "https://drdebmath.github.io/mobility-matters/",
+      "identifier": "https://debasishpattanayak.com/mobility-matters/",
       "relation": "isSupplementTo",
       "scheme": "url"
     }

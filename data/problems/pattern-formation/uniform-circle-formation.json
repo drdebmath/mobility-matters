@@ -52,6 +52,13 @@
       }
     ]
   },
+  "simulator": [
+    {
+      "title": "Spread evenly on a circle",
+      "query": "algorithm=CircleFormation&robots=12&seed=7",
+      "note": "The simulator's uniform circle formation algorithm with 12 robots under its asynchronous scheduler."
+    }
+  ],
   "glossary": [
     {
       "term": "robot",

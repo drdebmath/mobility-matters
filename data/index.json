@@ -53,6 +53,7 @@
     "flocking",
     "ring-deployment",
     "chauffeuring",
+    "segment-search",
     "partitioning-plane",
     "scattering-amoebots",
     "separation-amoebots",
@@ -155,6 +156,7 @@
         "moving-target-search",
         "evacuation",
         "chauffeuring",
+        "segment-search",
         "patrolling"
       ]
     },
@@ -197,11 +199,11 @@
     ],
     "title": "Mobility Matters: A Living Survey of Open Problems on Autonomous Agents, Robots and Particles",
     "year": 2026,
-    "version": "2026-11-02",
-    "url": "https://drdebmath.github.io/mobility-matters/",
+    "version": "2026-11-11",
+    "url": "https://debasishpattanayak.com/mobility-matters/",
     "pdf": "mobility-matters.pdf"
   },
-  "owner_url": "https://drdebmath.github.io/",
+  "owner_url": "https://debasishpattanayak.com/",
   "repo": "https://github.com/drdebmath/mobility-matters",
   "ai_disclaimer": "Claude (Anthropic) was used in cataloguing the problems.",
   "intro": "The problem space is a **directed acyclic graph**. Independent assumptions, one per axis (the graph or domain, the scheduler, what the entities see, remember and share, the faults), come together to define a problem, and each particular setting appears as a leaf of the graph: a problem solved under one set of assumptions. Results move along the edges: an algorithm for weaker assumptions works under stronger ones, and a lower bound for stronger assumptions holds under weaker ones. Assumption sets also change over time: later work minimises the set a result needs, a stronger assumption subsumes weaker ones, and some assumptions become irrelevant in the presence of better ones. Every setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.",
@@ -394,5 +396,11 @@
   "license": "Text and data: CC BY 4.0 · code: MIT",
   "license_url": "https://github.com/drdebmath/mobility-matters/blob/main/LICENSE-CONTENT.md",
   "changelog_url": "https://github.com/drdebmath/mobility-matters/blob/main/CHANGELOG.md",
-  "abstract": "Mobility Matters is a living survey of open problems in distributed computing by mobile entities: agents moving on graphs, robots in the plane, robots searching geometric domains, and programmable matter. The settings of each problem form a directed acyclic graph: a setting is a set of assumptions (timing, faults, communication, symmetry breaking, knowledge, and so on), the setting that assumes nothing comes first, and each edge leads to a setting that assumes more, so that algorithms carry over to stronger settings and lower bounds to weaker ones. For every setting the survey records the proven lower bounds and what forces them, the paper that introduced the setting, the current best result, the gap between them, and the open questions, each checked against the cited papers. Every assumption comes with its origin and formal definition, every problem with a plain-language first look, and essays connect the problems across models. The survey is maintained as a website and regenerated as a book from the same data."
+  "abstract": "Mobility Matters is a living survey of open problems in distributed computing by mobile entities: agents moving on graphs, robots in the plane, robots searching geometric domains, and programmable matter. The settings of each problem form a directed acyclic graph: a setting is a set of assumptions (timing, faults, communication, symmetry breaking, knowledge, and so on), the setting that assumes nothing comes first, and each edge leads to a setting that assumes more, so that algorithms carry over to stronger settings and lower bounds to weaker ones. For every setting the survey records the proven lower bounds and what forces them, the paper that introduced the setting, the current best result, the gap between them, and the open questions, each checked against the cited papers. Every assumption comes with its origin and formal definition, every problem with a plain-language first look, and essays connect the problems across models. The survey is maintained as a website and regenerated as a book from the same data.",
+  "simulator": {
+    "name": "LCM Simulator",
+    "url": "https://debasishpattanayak.com/LCMmodel/",
+    "repo": "https://github.com/drdebmath/LCMmodel",
+    "about": "A simulator of Look–Compute–Move robots in the plane that runs in the browser. Each case below starts one of its algorithms from a fixed starting configuration and seed; the run is the simulator's, not a proof."
+  }
 }

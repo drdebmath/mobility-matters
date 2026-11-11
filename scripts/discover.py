@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 WATCH = DATA / "watch.json"
-UA = {"User-Agent": "mobility-matters-atlas/1.0 (weekly discovery; https://drdebmath.github.io/mobility-matters/)"}
+UA = {"User-Agent": "mobility-matters-atlas/1.0 (weekly discovery; https://debasishpattanayak.com/mobility-matters/)"}
 CATS = ["cs.DC", "cs.DS", "cs.RO", "cs.MA", "cs.CG", "cs.NI", "cs.ET"]
 
 # Phrases that mark the atlas's topics; extended in data/watch.json.

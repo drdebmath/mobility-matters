@@ -1104,7 +1104,7 @@
             "every snapshot is a spanning tree in which only one node has degree above three; deterministic construction, polynomial in $n$",
             "holds from every start node; also a lower bound when only the degree of each snapshot is at most $\\Delta$"
           ],
-          "note": "Theorem 1.1 (arXiv v1). In each phase of $\\Theta(\\Delta n)$ steps, a cycle whose missing edge advances by one position per step lets the agent enter fewer than half of $\\Theta(\\Delta)$ branches; between phases the nodes not yet visited are reassigned among the branches along walks on an expander, which allows $\\Theta(1+\\log(n/\\Delta))$ phases. One construction thus combines the $\\Omega(\\Delta n)$ of chained rotating stars [Erlebach2021Temporal] and the $\\Omega(n\\log n)$ known for planar underlying graphs of maximum degree 4, both as reported by [Carnevale2026Hiding]; for constant $\\Delta$ it adds nothing to $\\Omega(n\\log n)$. Preprint."
+          "note": "Theorem 1.1 (arXiv v1). In each phase of $\\Theta(\\Delta n)$ steps, a cycle whose missing edge advances by one position per step lets the agent enter fewer than half of $\\Theta(\\Delta)$ branches; between phases the nodes not yet visited are reassigned among the branches along walks on an expander, which allows $\\Theta(1+\\log(n/\\Delta))$ phases. One construction thus combines the $\\Omega(\\Delta n)$ of chained rotating stars [Erlebach2021Temporal] and the $\\Omega(n\\log n)$ known for planar underlying graphs of maximum degree 3 whose snapshots are paths (Adamson, Gusev, Malyshev and Zamaraev, strengthening degree 4 of Erlebach, Hoffmann and Kammer), both as reported by [Carnevale2026Hiding] and [Bastide2025Improved]; for constant $\\Delta$ it adds nothing to $\\Omega(n\\log n)$. It answers Problem 5.1 of [Bastide2025Improved], as they state. Preprint."
         }
       ],
       "results": [
@@ -1136,13 +1136,19 @@
           "assumes": [
             "underlying graph of treewidth $\\mathrm{tw}$"
           ],
-          "note": "Theorem 2 of the full version (arXiv v2). The underlying graph is divided into parts with few boundary nodes; each part is explored by a team of agents (Theorem 1, on always $S$-connected temporal graphs, in which every snapshot joins every node to some node of a fixed set $S$), and the team schedule is turned into one for a single agent. For small $\\mathrm{tw}$ it is below the $O(n^{3/2}\\sqrt{\\mathrm{tw}}\\log n)$ of Bastide, Groenland, Michel and Rambaud, as reported by [Adamson2026Exploration]. [Carnevale2026Hiding] cites $\\mathrm{tw}^{11/2}$ for the brief announcement, which was not read."
+          "note": "Theorem 2 of the full version (arXiv v2). The underlying graph is divided into parts with few boundary nodes; each part is explored by a team of agents (Theorem 1, on always $S$-connected temporal graphs, in which every snapshot joins every node to some node of a fixed set $S$), and the team schedule is turned into one for a single agent. For small $\\mathrm{tw}$ it is below the $O(n^{3/2}\\sqrt{\\mathrm{tw}\\log n})$ of [Bastide2025Improved]. [Carnevale2026Hiding] cites $\\mathrm{tw}^{11/2}$ for the brief announcement, which was not read."
+        },
+        {
+          "ref": "Bastide2025Improved",
+          "role": "other",
+          "time": "O(n^{3/2}\\sqrt{\\overline{\\Delta}\\log n})",
+          "note": "Theorem 1.3 (arXiv v2), from every start node, for every always-connected temporal graph with $n^2$ snapshots, where $\\overline{\\Delta}$ (their $D$) is the average temporal maximum degree: the average over the nodes $v$ of the largest degree of $v$ in any snapshot. If every snapshot has maximum degree at most $\\Delta$ then $\\overline{\\Delta} \\le \\Delta$, which gives $O(n^{3/2}\\sqrt{\\Delta\\log n})$ (Corollary 1.4), and $O(n^{3/2}\\sqrt{\\log n})$ for constant $\\Delta$ against the $O(n^{7/4})$ of Erlebach, Kammer, Luo, Sajenko and Spooner. An underlying graph with $m$ edges has $\\overline{\\Delta} \\le 2m/n$ (Corollary 1.5, stated for average degree), which gives $O(n\\sqrt{m\\log n})$: $O(n^{3/2}\\sqrt{\\log n})$ for planar underlying graphs and $O(n^{3/2}\\sqrt{\\mathrm{tw}\\log n})$ for treewidth $\\mathrm{tw}$, against $O(n^{1.8}\\log n)$ and $O(n^{1.5}\\mathrm{tw}^{1.5}\\log n)$ [Erlebach2021Temporal] and $O(n^{7/4}\\log n)$ and $O(\\mathrm{tw}\\,n^{3/2}\\log n)$ by Adamson, Gusev, Malyshev and Zamaraev, the last three as reported by [Bastide2025Improved]. The bound is below $n^2$ when $\\overline{\\Delta} = o(n/\\log n)$. The key lemma: any set $X$ of nodes contains two nodes joined by a temporal walk within $2\\overline{\\Delta}n/|X|+1$ steps (Lemma 1.8); in each block of $n$ steps a walk then visits about $\\sqrt{|X|/(\\overline{\\Delta}\\log|X|)}$ of the $|X|$ nodes not yet visited (Lemma 3.2). The authors state, without a detailed proof, that the walk can be computed in polynomial time. Preprint."
         }
       ],
       "optimality": {
         "time": {
           "status": "tight",
-          "note": "$\\Theta(n^2)$ in the worst case."
+          "note": "$\\Theta(n^2)$ in the worst case. When every snapshot has maximum degree at most $\\Delta$ the bounds are $\\Omega(\\Delta n(1+\\log(n/\\Delta)))$ [Carnevale2026Hiding] and $O(n^{3/2}\\sqrt{\\Delta\\log n})$ [Bastide2025Improved], a polynomial gap (factor about $\\sqrt{n/\\Delta}$)."
         },
         "memory": {
           "status": "unknown",
@@ -1150,11 +1156,11 @@
         }
       },
       "open": [
-        "Tight bounds when the underlying graph is a grid, has bounded degree or is planar [Erlebach2021Temporal].",
-        "For underlying maximum degree $\\Delta$, close the gap between $\\Omega(\\Delta n(1+\\log(n/\\Delta)))$ [Carnevale2026Hiding] and $O(\\min\\{n^2, n^{3/2}\\sqrt{\\Delta}\\log n\\})$ (the latter as reported by [Carnevale2026Hiding]); for constant $\\Delta$ the bounds are $\\Omega(n\\log n)$ and $O(n^{3/2}\\log n)$.",
+        "Tight bounds when the underlying graph is a grid, has bounded degree or is planar [Erlebach2021Temporal]. For bounded degree and for planar underlying graphs the best bounds known are $\\Omega(n\\log n)$ and $O(n^{3/2}\\sqrt{\\log n})$ [Bastide2025Improved]; the upper bound holds for grids too.",
+        "For underlying maximum degree $\\Delta$, close the gap between $\\Omega(\\Delta n(1+\\log(n/\\Delta)))$ [Carnevale2026Hiding] and $O(\\min\\{n^2, n^{3/2}\\sqrt{\\Delta\\log n}\\})$ [Bastide2025Improved]; for constant $\\Delta$ the bounds are $\\Omega(n\\log n)$ and $O(n^{3/2}\\sqrt{\\log n})$. The upper bound needs only that every snapshot has maximum degree at most $\\Delta$.",
         "When at most $\\mu$ edges are missing in each snapshot, remove the factor $\\mu$ between $O(\\mu n\\log\\mu)$ [Lahtin2026Exploration] and $\\Omega(n\\log\\mu)$ (as reported by [Lahtin2026Exploration])."
       ],
-      "notes": "This is a centralised planning problem rather than a distributed one, but it gives the baseline for what any agent could do in a temporal graph.",
+      "notes": "This is a centralised planning problem rather than a distributed one, but it gives the baseline for what any agent could do in a temporal graph.\n\nThe worst case $\\Theta(n^2)$ needs nodes of degree $\\Omega(n)$ in the snapshots and a dense underlying graph. Bastide, Groenland, Michel, Rambaud and Smolarova [Bastide2025Improved] bound exploration by the average temporal maximum degree $\\overline{\\Delta}$, which is at most the maximum degree of every snapshot and at most the average degree of the underlying graph, and so treat bounded snapshot degree, planar, bounded-treewidth and sparse underlying graphs with one argument. Allowed two moves per step (a model not catalogued here), the agent explores every always-connected temporal graph within $O(n^{3/2}\\sqrt{\\log n})$ steps, as each snapshot squared has a spanning tree of maximum degree 3 [Bastide2025Improved]. For snapshots drawn independently from a distribution over connected graphs, the same paper gives expected exploration time $O(\\overline{\\Delta}n\\log^3 n)$ (Theorem 1.6), with $\\overline{\\Delta}$ taken over all graphs of positive probability; see [Baguley2025Temporal] under further reading.",
       "status": "verified"
     },
     {
@@ -1266,7 +1272,7 @@
     },
     {
       "ref": "Baguley2025Temporal",
-      "note": "Random temporal graphs in which every snapshot is a spanning tree drawn independently from a fixed distribution over a set of trees on the $n$ nodes. With high probability an agent that knows the whole sequence explores within $O(n^{3/2})$ steps (Theorem 1.1), which is tight for the uniform distribution over $\\lceil n/3\\rceil$ stars (Theorem 5.4), and within $54m$ steps when all trees are spanning trees of one graph with $m$ edges (Theorem 1.2). Trees of maximum degree $\\Delta$ can force $\\Omega(\\sqrt{\\Delta}\\,n)$ steps (Theorem 5.12, odd $\\Delta \\ge 5$), and $O(\\sqrt{\\Delta}\\,n)$ is conjectured (Conjecture 1.3). An agent that sees only the current snapshot needs $\\Omega(n\\log n)$ steps on some such model to succeed with probability $1-n^{-\\Omega(1)}$ (Proposition 4.4), and more than $n^2/15$ steps with high probability on $n/2$ uniform stars (Proposition 5.13). Read."
+      "note": "Random temporal graphs in which every snapshot is a spanning tree drawn independently from a fixed distribution over a set of trees on the $n$ nodes. With high probability an agent that knows the whole sequence explores within $O(n^{3/2})$ steps (Theorem 1.1), which is tight for the uniform distribution over $\\lceil n/3\\rceil$ stars (Theorem 5.4), and within $54m$ steps when all trees are spanning trees of one graph with $m$ edges (Theorem 1.2). Trees of maximum degree $\\Delta$ can force $\\Omega(\\sqrt{\\Delta}\\,n)$ steps (Theorem 5.12, odd $\\Delta \\ge 5$), and $O(\\sqrt{\\Delta}\\,n)$ is conjectured (Conjecture 1.3). [Bastide2025Improved] prove $O(\\Delta n\\log^3 n)$ in expectation and with probability $1 - e^{-\\log^3 n}$ (Theorem 1.6 and Corollary A.3), for any distribution over connected graphs with $\\Delta$ replaced by the average temporal maximum degree in expectation. An agent that sees only the current snapshot needs $\\Omega(n\\log n)$ steps on some such model to succeed with probability $1-n^{-\\Omega(1)}$ (Proposition 4.4), and more than $n^2/15$ steps with high probability on $n/2$ uniform stars (Proposition 5.13). Read."
     },
     {
       "ref": "Balev2026Shortest",

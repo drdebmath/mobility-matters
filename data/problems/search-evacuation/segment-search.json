@@ -1,0 +1,323 @@
+{
+  "id": "segment-search",
+  "model": "search-in-geometric-domains",
+  "name": "Search with segment visibility",
+  "origin": {
+    "ref": "Kranakis2026Segment",
+    "year": 2026,
+    "note": "Kranakis introduced segment visibility in a preprint of November 2026 [Kranakis2026Segment]; the earlier uses this note rests on are the author's own account."
+  },
+  "summary": "Robots search the plane for a point that they see when it lies on the segment joining two of them.",
+  "statement": "$k \\ge 2$ robots of unit speed start together at the origin $O$ of the plane, share a coordinate frame and a clock, and move deterministically. A stationary target lies at an unknown point $x \\ne O$ at distance $d = \\|x\\| > 0$. The target is found at the first time $t$ at which $x$ lies on the closed segment joining the positions of two robots at time $t$; robots learn nothing about the target before. Depending on the setting the robots know $d$ or not; they never know the direction of $x$. **Time** is the competitive ratio: the supremum, over targets, of the time until the target is found divided by $d$.",
+  "primer": {
+    "intro": "Two or more lifeguards scan the sea for a buoy, and a buoy counts as seen as soon as it lies on the line of sight between two of them. Here $k \\ge 2$ **robots**, points of unit speed, start together at the **origin** $O$ of the plane. A **target**, a point $x$ at distance $d$ from the origin, sits in an unknown direction. At every moment each pair of robots sees the straight **segment** that joins them, and the target is found the first time it lies on such a segment. The robots share a coordinate frame and a clock, and their routes are fixed in advance. The cost of a route plan is its **competitive ratio**: the largest value, over all targets, of the time until the target is found divided by $d$. In the basic version two robots do not know $d$.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Walk out in $k$ equally spaced directions",
+        "variant": "any-unknown",
+        "ref": "Kranakis2026Segment",
+        "idea": "For $k \\ge 3$ robots:\n1. Number the robots $0, 1, \\dots, k-1$.\n2. Robot $i$ walks straight away from the origin in the direction at angle $2\\pi i/k$, forever.\n3. At time $t$ the robots are the corners of a regular $k$-gon of circumradius $t$; its sides are segments between neighbouring robots, and they sweep the plane as the polygon grows.",
+        "analysis": "A target at distance $d$ whose direction is at angle $\\varphi$ from the middle of its sector lies on a side of the polygon when $t\\cos(\\pi/k) = d\\cos\\varphi$, that is at time $d\\cos\\varphi/\\cos(\\pi/k)$. The worst targets are in the middle of a sector, so the competitive ratio is $1/\\cos(\\pi/k) = \\sec(\\pi/k)$: 2 for three robots, about 1.41 for four, and close to 1 for many robots. [Kranakis2026Segment] proves that no plan does better, whether or not the robots know $d$.",
+        "why_it_matters": "It is optimal and needs no knowledge of $d$; the same walk is optimal for robots looking for a line."
+      },
+      {
+        "kind": "lower-bound",
+        "title": "Seeing a point is at least as hard as touching its tangent line",
+        "variant": "two-known",
+        "ref": "Kranakis2026Segment",
+        "idea": "Take a target $x$ at distance $d$ and the straight line through $x$ that is perpendicular to the direction of $x$ (the tangent at $x$ to the circle of radius $d$ about the origin). The robots start on the origin's side of that line. When $x$ lies on a segment between two robots, one of the two must be on the line or beyond it.",
+        "analysis": "So a plan that finds every target point of the circle within time $Td$ also makes some robot touch every tangent line within time $Td$: it solves **shoreline search**, the search for a line at known distance. The best ratio for two robots that look for a line at known distance is $1+\\sqrt3+\\pi/6 \\approx 3.256$ [Dobrev2020Shoreline], so no two-robot plan for points does better. [Kranakis2026Segment] gives a two-robot route that reaches exactly this ratio, so the bound is tight. When $d$ is unknown, the best known two-robot plan, two spirals on opposite sides of the origin, needs about $8.93$, and the best lower bound is about $3.29$.",
+        "why_it_matters": "The reduction lets every lower bound for line search transfer to point search with segment visibility, which settles all cases except two robots that do not know $d$."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "a point that starts at the origin and moves at unit speed along a route fixed in advance; robots share a coordinate frame and a clock",
+      "avoid": [
+        "searcher",
+        "agent"
+      ]
+    },
+    {
+      "term": "origin",
+      "definition": "the point $O$ of the plane where all robots start",
+      "avoid": []
+    },
+    {
+      "term": "target",
+      "definition": "a point $x \\ne O$ at distance $d$ from the origin, in an unknown direction; it is found when it lies on a segment joining two robots",
+      "avoid": [
+        "treasure"
+      ]
+    },
+    {
+      "term": "segment",
+      "definition": "the straight piece joining the positions of two robots at the same time; the robots see every point on it",
+      "avoid": []
+    },
+    {
+      "term": "competitive ratio",
+      "definition": "the largest value, over all targets, of the time until the target is found divided by $d$",
+      "avoid": []
+    }
+  ],
+  "history": "Search for a target at an unknown place in the plane goes back to Bellman's question of how to find a line at known distance, and to the search for a line or a point by one or several robots of unit speed [BaezaYates1993Searching] [Dobrev2020Shoreline]. In those models a robot finds the target by touching it. Kranakis lets the robots see along the segments that join them, so a team sees a whole set of chords at each moment, and studies how much this helps; the answers are expressed through shoreline search, whose lower bounds carry over [Kranakis2026Segment].",
+  "measures": [
+    {
+      "id": "time",
+      "name": "Competitive ratio",
+      "description": "worst-case time until the target lies on a segment between two robots, divided by its distance $d$ from the origin"
+    }
+  ],
+  "ignore_axes": [
+    "communication"
+  ],
+  "axes": [
+    {
+      "id": "robots",
+      "name": "Number of robots",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number $k \\ge 2$ of robots",
+          "short": "any $k$",
+          "definition": "$k \\ge 2$ robots; bounds are stated as functions of $k$."
+        },
+        {
+          "id": "two",
+          "level": 1,
+          "label": "two robots",
+          "short": "two robots",
+          "definition": "Two robots; the visible set at each time is the one segment between them."
+        }
+      ],
+      "origin": "Kranakis treats two robots separately because with two robots there is a single visible segment and the expanding-polygon algorithm does not exist; for $k \\ge 3$ the optimum is $\\sec(\\pi/k)$ [Kranakis2026Segment]. The same split appears in shoreline search, where the cases $k = 2$ and $k = 3$ were the last to be settled for a known distance [Dobrev2020Shoreline]."
+    },
+    {
+      "id": "distance",
+      "name": "Knowledge of the distance",
+      "values": [
+        {
+          "id": "unknown",
+          "level": 0,
+          "label": "$d$ unknown",
+          "short": "$d$ unknown",
+          "definition": "The trajectories do not depend on $d$; the ratio is the supremum over all targets $x \\ne O$ of $T(x)/\\|x\\|$."
+        },
+        {
+          "id": "known",
+          "level": 1,
+          "label": "$d$ known",
+          "short": "$d$ known",
+          "definition": "The robots know $d$ (not the direction of the target); the trajectories may depend on $d$, and the ratio is the supremum over targets with $\\|x\\| = d$ of $T(x)/d$."
+        }
+      ],
+      "origin": "Shoreline search was first studied at a known distance (Bellman's problem, solved for one searcher by Isbell, as reported by [Dobrev2020Shoreline]); Baeza-Yates, Culberson and Rawlins considered the unknown distance [BaezaYates1993Searching] (as reported by [Dobrev2020Shoreline]). Kranakis distinguishes the same two regimes for segment visibility and shows that for two robots not knowing $d$ costs at least $\\sqrt{17}/4 - 1 \\approx 0.031$ in the ratio, while for $k \\ge 3$ it costs nothing [Kranakis2026Segment]."
+    }
+  ],
+  "axis_order": [
+    "robots",
+    "distance",
+    "faults",
+    "speeds",
+    "algorithm"
+  ],
+  "variants": [
+    {
+      "id": "two-unknown",
+      "title": "Two robots, unknown distance",
+      "standard": true,
+      "assumptions": {
+        "robots": "two",
+        "distance": "unknown",
+        "faults": "none",
+        "speeds": "equal"
+      },
+      "summary": "Two robots that do not know $d$ need a ratio between $\\sqrt3+\\pi/6+\\sqrt{17}/4 \\approx 3.2864$ and $\\approx 8.9285$; the gap is open (a preprint).",
+      "statement": "Two robots; the trajectories do not depend on $d$, and every $d > 0$ is possible.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\sqrt3+\\pi/6+\\sqrt{17}/4 \\approx 3.2864",
+          "ref": "Kranakis2026Segment",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "deterministic",
+            "targets on the three circles of radii $1/8$, $1/4$ and $1$ about the origin; holds even if the robots know these three radii",
+            "any two 1-Lipschitz trajectories (no symmetry assumed)",
+            "scale-invariant: also with circles of radii $1$, $2$, $8$, so it holds when $d \\ge 1$ is promised"
+          ],
+          "note": "Theorem 3.2 of [Kranakis2026Segment]. Below this ratio, the robot that first reaches the unit circle stays within distance $1/8$ of a line through the origin until then (Lemma 3.7), so the other robot alone must reach the levels $\\pm1/8$, $\\pm1/4$ on the perpendicular line, which forces ratio 4 (Lemma 3.4). It exceeds the known-distance optimum $1+\\sqrt3+\\pi/6$ by $\\sqrt{17}/4 - 1 \\approx 0.031$."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kranakis2026Segment",
+          "role": "best",
+          "time": "e^{\\pi\\lambda^*}\\sqrt{1+\\lambda^{*2}}/\\lambda^* \\approx 8.9285",
+          "assumes": [
+            "common coordinate frame and clock",
+            "exact spirals from the origin, with infinitely many turns as $t \\to 0$"
+          ],
+          "note": "Introductory and current best (Theorem 3.1): the robots follow two antipodal logarithmic spirals, so the visible segment is a diameter turning about the origin while it grows; ratio $e^{\\pi\\lambda}\\sqrt{1+\\lambda^2}/\\lambda$, minimised at $\\pi\\lambda^*(1+\\lambda^{*2}) = 1$, $\\lambda^* \\approx 0.2931$. Optimal only within this family of spirals."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "$\\approx 8.9285$ against $\\approx 3.2864$: a constant gap, factor about 2.7."
+        }
+      },
+      "open": [
+        "Determine the optimal competitive ratio of two robots that do not know $d$: it lies between $\\sqrt3+\\pi/6+\\sqrt{17}/4 \\approx 3.2864$ and $\\approx 8.9285$ [Kranakis2026Segment].",
+        "Do asymmetric, non-antipodal or non-spiral trajectories beat $\\approx 8.9285$? The antipodal spirals see only along a diameter through the origin, while a segment between two moving robots can sweep chords that miss it [Kranakis2026Segment]."
+      ],
+      "notes": "From the preprint [Kranakis2026Segment], read in full (arXiv v1). The known-distance optimum $1+\\sqrt3+\\pi/6$ is a lower bound here as well; the point of Theorem 3.2 is that the unknown distance costs strictly more. With a promised lower bound on $d$ the spiral needs a finite start, whose ratio the paper does not analyse. For comparison, two robots looking for a line (shoreline search) at unknown distance reach about $5.2644$ with two equally spaced logarithmic spirals (Baeza-Yates and Schott, as reported by [Dobrev2020Shoreline]); a line is touched no later than its tangency point is seen, so that bound does not carry over to segment search.",
+      "status": "verified"
+    },
+    {
+      "id": "two-known",
+      "title": "Two robots, known distance",
+      "assumptions": {
+        "robots": "two",
+        "distance": "known",
+        "faults": "none",
+        "speeds": "equal"
+      },
+      "summary": "Two robots that know $d$ need exactly $1+\\sqrt3+\\pi/6 \\approx 3.2556$, the same ratio as two robots looking for a line at known distance.",
+      "statement": "Two robots that know $d$ (not the direction of the target); the targets are the points of the circle of radius $d$ about the origin.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\sqrt3+\\pi/6",
+          "ref": "Kranakis2026Segment",
+          "bottleneck": "unknown direction",
+          "preconditions": [
+            "deterministic",
+            "targets on the circle of radius $d$, $d$ known",
+            "any two 1-Lipschitz trajectories",
+            "from shoreline search at known distance (Theorem 3 of [Dobrev2020Shoreline]): a robot touches the line tangent at the target no later than the target is seen"
+          ],
+          "note": "Theorem 2.1 with Lemma 2.5 of [Kranakis2026Segment]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kranakis2026Segment",
+          "role": "best",
+          "time": "1+\\sqrt3+\\pi/6",
+          "assumes": [
+            "common coordinate frame and clock"
+          ],
+          "note": "Introductory and current best (Theorem 2.1, Proposition 2.3): robot $\\sigma \\in \\{\\pm1\\}$ walks straight to $(\\sigma d/\\sqrt3, d)$, along the tangent to $(\\sigma\\sqrt3 d/2, d/2)$, along the circle to $(\\sigma d, 0)$, then straight down to $(\\sigma d, -d)$; the last point found is $(0, -d)$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $1+\\sqrt3+\\pi/6 \\approx 3.2556$."
+        }
+      },
+      "open": [],
+      "notes": "From the preprint [Kranakis2026Segment], read in full (arXiv v1). The upper bound is proved directly; the lower bound is Theorem 3 of [Dobrev2020Shoreline] for shoreline search, transferred by the tangent-line reduction.",
+      "status": "verified"
+    },
+    {
+      "id": "any-unknown",
+      "title": "$k \\ge 3$ robots, unknown distance",
+      "assumptions": {
+        "distance": "unknown",
+        "faults": "none",
+        "speeds": "equal"
+      },
+      "summary": "With $k \\ge 3$ robots the optimal ratio is exactly $\\sec(\\pi/k)$: the robots walk straight in $k$ equally spaced directions and the edges of the growing regular $k$-gon sweep the plane.",
+      "statement": "$k \\ge 3$ robots that do not know $d$; every segment between two robots is visible (the algorithm uses only segments between neighbours on the $k$-gon). For $k = 2$ see the two-robot settings.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\sec(\\pi/k)",
+          "ref": "Kranakis2026Segment",
+          "bottleneck": "unknown direction",
+          "preconditions": [
+            "deterministic",
+            "$k \\ge 3$",
+            "holds even when every segment between two robots is visible",
+            "from shoreline search at unknown distance: Theorem 2.1 of [Acharjee2019Shoreline] for $k \\ge 4$, Theorem 1 of [Dobrev2020Shoreline] for $k = 3$"
+          ],
+          "note": "Theorem 4.1 with Lemma 4.4 of [Kranakis2026Segment]."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kranakis2026Segment",
+          "role": "best",
+          "time": "\\sec(\\pi/k)",
+          "assumes": [
+            "common coordinate frame and clock",
+            "only the $k$ segments between cyclic neighbours are monitored"
+          ],
+          "note": "Introductory and current best (Theorem 4.1, Lemma 4.2): robot $i$ walks straight in direction $2\\pi i/k$; a target at angle $\\varphi$ from the bisector of its sector is found at time $d\\cos\\varphi/\\cos(\\pi/k)$, worst on the bisectors. Does not use $d$."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $\\sec(\\pi/k)$ for every $k \\ge 3$."
+        }
+      },
+      "open": [],
+      "notes": "From the preprint [Kranakis2026Segment], read in full (arXiv v1). The ratio is the same as the optimum of shoreline search with $k \\ge 3$ robots, whose upper bound $1/\\cos(\\pi/k)$ is the same walk along $k$ equally spaced rays (Baeza-Yates and Schott, as reported by [Dobrev2020Shoreline]): with three or more robots, seeing a point on a segment costs no more than touching its tangent line.",
+      "status": "verified"
+    },
+    {
+      "id": "any-known",
+      "title": "$k \\ge 3$ robots, known distance",
+      "assumptions": {
+        "distance": "known",
+        "faults": "none",
+        "speeds": "equal"
+      },
+      "summary": "Knowing $d$ does not help $k \\ge 3$ robots: the optimal ratio is still exactly $\\sec(\\pi/k)$.",
+      "statement": "$k \\ge 3$ robots that know $d$ (not the direction of the target); the targets are the points of the circle of radius $d$ about the origin.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\sec(\\pi/k)",
+          "ref": "Kranakis2026Segment",
+          "bottleneck": "unknown direction",
+          "preconditions": [
+            "deterministic",
+            "$k \\ge 3$, targets on the circle of radius $d$, $d$ known",
+            "for $k \\ge 4$ a direct argument: at any time $T < d/\\cos(\\pi/k)$ some open cone of angle $2\\pi/k$ at the origin holds no robot, and no robot has touched the line tangent to the circle on its bisector",
+            "for $k = 3$ from Theorem 1 of [Dobrev2020Shoreline] (shoreline search at known distance, bound 2)"
+          ],
+          "note": "Lemma 4.5 and Theorem 4.1 of [Kranakis2026Segment]; Lemma 4.5 adapts Section 2 of [Acharjee2019Shoreline] to a fixed distance."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kranakis2026Segment",
+          "role": "best",
+          "time": "\\sec(\\pi/k)",
+          "assumes": [
+            "common coordinate frame and clock"
+          ],
+          "note": "The expanding $k$-gon of the unknown-distance setting; it does not use $d$ (Theorem 4.1)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly $\\sec(\\pi/k)$ for every $k \\ge 3$."
+        }
+      },
+      "open": [],
+      "notes": "From the preprint [Kranakis2026Segment], read in full (arXiv v1).",
+      "status": "verified"
+    }
+  ]
+}

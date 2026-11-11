@@ -5016,16 +5016,16 @@
   },
   "Masuzawa2026Disorientation": {
     "authors": [
+      "Koichi Wada",
       "Toshimitsu Masuzawa",
-      "Yuichi Sudo",
-      "Koichi Wada"
+      "Yuichi Sudo"
     ],
     "title": "Rendezvous under Variable Disorientation: The Algorithmic Power of Fixed Unit Distance",
     "kind": "preprint",
     "venue": "arXiv preprint",
     "year": 2026,
     "arxiv": "2610.09713",
-    "note": "Preprint, not peer reviewed."
+    "note": "Preprint, not peer reviewed. Authors in the order of arXiv v2 (6 November 2026), which lists Wada first; the key keeps the earlier order. v2 was found by the paper search of 11 November 2026 and not compared with the version read."
   },
   "Pramanick2025Mobility": {
     "authors": [
@@ -7791,12 +7791,13 @@
       "Toshimitsu Masuzawa",
       "Koichi Wada"
     ],
-    "title": "Tight Bounds on Window Size and Time for Single-Agent Graph Exploration under T-Interval Connectivity",
+    "title": "Online Graph Exploration under T-Interval Connectivity",
     "kind": "preprint",
     "venue": "arXiv preprint",
     "year": 2026,
     "arxiv": "2604.04619",
-    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, 6 April 2026). No published version found in Crossref on 27 October 2026."
+    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, 6 April 2026). No published version found in Crossref on 27 October 2026. arXiv v2 (6 November 2026) changed the title; it was found by the paper search of 11 November 2026 and has not been compared with v1.",
+    "read": "arXiv v1 (2026), titled \"Tight Bounds on Window Size and Time for Single-Agent Graph Exploration under T-Interval Connectivity\""
   },
   "Bhagat2026Exploring": {
     "authors": [
@@ -7885,12 +7886,24 @@
       "Kaushik Mondal",
       "Gokarna Sharma"
     ],
-    "title": "Semi-Synchronous Exploration in Dynamic Graphs",
-    "kind": "preprint",
-    "venue": "arXiv preprint",
+    "title": "Dynamic Graph Exploration: Semi-Synchrony and Dynamic Port Labeling",
+    "kind": "conference",
+    "venue": "DISC 2026, LIPIcs 397, 48:1–48:23",
     "year": 2026,
+    "doi": "10.4230/LIPIcs.DISC.2026.48",
+    "pdf": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol397-disc2026/LIPIcs.DISC.2026.48/LIPIcs.DISC.2026.48.pdf",
     "arxiv": "2605.14375",
-    "note": "Preprint (v1, 14 May 2026), not peer reviewed; no other version on Crossref or DataCite (checked 27 October 2026). Found by the backfill search of 27 October 2026; full text read (arXiv v1)."
+    "versions": [
+      {
+        "kind": "preprint",
+        "venue": "arXiv preprint",
+        "year": 2026,
+        "url": "https://arxiv.org/abs/2605.14375",
+        "title": "Semi-Synchronous Exploration in Dynamic Graphs"
+      }
+    ],
+    "read": "arXiv v1 (2026)",
+    "note": "Full text of arXiv v1 (14 May 2026) read on 27 October 2026; theorem numbers in the atlas refer to it. The DISC 2026 version (DataCite record of 2 November 2026, IsVersionOf arXiv:2605.14375) was found by the paper search of 11 November 2026; its abstract states the same deactivation threshold, but its full text was not compared with v1."
   },
   "Carnevale2026Hiding": {
     "authors": [
@@ -13734,5 +13747,44 @@
     ],
     "note": "Found by web search on 1 November 2026 (survey of single-agent exploration of directed graphs); metadata checked against Crossref; abstract and introduction read in the ECCC report.",
     "read": "the ECCC report TR05-022 (2005): abstract and introduction"
+  },
+  "Bastide2025Improved": {
+    "authors": [
+      "Paul Bastide",
+      "Carla Groenland",
+      "Lukas Michel",
+      "Clément Rambaud",
+      "Paulina Smolarova"
+    ],
+    "title": "Improved exploration of temporal graphs",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2025,
+    "arxiv": "2511.22604",
+    "read": "arXiv v2 (19 October 2026)",
+    "note": "Found by the paper search of 11 November 2026; full text read (arXiv v2). Preprint, not peer reviewed; no published version on Crossref or DataCite (checked 11 November 2026). arXiv v1 (27 November 2025) has four authors (without Smolarova) and only the deterministic results; v2 merges it with the random spanning-tree results. [Carnevale2026Hiding] and [Adamson2026Exploration] cite v1; its Problem 3.1 is Problem 5.1 of v2."
+  },
+  "Xin2026Faster": {
+    "authors": [
+      "Qin Xin"
+    ],
+    "title": "Faster Treasure Hunt via Strongly Universal Exploration with Polylogarithmic Overhead",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.08705",
+    "read": "arXiv v1 (2026)",
+    "note": "Found by the paper search of 11 November 2026; full text read (arXiv v1). Extended version of [Xin2007Faster] with new results; not peer reviewed. No published version on Crossref (checked 11 November 2026). Its acknowledgement says that ChatGPT helped derive Sections 9–10 and the appendices; those parts were only skimmed."
+  },
+  "Kranakis2026Segment": {
+    "authors": [
+      "Evangelos Kranakis"
+    ],
+    "title": "Searching the Plane in the Segment Visibility Model",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.03161",
+    "note": "Found by the paper search of 11 November 2026; full text read (arXiv v1). Preprint, not peer reviewed; no published version on Crossref (checked 11 November 2026)."
   }
 }

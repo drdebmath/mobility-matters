@@ -127,7 +127,15 @@ def inline(s):
     s = CITE_RE.sub(cite, s)
     s = esc_plain(s)
     s = emph(s)
-    return re.sub("\x00(\\d+)\x00", lambda m: held[int(m.group(1))], s)
+    s = re.sub("\x00(\\d+)\x00", lambda m: held[int(m.group(1))], s)
+    return merge_cites(s)
+
+def merge_cites(s):
+    """Neighbouring citations share one pair of parentheses: (A 2020; B 2021)."""
+    for cmd in ("citep", "citealp"):
+        s = re.sub(r"\\%s\{[^}]+\}(?:[ ~]*\\%s\{[^}]+\})+" % (cmd, cmd),
+                   lambda m: r"\%s{%s}" % (cmd, ",".join(re.findall(r"\{([^}]+)\}", m.group(0)))), s)
+    return s
 
 def emph(s):
     s = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", s)
@@ -699,6 +707,12 @@ def problem_section(p):
                          "\n\n" + r"\noindent\textit{%s} %s" % ("Why it works and what it costs." if x["kind"] == "algorithm" else "Why it holds.", inline(x["analysis"])) +
                          ("\n\n" + r"\noindent{\small\textit{Why it matters.} %s}" % inline(x["why_it_matters"]) if x.get("why_it_matters") else ""))
         out.append(r"\subsection*{A first look}" + "\n" + block(p["primer"]["intro"]) + "\n\n" + "\n\n".join(ideas))
+    if p.get("simulator") and IDX.get("simulator", {}).get("url"):
+        S = IDX["simulator"]
+        out.append(r"\subsection*{Simulator}" + "\n" + inline(S.get("about", "")) + " On the website each case runs in the page; here it is a link.\n" +
+                   r"\begin{itemize}[leftmargin=1.2em]\small" + "\n".join(
+                       r"\item \textbf{%s.} %s \href{%s}{Open in the simulator}." % (inline(c["title"]), inline(c.get("note", "")), (S["url"] + "?" + c["query"]).replace("%", r"\%").replace("#", r"\#").replace("&", r"\&"))
+                       for c in p["simulator"]) + r"\end{itemize}")
     if p.get("history"):
         out.append(r"\subsection*{What the community started looking at}" + block(p["history"]))
     if p.get("further"):
@@ -845,7 +859,11 @@ def model_chapter(mid):
 
 def problems_part(mid):
     m = MODELS[mid]
-    out = [r"\part{%s}\label{part:%s}" % (esc_plain(m["name"]), mid)]
+    i = IDX["models"].index(mid)
+    colour, glyph, short = MODEL_ART.get(mid, ("accent", "", m["name"].split()[0]))
+    art = (r"\textcolor{%s}{\%s{%%s}}" % (colour, glyph)) if glyph else ""
+    out = [r"\setpart{%s}{%s}{%dmm}{%s}{%s}" % (colour, esc_plain(short), 52 + 26 * i, art % "44mm" if art else "", (r"\raisebox{-1.6mm}{%s}" % (art % "7.5mm")) if art else ""),
+           r"\part{%s}\label{part:%s}" % (esc_plain(m["name"]), mid)]
     out.append(r"\noindent The model and its assumption axes are in Chapter~\ref{model:%s}." % mid)
     probs = [PROBLEMS[x] for x in IDX["problems"] if PROBLEMS[x]["model"] == mid]
     for f in IDX.get("families", []):
@@ -865,24 +883,36 @@ def problems_part(mid):
             out.append(problem_section(p))
     return "\n\n".join(out)
 
+# colour, glyph macro and thumb-tab label of each model (the glyphs are those of the website's home page)
+MODEL_ART = {"mobile-agents-on-graphs": ("mzero", "glyphgraphs", "Graphs"), "mobile-robots-in-the-plane": ("mone", "glyphplane", "Plane"),
+             "search-in-geometric-domains": ("mtwo", "glyphsearch", "Search"), "programmable-matter": ("mthree", "glyphmatter", "Matter")}
+
+def dropcap(tex):
+    """The first letter of an essay as a drop cap (Libertinus Serif Initials), the rest of its first word in small capitals."""
+    m = re.match(r"\s*([A-Z])([A-Za-z\u00C0-\u024F']*)", tex)
+    return (tex[:m.start(1)] + r"\lettrine{%s}{%s}" % (m.group(1), m.group(2)) + tex[m.end():]) if m else tex
+
 RANKING = "consequential-open-problems"   # shown at the start of the open-questions appendix, not among the perspectives
 
 def overviews_part():
     """The perspectives, one chapter each, in the order of index.json."""
-    out = [r"\part{Perspectives}\label{part:perspectives}",
+    out = [r"\setpart{mpersp}{Perspectives}{26mm}{\glyphsettings{70mm}}{}", r"\part{Perspectives}\label{part:perspectives}",
            r"\noindent Essays that connect the problems of the atlas across models: where they come from, why the papers say they matter, and how techniques and lower bounds move between them. They assume the models of Part~\ref{part:models}."]
     for o in OVERVIEWS:
         if o["id"] == RANKING:
             continue
-        out.append(r"\chapter{%s}\label{ov:%s}" % (esc_plain(o["title"]), o["id"]))
+        out.append(r"\chapter{%s}\label{ov:%s}\essaynumber" % (esc_plain(o["title"]), o["id"]))
         out.append(r"\begin{summarybox}%s\end{summarybox}" % inline(o["summary"]))
         ps = [PROBLEMS[x] for x in o.get("problems", []) if x in PROBLEMS]
         if ps:
             out.append(r"\noindent\textit{Problems:} " + ", ".join(pref(p) for p in ps) + ".")
-        for sct in o.get("sections", []):
-            out.append(r"\section*{%s}" % esc_plain(sct["heading"]) + "\n" + block(sct["body"]))
+        # a perspective is one continuous essay: the headings of its sections are not printed,
+        # a wider gap marks where a section begins
+        for n, sct in enumerate(o.get("sections", [])):
+            out.append(dropcap(block(sct["body"])) if n == 0 else r"\essaybreak" + "\n" + block(sct["body"]))
         if o.get("further"):
-            out.append(r"\section*{Further reading}" + block(o["further"]))
+            out.append(r"\essaybreak\textit{Further reading.} " + block(o["further"]).lstrip())
+        out.append(r"\essayend")
     return "\n\n".join(out)
 
 def acknowledgements():
@@ -1056,7 +1086,7 @@ def bibliography():
         if extra:
             s += r" \newblock {\footnotesize %s}" % " ".join(extra)
         items.append(s)
-    return "\\begin{thebibliography}{99}\n" + "\n\n".join(items) + "\n\\end{thebibliography}"
+    return "\\begin{thebibliography}{99}\\backrefsetup{disable}\n" + "\n\n".join(items) + "\n\\end{thebibliography}"
 
 def citation_text():
     c = IDX.get("citation", {})
@@ -1113,23 +1143,46 @@ PREAMBLE = r"""\documentclass[11pt,a4paper,openany]{book}
 \definecolor{fgrey}{HTML}{8C8C8C}\definecolor{fviolet}{HTML}{7A4FA3}\definecolor{fsoft}{HTML}{EDEDED}\definecolor{fline}{HTML}{9A9A9A}
 \definecolor{flattice}{HTML}{D2D2D2}\definecolor{fghost}{HTML}{8C8C8C}\definecolor{ftrace}{HTML}{6E6E6E}
 \definecolor{fone}{HTML}{C0503A}\definecolor{ftwo}{HTML}{2C8A99}\definecolor{fthree}{HTML}{E0B33A}\definecolor{ffour}{HTML}{6A9A3A}
+% drawings: one glyph per model (the same as on the website), the graph of settings, thumb tabs, drop caps
+\usepackage{lettrine}\usepackage{eso-pic}\usepackage{pgfornament}
+\newfontfamily\initfont{LibertinusSerifInitials-Regular.otf}
+\newfontfamily\displayfont{LibertinusSerifDisplay-Regular.otf}
+\renewcommand{\LettrineFontHook}{\initfont\color{accent}}\renewcommand{\LettrineTextFont}{\scshape}
+\setcounter{DefaultLines}{3}\setlength{\DefaultFindent}{2.5pt}\setlength{\DefaultNindent}{0pt}\renewcommand{\DefaultLoversize}{0.04}
+\definecolor{mzero}{HTML}{3553C9}\definecolor{mone}{HTML}{0F7B6C}\definecolor{mtwo}{HTML}{B5502B}\definecolor{mthree}{HTML}{7A3FB0}\definecolor{mpersp}{HTML}{23407A}
+\newcommand{\glyphgraphs}[1]{\begin{tikzpicture}[x=#1,y=#1,line cap=round,line width=0.034*#1]\draw (0.12,0.84)--(0.8,0.93)--(0.9,0.36)--(0.38,0.1)--cycle (0.8,0.93)--(0.38,0.1);\foreach \p in {(0.12,0.84),(0.8,0.93),(0.9,0.36)}{\draw[fill=white] \p circle[radius=0.075];}\fill[.] (0.38,0.1) circle[radius=0.095];\end{tikzpicture}}
+\newcommand{\glyphplane}[1]{\begin{tikzpicture}[x=#1,y=#1,line cap=round,line width=0.03*#1]\draw[dash pattern=on 0.04*#1 off 0.07*#1] (0.5,0.5) circle[radius=0.38];\fill[.] (0.500,0.880) circle[radius=0.07];\fill[.] (0.139,0.617) circle[radius=0.07];\fill[.] (0.277,0.193) circle[radius=0.07];\fill[.] (0.723,0.193) circle[radius=0.07];\fill[.] (0.861,0.617) circle[radius=0.07];\end{tikzpicture}}
+\newcommand{\glyphsearch}[1]{\begin{tikzpicture}[x=#1,y=#1,line cap=round,line width=0.034*#1]\draw (0.02,0.3)--(0.98,0.3);\draw[dash pattern=on 0.04*#1 off 0.06*#1] (0.5,0.3) arc[start angle=180,end angle=0,radius=0.06] arc[start angle=0,end angle=180,radius=0.16] arc[start angle=180,end angle=0,radius=0.28];\fill[.] (0.5,0.3) circle[radius=0.08];\draw (0.8,0.24)--(0.92,0.36) (0.8,0.36)--(0.92,0.24);\path (0,0) (1,1);\end{tikzpicture}}
+\newcommand{\glyphmatter}[1]{\begin{tikzpicture}[x=#1,y=#1]\fill[.!45] (0.120,0.140) circle[radius=0.03];\fill[.] (0.370,0.140) circle[radius=0.085];\fill[.] (0.620,0.140) circle[radius=0.085];\fill[.!45] (0.870,0.140) circle[radius=0.03];\fill[.] (0.245,0.380) circle[radius=0.085];\fill[.] (0.495,0.380) circle[radius=0.085];\fill[.] (0.745,0.380) circle[radius=0.085];\fill[.!45] (0.120,0.620) circle[radius=0.03];\fill[.] (0.370,0.620) circle[radius=0.085];\fill[.] (0.620,0.620) circle[radius=0.085];\fill[.!45] (0.870,0.620) circle[radius=0.03];\fill[.!45] (0.245,0.860) circle[radius=0.03];\fill[.!45] (0.495,0.860) circle[radius=0.03];\fill[.!45] (0.745,0.860) circle[radius=0.03];\path (0,0) (1,1);\end{tikzpicture}}
+\newcommand{\glyphmodels}[1]{\begin{tikzpicture}[x=#1,y=#1,line cap=round,line width=0.03*#1]\foreach \y/\k in {0.8/1,0.5/3,0.2/2}{\draw[.!45] (0.08,\y)--(0.92,\y);\foreach \i in {0,1,2,3}{\draw[.!45] (0.08+0.28*\i,\y-0.05)--(0.08+0.28*\i,\y+0.05);}\fill[.] (0.08+0.28*\k,\y) circle[radius=0.08];}\end{tikzpicture}}
+\newcommand{\glyphsettings}[1]{\begin{tikzpicture}[x=#1,y=#1]\draw[fline,line width=0.0035*#1] (0.5000,0.6667)--(0.1944,0.4667);\draw[fline,line width=0.0035*#1] (0.5000,0.6667)--(0.5000,0.4667);\draw[fline,line width=0.0035*#1] (0.5000,0.6667)--(0.8056,0.4667);\draw[fline,line width=0.0035*#1] (0.1944,0.4667)--(0.0556,0.2611);\draw[fline,line width=0.0035*#1] (0.1944,0.4667)--(0.2778,0.2611);\draw[fline,line width=0.0035*#1] (0.5000,0.4667)--(0.2778,0.2611);\draw[fline,line width=0.0035*#1] (0.5000,0.4667)--(0.5000,0.2611);\draw[fline,line width=0.0035*#1] (0.5000,0.4667)--(0.7222,0.2611);\draw[fline,line width=0.0035*#1] (0.8056,0.4667)--(0.7222,0.2611);\draw[fline,line width=0.0035*#1] (0.8056,0.4667)--(0.9444,0.2611);\draw[fline,line width=0.0035*#1] (0.0556,0.2611)--(0.1667,0.0556);\draw[fline,line width=0.0035*#1] (0.2778,0.2611)--(0.1667,0.0556);\draw[fline,line width=0.0035*#1] (0.2778,0.2611)--(0.3889,0.0556);\draw[fline,line width=0.0035*#1] (0.5000,0.2611)--(0.3889,0.0556);\draw[fline,line width=0.0035*#1] (0.5000,0.2611)--(0.6111,0.0556);\draw[fline,line width=0.0035*#1] (0.7222,0.2611)--(0.6111,0.0556);\draw[fline,line width=0.0035*#1] (0.7222,0.2611)--(0.8333,0.0556);\draw[fline,line width=0.0035*#1] (0.9444,0.2611)--(0.8333,0.0556);\draw[black,fill=white,line width=0.005*#1] (0.5000,0.6667) circle[radius=0.03];\draw[muted,fill=white,densely dashed,line width=0.004*#1] (0.1944,0.4667) circle[radius=0.025];\fill[gap] (0.5000,0.4667) circle[radius=0.025];\fill[fline] (0.8056,0.4667) circle[radius=0.025];\fill[near] (0.0556,0.2611) circle[radius=0.025];\fill[gap] (0.2778,0.2611) circle[radius=0.025];\fill[tight] (0.5000,0.2611) circle[radius=0.025];\fill[near] (0.7222,0.2611) circle[radius=0.025];\fill[impossible] (0.9444,0.2611) circle[radius=0.025];\fill[tight] (0.1667,0.0556) circle[radius=0.025];\fill[tight] (0.3889,0.0556) circle[radius=0.025];\fill[tight] (0.6111,0.0556) circle[radius=0.025];\fill[gap] (0.8333,0.0556) circle[radius=0.025];\end{tikzpicture}}
+% art under a part title, a glyph left of each problem's section number, and a thumb tab on the outer edge
+\def\partart{}\def\secglyph{}\def\thumbcolor{}\def\thumblabel{}\newlength{\thumbtop}
+\newcommand{\setpart}[5]{\gdef\thumbcolor{#1}\gdef\thumblabel{#2}\global\setlength{\thumbtop}{#3}\gdef\partart{#4}\gdef\secglyph{#5}}
+\newcommand{\thumbbox}{\begin{tikzpicture}\fill[color=\thumbcolor] (0,0) rectangle (5.5mm,24mm);\node[rotate=90,text=white,font=\sffamily\scriptsize\bfseries,inner sep=0pt] at (2.75mm,12mm) {\MakeUppercase{\thumblabel}};\end{tikzpicture}}
+\AddToShipoutPictureBG{\ifx\thumbcolor\empty\else\ifodd\value{page}\AtPageUpperLeft{\put(\LenToUnit{\dimexpr\paperwidth-5.5mm\relax},\LenToUnit{\dimexpr-\thumbtop-54mm\relax}){\thumbbox}}\else\AtPageUpperLeft{\put(0,\LenToUnit{\dimexpr-\thumbtop-54mm\relax}){\thumbbox}}\fi\fi}
+\newcommand{\essaynumber}{\AddToShipoutPictureBG*{\AtPageUpperLeft{\put(\LenToUnit{\dimexpr\paperwidth-76mm\relax},\LenToUnit{-58mm}){\makebox[50mm][r]{\fontsize{96}{96}\selectfont\displayfont\color{accentsoft}\thechapter}}}}}
+\newcommand{\essaybreak}{\par\addvspace{1.1\baselineskip}}
+\newcommand{\essayend}{\par\bigskip{\centering\pgfornament[width=26mm,color=muted]{84}\par}}
 \usepackage{caption}\captionsetup[figure]{font={small,sf},labelfont={bf,color=accent}}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
-\usepackage[round,sort]{natbib}
+\usepackage[round]{natbib}
 \setcitestyle{aysep={}}
-\usepackage[hidelinks,pdfusetitle,bookmarksnumbered]{hyperref}
+\usepackage[hidelinks,pdfusetitle,bookmarksnumbered,pagebackref]{hyperref}
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{\ifcase #1\or{\footnotesize\color{muted}Cited on p.\,#2.}\else{\footnotesize\color{muted}Cited on pp.\,#2.}\fi}
 \hypersetup{colorlinks=true,linkcolor=accent,citecolor=accent,urlcolor=accent}
 PDFMETA
 \usepackage{bookmark}
 \usepackage{emptypage}
 \renewcommand{\bibname}{Bibliography}
 \setlength{\parindent}{0pt}\setlength{\parskip}{5pt plus 1pt}\setlength{\emergencystretch}{2.5em}
-\titleformat{\part}[display]{\centering\sffamily}{\large\scshape\color{muted}Part \thepart}{14pt}{\Huge\bfseries}
+\titleformat{\part}[display]{\centering\sffamily}{\large\scshape\color{muted}Part \thepart}{14pt}{\Huge\bfseries}[\vspace{14mm}\partart]
 \titleformat{\chapter}[display]{\sffamily}{\large\color{accent}\scshape\chaptertitlename\ \thechapter}{6pt}{\huge\bfseries}[\vspace{2pt}{\color{accent}\titlerule[1pt]}]
 \titleformat{name=\chapter,numberless}[display]{\sffamily}{}{0pt}{\huge\bfseries}[\vspace{2pt}{\color{accent}\titlerule[1pt]}]
 \titlespacing*{\chapter}{0pt}{10pt}{18pt}
-\titleformat{\section}{\sffamily\Large\bfseries}{\color{accent}\thesection}{0.8em}{}
+\titleformat{\section}{\sffamily\Large\bfseries}{\llap{\secglyph\hspace{3.5mm}}\color{accent}\thesection}{0.8em}{}
 \titleformat{\subsection}{\sffamily\large\bfseries}{\color{accent}\thesubsection}{0.7em}{}
 \titleformat{\paragraph}[runin]{\sffamily\bfseries}{}{0pt}{}
 \titlespacing*{\paragraph}{0pt}{8pt}{0.6em}
@@ -1202,6 +1255,8 @@ def title_page():
 \vspace{7mm}{\sffamily\Large\color{accent} %s\par}
 \vspace{12mm}{\large\itshape %s\par}
 \vfill
+\glyphsettings{78mm}\par
+\vfill
 {\Large %s\par}\vspace{3mm}{\color{muted}Last updated %s\par}
 \vspace{10mm}{\small\color{muted}\colorbox{accentsoft}{\sffamily\scriptsize\color{accent}AI USE} %s\par}
 \vspace*{15mm}
@@ -1231,17 +1286,17 @@ def main():
     pre = pre.replace("PDFMETA", r"\hypersetup{pdftitle={%s},pdfauthor={%s},pdfsubject={%s},pdfkeywords={%s},pdfcreator={scripts/build-pdf.py (version %s)}}" % (
         esc_plain(c.get("title", IDX.get("title", ""))), esc_plain(", ".join(c.get("authors", []))), esc_plain(IDX.get("tagline", "")), esc_plain(", ".join(KEYWORDS)), esc_plain(c.get("version", ""))))
     parts = [pre, title_page(), r"\frontmatter\tableofcontents", acknowledgements(), r"\mainmatter", reading_guide(),
-             r"\part{Models and their assumptions}\label{part:models}" + "\n" + r"\noindent What an agent, a robot or a particle can see, remember and do, and what the adversary controls. Each chapter tells how the assumptions of one model fit together, then gives every axis with its origin and formal definitions."]
+             r"\setpart{accent}{Models}{0mm}{\textcolor{accent}{\glyphmodels{44mm}}}{}" + "\n" + r"\part{Models and their assumptions}\label{part:models}" + "\n" + r"\noindent What an agent, a robot or a particle can see, remember and do, and what the adversary controls. Each chapter tells how the assumptions of one model fit together, then gives every axis with its origin and formal definitions."]
     parts.append(notation_chapter())
     parts += [model_chapter(mid) for mid in IDX["models"]]
     parts.append(overviews_part())
     for mid in IDX["models"]:
         parts.append(problems_part(mid))
-    parts += [r"\appendix", r"\part*{Appendices}", open_questions_appendix(), assumptions_appendix(), timeline_appendix(),
+    parts += [r"\appendix", r"\setpart{muted}{Appendices}{156mm}{}{}", r"\part*{Appendices}", open_questions_appendix(), assumptions_appendix(), timeline_appendix(),
               r"\backmatter", r"\cleardoublepage\phantomsection\addcontentsline{toc}{chapter}{Bibliography}\markboth{Bibliography}{Bibliography}", r"\setlength{\bibsep}{4pt plus 1pt}\small", bibliography(), r"\end{document}"]
     BUILD.mkdir(exist_ok=True)
     tex = BUILD / "atlas.tex"
-    tex.write_text("\n\n".join(parts), encoding="utf-8")
+    tex.write_text(merge_cites("\n\n".join(parts)), encoding="utf-8")
     print(f"wrote {tex.relative_to(ROOT)}")
     if "--tex-only" in sys.argv:
         return

@@ -522,7 +522,7 @@
       },
       {
         "symbol": "d",
-        "meaning": "distance from the origin to the target on a line or on rays"
+        "meaning": "distance from the origin to the target (on a line, on rays or in the plane)"
       },
       {
         "symbol": "x",

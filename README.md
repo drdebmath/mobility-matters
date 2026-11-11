@@ -2,7 +2,7 @@
 
 *A Living Survey of Open Problems on Autonomous Agents, Robots and Particles*
 
-**Website:** https://drdebmath.github.io/mobility-matters/ · **Book (PDF):** [mobility-matters.pdf](mobility-matters.pdf)
+**Website:** https://debasishpattanayak.com/mobility-matters/ · **Book (PDF):** [mobility-matters.pdf](mobility-matters.pdf)
 
 Mobility Matters is a public atlas of research problems in distributed computing by
 mobile entities: agents moving on graphs, robots in the plane, robots searching

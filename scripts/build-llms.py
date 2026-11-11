@@ -123,6 +123,8 @@ def main():
                 if v.get("notes"):
                     f += ["", "Notes: " + one_line(v["notes"])]
                 f.append("")
+            for x in p.get("simulator", []):
+                f.append(f"- Simulator: {one_line(x['title'])}: {one_line(x.get('note'))} {idx.get('simulator', {}).get('url', '')}?{x['query']}")
             for x in p.get("further", []):
                 f.append(f"- Further reading: [{x['ref']}]: {one_line(x.get('note'))}")
             f.append("")

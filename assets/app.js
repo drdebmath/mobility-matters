@@ -446,39 +446,76 @@
           .concat(derivedOf(p).filter(q => ids.has(q.id)).flatMap(q => walk(q, d + 1)));
         return `<div class="mfam"><h4>${esc(f.name)}</h4><div class="plinks">${roots.flatMap(r => walk(r, 0)).join('')}</div></div>`;
       }).join('');
-      return `<article class="mcard m${i % 4}">
-        <header><span class="eyebrow">Model ${i + 1}</span><h3><a href="${L('model', m.id)}">${esc(m.name)}</a></h3>
-          <p class="muted">${fmt(m.summary)}</p></header>
-        <div class="mstats"><span><b>${probs.length}</b> problems</span><span><b>${probs.reduce((n, p) => n + p.variants.length, 0)}</b> settings</span><span><b>${open}</b> open questions</span></div>
-        ${statusBar(statusTally(probs), false)}
+      return `<article class="mrow m${i % 4}">
+        <header class="mrow-head">
+          <div class="mrow-title">${MODEL_ICON[m.id] ? `<span class="micon" aria-hidden="true">${MODEL_ICON[m.id]}</span>` : ''}<div><span class="eyebrow">Model ${i + 1}</span><h3><a href="${L('model', m.id)}">${esc(m.name)}</a></h3></div></div>
+          <p class="muted">${fmt(m.summary)}</p>
+          <div class="mstats"><span><b>${probs.length}</b> problems</span><span><b>${probs.reduce((n, p) => n + p.variants.length, 0)}</b> settings</span><span><b>${open}</b> open questions</span></div>
+          ${statusBar(statusTally(probs), false)}
+          <a class="mmore" href="${L('model', m.id)}">Axes, definitions and problem trees →</a>
+        </header>
         <div class="mfams">${famHtml}</div>
-        <a class="mmore" href="${L('model', m.id)}">Axes, definitions and problem trees →</a>
       </article>`;
     };
     const ovs = (idx.overviews || []).map(id => state.overviews[id]).filter(Boolean);
+    const prio = ((idx.priorities || {}).items || []).slice(0, 6);
+    const nPrio = ((idx.priorities || {}).items || []).length;
+    const pad2 = n => String(n).padStart(2, '0');
     return `<section class="home-hero">
         <div class="hh-text">
           <h1>${esc(idx.title)}</h1>
           ${idx.subtitle ? `<p class="subtitle">${esc(idx.subtitle)}</p>` : ''}
           <p class="tagline">${esc(idx.tagline)}</p>
+          ${idx.owner ? `<p class="maintainer">Maintained by ${idx.owner_url ? `<a href="${esc(idx.owner_url)}" rel="author">${esc(idx.owner)}</a>` : esc(idx.owner)}</p>` : ''}
+          <div class="hh-links"><a class="btn" href="${L('explore')}">Explore by assumptions</a><a class="btn" href="${L('open')}">Open questions</a><a class="btn ghost" href="${L('timeline')}">Timeline</a><a class="btn ghost" href="${L('references')}">References</a><a class="btn ghost" href="${esc((idx.citation || {}).pdf || 'mobility-matters.pdf')}">PDF</a></div>
           ${(idx.citation || {}).version ? `<p class="updated"><span class="updated-tag">Last updated</span> <time datetime="${esc(idx.citation.version)}">${esc(longDate(idx.citation.version))}</time>${changelogLink('what changed') ? ` · ${changelogLink('what changed')}` : ''}</p>` : ''}
           ${aiNote('sub')}
-          <p class="hh-intro">${mdInline(idx.intro || 'Every problem is a tree of settings. Its root assumes nothing; each edge adds one assumption, until it reaches the settings studied in the literature. Each setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.')}</p>
-          <div class="hh-links"><a class="btn" href="${L('explore')}">Explore by assumptions</a><a class="btn" href="${L('open')}">Open questions</a><a class="btn ghost" href="${L('timeline')}">Timeline</a><a class="btn ghost" href="${L('references')}">References</a><a class="btn ghost" href="${esc((idx.citation || {}).pdf || 'mobility-matters.pdf')}">PDF</a></div>
         </div>
-        <aside class="hh-glance panel">
-          <span class="eyebrow">At a glance</span>
-          <div class="glance-nums"><div><b>${probsAll.length}</b><span>problems</span></div><div><b>${nVar}</b><span>settings</span></div><div><b>${nOpen}</b><span>open questions</span></div><div><b>${nRefs}</b><span>papers</span></div></div>
-          <span class="eyebrow">How close the bounds are</span>
+        <figure class="hh-fig">${HERO_FIG}<figcaption>A problem is a graph of settings. The root assumes nothing; each edge adds an assumption; the colour of a setting says how close its bounds are.</figcaption></figure>
+      </section>
+      <section class="hh-glance" aria-label="At a glance">
+        <div class="glance-nums"><div><b>${probsAll.length}</b><span>problems</span></div><div><b>${nVar}</b><span>settings</span></div><div><b>${nOpen}</b><span>open questions</span></div><div><b>${nRefs}</b><span>papers</span></div></div>
+        <div class="glance-bar"><span class="eyebrow">How close the bounds are</span>
           ${statusBar(statusTally(probsAll), true)}
-          <p class="small muted">One count per setting and measure: the best upper bound against the best lower bound.</p>
-        </aside>
+          <p class="small muted">One count per setting and measure: the best upper bound against the best lower bound.</p></div>
+      </section>
+      <section class="home-how"><h2>How to read the atlas</h2>
+        <p class="hh-intro">${mdInline(idx.intro || 'Every problem is a tree of settings. Its root assumes nothing; each edge adds one assumption, until it reaches the settings studied in the literature. Each setting records the proven lower bounds and what forces them, the paper that introduced it, the current best result, and the gap between them.')}</p>
       </section>
       ${homeSwitch('logical')}
-      <div class="mgrid">${idx.models.map(modelCard).join('')}</div>
+      <div class="mrows">${idx.models.map(modelCard).join('')}</div>
+      ${prio.length ? `<div class="section-title"><h2>Most consequential open questions</h2><a class="small" href="${L('open')}">All ${nPrio} ranked, and every open question →</a></div>
+      <ol class="hprio">${prio.map((it, i) => `<li><a href="${L('open')}"><span class="num">${pad2(i + 1)}</span><span><b>${fmt(it.title)}</b><small>${(it.problems || []).map(id => state.problems[id]).filter(Boolean).map(q => esc(q.name)).join(' · ')}</small></span></a></li>`).join('')}</ol>` : ''}
       ${ovs.length ? `<div class="section-title"><h2>Perspectives</h2><span class="muted small">Essays that connect problems across models, in reading order</span></div>
-      <div class="ovgrid">${ovs.map(o => `<a class="ovitem" href="${L('overview', o.id)}"><h4>${esc(o.title)}</h4><p>${fmt(o.summary)}</p></a>`).join('')}</div>` : ''}`;
+      <div class="ovgrid">${ovs.map((o, i) => `<a class="ovitem" href="${L('overview', o.id)}"><span class="num">${pad2(i + 1)}</span><h4>${esc(o.title)}</h4><p>${fmt(o.summary)}</p></a>`).join('')}</div>` : ''}`;
   }
+
+  // Home page drawings: a problem as a graph of settings, and one glyph per model.
+  const HERO_FIG = (() => {
+    const N = { r: [210, 40, 'root'], a: [100, 112, 'branch'], b: [210, 112, 'gap'], c: [320, 112, 'unknown'],
+      d: [50, 186, 'near'], e: [130, 186, 'gap'], f: [210, 186, 'tight'], g: [290, 186, 'near'], h: [370, 186, 'impossible'],
+      i: [90, 260, 'tight'], j: [170, 260, 'tight'], k: [250, 260, 'tight'], l: [330, 260, 'gap'] };
+    const E = 'ra rb rc ad ae be bf bg cg ch di ei ej fj fk gk gl hl'.split(' ');
+    return `<svg class="herofig" viewBox="0 0 420 290" role="img" aria-label="A graph of settings: the root assumes nothing and each edge adds an assumption">
+      ${E.map(e => `<line x1="${N[e[0]][0]}" y1="${N[e[0]][1]}" x2="${N[e[1]][0]}" y2="${N[e[1]][1]}"/>`).join('')}
+      ${Object.values(N).map(([x, y, c]) => `<circle class="hf-${c}" cx="${x}" cy="${y}" r="${c === 'root' ? 11 : 9}"/>`).join('')}
+      <text x="228" y="44">no assumptions</text>
+      <text x="10" y="150" class="hf-side" transform="rotate(90 10 150)" text-anchor="middle">stronger assumptions →</text>
+    </svg>`;
+  })();
+  const MODEL_ICON = (() => {
+    const svg = body => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">${body}</svg>`;
+    const dot = (x, y, r = 3.2) => `<circle cx="${x}" cy="${y}" r="${r}" fill="currentColor" stroke="none"/>`;
+    const ring = (x, y, r = 3.4) => `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--bg)"/>`;
+    const lattice = []; for (let j = 0; j < 4; j++) for (let i = 0; i < 4 - (j % 2); i++) lattice.push([8 + i * 10.6 + (j % 2) * 5.3, 9 + j * 10]);
+    const filled = new Set([1, 2, 4, 5, 6, 8, 9]);
+    return {
+      'mobile-agents-on-graphs': svg(`<path d="M10 12 L36 9 L40 30 L20 39 Z M10 12 L20 39 M36 9 L20 39"/>${ring(10, 12)}${ring(36, 9)}${ring(40, 30)}${dot(20, 39, 4)}`),
+      'mobile-robots-in-the-plane': svg(`<circle cx="24" cy="24" r="16" stroke-dasharray="2 4"/>${[0, 72, 144, 216, 288].map(d => dot(24 + 16 * Math.cos((d - 90) * Math.PI / 180), 24 + 16 * Math.sin((d - 90) * Math.PI / 180))).join('')}`),
+      'search-in-geometric-domains': svg(`<path d="M4 30 H44"/><path d="M24 30 C24 14 30 14 30 30 C30 8 14 8 14 30 C14 2 40 2 40 30" stroke-dasharray="2 3.4"/>${dot(24, 30, 3.6)}<path d="M37 33 l6 6 M43 33 l-6 6"/>`),
+      'programmable-matter': svg(lattice.map(([x, y], i) => filled.has(i) ? dot(x, y, 3.6) : `<circle cx="${x}" cy="${y}" r="1.2" fill="currentColor" stroke="none" opacity=".45"/>`).join('')),
+    };
+  })();
 
   const homeSwitch = cur => `<div class="section-title viewhead"><h2>${cur === 'logical' ? 'Four models' : 'How the problems evolved'}</h2><nav class="viewswitch" aria-label="View"><a class="${cur === 'logical' ? 'on' : ''}" href="${L()}">Logical</a><a class="${cur === 'chrono' ? 'on' : ''}" href="${L('timeline')}">Chronological</a></nav></div>`;
   const refYear = k => { const r = state.refs[k]; return r ? (r.first_year || r.year) : null; };
@@ -536,6 +573,33 @@
       <section class="panel timeline">${rows}</section>`;
   }
 
+  // The owner's Look-Compute-Move simulator, embedded on the problems that list `simulator` cases.
+  const simSrc = (c, embed) => {
+    const S = state.index.simulator || {};
+    let theme = ''; try { theme = '&theme=' + (document.documentElement.dataset.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')); } catch (e) {}
+    return `${S.url || ''}?${embed ? 'embed&' : ''}${c.query}${embed ? theme : ''}`;
+  };
+  function simulatorPanel(p) {
+    const S = state.index.simulator, cases = p.simulator || [];
+    if (!S || !S.url || !cases.length) return '';
+    return `<section class="panel simulator" id="sec-simulator"><h3 class="eyebrow">Simulator <span class="muted">watch an algorithm run</span></h3>
+      <p class="small muted">${mdInline(S.about || '')} ${S.repo ? `<a href="${esc(S.repo)}" rel="noopener">Source</a>.` : ''}</p>
+      ${cases.length > 1 ? `<div class="sim-tabs" role="tablist">${cases.map((c, i) => `<button type="button" role="tab" class="${i ? '' : 'on'}" aria-selected="${i ? 'false' : 'true'}" data-sim="${i}">${fmt(c.title)}</button>`).join('')}</div>` : ''}
+      ${cases.map((c, i) => `<div class="sim-case" data-sim-case="${i}"${i ? ' hidden' : ''}>
+        <p><b>${fmt(c.title)}.</b> ${mdInline(c.note || '')} <a class="small" href="${esc(simSrc(c, false))}" target="_blank" rel="noopener">Open in the simulator ↗</a></p>
+        <iframe class="simframe" title="${esc(S.name || 'Simulator')}: ${esc(c.title)}" loading="lazy" ${i ? 'data-src' : 'src'}="${esc(simSrc(c, true))}"></iframe></div>`).join('')}
+    </section>`;
+  }
+  if (document.addEventListener) document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-sim]'); if (!b) return;
+    const box = b.closest('.simulator'); if (!box) return;
+    box.querySelectorAll('[data-sim]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    box.querySelectorAll('[data-sim-case]').forEach(d => {
+      const on = d.dataset.simCase === b.dataset.sim; d.hidden = !on;
+      const f = d.querySelector('iframe'); if (on && f && f.dataset.src) { f.src = f.dataset.src; delete f.dataset.src; }
+    });
+  });
+
   function overviewCards(problemId) {
     const list = Object.values(state.overviews).filter(o => !problemId || (o.problems || []).includes(problemId));
     if (!list.length) return '';
@@ -568,15 +632,16 @@
     const o = state.overviews[id];
     if (!o) return notFound('overview', id);
     const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const toc = (o.sections || []).map(sct => `<li><a href="#" data-jump="${slug(sct.heading)}">${esc(sct.heading)}</a></li>`).join('');
+    // A perspective reads as one continuous essay: section headings are not shown. The ranked
+    // list of open problems is the exception, because its headings are the ranked items.
+    const ranked = (o.sections || []).some(sct => /^\d/.test(sct.heading));
     return `<article class="essay">
         <div class="crumbs"><a href="${L()}">Home</a><span class="sep">›</span><span>Perspective</span></div>
         <header><h1>${esc(o.title)}</h1><p class="lead muted">${fmt(o.summary)}</p>
           <div class="chips">${(o.problems || []).map(p => state.problems[p] ? `<a class="chip assume" href="${L('problem', p)}">${esc(state.problems[p].name)}</a>` : '').join('')}</div>
           ${o.status ? `<span class="badge ${esc(o.status)}">${esc(o.status)}</span>` : ''}</header>
-        ${toc ? `<nav class="toc"><h3 class="eyebrow">Contents</h3><ol>${toc}</ol></nav>` : ''}
-        ${(o.sections || []).map(sct => `<section id="sec-${slug(sct.heading)}"><h2>${esc(sct.heading)}</h2><div class="prose">${md(sct.body)}</div></section>`).join('')}
-        ${o.further ? `<section><h2>Further reading</h2><div class="prose">${md(o.further)}</div></section>` : ''}
+        ${(o.sections || []).map(sct => `<section class="essay-sec" id="sec-${slug(sct.heading)}">${ranked ? `<h2>${esc(sct.heading)}</h2>` : ''}<div class="prose">${md(sct.body)}</div></section>`).join('')}
+        ${o.further ? `<section class="essay-sec"><div class="prose"><p><em>Further reading.</em></p>${md(o.further)}</div></section>` : ''}
       </article>${overviewNav(o)}<a href="#" class="to-top" data-jump="top" aria-label="Back to top" title="Back to top">↑</a>`;
   }
 
@@ -854,10 +919,11 @@
           ${bigTree(p)}</details>
           ${probAxes.length ? `<h3>Assumptions specific to this problem</h3>${axesTable(probAxes)}` : ''}
         </section>`;
-      const toc = [['statement', 'Statement'], p.primer && ['first-look', 'A first look'], ['known', 'What is known'], nOpen && ['open', `Open questions (${nOpen})`], hist && ['history', 'History'], rel && ['relations', 'Relations'], persp && ['perspectives', 'Perspectives'], further && ['further', 'Further reading'], ['settings', 'All settings']].filter(Boolean);
+      const sim = simulatorPanel(p);
+      const toc = [['statement', 'Statement'], p.primer && ['first-look', 'A first look'], sim && ['simulator', 'Simulator'], ['known', 'What is known'], nOpen && ['open', `Open questions (${nOpen})`], hist && ['history', 'History'], rel && ['relations', 'Relations'], persp && ['perspectives', 'Perspectives'], further && ['further', 'Further reading'], ['settings', 'All settings']].filter(Boolean);
       return `${crumbs}<div class="chapter">
         <nav class="chapter-toc" aria-label="On this page"><h4>On this page</h4><ol>${toc.map(([k, l]) => `<li><a href="#" data-jump="${k}">${esc(l)}</a></li>`).join('')}</ol></nav>
-        <div class="chapter-body">${head.replace(crumbs, '').replace('<details class="statement"', '<details class="statement" id="sec-statement"')}${primer.replace('<details class="panel primer"', '<details class="panel primer" id="sec-first-look"')}${known}${openSec}${hist.replace('<section class="panel history">', '<section class="panel history" id="sec-history">')}${rel.replace('<section class="panel relation">', '<section class="panel relation" id="sec-relations">')}${persp ? `<section class="panel" id="sec-perspectives"><h3 class="eyebrow">Perspectives</h3>${persp}</section>` : ''}${further}${treeSec}
+        <div class="chapter-body">${head.replace(crumbs, '').replace('<details class="statement"', '<details class="statement" id="sec-statement"')}${primer.replace('<details class="panel primer"', '<details class="panel primer" id="sec-first-look"')}${sim}${known}${openSec}${hist.replace('<section class="panel history">', '<section class="panel history" id="sec-history">')}${rel.replace('<section class="panel relation">', '<section class="panel relation" id="sec-relations">')}${persp ? `<section class="panel" id="sec-perspectives"><h3 class="eyebrow">Perspectives</h3>${persp}</section>` : ''}${further}${treeSec}
         ${contributeBox(p, null)}</div></div>`;
     }
     const sel = view === 'map' ? null : n;

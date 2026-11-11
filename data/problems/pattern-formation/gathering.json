@@ -106,6 +106,13 @@
       }
     ]
   },
+  "simulator": [
+    {
+      "title": "Gathering under a sequential scheduler",
+      "query": "algorithm=SqGathering&robots=6&seed=7&speed=turn:1",
+      "note": "Six robots with weak multiplicity detection, activated one at a time. The simulator's documentation gives the algorithm as Algorithm 8 of the arXiv version of [Flocchini2026Universal]."
+    }
+  ],
   "glossary": [
     {
       "term": "robot",

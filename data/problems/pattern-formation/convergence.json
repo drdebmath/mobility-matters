@@ -42,6 +42,18 @@
       }
     ]
   },
+  "simulator": [
+    {
+      "title": "Go to the centre of gravity",
+      "query": "algorithm=Gathering&robots=30&seed=7",
+      "note": "Each robot moves to the average position of the robots it sees, the rule of [Cohen2005Gravitational]. Here 30 robots see everyone and run under the simulator's asynchronous scheduler."
+    },
+    {
+      "title": "Limited visibility: go to the centre, keep your neighbours",
+      "query": "algorithm=GoToCenter&points=-160,20;-80,10;0,0;95,-5;170,30;240,-20&visibility=100&scheduler=sequential&speed=turn:1&links=1",
+      "note": "Each robot heads for the centre of the smallest circle enclosing the robots it sees, without losing sight of a neighbour, the rule of [Ando1999Convergence]. Six robots with visibility radius 100 start on a chain and move one at a time; the lines join robots that see each other."
+    }
+  ],
   "glossary": [
     {
       "term": "robot",
