@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Treasure hunt simulator · Mobility Matters</title>
+<meta name="description" content="A browser simulator of treasure hunt by exploration sequences of doubling size: one agent, a graph with port numbers, a treasure at an unknown node.">
+<style>
+  /* the atlas tokens (assets/style.css), copied so this page stands alone */
+  :root {
+    --bg: #fcfbf8; --bg-elev: #ffffff; --bg-sunken: #f4f2ed; --fg: #1f1d19; --muted: #6c6861;
+    --line: #e7e3da; --line-strong: #d3cdc1; --accent: #2d4a9b; --accent-soft: #edf0f7;
+    --tight: #2f6f4a; --tight-soft: #e6f1ea; --near: #96661c; --near-soft: #f8f0e0; --gap: #a83a35;
+    --fig-ink: #857f74; --fig-faint: #dcd7cd;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --radius: 8px; --radius-sm: 6px; color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16171a; --bg-elev: #1c1d21; --bg-sunken: #202227; --fg: #e6e3dc; --muted: #a29e96; --line: #2c2e34; --line-strong: #3d4048;
+      --fig-ink: #7d818b; --fig-faint: #34373e; --accent: #a3b4ec; --accent-soft: #232a3d; --tight: #74cf9b; --tight-soft: #1d3327;
+      --near: #e5b45e; --near-soft: #3a2f16; --gap: #f08a8a; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16171a; --bg-elev: #1c1d21; --bg-sunken: #202227; --fg: #e6e3dc; --muted: #a29e96; --line: #2c2e34; --line-strong: #3d4048;
+    --fig-ink: #7d818b; --fig-faint: #34373e; --accent: #a3b4ec; --accent-soft: #232a3d; --tight: #74cf9b; --tight-soft: #1d3327;
+    --near: #e5b45e; --near-soft: #3a2f16; --gap: #f08a8a; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--fg); font: 14.5px/1.5 var(--sans); }
+  body.embed { font-size: 12.5px; line-height: 1.45; }
+  html.embed { overflow: hidden; }   /* the atlas page sizes the frame to the reported height */
+  a { color: var(--accent); }
+  .sim { max-width: 1120px; margin: 0 auto; padding: 1.2rem 16px 2rem; }
+  body.embed .sim { padding: 0; }
+  header h1 { font-size: 1.55rem; margin: .3rem 0 .4rem; }
+  header p { max-width: 75ch; color: var(--muted); margin: .3rem 0 1rem; }
+  .back { font-size: .9rem; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.2rem; align-items: start; }
+  body.embed .layout, .narrow .layout { display: block; }
+  @media (max-width: 820px) { .layout { display: block; } }
+  .stage svg { display: block; width: 100%; height: auto; background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius-sm); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+  .lines { margin: .45rem 0 0; min-height: 3.6em; }
+  .lines p { margin: 0 0 .15rem; }
+  .muted { color: var(--muted); }
+  .small { font-size: .88em; }
+  .mono { font-family: var(--mono); font-size: .92em; }
+  .seq b { color: var(--accent); background: var(--accent-soft); border-radius: 3px; padding: 0 .15em; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .4rem; margin: .5rem 0 .3rem; }
+  button, select, input[type=number] { font: inherit; color: var(--fg); background: var(--bg-elev); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: .25rem .6rem; }
+  button { cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--fg); }
+  button:disabled, select:disabled, input:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); min-width: 4.6em; }
+  .speed { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted); }
+  .speed input { width: 6.5rem; accent-color: var(--accent); }
+  /* the result box is always there, so the height of the page (and of the frame that embeds it) stays steady */
+  .result { margin: .3rem 0 0; padding: .45rem .6rem; border-radius: var(--radius-sm); border: 1px solid var(--line); color: var(--muted); min-height: 4.4em; }
+  .result.done { background: var(--tight-soft); color: var(--fg); }
+  body.embed .lines { min-height: 5.9em; }
+  body.embed .result { min-height: 5.8em; }
+  .phases { display: flex; flex-wrap: wrap; gap: .25rem; margin: .35rem 0 0; }
+  .phases span { font-size: .85em; padding: .05rem .4rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--bg-elev); }
+  .phases span.cur { color: var(--fg); border-color: var(--line-strong); }
+  .phases span.hit { color: var(--tight); border-color: var(--tight); }
+  .stats { display: flex; flex-wrap: wrap; gap: .2rem .9rem; margin: .35rem 0 0; color: var(--muted); }
+  .stats b { color: var(--fg); font-weight: 600; }
+  details.settings { margin: .6rem 0 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg-elev); }
+  details.settings summary { cursor: pointer; padding: .45rem .7rem; font-weight: 600; }
+  .panel { padding: .2rem .7rem .7rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: .55rem; }
+  .panel select { max-width: 100%; min-width: 0; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; }
+  .row > label:first-child { min-width: 5.5em; color: var(--muted); }
+  .row input[type=range] { width: 7.5rem; accent-color: var(--accent); }
+  .row input[type=number] { width: 5em; padding: .2rem .4rem; }
+  .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
+  .seg label { cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg input:checked + span { color: var(--bg); background: var(--fg); }
+  .seg label span { display: inline-block; padding: .2rem .6rem; }
+  .note { color: var(--muted); font-size: .88em; margin: 0; }
+  .importbox { display: grid; gap: .4rem; padding: .55rem .6rem; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--bg-sunken); }
+  .importbox[hidden] { display: none; }
+  .importbox textarea { width: 100%; min-width: 0; resize: vertical; font: .9em/1.4 var(--mono); color: var(--fg); background: var(--bg-elev); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: .35rem .45rem; }
+  #importMsg.err { color: var(--gap); }
+  #importMsg.ok { color: var(--tight); }
+  .full-link { margin: .45rem 0 0; }
+  body:not(.embed) .embed-only, body.embed .full-only { display: none; }
+  /* drawing */
+  .edge { stroke: var(--fig-ink); stroke-width: .6; }
+  .walk { stroke: var(--accent); stroke-width: 1.3; stroke-linecap: round; opacity: .32; }
+  .lastmove { stroke: var(--accent); stroke-width: .9; }
+  .node { fill: var(--bg-elev); stroke: var(--fig-ink); stroke-width: .5; pointer-events: none; }
+  #dyn { pointer-events: none; }
+  .seen { fill: var(--tight); opacity: .3; }
+  .hit { fill: transparent; cursor: pointer; }
+  .hit:hover + .node, .node.hover { stroke: var(--fg); stroke-width: .8; }
+  .port { fill: var(--muted); font: 2.3px var(--sans); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .port.used { fill: var(--accent); font-weight: 700; }
+  .lab { fill: var(--fg); font: 3.1px var(--sans); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .startring { fill: none; stroke: var(--tight); stroke-width: .55; }
+  .star { fill: var(--near); pointer-events: none; }
+  #agent { transition: transform var(--dur, .35s) ease; pointer-events: none; }
+  #agent .body { fill: var(--accent); stroke: var(--bg-elev); stroke-width: .6; }
+  #agent .halo { fill: none; stroke: var(--accent); stroke-width: .35; }
+  @media (prefers-reduced-motion: reduce) { #agent { transition: none; } }
+</style>
+</head>
+<body>
+<main class="sim" id="sim">
+  <header class="full-only">
+    <a class="back" href="../../#/problem/treasure-hunt">← Treasure hunt in Mobility Matters</a>
+    <h1>Treasure hunt simulator</h1>
+    <p>One agent starts at node <i>s</i> of a graph it does not know and must reach the treasure at node <i>v*</i>; it recognises the treasure only when it stands on it. It runs treasure hunt by exploration sequences of doubling size (Ta-Shma &amp; Zwick 2014): in the phases <i>N</i> = 1, 2, 4, 8, … it follows the exploration sequence for size <i>N</i> from where it stands. Entering a node by port <i>p</i>, with term <i>x</i> it leaves by port (<i>p</i> + <i>x</i>) mod deg; at the start it acts as if it had entered by port 0. Once <i>N</i> ≥ <i>n</i>, a universal exploration sequence visits every node, so the treasure is found in that phase at the latest. Real universal exploration sequences are far too long to run here: the simple example's sequences are short illustrations, and the random ones stand in for universal ones without that guarantee. A run is an illustration, not evidence for a bound.</p>
+  </header>
+  <div class="layout">
+    <div class="stage">
+      <svg id="g" role="img" aria-label="The graph, the agent and the treasure"><g id="static"></g><g id="dyn"></g><g id="agent"><circle class="halo" r="2.6"></circle><circle class="body" r="1.9"></circle></g></svg>
+      <div class="lines" aria-live="off">
+        <p id="phase"></p>
+        <p id="move" class="muted"></p>
+      </div>
+      <div class="controls">
+        <button type="button" class="primary" id="play" aria-label="Play">▶ Play</button>
+        <button type="button" id="step" title="One move (→)">Step</button>
+        <button type="button" id="phaseBtn" title="Run to the end of this phase">Phase ⇥</button>
+        <button type="button" id="finish" title="Run until the treasure is found">Finish</button>
+        <button type="button" id="reset" title="Back to the start">Reset</button>
+        <label class="speed"><span>speed</span><input id="speed" type="range" min="0" max="10" step="1" aria-label="Speed"><span id="speedLab" class="small"></span></label>
+      </div>
+      <div class="result" id="result" aria-live="polite"></div>
+      <div class="phases" id="phases" aria-label="Moves made in each phase"></div>
+      <div class="stats" id="stats"></div>
+      <p class="full-link embed-only small"><a id="fullLink" href="./" target="_blank" rel="noopener">Open the simulator on its own page ↗</a></p>
+    </div>
+    <details class="settings" id="settings">
+      <summary>Graph, ports and sequences</summary>
+      <div class="panel">
+        <div class="row"><label for="kind">Graph</label>
+          <select id="kind"><option value="figure">Simple example</option><option value="ring">Ring</option><option value="grid">Grid</option><option value="tree">Random tree</option><option value="random">Random graph</option><option value="import">Imported graph</option></select>
+          <button type="button" id="newGraph" title="Draw another graph of this kind">New</button>
+          <button type="button" id="importOpen" aria-expanded="false" aria-controls="importBox">Import…</button></div>
+        <div class="importbox" id="importBox" hidden>
+          <label for="importText" class="note">Paste a graph as <span class="mono">n start u-v,u-v,…</span> (the import/export format of the MobileAutomata workbench): <i>n</i> nodes numbered 0 … <i>n</i> − 1, the start node, then the edges.</label>
+          <textarea id="importText" rows="4" spellcheck="false" autocomplete="off" placeholder="8 0 0-1,0-2,1-3,1-4,3-5,4-5,2-6,6-7,7-5"></textarea>
+          <div class="row"><button type="button" class="primary" id="importGo">Import</button><button type="button" id="importCancel">Cancel</button></div>
+          <p class="note" id="importMsg" role="status"></p>
+          <p class="note">Ports follow the order of the edges: at each node, port 0 is its first edge in the list, port 1 the next, and so on. The graph must be simple and connected, with at most 100 nodes; repeated edges are merged. The treasure starts on a node farthest from the start.</p>
+        </div>
+        <div class="row"><label for="n">Nodes</label><input id="n" type="range" min="4" max="30" step="1"><span id="nLab" class="small"></span></div>
+        <div class="row"><label>Ports</label><button type="button" id="shuffle">Shuffle</button><button type="button" id="unshuffle">Default</button><span id="portLab" class="small muted"></span></div>
+        <div class="row"><label for="seq">Sequences</label>
+          <select id="seq"><option value="figure">Simple example's (N ≤ 8), then random N³</option><option value="n3">Random, length N³</option><option value="n2">Random, length N²</option></select></div>
+        <div class="row"><label for="seed">Seed</label><input id="seed" type="number" min="1" step="1"><button type="button" id="newSeed">New</button></div>
+        <div class="row"><label>Click places</label>
+          <span class="seg" role="radiogroup"><label><input type="radio" name="place" value="treasure" checked><span>treasure v*</span></label><label><input type="radio" name="place" value="start"><span>start s</span></label></span></div>
+        <p class="note" id="seqNote"></p>
+        <p class="note">Ports are numbered from 0 at each node. Default ports go counter-clockwise from the right (on the simple example, the numbers of the book's figure; on an imported graph, the order of the edge list); the adversary may number them any way, which is what Shuffle tries. Shortcuts: space plays or pauses, → makes one move.</p>
+      </div>
+    </details>
+  </div>
+</main>
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  const E = window.THEngine;
+  const Q = new URLSearchParams(location.search);
+  const EMBED = Q.has('embed');
+  const $ = id => document.getElementById(id);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const SPEEDS = [0.5, 1, 2, 4, 8, 16, 32, 64, 128, 512, 2048];
+  const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const int = (k, d) => { const v = parseInt(Q.get(k), 10); return Number.isFinite(v) ? v : d; };
+  if (EMBED) { document.body.classList.add('embed'); if (window.parent !== window) document.documentElement.classList.add('embed'); }
+
+  /* ---------- theme: the atlas page's choice when embedded, else ?theme=, else the system ---------- */
+  function applyTheme() {
+    // same-origin parent: copy its explicit choice, or follow the system like it does (a ?theme= baked into
+    // the frame's address would go stale when the system theme changes); otherwise use ?theme=
+    let t = null, seesParent = false;
+    try { if (window.parent !== window) { t = parent.document.documentElement.dataset.theme || null; seesParent = true; } } catch (e) { /* another origin */ }
+    if (!seesParent && (Q.get('theme') === 'dark' || Q.get('theme') === 'light')) t = Q.get('theme');
+    if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  }
+  applyTheme();
+  try { if (window.parent !== window) new MutationObserver(applyTheme).observe(parent.document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+
+  /* ---------- state ---------- */
+  const st = {
+    kind: E.KINDS.includes(Q.get('graph')) ? Q.get('graph') : 'figure',
+    n: clamp(int('n', 10), 4, 30), gseed: Math.max(1, int('gseed', 1)), pseed: Math.max(0, int('pseed', 0)),
+    seq: E.SEQ_KINDS.includes(Q.get('seq')) ? Q.get('seq') : 'figure', seed: Math.max(1, int('seed', 1)),
+    speed: clamp(int('speed', 2), 0, SPEEDS.length - 1),
+    place: 'treasure', playing: false, loop: false, timer: null,
+    importText: Q.get('g') || ''   // an imported graph, as canonical "n start u-v,..." text
+  };
+  let g, run, startQ = Q.get('start'), treasureQ = Q.get('treasure');
+
+  function nodeOf(val, dflt) {
+    if (val == null || val === '') return dflt;
+    if (g.names && g.names.includes(val)) return g.names.indexOf(val);
+    const k = parseInt(val, 10); return Number.isFinite(k) && k >= 0 && k < g.n ? k : dflt;
+  }
+  const nodeName = v => g.names ? g.names[v] : String(v);
+  function farthest(s) { const d = E.distances(g, s); let best = 0; d.forEach((x, v) => { if (x >= d[best]) best = v; }); return best; }
+
+  function buildGraph(keepEnds) {
+    const old = g && keepEnds ? { s: run.start, t: run.treasure, n: g.n } : null;
+    try { g = E.makeGraph({ kind: st.kind, n: st.n, gseed: st.gseed, pseed: st.pseed, text: st.importText }); }
+    catch (err) {   // only an imported graph can fail (a bad ?g= in a link): say why and show the simple example
+      showImportMsg(err.message, 'err'); openImport(true);
+      st.kind = 'figure'; st.pseed = 0; startQ = treasureQ = null; g = E.makeGraph({ kind: 'figure' });
+    }
+    let s = nodeOf(startQ, g.start != null ? g.start : 0);
+    let t = nodeOf(treasureQ, g.kind === 'figure' ? 5 : -1);
+    if (old && old.n === g.n) { s = old.s; t = old.t; }
+    if (t < 0 || t >= g.n) t = farthest(s);
+    startQ = treasureQ = null;
+    newRun(s, t);
+    drawStatic();
+  }
+  function newRun(s, t) {
+    stop();
+    run = new E.Run(g, { start: s, treasure: t, seq: st.seq, seed: st.seed });
+    render(true);
+  }
+
+  /* ---------- drawing ---------- */
+  const svg = $('g'), stat = $('static'), dyn = $('dyn'), agent = $('agent');
+  let H = 56, K = 1;   // K scales nodes and labels down when nodes are drawn close together (large imports)
+  const X = p => p[0], Y = p => H - p[1];
+  const el = (tag, attrs, text) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  function portPos(v, q) {
+    const a = g.pos[v], b = g.pos[g.ports[v][q].to];
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+    const along = Math.min(3.9 * Math.max(K, 0.5), L * 0.32);
+    return [a[0] + ux * along - uy * 1.6 * K, a[1] + uy * along + ux * 1.6 * K];
+  }
+  function drawStatic() {
+    const [W, h] = g.view; H = h;
+    let minSep = Infinity;
+    for (let i = 0; i < g.n; i++) for (let j = i + 1; j < g.n; j++) minSep = Math.min(minSep, Math.hypot(g.pos[i][0] - g.pos[j][0], g.pos[i][1] - g.pos[j][1]));
+    K = Math.max(0.3, Math.min(1, minSep / 4.5));
+    svg.setAttribute('viewBox', `-3 -4 ${W + 6} ${H + 8}`);
+    stat.textContent = '';
+    for (let v = 0; v < g.n; v++) g.ports[v].forEach(({ to }) => { if (v < to) stat.appendChild(el('line', { class: 'edge', x1: X(g.pos[v]), y1: Y(g.pos[v]), x2: X(g.pos[to]), y2: Y(g.pos[to]) })); });
+    for (let v = 0; v < g.n; v++) g.ports[v].forEach((_, q) => { const p = portPos(v, q); stat.appendChild(el('text', { class: 'port', id: `pl-${v}-${q}`, x: X(p).toFixed(2), y: Y(p).toFixed(2), style: `font-size:${(2.3 * K).toFixed(2)}px` }, q)); });
+    agent.querySelector('.halo').setAttribute('r', (2.6 * K).toFixed(2)); agent.querySelector('.body').setAttribute('r', (1.9 * K).toFixed(2));
+    for (let v = 0; v < g.n; v++) {
+      const hit = el('circle', { class: 'hit', cx: X(g.pos[v]), cy: Y(g.pos[v]), r: Math.max(1, Math.min(3.6, minSep / 2)).toFixed(2), 'data-v': v });
+      const title = el('title', {}, `node ${nodeName(v)}, degree ${g.ports[v].length}: click to place the ${st.place === 'start' ? 'start s' : 'treasure v*'}`);
+      hit.appendChild(title);
+      stat.appendChild(hit);
+      stat.appendChild(el('circle', { class: 'node', id: `nd-${v}`, cx: X(g.pos[v]), cy: Y(g.pos[v]), r: (1.4 * K).toFixed(2) }));
+    }
+    placeAgent(true);
+  }
+  function placeAgent(instant) {
+    const p = g.pos[run.v];
+    const speed = SPEEDS[st.speed];
+    const dur = instant || reduceMotion ? 0 : (speed <= 8 ? Math.min(0.45, 0.75 / speed) : 0);
+    agent.style.setProperty('--dur', dur + 's');
+    agent.style.transform = `translate(${X(p)}px, ${Y(p)}px)`;
+  }
+  function star(x, y, r) {
+    return Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.5 : r * 1.3; return `${(x + rr * Math.cos(a)).toFixed(2)},${(y + rr * Math.sin(a)).toFixed(2)}`; }).join(' ');
+  }
+  // the label of s or v* goes on the side of the node away from its edges (below when that is balanced)
+  function labelAt(v) {
+    const p = g.pos[v]; let ax = 0, ay = 0;
+    g.ports[v].forEach(({ to }) => { const q = g.pos[to], L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1; ax += (q[0] - p[0]) / L; ay += (q[1] - p[1]) / L; });
+    let L = Math.hypot(ax, ay);
+    if (L < 0.35) { ax = 0; ay = 1; L = 1; }
+    const [W] = g.view, off = 5.4 * Math.max(K, 0.5), x = p[0] - ax / L * off, y = p[1] - ay / L * off;
+    return [Math.max(1, Math.min(W - 1, x)), Math.max(-2, Math.min(H + 2, y))];
+  }
+  let usedPorts = [];
+  function drawDynamic() {
+    dyn.textContent = '';
+    run.phaseNodes.forEach(v => dyn.appendChild(el('circle', { class: 'seen', cx: X(g.pos[v]), cy: Y(g.pos[v]), r: (2.3 * K).toFixed(2) })));
+    run.phaseEdges.forEach((c, key) => { const [a, b] = key.split('-').map(Number); dyn.appendChild(el('line', { class: 'walk', x1: X(g.pos[a]), y1: Y(g.pos[a]), x2: X(g.pos[b]), y2: Y(g.pos[b]) })); });
+    const s = g.pos[run.start], t = g.pos[run.treasure], ls = labelAt(run.start), lt = labelAt(run.treasure);
+    const labStyle = `font-size:${(3.1 * Math.max(K, 0.6)).toFixed(2)}px`;
+    dyn.appendChild(el('circle', { class: 'startring', cx: X(s), cy: Y(s), r: (2.9 * K).toFixed(2) }));
+    dyn.appendChild(el('text', { class: 'lab', x: X(ls), y: Y(ls), style: labStyle }, 's'));
+    dyn.appendChild(el('polygon', { class: 'star', points: star(X(t), Y(t), 2.1 * K) }));
+    dyn.appendChild(el('text', { class: 'lab', x: X(lt), y: Y(lt), style: labStyle }, 'v*'));
+    usedPorts.forEach(id => { const e = $(id); if (e) e.classList.remove('used'); });
+    usedPorts = [];
+    if (run.last) {
+      const m = run.last;
+      [`pl-${m.from}-${m.out}`, `pl-${m.to}-${m.back}`].forEach(id => { const e = $(id); if (e) { e.classList.add('used'); usedPorts.push(id); } });
+    }
+  }
+
+  /* ---------- text ---------- */
+  const fmtN = k => k.toLocaleString('en-US');
+  function seqText(N, i, seq) {
+    const len = seq.length;
+    if (len <= 16) return '(' + Array.from({ length: len }, (_, j) => j === i ? `<b>${seq.term(j)}</b>` : seq.term(j)).join(', ') + ')';
+    const a = Math.max(0, i - 4), b = Math.min(len, a + 9);
+    return (a > 0 ? '(…, ' : '(') + Array.from({ length: b - a }, (_, j) => a + j === i ? `<b>${seq.term(a + j)}</b>` : seq.term(a + j)).join(', ') + (b < len ? ', …)' : ')');
+  }
+  function renderText() {
+    const N = run.N, len = run.seq.length;
+    let phase;
+    if (run.found) phase = `Phase <i>N</i> = ${run.foundPhase}: the agent stands on the treasure.`;
+    else if (run.stopped) phase = `Stopped after ${fmtN(run.moves)} moves.`;
+    else phase = `Phase <i>N</i> = ${N}, term ${fmtN(run.i + 1)} of ${fmtN(len)}: <span class="seq mono">${seqText(N, run.i, run.seq)}</span>` + (run.seq.illustrative ? ' <span class="muted small">(illustrative)</span>' : '');
+    if (run.moves === 0 && !run.found) phase = `Start: the agent is at <i>s</i>; the treasure is at <i>v*</i>, which it does not know. ` + phase;
+    $('phase').innerHTML = phase;
+    const m = run.last;
+    $('move').innerHTML = m ? `Move ${fmtN(run.moves)}: entered by port ${m.p}${run.moves === 1 ? ' (the start counts as port 0)' : ''}, term <i>x</i> = ${m.x}, so it leaves by port (${m.p} + ${m.x}) mod ${m.deg} = ${m.out} and arrives by port ${m.back}.` : 'No move yet.';
+    // phases
+    $('phases').innerHTML = run.log.map((L, j) => {
+      const last = j === run.log.length - 1, hit = last && run.found;
+      return `<span class="${hit ? 'hit' : last ? 'cur' : ''}" title="phase N = ${L.N}: ${L.moves} of ${L.len} moves">N=${L.N}: ${fmtN(L.moves)}${L.moves < L.len && !last ? '' : last && !run.done() ? '/' + fmtN(L.len) : ''}</span>`;
+    }).join('');
+    $('stats').innerHTML = `<span>moves <b>${fmtN(run.moves)}</b></span><span title="distance from s to the treasure">d = <b>${run.d}</b></span><span title="edges with an endpoint at distance less than d from s">e(d) = <b>${run.ed}</b></span><span title="nodes">n = <b>${g.n}</b></span><span title="edges">m = <b>${g.m}</b></span>`;
+    const R = $('result');
+    if (run.found) {
+      const G = run.guaranteedPhase();
+      let msg = run.moves === 0 ? 'The treasure is at the start: found with 0 moves.' : `Found the treasure in phase <i>N</i> = ${run.foundPhase} after <b>${fmtN(run.moves)}</b> move${run.moves === 1 ? '' : 's'}.`;
+      if (run.moves > 0) msg += ` The algorithm does not use the distance <i>d</i> = ${run.d}: a universal exploration sequence is sure to reach the treasure only from the phase <i>N</i> = ${G}, the first with <i>N</i> ≥ <i>n</i> = ${g.n}.`;
+      if (run.foundPhase > G) msg += st.seq === 'figure' && G <= 8
+        ? ` Phase <i>N</i> = ${G} did not reach it: the simple example's sequences are short illustrations, not universal exploration sequences.`
+        : ` Phase <i>N</i> = ${G} did not reach it: a random sequence is not guaranteed to be universal.`;
+      R.innerHTML = msg; R.classList.add('done');
+    } else if (run.stopped) { R.innerHTML = `Stopped after ${fmtN(E.MAX_MOVES)} moves without finding the treasure.`; R.classList.add('done'); }
+    else { R.textContent = 'The run ends when the agent stands on the treasure. Click a node to move the treasure.'; R.classList.remove('done'); }
+    svg.setAttribute('aria-label', `Graph with ${g.n} nodes; the agent is at node ${nodeName(run.v)}; the treasure is at node ${nodeName(run.treasure)}${run.found ? ' and has been found' : ''}.`);
+  }
+  function renderControls() {
+    const over = run.done();
+    $('play').innerHTML = st.playing ? '❚❚ Pause' : (over ? '▶ Replay' : '▶ Play');
+    $('play').setAttribute('aria-label', st.playing ? 'Pause' : 'Play');
+    ['step', 'phaseBtn', 'finish'].forEach(id => { $(id).disabled = over; });
+    $('speed').value = st.speed; $('speedLab').textContent = SPEEDS[st.speed] < 1 ? '1 move / 2 s' : `${SPEEDS[st.speed]} moves/s`;
+    $('kind').value = st.kind;
+    $('n').value = st.n; $('n').disabled = st.kind === 'figure' || st.kind === 'import';
+    $('nLab').textContent = st.kind === 'figure' ? '8 (fixed)' : st.kind === 'import' ? `${g.n} (imported)` : (st.kind === 'grid' ? `${g.n} (grid)` : String(g.n));
+    $('newGraph').disabled = !(st.kind === 'tree' || st.kind === 'random');
+    $('portLab').textContent = st.pseed ? `shuffled (#${st.pseed})` : st.kind === 'import' ? 'in the order of the edge list' : 'default';
+    $('unshuffle').disabled = !st.pseed;
+    $('seq').value = st.seq; $('seed').value = st.seed;
+    $('seqNote').textContent = st.seq === 'figure'
+      ? 'The simple example\'s sequences are short illustrations, not universal exploration sequences; from N = 16 on the simulator continues with random sequences of length N³.'
+      : `Each term is drawn at random from 0 … N − 1 (seeded). A random sequence of this length stands in for a universal exploration sequence; it is not guaranteed to visit every node.`;
+    $('fullLink').href = './?' + query(false);
+    if (!EMBED) history.replaceState(null, '', '?' + query(false));
+  }
+  function query(embed) {
+    const q = new URLSearchParams();
+    q.set('graph', st.kind);
+    if (st.kind === 'import') q.set('g', st.importText); else if (st.kind !== 'figure') q.set('n', st.n);
+    if (st.kind === 'tree' || st.kind === 'random') q.set('gseed', st.gseed);
+    if (st.pseed) q.set('pseed', st.pseed);
+    q.set('seq', st.seq); q.set('seed', st.seed);
+    q.set('start', nodeName(run.start)); q.set('treasure', nodeName(run.treasure)); q.set('speed', st.speed);
+    return q.toString();
+  }
+  function render(instant) { drawDynamic(); placeAgent(instant); renderText(); renderControls(); postHeight(); }
+
+  /* ---------- playing ---------- */
+  let raf = null, lastT = 0, acc = 0;
+  function frame(t) {
+    raf = null;
+    if (!st.playing) return;
+    const dt = Math.min(0.25, (t - lastT) / 1000); lastT = t;
+    acc += dt * SPEEDS[st.speed];
+    let k = Math.min(Math.floor(acc), 20000); acc -= Math.floor(acc);
+    let moved = false;
+    while (k-- > 0 && run.step()) moved = true;
+    if (moved) render(SPEEDS[st.speed] > 8);
+    if (run.done()) { finishedPlaying(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function play() {
+    if (run.done()) { run.reset(); render(true); }
+    st.playing = true; acc = 1;   // the first move comes at once
+    lastT = performance.now(); renderControls();
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
+  function stop() { st.playing = false; if (raf) cancelAnimationFrame(raf); raf = null; clearTimeout(st.timer); if (run) renderControls(); }
+  function finishedPlaying() {
+    st.playing = false; render(false);
+    // embedded and untouched: start again after a pause, like the animation it replaces
+    if (st.loop) st.timer = setTimeout(() => { if (st.loop) { run.reset(); render(true); setTimeout(() => st.loop && play(), 900); } }, 5000);
+  }
+  function userAction() { st.loop = false; clearTimeout(st.timer); }
+  function runUntil(pred) {
+    stop();
+    // in slices, so a long run does not freeze the page
+    const slice = () => {
+      let k = 200000, mv;
+      while (k-- > 0 && (mv = run.step())) if (pred(mv)) { render(true); return; }
+      if (run.done()) { render(true); return; }
+      render(true); setTimeout(slice, 0);
+    };
+    slice();
+  }
+
+  /* ---------- events ---------- */
+  $('play').addEventListener('click', () => { userAction(); st.playing ? stop() : play(); });
+  $('step').addEventListener('click', () => { userAction(); stop(); if (run.step()) render(false); });
+  $('phaseBtn').addEventListener('click', () => { userAction(); runUntil(mv => mv.phaseEnded); });
+  $('finish').addEventListener('click', () => { userAction(); runUntil(() => false); });
+  $('reset').addEventListener('click', () => { userAction(); stop(); run.reset(); render(true); });
+  $('speed').addEventListener('input', e => { userAction(); st.speed = +e.target.value; renderControls(); });
+  $('kind').addEventListener('change', e => {
+    userAction();
+    // "Imported graph" before anything was imported: open the import box instead
+    if (e.target.value === 'import' && !st.importText) { e.target.value = st.kind; openImport(true); $('importText').focus(); return; }
+    st.kind = e.target.value; st.pseed = 0; buildGraph(false);
+  });
+  /* ---------- import ---------- */
+  function showImportMsg(msg, cls) { const m = $('importMsg'); m.textContent = msg; m.className = 'note' + (cls ? ' ' + cls : ''); }
+  function openImport(on) {
+    $('importBox').hidden = !on; $('importOpen').setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (on) { $('settings').open = true; if (!$('importText').value && st.importText) $('importText').value = st.importText; }
+    postHeight();
+  }
+  function doImport() {
+    let P;
+    try { P = E.parseGraphText($('importText').value); } catch (err) { showImportMsg(err.message, 'err'); return; }
+    userAction();
+    st.kind = 'import'; st.importText = P.text; st.pseed = 0; startQ = treasureQ = null;
+    buildGraph(false);
+    showImportMsg(`Imported ${P.n} nodes and ${P.edges.length} edges${P.repeated ? ` (${P.repeated} repeated edge${P.repeated > 1 ? 's' : ''} merged)` : ''}. The agent starts at node ${P.start}; the treasure is at node ${run.treasure}, at distance ${run.d}.`, 'ok');
+  }
+  $('importOpen').addEventListener('click', () => { const on = $('importBox').hidden; openImport(on); if (on) $('importText').focus(); });
+  $('importGo').addEventListener('click', doImport);
+  $('importCancel').addEventListener('click', () => openImport(false));
+  $('importText').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doImport(); } });
+  $('n').addEventListener('input', e => { st.n = +e.target.value; $('nLab').textContent = st.n; });
+  $('n').addEventListener('change', () => { userAction(); buildGraph(false); });
+  $('newGraph').addEventListener('click', () => { userAction(); st.gseed++; buildGraph(false); });
+  $('shuffle').addEventListener('click', () => { userAction(); st.pseed = (st.pseed % 997) + 1 + Math.floor(Math.random() * 50); buildGraph(true); });
+  $('unshuffle').addEventListener('click', () => { userAction(); st.pseed = 0; buildGraph(true); });
+  $('seq').addEventListener('change', e => { userAction(); st.seq = e.target.value; newRun(run.start, run.treasure); });
+  $('seed').addEventListener('change', e => { userAction(); st.seed = Math.max(1, parseInt(e.target.value, 10) || 1); newRun(run.start, run.treasure); });
+  $('newSeed').addEventListener('click', () => { userAction(); st.seed++; newRun(run.start, run.treasure); });
+  document.querySelectorAll('input[name=place]').forEach(r => r.addEventListener('change', e => { st.place = e.target.value; drawStatic(); render(true); }));
+  svg.addEventListener('click', e => {
+    const v = e.target.getAttribute && e.target.getAttribute('data-v'); if (v == null) return;
+    userAction();
+    const k = +v;
+    if (st.place === 'start') newRun(k, run.treasure); else newRun(run.start, k);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, select, textarea, button, summary, a')) return;
+    if (e.key === ' ') { e.preventDefault(); $('play').click(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); $('step').click(); }
+  });
+  $('settings').addEventListener('toggle', postHeight);
+
+  /* ---------- height for the atlas page that embeds this one ---------- */
+  function postHeight() {
+    if (window.parent === window) return;
+    try { parent.postMessage({ type: 'mm-sim-height', h: Math.ceil(document.documentElement.getBoundingClientRect().height) }, '*'); } catch (e) {}
+  }
+  if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+  window.addEventListener('load', postHeight);
+
+  /* ---------- start ---------- */
+  if (!EMBED) $('settings').open = true;
+  buildGraph(false);
+  const autoplay = Q.get('autoplay') !== '0' && !reduceMotion;
+  if (autoplay) { st.loop = EMBED; setTimeout(play, EMBED ? 700 : 400); }
+})();
+</script>
+</body>
+</html>

@@ -805,6 +805,8 @@ details.statement .statement-body { padding: .2rem 0 1.2rem; }
 .pfig .figsvg { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: .4rem; }
 .pfig figcaption { font-size: .86rem; line-height: 1.45; margin-top: .55rem; }
 @media (max-width: 720px) { .pfig { width: 100%; margin: 0 0 1rem; } }
+/* a figure replaced by a simulator page (figure.simulator); the page reports its height */
+.figsim { display: block; width: 100%; height: 520px; border: 0; background: transparent; }
 
 /* primer and history read as text, the analysis set off by a rule */
 .idea { padding: 1.1rem 0 .6rem; }

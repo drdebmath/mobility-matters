@@ -120,6 +120,7 @@ def problem_prose(p):
     fig = p.get("figure") or {}
     out.append(fig.get("caption", ""))
     out += [f.get("label", "") for f in fig.get("frames", [])]
+    out.append((fig.get("simulator") or {}).get("caption", ""))
     return "\n".join(o for o in out if o)
 
 
@@ -396,6 +397,19 @@ def main():
             for k in re.findall(r"\[([A-Z][A-Za-z]+\d{4}[A-Za-z0-9]*)\]", fig.get("caption", "")):
                 if k not in refs:
                     err(f"{rel}: figure caption cites unknown reference '{k}'")
+            sim = fig.get("simulator")
+            if sim is not None:
+                # a simulator page of this repository, shown on the site in place of the animation
+                src = sim.get("src", "")
+                if not src or src.startswith(("/", "http:", "https:")) or ".." in src:
+                    err(f"{rel}: figure.simulator.src must be a relative path inside the repository")
+                elif not (ROOT / src / "index.html").is_file() and not (ROOT / src).is_file():
+                    err(f"{rel}: figure.simulator.src '{src}' does not exist")
+                if not sim.get("caption"):
+                    err(f"{rel}: figure.simulator needs a caption")
+                for k in re.findall(r"\[([A-Z][A-Za-z]+\d{4}[A-Za-z0-9]*)\]", sim.get("caption", "")):
+                    if k not in refs:
+                        err(f"{rel}: figure.simulator caption cites unknown reference '{k}'")
         for i, c in enumerate(p.get("simulator", []) or []):
             if not (c.get("title") and c.get("query") and c.get("note")):
                 err(f"{path.relative_to(ROOT)}: simulator case {i} needs 'title', 'query' and 'note'")

@@ -782,7 +782,23 @@
     if (!reduceMotion()) return;
     app.querySelectorAll('.figwrap').forEach(w => { const svg = w.querySelector('svg'), b = w.querySelector('[data-figplay]'); if (svg && b) { svg.setCurrentTime && svg.setCurrentTime(0); setFigPlaying(b, svg, false); } });
   }
-  const figurePanel = p => p.figure ? `<figure class="pfig"><div class="figwrap">${figureSvg(p.figure, p.id)}${(p.figure.frames || []).length > 1 ? '<button type="button" class="figplay" data-figplay aria-label="Pause the animation" title="Pause">❚❚</button>' : ''}</div><figcaption>${mdInline(p.figure.caption || '')}</figcaption></figure>` : '';
+  // A figure may name a simulator page of this repository (figure.simulator {src, query, title, caption}):
+  // the site shows that page in place of the animation; the PDF still draws the figure's frames.
+  const figSimSrc = (S, embed) => {
+    let theme = ''; try { theme = '&theme=' + (document.documentElement.dataset.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')); } catch (e) {}
+    return `${S.src}?${embed ? 'embed&' : ''}${S.query || ''}${embed ? theme : ''}`;
+  };
+  const figurePanel = p => {
+    if (!p.figure) return '';
+    const S = p.figure.simulator;
+    if (S && S.src) return `<figure class="pfig pfig-sim"><iframe class="figsim" title="${esc(S.title || 'Simulator')}" src="${esc(figSimSrc(S, true))}"></iframe><figcaption>${mdInline(S.caption || p.figure.caption || '')}</figcaption></figure>`;
+    return `<figure class="pfig"><div class="figwrap">${figureSvg(p.figure, p.id)}${(p.figure.frames || []).length > 1 ? '<button type="button" class="figplay" data-figplay aria-label="Pause the animation" title="Pause">❚❚</button>' : ''}</div><figcaption>${mdInline(p.figure.caption || '')}</figcaption></figure>`;
+  };
+  // a simulator page reports its height, so its frame fits it without an inner scrollbar
+  if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('message', e => {
+    const d = e.data; if (!d || d.type !== 'mm-sim-height' || !(d.h > 0)) return;
+    document.querySelectorAll('iframe.figsim').forEach(f => { if (f.contentWindow === e.source) f.style.height = Math.min(2400, Math.ceil(d.h)) + 'px'; });
+  });
 
   /* ---------- model landscape: which robot model is stronger ---------- */
   const landState = { view: null, sel: null };

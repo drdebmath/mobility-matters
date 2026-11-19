@@ -2736,7 +2736,13 @@
         ],
         "label": "Final: treasure found during the phase N = 8, after 13 moves"
       }
-    ]
+    ],
+    "simulator": {
+      "src": "sims/treasure-hunt/",
+      "query": "graph=figure&seq=figure&start=s&treasure=t",
+      "title": "Treasure hunt simulator",
+      "caption": "Simulator of treasure hunt by exploration sequences of doubling size [TaShma2014Deterministic]: in the phases $N = 1, 2, 4, 8, \\dots$ the agent follows the sequence for size $N$ from where it stands (entering by port $p$ with term $x$, it leaves by port $(p + x) \\bmod \\deg$; ports are numbered from 0, and at the start the agent acts as if it had entered by port 0) and stops on the treasure $v^*$. It opens on the run of the printed figure, whose short sequences are illustrative; the random sequences it also offers, of length $N^2$ or $N^3$, stand in for universal exploration sequences and are not guaranteed to visit every node. Click a node to move the treasure or the start; a run is an illustration, not evidence for a bound."
+    }
   },
   "further": [
     {

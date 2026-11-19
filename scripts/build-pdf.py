@@ -696,6 +696,11 @@ def problem_section(p):
                r"\noindent\textit{Measures:} " + "; ".join(r"\textbf{%s}, %s" % (esc_plain(m["name"]), inline(m["description"])) for m in p["measures"]) + ".")
     if p.get("figure"):
         out.append(figure_tikz(p))
+        # on the website this figure is a simulator page (figure.simulator); the book says so and links it
+        sim, site = p["figure"].get("simulator"), IDX.get("citation", {}).get("url", "")
+        if sim and sim.get("src") and site:
+            url = site + sim["src"] + ("?" + sim["query"] if sim.get("query") else "")
+            out.append(r"\noindent{\small\textcolor{muted}{On the website the figure of this section is a simulator of the same algorithm, in which the graph, the start and the treasure can be changed: \href{%s}{open the simulator}.}}" % url.replace("%", r"\%").replace("#", r"\#").replace("&", r"\&"))
     if p.get("primer"):
         KIND = {"algorithm": "Algorithm", "impossibility": "Impossibility", "lower-bound": "Lower bound"}
         ideas = []
