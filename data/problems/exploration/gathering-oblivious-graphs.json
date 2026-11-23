@@ -1834,6 +1834,10 @@
     {
       "ref": "Ooshita2015Selfstabilization",
       "note": "Self-stabilizing gathering on rings, from every start, towers included. No randomized algorithm gathers from every such start in ASYNC, even with strong multiplicity detection on an oriented ring (Theorem 1), nor in SSYNC with only local strong and global weak detection (Theorem 2); so the usual assumption that robots start on distinct nodes is a strong one. With global strong detection, a randomized SSYNC algorithm gathers in $O(n\\log k)$ expected rounds and $O(kn)$ expected moves (Theorem 3), and also orients the ring and forms sets of nodes (Theorems 4, 5). Read (model and theorems)."
+    },
+    {
+      "ref": "Kim2026Field",
+      "note": "Oblivious, silent, lightless robots with visibility range 1 and a common compass on the infinite grid, FSYNC, no multiplicity detection, starting on arbitrary distinct cells (no connectivity), on a floor that is a cellular automaton with $|Q|$ states that senses robots and shows its state to the robots in view. Gathering is impossible with $|Q| = 1$ (Proposition 1(ii)), possible with $|Q| = 3$ on the cell of the lowest robot of the easternmost column (Theorem 3, proof sketch and simulation); no $|Q|$ makes it field-silent (Proposition 4). Read; the robots see only neighbours and the field is active, so it is not placed in a setting. A preprint."
     }
   ]
 }

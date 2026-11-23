@@ -336,9 +336,19 @@
           "label": "bipartite",
           "short": "bipartite",
           "definition": "$V = V_1 \\cup V_2$ with $V_1 \\cap V_2 = \\emptyset$ and every edge joining $V_1$ to $V_2$; trees are a special case."
+        },
+        {
+          "id": "path",
+          "level": 2,
+          "refines": [
+            "tree"
+          ],
+          "label": "path (finite, or infinite in one or both directions)",
+          "short": "path",
+          "definition": "$G$ is a path: connected, acyclic and of maximum degree 2. It may be infinite; the infinite path has the integers as nodes and an edge between $i$ and $i+1$. A path is a tree, hence the level above it; it is a special case of a tree only, not of a ring, grid or other family of level 1."
         }
       ],
-      "origin": "Special topologies enter for two reasons: they are the simplest graphs with a given feature, and they are networks that are used. Trees can be explored with termination by a single agent and have a central node or edge that acts as a focal point, so rendezvous was first solved there; rings are \"the simplest class\" of graphs with cycles [Pelc2019Survey] [Dessmark2006Deterministic]. The oriented ring is also the most symmetric instance, where identical agents cannot meet [Pelc2019Survey]. The ring, oriented or not, was the first topology for black hole search [Dobrev2007Ring], and the oriented ring was the first for live exploration of dynamic graphs [DiLuna2020Dynamic] and, as reported by [Molla2021ByzantineGraphs], for Byzantine dispersion. Grids model discretised space: the infinite grid is a tool for rendezvous in the plane [Pelc2019Survey], and dispersion on grids is studied for its own sake [Kshemkalyani2020Grids]. Hypercubes are interconnection networks on which decontamination was solved before unknown graphs [Flocchini2008Hypercubes]; the complete graph $K_3$ is the witness in Pelc's crash impossibility [Pelc2018Crash]; bipartite graphs appear with butterfly counting by agents [Chand2025Butterfly]. Level 0 is an arbitrary connected graph, unknown to the agents."
+      "origin": "Special topologies enter for two reasons: they are the simplest graphs with a given feature, and they are networks that are used. Trees can be explored with termination by a single agent and have a central node or edge that acts as a focal point, so rendezvous was first solved there; rings are \"the simplest class\" of graphs with cycles [Pelc2019Survey] [Dessmark2006Deterministic]. The oriented ring is also the most symmetric instance, where identical agents cannot meet [Pelc2019Survey]. The ring, oriented or not, was the first topology for black hole search [Dobrev2007Ring], and the oriented ring was the first for live exploration of dynamic graphs [DiLuna2020Dynamic] and, as reported by [Molla2021ByzantineGraphs], for Byzantine dispersion. Grids model discretised space: the infinite grid is a tool for rendezvous in the plane [Pelc2019Survey], and dispersion on grids is studied for its own sake [Kshemkalyani2020Grids]. Hypercubes are interconnection networks on which decontamination was solved before unknown graphs [Flocchini2008Hypercubes]; the complete graph $K_3$ is the witness in Pelc's crash impossibility [Pelc2018Crash]; bipartite graphs appear with butterfly counting by agents [Chand2025Butterfly]. The infinite path is where a finite-state agent searches with pebbles, the cow-path problem on a discrete line [Dobrev2026Pebbles]. Level 0 is an arbitrary connected graph, unknown to the agents."
     },
     {
       "id": "initial",

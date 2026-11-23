@@ -5025,7 +5025,8 @@
     "venue": "arXiv preprint",
     "year": 2026,
     "arxiv": "2610.09713",
-    "note": "Preprint, not peer reviewed. Authors in the order of arXiv v2 (6 November 2026), which lists Wada first; the key keeps the earlier order. v2 was found by the paper search of 11 November 2026 and not compared with the version read."
+    "note": "Preprint, not peer reviewed. Authors in the order of arXiv v2 (6 November 2026), which lists Wada first; the key keeps the earlier order. v1 (7 October 2026) and v2 read in full and compared on 18 November 2026: the title, the model, the theorem numbers and every theorem statement are unchanged; v2 rewrites parts of the introduction and the round-robin proof of Theorem 7 (Lemma 14 in the appendix). No published version found in Crossref (18 November 2026).",
+    "read": "arXiv v2 (2026)"
   },
   "Pramanick2025Mobility": {
     "authors": [
@@ -5034,12 +5035,13 @@
       "Partha Sarathi Mandal",
       "Gokarna Sharma"
     ],
-    "title": "Asynchronous Gathering of Opaque Robots with Mobility Faults",
+    "title": "Asynchronous Indulgent Gathering of Opaque Robots",
     "kind": "preprint",
     "venue": "arXiv preprint",
     "year": 2025,
     "arxiv": "2509.10711",
-    "note": "Preprint, not peer reviewed."
+    "note": "Preprint, not peer reviewed. Cited by the title of arXiv v2 (15 October 2026); v1 (12 September 2025) was \"Asynchronous Gathering of Opaque Robots with Mobility Faults\". v2 states the problem as indulgent gathering (the non-faulty robots gather at the position of a faulty robot, Definition 1), adds Theorem 1 (without the rule that robots on one point act as a single entity, indulgent gathering is impossible even in FSYNC), corrects one rule of the 3-colour algorithm and renumbers the theorems (v1 Theorems 1–4 are v2 Theorems 2–5). v2 read: model (Section 2), Section 3 with its proofs, and every theorem statement; the proofs of Theorems 4 and 5 were not checked. No published version found in Crossref (18 November 2026).",
+    "read": "arXiv v2 (2026)"
   },
   "DiLuna2014Robots": {
     "authors": [
@@ -6925,7 +6927,7 @@
     "first_year": 2020,
     "doi": "10.1093/comjnl/bxac158",
     "arxiv": "2012.03399",
-    "note": "Metadata from Crossref. Abstract read in the arXiv version."
+    "note": "Metadata from Crossref. Abstract read in the arXiv version. A correction notice, \"Correction to: An Asynchronous Maximum Independent Set Algorithm By Myopic Luminous Robots On Grids\", The Computer Journal, doi:10.1093/comjnl/bxag113 (published online 15 October 2026), was read (papers/Kamei2024MIS.erratum2026.pdf): in the published version Algorithm 2 appears twice, and the notice prints the Algorithm 1 that the first instance should have been. No theorem or bound is changed."
   },
   "Das2025MISGrid": {
     "authors": [
@@ -7796,8 +7798,8 @@
     "venue": "arXiv preprint",
     "year": 2026,
     "arxiv": "2604.04619",
-    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, 6 April 2026). No published version found in Crossref on 27 October 2026. arXiv v2 (6 November 2026) changed the title; it was found by the paper search of 11 November 2026 and has not been compared with v1.",
-    "read": "arXiv v1 (2026), titled \"Tight Bounds on Window Size and Time for Single-Agent Graph Exploration under T-Interval Connectivity\""
+    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, 6 April 2026). No published version found in Crossref on 27 October 2026. arXiv v2 (6 November 2026) was read in full on 18 November 2026 and compared with v1: same theorems and bounds (numbering unchanged); v2 renames $\\epsilon(n,m)$ to $\\xi(n,m)$, removes the degree $\\delta(v)$ from the agent's input, rewrites the algorithms' bookkeeping (GreedyExp$_1$ keeps a set of edges $E_{map}$; GreedyExp$_0$ estimates $n'$ from the largest port number seen) and states Theorems 4 and 5 with an explicit starting node.",
+    "read": "arXiv v2 (6 November 2026), titled \"Online Graph Exploration under T-Interval Connectivity\"; v1 (6 April 2026) was titled \"Tight Bounds on Window Size and Time for Single-Agent Graph Exploration under T-Interval Connectivity\""
   },
   "Bhagat2026Exploring": {
     "authors": [
@@ -8013,17 +8015,24 @@
       "Kaushik Mondal"
     ],
     "title": "Black Hole Search: Dynamics, Distribution, and Emergence",
-    "kind": "preprint",
-    "venue": "arXiv preprint",
+    "kind": "journal",
+    "venue": "Theoretical Computer Science, article 116323",
     "year": 2026,
     "first_year": 2025,
     "arxiv": "2603.00766",
     "versions": [
       {
         "ref": "Kaur2025Scattered"
+      },
+      {
+        "kind": "preprint",
+        "venue": "arXiv preprint",
+        "year": 2026
       }
     ],
-    "note": "Found by the backfill search of 27 October 2026; arXiv v2 (3 March 2026) read in full. Extended version of [Kaur2025Scattered] (SSS 2025), which it calls a preliminary version; it adds the eventually emerging black hole (Section 3). No journal version found on Crossref (28 October 2026). Not peer reviewed in this form."
+    "note": "Found by the backfill search of 27 October 2026; arXiv v2 (3 March 2026) read in full. Extended version of [Kaur2025Scattered] (SSS 2025), which it calls a preliminary version; it adds the eventually emerging black hole (Section 3). The journal version (Theoretical Computer Science, November 2026) was found on Crossref on 18 November 2026; it was not seen, and the bounds and theorem numbers follow arXiv v2.",
+    "doi": "10.1016/j.tcs.2026.116323",
+    "read": "arXiv v2 (2026)"
   },
   "Bhattacharya2025Perpetual": {
     "authors": [
@@ -8577,15 +8586,24 @@
       "Khaled Jawhar",
       "Evangelos Kranakis"
     ],
-    "title": "Linear Search for Capturing a Moving Target by Two Robots in the F2F Model",
-    "kind": "conference",
-    "venue": "ICDCN 2026, ACM, pp. 1–10",
+    "title": "Capturing a Moving Target by Two Robots in the F2F Model",
+    "kind": "journal",
+    "venue": "Journal of Combinatorial Mathematics and Combinatorial Computing 130:33–61",
     "year": 2026,
     "first_year": 2025,
-    "doi": "10.1145/3772290.3772317",
+    "doi": "10.61091/jcmcc130-03",
     "arxiv": "2503.15688",
-    "read": "arXiv v2 (2025), titled \"Capturing a Moving Target by Two Robots in the F2F Model\"",
-    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v2, October 2025). Venue (ICDCN 2026, Nara, January 2026), pages and title from Crossref; the ICDCN version was not read."
+    "versions": [
+      {
+        "kind": "conference",
+        "venue": "ICDCN 2026, ACM, pp. 1–10",
+        "year": 2026,
+        "doi": "10.1145/3772290.3772317",
+        "title": "Linear Search for Capturing a Moving Target by Two Robots in the F2F Model"
+      }
+    ],
+    "read": "arXiv v2 (2025)",
+    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v2, October 2025, which has the journal's title). Journal metadata (JCMCC 130, pp. 33–61, published 12 February 2026) from Crossref, 23 November 2026; the journal text was not seen. The ICDCN 2026 version (Nara, January 2026; venue, pages and title from Crossref) was not read either."
   },
   "Coleman2025Linear": {
     "authors": [
@@ -8876,11 +8894,16 @@
       "Antoine Toullalan"
     ],
     "title": "The Shortest Temporal Exploration Problem",
-    "kind": "preprint",
-    "venue": "arXiv preprint",
-    "year": 2025,
+    "kind": "journal",
+    "venue": "Theoretical Computer Science 1084:116190",
+    "year": 2026,
     "arxiv": "2504.06652",
     "versions": [
+      {
+        "kind": "preprint",
+        "venue": "arXiv preprint",
+        "year": 2025
+      },
       {
         "kind": "preprint",
         "venue": "SSRN preprint",
@@ -8888,7 +8911,10 @@
         "doi": "10.2139/ssrn.6184193"
       }
     ],
-    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, April 2025). No peer-reviewed version found in Crossref on 28 October 2026."
+    "note": "Found by the backfill search of 27 October 2026 and read in full (arXiv v1, April 2025). The journal version (Theoretical Computer Science 1084, September 2026) was found on Crossref on 18 November 2026; it was not seen, and the bounds and theorem numbers follow arXiv v1.",
+    "first_year": 2025,
+    "doi": "10.1016/j.tcs.2026.116190",
+    "read": "arXiv v1 (2025)"
   },
   "Mutzari2026Competitive": {
     "authors": [
@@ -9247,9 +9273,16 @@
         "year": 2022,
         "doi": "10.1109/IPDPSW55747.2022.00087",
         "title": "Fully Dynamic Line Maintenance by Hybrid Programmable Matter"
+      },
+      {
+        "kind": "conference",
+        "venue": "ICARA 2022, IEEE, pp. 108–112",
+        "year": 2022,
+        "doi": "10.1109/ICARA55094.2022.9738561",
+        "title": "Fully Dynamic Line Maintenance by a Simple Robot"
       }
     ],
-    "note": "Found by the backfill search of 27 October 2026 and read (journal version). Metadata from Crossref."
+    "note": "Found by the backfill search of 27 October 2026 and read (journal version). Metadata from Crossref. The ICARA 2022 paper (Crossref, 23 November 2026) is listed as another version; not read."
   },
   "Oh2022Foraging": {
     "authors": [
@@ -13786,5 +13819,222 @@
     "year": 2026,
     "arxiv": "2611.03161",
     "note": "Found by the paper search of 11 November 2026; full text read (arXiv v1). Preprint, not peer reviewed; no published version on Crossref (checked 11 November 2026)."
+  },
+  "Frei2026Byzantine": {
+    "authors": [
+      "Fabian Frei",
+      "Yuichi Sudo",
+      "Koichi Wada"
+    ],
+    "title": "Byzantine Resilience of Robot Gathering under Round-Robin Scheduling",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.22631",
+    "note": "Found by the weekly search of 18 November 2026 and read in full (arXiv v1, 17 November 2026). Preprint, not peer reviewed; no published version found on Crossref. Metadata from arXiv and DataCite."
+  },
+  "Georgiou2026Emerging": {
+    "authors": [
+      "Konstantinos Georgiou",
+      "Caleb Jones",
+      "Liza Krupsky"
+    ],
+    "title": "Evacuating from Eventually Emerging Targets on the Line",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.20146",
+    "note": "Found by the paper search of 18 November 2026; full text read (arXiv v1, 52 pages, which calls itself the full version of a paper accepted to WALCOM 2027, to appear). Preprint, not peer reviewed in this form; no published version on Crossref (checked 18 November 2026). Cite the WALCOM version once it appears."
+  },
+  "Kranakis2026Disk": {
+    "authors": [
+      "Evangelos Kranakis"
+    ],
+    "title": "Two-Robot Evacuation from a Unit Disk in the Segment Visibility Model",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.19992",
+    "note": "Found by the paper search of 18 November 2026; full text read (arXiv v1). Preprint, not peer reviewed; no published version on Crossref (checked 18 November 2026)."
+  },
+  "Dereniowski2026Subgraphs": {
+    "authors": [
+      "Dariusz Dereniowski",
+      "Boting Yang"
+    ],
+    "title": "Searching subgraphs",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2610.25578",
+    "note": "Metadata from the arXiv API (v1, 18 Oct 2026, cs.DS); no DOI or other version found. Full text read."
+  },
+  "Baligacs2026Sublogarithmic": {
+    "authors": [
+      "Júlia Baligács"
+    ],
+    "title": "Sublogarithmic Online Graph Exploration",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.14827",
+    "note": "Found by the weekly run of 18 November 2026 and read in full (arXiv v1, 10 November 2026). No published version found. Posted on the same day as [Klimm2026Sublogarithmic], with the same asymptotic bound; neither paper cites the other."
+  },
+  "Klimm2026Sublogarithmic": {
+    "authors": [
+      "Max Klimm"
+    ],
+    "title": "A Sublogarithmic Competitive Algorithm for Online Graph Exploration",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.14755",
+    "note": "Found by the weekly run of 18 November 2026 and read in full (arXiv v1, 10 November 2026), including the appendices. No published version found. Posted on the same day as [Baligacs2026Sublogarithmic], with the same asymptotic bound; neither paper cites the other."
+  },
+  "Cosson2026Predictions": {
+    "authors": [
+      "Romain Cosson",
+      "Yichen Huang",
+      "Michael Mitzenmacher",
+      "Ali Vakilian"
+    ],
+    "title": "Collective Tree Exploration with Predictions",
+    "kind": "preprint",
+    "venue": "arXiv preprint (November 2026)",
+    "year": 2026,
+    "arxiv": "2611.17482",
+    "note": "Metadata from the arXiv API (v1, 12 November 2026). Preprint, not yet peer-reviewed; the paper carries an AI-assistance disclosure. Read in full (arXiv v1)."
+  },
+  "Kim2026Field": {
+    "authors": [
+      "Yonghwan Kim",
+      "Gil-Tak Kong",
+      "Un-Sook Choi"
+    ],
+    "title": "Autonomous Mobile Robots on a Computing Field",
+    "kind": "preprint",
+    "venue": "arXiv preprint",
+    "year": 2026,
+    "arxiv": "2611.16652",
+    "note": "Found by the weekly search of 18 November 2026 and read in full (arXiv v1, 12 November 2026). Preprint, not peer reviewed; no published version found. Proof sketches only for Theorems 2 to 4 (and machine checks on small instances); Section 9 is simulation only."
+  },
+  "Dobrev2026Pebbles": {
+    "authors": [
+      "Stefan Dobrev",
+      "Rastislav Královič",
+      "Richard Královič",
+      "Dana Pardubská",
+      "Peter Rossmanith"
+    ],
+    "title": "Cow Path by Finite Agent: Time vs Pebbles",
+    "kind": "conference",
+    "venue": "SIROCCO 2026, LNCS 16488, pp. 253–271",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_14",
+    "note": "Metadata from Crossref (18 November 2026), checked against the publisher PDF (title, authors, LNCS volume 16488, pages 253–271, DOI on the first page). Read in full: the publisher version, downloaded by the owner. Several proofs are omitted (marked for a journal version)."
+  },
+  "Shibata2026Myopic": {
+    "authors": [
+      "Masahiro Shibata",
+      "Sayaka Kamei",
+      "Fukuhito Ooshita",
+      "Hirotsugu Kakugawa"
+    ],
+    "title": "Uniform Deployment of Myopic Luminous Robots in Rings",
+    "kind": "conference",
+    "venue": "SIROCCO 2026, LNCS 16488, pp. 509–526",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_27",
+    "note": "Metadata from Crossref (18 November 2026); the publisher PDF (Springer, 'The Author(s), under exclusive license') confirms the four authors, title, SIROCCO 2026, LNCS 16488, pp. 509-526 and the DOI. No arXiv or open version found. Read in full (publisher version, 18 pages; the proofs of several lemmas and theorems are omitted in the paper for lack of space)."
+  },
+  "Pramanick2026Mutual": {
+    "authors": [
+      "Subhajit Pramanick",
+      "Saswata Jana",
+      "Partha Sarathi Mandal"
+    ],
+    "title": "Asynchronous Fault-Tolerant Mutual Visibility",
+    "kind": "conference",
+    "venue": "SIROCCO 2026, LNCS 16488, pp. 470–488",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_25",
+    "note": "Metadata from Crossref, checked against the publisher PDF (Springer, LNCS 16488, pp. 470–488). Read in full (publisher version, provided by the owner): model (Section 2), problem definition and contributions (Section 1), Theorem 1. No open copy found (not on arXiv)."
+  },
+  "Higashikawa2026Grid": {
+    "authors": [
+      "Yuya Higashikawa",
+      "Shuichi Miyazaki",
+      "Daiki Okayama"
+    ],
+    "title": "Online Exploration of Grid Graphs with Multiple Searchers",
+    "kind": "conference",
+    "venue": "SIROCCO 2026, LNCS 16488, pp. 371–390",
+    "year": 2026,
+    "doi": "10.1007/978-3-032-26465-7_20",
+    "first_year": 2025,
+    "versions": [
+      {
+        "kind": "brief",
+        "venue": "AAAC 2025 (one-page abstract)",
+        "year": 2025,
+        "pdf": "https://conference.cs.cityu.edu.hk/aaac2025/abstract/AAAC_2025_paper_12.pdf",
+        "authors": [
+          "Daiki Okayama",
+          "Yuya Higashikawa",
+          "Shuichi Miyazaki"
+        ]
+      }
+    ],
+    "note": "Metadata from Crossref (LNCS 16488, book chapter, pp. 371–390), checked against the publisher PDF supplied by the owner (no open copy found). The AAAC 2025 abstract states an earlier, weaker bound $O((c+1)k/\\log k)$ for an algorithm named GTE."
+  },
+  "Das2025Infinite": {
+    "authors": [
+      "Raja Das",
+      "Buddhadeb Sau"
+    ],
+    "title": "Exploration of infinite triangular grid by myopic robots without chirality",
+    "kind": "conference",
+    "venue": "ICDCN 2025, pp. 264–268",
+    "year": 2025,
+    "doi": "10.1145/3700838.3700844",
+    "note": "Metadata of the cited version from Crossref (5 pages); SSRN record from Crossref (registered April 2025). The full text was read in the 12-page SSRN preprint (not peer reviewed; it says a preliminary version is the ICDCN paper, and its running head lists a third author, Avisek Sharma, whom Crossref does not list). The 5-page proceedings text was not seen, so theorem and lemma numbers refer to the SSRN text. Not the same paper as Das2025Triangular (ICDCN 2025, pp. 249–253).",
+    "read": "SSRN preprint (2025)",
+    "versions": [
+      {
+        "kind": "preprint",
+        "venue": "SSRN preprint",
+        "year": 2025,
+        "doi": "10.2139/ssrn.5208547",
+        "url": "https://ssrn.com/abstract=5208547",
+        "title": "Exploration of Infinite Triangular Grid by Myopic Robots Without Chirality"
+      }
+    ]
+  },
+  "Aliberti2025Defected": {
+    "authors": [
+      "Andrea Aliberti",
+      "Yonghwan Kim",
+      "Yoshiaki Katayama"
+    ],
+    "title": "Limits of Fault-Tolerant Observation: Impossibility of Gathering in the (4,2)-Defected View Model",
+    "kind": "conference",
+    "venue": "CANDAR Workshops 2025, pp. 121–127",
+    "year": 2025,
+    "doi": "10.1109/CANDARW68385.2025.00029",
+    "note": "Metadata from Crossref and checked against the publisher PDF (7 pages, workshop proceedings of the Thirteenth International Symposium on Computing and Networking, Yamagata; IEEE). No open copy found; read in full in the publisher version supplied by the owner."
+  },
+  "Wang2026Tree": {
+    "authors": [
+      "Yuzhe Wang",
+      "Paola Flocchini",
+      "Nooshin Nokhanji",
+      "Nicola Santoro"
+    ],
+    "title": "Dynamic Tree Maintenance by Hybrid Programmable Matter",
+    "kind": "conference",
+    "venue": "12th World Congress on Electrical Engineering and Computer Systems and Sciences (EECSS 2026), paper CIST 124",
+    "year": 2026,
+    "doi": "10.11159/cist26.124",
+    "note": "Found by the weekly search of 18 November 2026; the owner supplied the PDF. Metadata from Crossref, checked against the PDF (8 pages, proofs omitted)."
   }
 }

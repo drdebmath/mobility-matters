@@ -7,8 +7,14 @@
     "year": 2026,
     "note": "Kranakis introduced segment visibility in a preprint of November 2026 [Kranakis2026Segment]; the earlier uses this note rests on are the author's own account."
   },
+  "related": [
+    {
+      "problem": "evacuation",
+      "relation": "Segment search is the search and evacuation of robots that detect the target on the segment joining them instead of at their own positions. Every algorithm for two wireless robots evacuating the unit disk also works with segment visibility, since an exit is detected no later; the setting *Two robots evacuate the unit disk* of segment search improves the wireless optimum $1+2\\pi/3+\\sqrt3$ to $2\\sqrt3+\\pi/3$ [Kranakis2026Disk]."
+    }
+  ],
   "summary": "Robots search the plane for a point that they see when it lies on the segment joining two of them.",
-  "statement": "$k \\ge 2$ robots of unit speed start together at the origin $O$ of the plane, share a coordinate frame and a clock, and move deterministically. A stationary target lies at an unknown point $x \\ne O$ at distance $d = \\|x\\| > 0$. The target is found at the first time $t$ at which $x$ lies on the closed segment joining the positions of two robots at time $t$; robots learn nothing about the target before. Depending on the setting the robots know $d$ or not; they never know the direction of $x$. **Time** is the competitive ratio: the supremum, over targets, of the time until the target is found divided by $d$.",
+  "statement": "$k \\ge 2$ robots of unit speed start together at the origin $O$ of the plane, share a coordinate frame and a clock, and move deterministically. A stationary target lies at an unknown point $x \\ne O$ at distance $d = \\|x\\| > 0$. The target is found at the first time $t$ at which $x$ lies on the closed segment joining the positions of two robots at time $t$; robots learn nothing about the target before. Depending on the setting the robots know $d$ or not; they never know the direction of $x$. **Time** is the competitive ratio: the supremum, over targets, of the time until the target is found divided by $d$. In the evacuation setting the target is an exit on the unit circle about the origin, and the time runs until both robots are at the target.",
   "primer": {
     "intro": "Two or more lifeguards scan the sea for a buoy, and a buoy counts as seen as soon as it lies on the line of sight between two of them. Here $k \\ge 2$ **robots**, points of unit speed, start together at the **origin** $O$ of the plane. A **target**, a point $x$ at distance $d$ from the origin, sits in an unknown direction. At every moment each pair of robots sees the straight **segment** that joins them, and the target is found the first time it lies on such a segment. The robots share a coordinate frame and a clock, and their routes are fixed in advance. The cost of a route plan is its **competitive ratio**: the largest value, over all targets, of the time until the target is found divided by $d$. In the basic version two robots do not know $d$.",
     "ideas": [
@@ -69,7 +75,7 @@
     {
       "id": "time",
       "name": "Competitive ratio",
-      "description": "worst-case time until the target lies on a segment between two robots, divided by its distance $d$ from the origin"
+      "description": "worst-case time until the target lies on a segment between two robots, divided by its distance $d$ from the origin (in evacuation of the unit disk: until every robot is at the target, $d = 1$)"
     }
   ],
   "ignore_axes": [
@@ -117,11 +123,33 @@
         }
       ],
       "origin": "Shoreline search was first studied at a known distance (Bellman's problem, solved for one searcher by Isbell, as reported by [Dobrev2020Shoreline]); Baeza-Yates, Culberson and Rawlins considered the unknown distance [BaezaYates1993Searching] (as reported by [Dobrev2020Shoreline]). Kranakis distinguishes the same two regimes for segment visibility and shows that for two robots not knowing $d$ costs at least $\\sqrt{17}/4 - 1 \\approx 0.031$ in the ratio, while for $k \\ge 3$ it costs nothing [Kranakis2026Segment]."
+    },
+    {
+      "id": "task",
+      "name": "Task",
+      "values": [
+        {
+          "id": "evacuation",
+          "level": 0,
+          "label": "evacuation of the unit disk: both robots must reach the target",
+          "short": "disk evacuation",
+          "definition": "The target is an exit at an unknown point of the unit circle about the origin ($d = 1$, known to the robots), and the task ends when every robot is at the target. The robots learn the target when it first lies on the closed segment joining them and then move straight to it; they may leave the disk. The measure is the worst-case time; the offline optimum is $1$, so it equals the competitive ratio."
+        },
+        {
+          "id": "search",
+          "level": 1,
+          "label": "search: the task ends when the target is seen",
+          "short": "search",
+          "definition": "The task ends at the first time the target lies on a segment joining two robots."
+        }
+      ],
+      "origin": "Kranakis studied search, where the task ends when the target is seen [Kranakis2026Segment], and then the evacuation of the unit disk posed by Czyzowicz et al. [Czyzowicz2014Evacuating], where both robots must reach an exit on the boundary, under the same segment rule [Kranakis2026Disk]. An evacuation algorithm also sees every exit by the time it ends, so evacuation is the weaker assumption (the harder task) and search at known distance $d = 1$ gives lower bounds for it."
     }
   ],
   "axis_order": [
     "robots",
     "distance",
+    "task",
     "faults",
     "speeds",
     "algorithm"
@@ -135,7 +163,8 @@
         "robots": "two",
         "distance": "unknown",
         "faults": "none",
-        "speeds": "equal"
+        "speeds": "equal",
+        "task": "search"
       },
       "summary": "Two robots that do not know $d$ need a ratio between $\\sqrt3+\\pi/6+\\sqrt{17}/4 \\approx 3.2864$ and $\\approx 8.9285$; the gap is open (a preprint).",
       "statement": "Two robots; the trajectories do not depend on $d$, and every $d > 0$ is possible.",
@@ -186,7 +215,8 @@
         "robots": "two",
         "distance": "known",
         "faults": "none",
-        "speeds": "equal"
+        "speeds": "equal",
+        "task": "search"
       },
       "summary": "Two robots that know $d$ need exactly $1+\\sqrt3+\\pi/6 \\approx 3.2556$, the same ratio as two robots looking for a line at known distance.",
       "statement": "Two robots that know $d$ (not the direction of the target); the targets are the points of the circle of radius $d$ about the origin.",
@@ -232,7 +262,8 @@
       "assumptions": {
         "distance": "unknown",
         "faults": "none",
-        "speeds": "equal"
+        "speeds": "equal",
+        "task": "search"
       },
       "summary": "With $k \\ge 3$ robots the optimal ratio is exactly $\\sec(\\pi/k)$: the robots walk straight in $k$ equally spaced directions and the edges of the growing regular $k$-gon sweep the plane.",
       "statement": "$k \\ge 3$ robots that do not know $d$; every segment between two robots is visible (the algorithm uses only segments between neighbours on the $k$-gon). For $k = 2$ see the two-robot settings.",
@@ -279,7 +310,8 @@
       "assumptions": {
         "distance": "known",
         "faults": "none",
-        "speeds": "equal"
+        "speeds": "equal",
+        "task": "search"
       },
       "summary": "Knowing $d$ does not help $k \\ge 3$ robots: the optimal ratio is still exactly $\\sec(\\pi/k)$.",
       "statement": "$k \\ge 3$ robots that know $d$ (not the direction of the target); the targets are the points of the circle of radius $d$ about the origin.",
@@ -317,6 +349,54 @@
       },
       "open": [],
       "notes": "From the preprint [Kranakis2026Segment], read in full (arXiv v1).",
+      "status": "verified"
+    },
+    {
+      "id": "two-disk-evacuation",
+      "title": "Two robots evacuate the unit disk",
+      "assumptions": {
+        "robots": "two",
+        "distance": "known",
+        "task": "evacuation",
+        "faults": "none",
+        "speeds": "equal"
+      },
+      "summary": "Two robots that see along the segment joining them evacuate the unit disk in time $2\\sqrt3+\\pi/3 \\approx 4.5113$, less than the $\\approx 4.826$ of wireless robots that must touch the exit; whether this is optimal is open (a preprint).",
+      "statement": "Two robots of unit speed start at the centre of the unit disk; the target is an exit at an unknown point of the boundary circle. Both robots learn the target at the first time it lies on the closed segment joining them, and then move straight to it; robots may leave the disk. **Time** is the worst case, over exit positions, of the time until both robots are at the exit.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "1+\\sqrt3+\\pi/6 \\approx 3.2556",
+          "ref": "Kranakis2026Segment",
+          "bottleneck": "unknown direction",
+          "preconditions": [
+            "inherited from search by two robots at known distance $d = 1$ (setting two-known): an evacuation algorithm has seen the exit before both robots reach it",
+            "the catalogue's observation; [Kranakis2026Disk] proves no lower bound for all algorithms"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kranakis2026Disk",
+          "role": "best",
+          "time": "2\\sqrt3+\\pi/3 \\approx 4.5113",
+          "assumes": [
+            "common coordinate frame and clock"
+          ],
+          "note": "Introductory and current best (Theorem 2.2): robot $\\sigma \\in \\{\\pm1\\}$ walks straight to $(\\sigma/\\sqrt3, 1)$, along the tangent to $(\\sigma\\sqrt3/2, 1/2)$, then along the circle to $(0,-1)$; the segment between the robots stays horizontal and sweeps the disk from top to bottom. The worst exits are $(\\pm\\sqrt3/2, -1/2)$, found by one robot while the other is $\\sqrt3$ away. Theorem 3.4: every descending horizontal full-slice sweep (after an initial phase above the horizontal axis, a horizontal segment at a nonincreasing common height from $1$ to $-1$ that covers the whole chord of the circle at that height) needs at least $2\\sqrt3+\\pi/3$; this bound holds only for that class."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap: $2\\sqrt3+\\pi/3 \\approx 4.5113$ against the inherited search bound $1+\\sqrt3+\\pi/6 \\approx 3.2556$; $2\\sqrt3+\\pi/3$ is optimal among descending horizontal full-slice sweeps."
+        }
+      },
+      "open": [
+        "Is $2\\sqrt3+\\pi/3$ optimal among all algorithms? Rotating or non-horizontal segments might do better; Kranakis leaves this open [Kranakis2026Disk].",
+        "What is the competitive ratio when the exit may lie anywhere in the disk? The same algorithm then has an unbounded ratio, since exits near the centre are found late [Kranakis2026Disk]."
+      ],
+      "notes": "From the preprint [Kranakis2026Disk], read in full (arXiv v1); the proof of Theorem 3.4 was not checked line by line. Up to the point $(\\pm\\sqrt3/2, 1/2)$ the robots follow the trajectory of the known-distance search setting with $d = 1$, which then turns down the vertical lines while this one stays on the circle (the catalogue's observation). Under segment visibility a robot that reaches the exit also reveals it to the other, so every algorithm for two wireless robots works here: the optimum $1+2\\pi/3+\\sqrt3 \\approx 4.826$ of two wireless robots in Evacuation is an upper bound, and Kranakis's algorithm improves it; the wireless lower bound does not carry over.",
       "status": "verified"
     }
   ]

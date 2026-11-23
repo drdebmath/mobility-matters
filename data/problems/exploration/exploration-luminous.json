@@ -3159,6 +3159,10 @@
     {
       "ref": "Altisen2026Synthesizing",
       "note": "Perpetual exploration of a finite grid that contains one obstacle (a missing node or a pole the robots must go around) by two myopic luminous robots with common chirality under FSYNC. A partly automated method starts from two algorithms of [Bramas2023Chirality], synthesises 5 algorithms for visibility 1 with three colours and 115 for visibility 2 with two colours, checks them by simulation on small grids, and proves them for larger grids by induction on the grid size. Read."
+    },
+    {
+      "ref": "Das2025Infinite",
+      "note": "Exploration of the infinite triangular grid (every node is visited) by five FSYNC luminous robots with $\\varphi = 2$, four fixed colours and no chirality or axis agreement, from a fixed initial configuration of five robots on a node and its neighbours; the robots sweep ever larger triangles (Theorem 1, Lemmas 1–3), and the paper reports no lower bound. Read in the SSRN preprint (not peer reviewed); the 5-page ICDCN text was not seen; not placed because the network axis has no infinite triangular grid."
     }
   ]
 }

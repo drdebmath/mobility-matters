@@ -207,11 +207,18 @@
           "level": 1,
           "label": "an upper bound on $n$",
           "short": "bound on $n$",
-          "definition": "The agents know an upper bound on $n$ ([Das2025Collisionfree] give them $n$ itself)."
+          "definition": "The agents know an upper bound on $n$."
+        },
+        {
+          "id": "exact-n",
+          "level": 2,
+          "label": "the number of nodes $n$",
+          "short": "$n$",
+          "definition": "The agents know $n$ itself [Das2025Collisionfree]."
         },
         {
           "id": "map",
-          "level": 2,
+          "level": 3,
           "label": "a map with their own position",
           "short": "map",
           "definition": "Every agent knows $G$ and its own start node in it, but not the number or the start nodes of the other agents."
@@ -621,7 +628,7 @@
         "direction": "undirected",
         "timing": "sync",
         "team": "two",
-        "knowledge": "bound-n",
+        "knowledge": "exact-n",
         "coverage": "team",
         "vision": "presence"
       },
@@ -660,7 +667,7 @@
         "direction": "undirected",
         "timing": "sync",
         "team": "two",
-        "knowledge": "bound-n",
+        "knowledge": "exact-n",
         "coverage": "team",
         "vision": "presence",
         "help": "pebbles"
@@ -689,7 +696,7 @@
       ],
       "optimality": {
         "colours": {
-          "status": "tight",
+          "status": "gap",
           "note": "2 or 3."
         },
         "time": {
@@ -712,7 +719,7 @@
         "direction": "undirected",
         "timing": "sync",
         "team": "two",
-        "knowledge": "bound-n",
+        "knowledge": "exact-n",
         "coverage": "team",
         "vision": "presence",
         "help": "pebbles",
@@ -742,7 +749,7 @@
       ],
       "optimality": {
         "colours": {
-          "status": "tight",
+          "status": "gap",
           "note": "1 or 2."
         },
         "time": {

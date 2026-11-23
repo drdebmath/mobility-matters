@@ -1070,6 +1070,10 @@
     {
       "ref": "Kameda2016Alternative",
       "note": "A continuous relative: one agent inside a simple polygon must detect an intruder that moves arbitrarily fast. An agent with two flashlights can search every polygon that an agent with a light in all directions can, as conjectured in 1992 and proved by Park et al. in 2001; a simpler proof through a 2-link visibility diagram of the polygon (Theorems 1–3). Read (statements and outline)."
+    },
+    {
+      "ref": "Dereniowski2026Subgraphs",
+      "note": "Centralised (offline) strategy computation when the team is too small for the whole graph: all $k$ agents start at the home base, the graph is known, the clean part stays connected after every move, and the measure is the largest number of edges that can be cleaned, not the number of agents. Two problems: LSS (the best subgraph $H$, with the rest of the graph deleted, that $k$ agents clean; $\\mathrm{cs}(H)\\le k$) and LPSS (the most edges that $k$ agents clean in $G$ itself, protecting them from recontamination by the edges never cleaned). Hardness: LSS is NP-hard on cubic planar graphs with $k=1$ (Theorem 4; Monotonic LSS is NP-complete there, Corollary 5); Monotonic LPSS is NP-complete, and LPSS is NP-hard, even on graphs with a universal node whose removal leaves a planar graph of maximum degree 3 (Corollaries 2 and 3; whether LPSS is in NP is open). On trees LSS takes $O(\\min\\{kn,n\\log n\\})$ time (Theorems 11 and 12) and LPSS $O(\\min\\{2^{6k}kn,n^{8.571}\\log n\\})$ time (Theorem 13). These are running times of an algorithm that computes the strategy, not bounds on agents, moves or time of a distributed strategy. Preprint; full text read."
     }
   ]
 }

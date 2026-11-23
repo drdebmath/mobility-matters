@@ -157,6 +157,8 @@
     "graph-size",
     "node-ids",
     "help",
+    "agent-memory",
+    "markers",
     "topology"
   ],
   "axes": [
@@ -215,6 +217,48 @@
         }
       ],
       "origin": "External help measures how much information about the instance buys a fast treasure hunt. Miller and Pelc framed it in the paradigm of algorithms with advice: an oracle that knows the network, the start and the treasure gives the agent a binary string, and the question is the smallest advice that achieves a given cost, against cost $\\Theta(m)$ in the worst case without information [Miller2015Tradeoffs]; among the earlier advice papers they cite tree exploration with advice by Fraigniaud, Ilcinkas and Pelc [Fraigniaud2008Advice]. Their nodes carry labels that the agent reads on arrival [Miller2015Tradeoffs]. Gorain, Mondal, Nayak and Pandit replaced the string by pebbles that the oracle places on nodes of an anonymous graph, at most one per node, seen only on arrival, arguing that when many agents search independently it is cheaper to put information on the nodes once than to give advice to each agent [Gorain2022Pebble]. They show $O(d\\log\\Delta)$ pebbles give time $O(d\\log\\Delta+\\log^3\\Delta)$ and that no number of pebbles beats $\\Omega(d\\log\\Delta)$ [Gorain2022Pebble]. The two forms of help sit on the same level because neither simulates the other: advice is global and read at once, pebbles are local and read along the walk."
+    },
+    {
+      "id": "agent-memory",
+      "name": "Memory of the agent",
+      "values": [
+        {
+          "id": "finite",
+          "level": 0,
+          "label": "finite: a fixed number of states",
+          "short": "finite-state agent",
+          "definition": "The agent is a finite automaton with $K$ states, where $K$ does not depend on the graph or on the distance $d$ to the treasure."
+        },
+        {
+          "id": "unbounded",
+          "level": 1,
+          "label": "unbounded",
+          "short": "unbounded memory",
+          "definition": "No bound on the agent's memory is part of the setting; the memory an algorithm uses, if it is studied, is reported with the result."
+        }
+      ],
+      "origin": "Treasure hunt was posed for agents whose memory is not a constraint: the questions were the cost in terms of the graph or of the distance, and the help an oracle must give [TaShma2014Deterministic] [Miller2015Tradeoffs]. Dobrev, Královič, Královič, Pardubská and Rossmanith ask what a deterministic finite-state agent can do, on the simplest infinite graph: the classical cow-path search on a discrete infinite line, by an agent with a fixed number of states [Dobrev2026Pebbles]. Such an agent alone cannot keep the growing counters that doubling needs, so they give it pebbles (see *Markers*) and study the trade-off between the number of pebbles and the time."
+    },
+    {
+      "id": "markers",
+      "name": "Markers",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no markers",
+          "short": "no markers",
+          "definition": "The agent cannot mark nodes."
+        },
+        {
+          "id": "pebbles",
+          "level": 1,
+          "label": "pebbles carried by the agent; their number is a resource",
+          "short": "carried pebbles",
+          "definition": "The agent starts with $p$ identical pebbles in a bag. In a step it sees whether its node holds a pebble and whether its bag is empty (not how many pebbles it holds), and it may drop a pebble at its node or pick one up. Unlike the pebbles of *External help*, no oracle places them."
+        }
+      ],
+      "origin": "Pebbles that an agent carries, drops and picks up come from the exploration of mazes and graphs by finite automata: two pebbles suffice for a finite automaton in a maze [Blum1978Compass], and $\\Theta(\\log\\log n)$ pebbles are necessary and sufficient for a constant-memory agent to explore every undirected graph with $n$ nodes [Disser2019Pebbles]. Dobrev, Královič, Královič, Pardubská and Rossmanith brought them to treasure hunt on the infinite line, as the resource that lets a finite-state agent measure distances it cannot store [Dobrev2026Pebbles]. They are a different resource from the pebbles of [Gorain2022Pebble], which an oracle that knows the instance places before the agent starts."
     }
   ],
   "variants": [
@@ -225,7 +269,8 @@
       "assumptions": {
         "dynamics": "static",
         "direction": "undirected",
-        "graph-size": "finite"
+        "graph-size": "finite",
+        "agent-memory": "unbounded"
       },
       "summary": "If the treasure is present from the start, concatenating universal traversal sequences finds it in polynomial time; if it may appear later, explicit solutions need backtracking and take the length of a universal exploration sequence, polynomial with a huge exponent, times a polylogarithmic factor.",
       "lower_bounds": [],
@@ -287,7 +332,8 @@
       "title": "Anonymous graphs with possibly infinite degrees",
       "assumptions": {
         "dynamics": "static",
-        "direction": "undirected"
+        "direction": "undirected",
+        "agent-memory": "unbounded"
       },
       "summary": "A universal algorithm whose cost is optimal among universal algorithms, measured by a weight $w(s,v^*)$ of the cheapest path type to the treasure.",
       "statement": "For a path with largest port $q$ and length $\\rho$, its type is $(q,\\rho)$ with value $\\rho\\,2^{\\rho}q^{\\rho}$; $w(s,v^*)$ is the value of the cheapest type of a path from $s$ to $v^*$.",
@@ -332,7 +378,8 @@
         "dynamics": "static",
         "direction": "undirected",
         "graph-size": "locally-finite",
-        "node-ids": "labelled"
+        "node-ids": "labelled",
+        "agent-memory": "unbounded"
       },
       "summary": "With node labels, a treasure at distance $d$ is found at cost $O(e(d)\\log d)$, against a lower bound of $\\Omega(e(d))$.",
       "lower_bounds": [
@@ -381,7 +428,8 @@
         "dynamics": "static",
         "direction": "undirected",
         "graph-size": "finite",
-        "help": "advice"
+        "help": "advice",
+        "agent-memory": "unbounded"
       },
       "summary": "How many bits of advice buy a given cost $C$: about $d\\log(m/C)$.",
       "lower_bounds": [
@@ -426,7 +474,8 @@
         "dynamics": "static",
         "direction": "undirected",
         "graph-size": "finite",
-        "help": "pebbles"
+        "help": "pebbles",
+        "agent-memory": "unbounded"
       },
       "summary": "An oracle places pebbles (at most one per node); $O(d\\log\\Delta)$ pebbles let the agent reach the treasure in near-optimal time.",
       "lower_bounds": [
@@ -470,7 +519,8 @@
       "assumptions": {
         "dynamics": "1-interval",
         "direction": "undirected",
-        "graph-size": "finite"
+        "graph-size": "finite",
+        "agent-memory": "unbounded"
       },
       "summary": "If the edges may change at every step while every snapshot stays connected, no agent ever finds the treasure, even when every snapshot is a ring; if every two nodes become adjacent within every $\\xi$ steps and agents flag the nodes they visit, $\\Theta(\\xi n)$ steps are necessary and sufficient on such rings.",
       "statement": "The graph is dynamic on a fixed set of $n$ nodes: an adversary chooses the edges at every step $t$, and every snapshot is connected (1-interval connectivity). The known results concern **vertex-permuted rings**, a special case: every snapshot is a cycle through all $n$ nodes, and the adversary may place the nodes on this cycle in a new order at every step. The treasure stays at one node. The agent chooses each move online, from what it sees at that step, without knowing the snapshots to come. **Flags**, used by the algorithms described in the notes, are marks that an agent plants on every node it visits and that agents on neighbouring nodes see.",
@@ -504,6 +554,82 @@
         "Which of these results extend to vertex-permuted graphs other than rings? [Ayoubi2026Online]"
       ],
       "notes": "Ayoubi, Mans and Narayanan make the problem solvable with two restrictions. In the class VP($\\xi$) (their VP($\\delta$); their $\\delta$ is $\\xi$ here) every two nodes are adjacent in at least one step of each window of $\\xi$ consecutive steps; the class is non-empty if and only if $\\xi\\ge\\lceil (n-1)/2\\rceil$ (Proposition 1, through Walecki's decomposition of the complete graph into Hamiltonian cycles). With flags, a memoryless agent that moves to an unflagged neighbour whenever it sees one finds the treasure within $\\xi(n-1)$ steps (Theorem 2), and for $\\xi\\ge 2n$ every deterministic agent needs $\\xi(n-3)$ steps on some input, even with memory, chirality, a view of the whole snapshot and knowledge of the node labels (Theorem 3); without node labels its competitive ratio is $\\Omega(\\xi n)$ (Theorem 4). Without flags and without node labels, no deterministic agent succeeds for $\\xi\\ge n$, even with memory, chirality and a view of the whole snapshot (Theorem 5), while a randomized agent that stays put with probability $1-1/\\xi$ finds the treasure in expected $O(\\xi^2)$ steps (Theorem 6), even without knowing $n$ or $\\xi$ (Remark 1). With $k$ agents, flags, and access to each port by mutual exclusion, $\\xi\\lceil 2n/k\\rceil$ steps suffice for $\\xi\\ge\\lceil (n-1)/2\\rceil$ (Theorem 8), and $(\\lceil (n-2)/k\\rceil-2)\\,\\xi$ steps are necessary for $1\\le k\\le n/2-2$ and $\\xi\\ge (k+1)(n-k-2)$ (Theorem 9). If each snapshot is a ring in a uniformly random order (R-VP), an agent that always moves to its clockwise neighbour finds the treasure in expected $\\Theta(n)$ steps when the treasure is placed in advance, and $\\Theta(n\\log n)$ when an adversary that knows the sequence of snapshots places it (Theorem 7). These results need flags, the window $\\xi$ or random snapshots, which the axes do not record, so they are described here rather than listed as bounds. Checked against the full text (preprint, v1).",
+      "status": "verified"
+    },
+    {
+      "id": "line-pebbles",
+      "title": "Finite-state agent with pebbles on the infinite path",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "graph-size": "locally-finite",
+        "agent-memory": "finite",
+        "markers": "pebbles",
+        "topology": "path"
+      },
+      "summary": "On the infinite path a deterministic finite-state agent needs 2 pebbles to find the treasure at all; with $O(\\log\\log d)$ pebbles it needs $\\Theta(d\\log d)$ steps, and no number of pebbles gives less.",
+      "statement": "The graph is the infinite path: nodes are the integers, and the agent can tell its two directions apart. The agent is a deterministic finite automaton with $K$ states that starts at node 0 with $p$ identical pebbles in its bag; its transition function does not depend on $p$. In each step it sees its state, whether its node holds a pebble and whether its bag is empty, may drop or pick up a pebble, and moves to a neighbour. The treasure is at a node at unknown distance $d$ in an unknown direction. The cost is the number of steps until the agent reaches the treasure [Dobrev2026Pebbles].",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\Omega(d\\log d)",
+          "ref": "Dobrev2026Pebbles",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 8, stated without proof in the conference version; the paper names a crossing-sequence argument",
+            "a deterministic agent with a fixed number of states on the infinite path, the treasure at distance $d$ on either side",
+            "proved for an unlimited supply of pebbles (a bag that is never empty); the authors conclude that no number of pebbles gives fewer steps"
+          ]
+        },
+        {
+          "measure": "time",
+          "bound": "\\Omega(d^2/K)",
+          "ref": "Dobrev2026Pebbles",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 5: exactly $p = 2$ pebbles",
+            "a deterministic agent with $K$ states on the infinite path"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Dobrev2026Pebbles",
+          "role": "best",
+          "time": "O(d\\log d)",
+          "assumes": [
+            "the infinite path",
+            "$p = O(\\log\\log d)$ identical pebbles",
+            "deterministic"
+          ],
+          "note": "Introductory and current best. Theorem 7 gives competitive ratio $O(d^{1/(p-2)})$ for $4\\le p\\le 10$ pebbles and $O(10^r d^{1/(4r)})$ with $r=\\lfloor p/5\\rfloor$ for $p\\ge 11$ (the rounding brackets are lost in the text of the PDF; the floor is the reading taken here). The paper concludes that $O(\\log\\log d)$ pebbles give $O(d\\log d)$ steps. The agent counts with pebbles: nested counters, five pebbles per level of recursion."
+        },
+        {
+          "ref": "Dobrev2026Pebbles",
+          "role": "other",
+          "time": "O(d^2/K)",
+          "assumes": [
+            "the infinite path",
+            "exactly $p = 2$ pebbles",
+            "deterministic"
+          ],
+          "note": "Theorem 5: with two pebbles $\\Theta(d^2/K)$ steps are necessary and sufficient. The two pebbles delimit the explored interval, which the agent extends on alternating sides."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "$\\Theta(d\\log d)$ steps when $O(\\log\\log d)$ pebbles are available; the lower bound is stated for an unlimited supply of pebbles, and its proof is omitted in the conference version [Dobrev2026Pebbles]."
+        },
+        "memory": {
+          "status": "unknown",
+          "note": "No oracle helps here. For the pebbles the agent carries: fewer than 2 make the task impossible (Theorem 4, proof omitted), and the number needed for $O(d\\log d)$ steps is not known to be $\\Omega(\\log\\log d)$ [Dobrev2026Pebbles]."
+        }
+      },
+      "open": [
+        "How many pebbles does a deterministic finite-state agent need to find the treasure on the infinite path in $O(d\\log d)$ steps? $O(\\log\\log d)$ suffice [Dobrev2026Pebbles]."
+      ],
+      "notes": "Dobrev, Královič, Královič, Pardubská and Rossmanith call the problem TreasureHunt and present it as the cow-path problem for a finite agent (their $n$ is $d$, their $k$ is $p$ and their $s$ is $K$ here). With unbounded memory the problem is linear search, where doubling reaches the treasure within $9d$ (see *Linear search*); a finite-state agent cannot store the growing turning distances and uses pebbles to measure them. Further statements of the paper: with fewer than 2 pebbles the treasure cannot be found (Theorem 4, proof omitted); with 3 pebbles $d^2/f(K)+O(d)$ steps suffice, for a function $f(K)=2^{\\Theta(\\sqrt{K}\\log K)}$ (Theorem 6, proof omitted); a randomized agent with one pebble finds the treasure in finite expected time (Theorem 10, proof omitted) and with $O(\\log\\log d)$ pebbles in expected $O(d\\log\\log d)$ steps (Theorem 11, proof outline only). The sentence before Theorem 5 says $O(d^2K)$ where the theorem and its proof give $O(d^2/K)$. Checked against the full text of the publisher version (model in Section 2.1 and Theorems 4, 5, 7, 8); the omitted proofs are announced for a journal version.",
       "status": "verified"
     }
   ],

@@ -251,8 +251,30 @@
     const v = ax && ax.values.find(x => x.id === valueId);
     return v ? (v.level || 0) : 0;
   }
+  // Values strictly below value v on its axis. By default: every value of a lower level. A value
+  // with `refines: [ids]` is a special case of those values only, so it lies above them and above
+  // what lies below them, and above nothing else (e.g. round-robin refines sequential, not FSYNC).
+  const belowCache = new WeakMap();
+  function belowOf(ax, valueId) {
+    let m = belowCache.get(ax);
+    if (!m) { m = new Map(); belowCache.set(ax, m); }
+    if (m.has(valueId)) return m.get(valueId);
+    const v = ax.values.find(x => x.id === valueId);
+    const set = new Set();
+    m.set(valueId, set);
+    if (v && Array.isArray(v.refines) && v.refines.length) {
+      v.refines.forEach(r => { set.add(r); belowOf(ax, r).forEach(x => set.add(x)); });
+    } else if (v) {
+      ax.values.forEach(x => { if ((x.level || 0) < (v.level || 0)) set.add(x.id); });
+    }
+    return set;
+  }
+  const valueBelow = (p, axisId, a, b) => {
+    const ax = p.axisById[axisId];
+    return ax ? belowOf(ax, b).has(a) : false;
+  };
   // A is at most as strong as B (every assumption of A is implied by B)
-  const weakerOrEqual = (p, A, B) => p.axes.every(a => A[a.id] === B[a.id] || levelOf(p, a.id, A[a.id]) < levelOf(p, a.id, B[a.id]));
+  const weakerOrEqual = (p, A, B) => p.axes.every(a => A[a.id] === B[a.id] || valueBelow(p, a.id, A[a.id], B[a.id]));
   function implied(p, node) {
     const others = p.variants.filter(v => v.node !== node);
     const weaker = others.filter(v => weakerOrEqual(p, v.assumptions, node.assumptions));

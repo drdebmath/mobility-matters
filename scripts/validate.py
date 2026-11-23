@@ -180,6 +180,18 @@ def check_axis_values(ax, rel):
         ids[v.get("id")] = lvl if isinstance(lvl, int) else 0
     if not ax.get("origin"):
         warn(f"{rel}: axis '{ax['id']}' has no 'origin' (where the assumption comes from and why it matters)")
+    for v in ax.get("values", []):
+        ref = v.get("refines")
+        if ref is None:
+            continue
+        if not isinstance(ref, list) or not ref:
+            err(f"{rel}: axis '{ax['id']}' value '{v.get('id')}': 'refines' must be a non-empty list of value ids")
+            continue
+        for r in ref:
+            if r not in ids:
+                err(f"{rel}: axis '{ax['id']}' value '{v.get('id')}' refines unknown value '{r}'")
+            elif ids[r] >= ids.get(v.get("id"), 0):
+                err(f"{rel}: axis '{ax['id']}' value '{v.get('id')}' refines '{r}', which must have a lower level")
     zeros = [k for k, l in ids.items() if l == 0]
     if len(zeros) != 1:
         err(f"{rel}: axis '{ax['id']}' must have exactly one level-0 value (nothing assumed); has {zeros}")

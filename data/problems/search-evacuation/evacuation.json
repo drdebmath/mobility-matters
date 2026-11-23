@@ -2270,6 +2270,10 @@
     {
       "ref": "Nakamura2021Evacuation",
       "note": "A different model, a metamorphic robotic system (connected oblivious modules on the square grid) that must leave a rectangular field through an exit: two modules with a common compass are necessary and sufficient (Theorem 1); without one, four modules from restricted initial shapes and seven from any (Theorems 2 and 3), and two when the system starts touching a wall (Theorem 4); also when the system can stop after leaving, mazes and convex fields. Read (arXiv v3)."
+    },
+    {
+      "ref": "Kranakis2026Disk",
+      "note": "Two robots at the centre of the unit disk under segment visibility: both robots learn the exit at the first time it lies on the closed segment joining them, and robots may leave the disk. A tangent-and-arc algorithm (the robots walk to $(\\pm 1/\\sqrt3, 1)$, along the tangents to $(\\pm\\sqrt3/2, 1/2)$, then along the boundary to $(0,-1)$) evacuates in exactly $2\\sqrt3+\\pi/3 \\approx 4.5113$ (Theorem 2.2), less than the optimum $1+2\\pi/3+\\sqrt3 \\approx 4.826$ of two wireless robots. The time is optimal only within the class of descending horizontal full-slice sweeps (Theorem 3.4); no lower bound is proved for all algorithms. Read (arXiv v1); placed in Search with segment visibility, setting two-disk-evacuation."
     }
   ],
   "figure": {

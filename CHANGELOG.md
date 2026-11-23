@@ -3,6 +3,105 @@
 What changed in each version of the atlas, newest first. Versions are dated; the website
 footer and the book's title page show the current one.
 
+## 2026-11-23 — Online exploration below the logarithm, defected views
+
+### New problems
+
+- **Uniform deployment by myopic robots with lights** (exploration). Robots on a ring that see
+  only $\varphi$ hops and carry lights must spread evenly (Shibata, Kamei, Ooshita and
+  Kakugawa, SIROCCO 2026; 3 settings). Without a common direction, or with explicit
+  termination, it is impossible even in FSYNC; with a common direction, $\varphi \ge
+  \lfloor n/k\rfloor$ is necessary and, with 20 colours under SSYNC, sufficient.
+- **Dynamic structure maintenance** (programmable matter). Agents that carry tiles keep a line
+  or a tree of tiles connected forever while any tile may fail (Nokhanji, Flocchini and
+  Santoro; Wang, Flocchini, Nokhanji and Santoro, EECSS 2026; 4 settings). Both papers moved
+  here from the further reading of hybrid shape formation.
+
+### New settings and results
+
+- **Online graph exploration.** Two preprints posted on the same day, by Baligács and by Klimm,
+  give $O(\log n/\log\log n)$-competitive algorithms for general weighted graphs, improving
+  on the $O(\log n)$ of the nearest-neighbour rule (1977). Both modify hierarchical
+  depth-first search; neither cites the other. Klimm states the constant,
+  $(2+o(1))\ln n/\ln\ln n$ when $n$ is known. The lower bound is still 4, and whether a
+  constant ratio is possible stays open.
+- **Linear search for a target that emerges.** A new axis: the target can be detected only
+  from an unknown time on (Georgiou, Jones and Krupsky, a preprint; 3 settings). One robot
+  needs ratio exactly 9, as in the classical problem; two robots between 4.38 and $3+\sqrt6$;
+  three robots between 3.28 and 4.34.
+- **Evacuation with segment visibility.** Two robots that detect an exit on the segment joining
+  them evacuate the unit disk in $2\sqrt3+\pi/3 \approx 4.51$ (Kranakis, a preprint), less
+  than the 4.83 that two wireless robots need. The setting is part of *Search with segment
+  visibility*.
+- **Mobility faults.** The plane model has a new kind of fault: a faulty robot stops moving
+  but its light keeps working. Two robots then meet at the faulty robot's position with
+  exactly 3 colours, and $n$ opaque robots gather there with 7 or 26 colours (Pramanick, Jana,
+  Mandal and Sharma, a preprint; 2 settings in gathering). Two settings of mutual visibility
+  moved to this kind of fault.
+- **Defected views.** The plane model has a new axis, *view*: a robot may see only $K$ of the
+  other robots (chosen by an adversary, or the $K$ nearest) or of the occupied points.
+  Gathering has 5 settings for it, from Kim et al. (OPODIS 2022), Shukla, Peddinti and Bhagat
+  (a preprint) and Aliberti, Kim and Katayama (CANDAR Workshops 2025): for example, four robots that each see their two nearest
+  gather in FSYNC in at most 4 rounds but cannot gather under SSYNC.
+- **Treasure hunt by a finite-state agent with pebbles.** Two new axes (memory of the agent,
+  markers), a topology value for paths and one setting on the infinite path, from Dobrev,
+  Královič, Královič, Pardubská and Rossmanith (SIROCCO 2026): 2 pebbles are necessary, and with $O(\log\log d)$ pebbles
+  $\Theta(d\log d)$ steps are necessary and sufficient.
+- **Byzantine gathering under a round-robin scheduler.** A new scheduler value, a special
+  case of the sequential scheduler. Robots gather with up to $\lfloor\sqrt{n}/2\rfloor$
+  Byzantine robots, and no algorithm tolerates $\lceil n/2\rceil$ (Frei, Sudo and Wada, a
+  preprint; 1 setting).
+- **Mutual visibility with mobility faults in ASYNC.** Robots with lights and no common
+  coordinate system reach mutual visibility in $O(n)$ epochs with 35 colours, whatever the
+  number of mobility faults, outside a few excluded initial configurations (Pramanick, Jana
+  and Mandal, SIROCCO 2026; 1 setting). The paper states its theorem without proof.
+
+### References
+
+New further reading. Each paper was read in full and is listed under its problem; none is
+placed in a setting, because each needs an assumption the atlas does not have yet.
+
+- **Collaborative exploration.** Cosson, Huang, Mitzenmacher and Vakilian (a preprint): tree
+  exploration when every new node comes with a predicted subtree size.
+- **Decontamination.** Dereniowski and Yang (a preprint): the largest subgraph that too few
+  searchers can clean.
+- **Exploration with colours, gathering on graphs.** Kim, Kong and Choi (a preprint): robots
+  on a grid whose cells are a cellular automaton.
+- **Collaborative exploration.** Higashikawa, Miyazaki and Okayama (SIROCCO 2026): $k$
+  searchers explore grid graphs with holes at competitive ratio
+  $O(k/\log k+\min(c,k))$, where $c$ is the number of hole corners.
+- **Exploration with lights.** Das and Sau (ICDCN 2025, read in its SSRN preprint): five
+  robots with four colours explore the infinite triangular grid without chirality.
+
+New versions.
+
+- Two preprints are now cited by their journal versions in Theoretical Computer Science:
+  Kaur, Saxena, Mandal and Mondal on black hole search, and Balev, Sanlaville and Toullalan
+  on the shortest temporal exploration.
+- Jawhar and Kranakis on capturing a moving target by two robots are now cited by their
+  journal version (Journal of Combinatorial Mathematics and Combinatorial Computing).
+- The correction (2026) to Kamei and Tixeuil's maximum independent set paper was read: it
+  supplies an algorithm listing that was printed wrongly; no result changes.
+- The entries of Pramanick et al. (retitled *Asynchronous Indulgent Gathering of Opaque
+  Robots*), Wada, Masuzawa and Sudo, and Sudo et al. follow their second arXiv versions,
+  which were read and compared with the first.
+
+### Corrections
+
+- **Rendezvous with a mobility fault.** The note on the preprint of Pramanick, Jana, Mandal
+  and Sharma now gives the conditions of its two theorems: 3 colours suffice with rigid moves, and 2 colours fail when
+  the two robots may have mirrored coordinate systems.
+- **Exploration under $T$-interval connectivity.** The statement no longer says that the
+  agent is told the degree of its node; the second version of Sudo et al. removed it, with the
+  same bounds.
+
+### Site and book
+
+- An assumption may now be a special case of some values of its axis only: a path is a tree
+  but not a grid, and a round-robin scheduler is sequential but not FSYNC. The settings that
+  carry over to a page follow this order.
+- *Search with segment visibility* and *Evacuation* are linked as related problems.
+
 ## 2026-11-11 — A new home page and a new address
 
 The atlas now lives at https://debasishpattanayak.com/mobility-matters/; the old address

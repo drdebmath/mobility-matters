@@ -108,7 +108,7 @@
       "avoid": []
     }
   ],
-  "history": "Kalyanasundaram and Pruhs posed the problem, asked whether some algorithm has a constant competitive ratio and gave one for planar graphs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Lower] and [Baligacs2026Exploration]. The question is still open. The nearest-neighbour rule (always go to the closest unvisited node), analysed as a travelling-salesperson heuristic by Rosenkrantz, Stearns and Lewis in 1977, is $\\Theta(\\log n)$-competitive, and no algorithm is known to do better on all graphs, as reported by [Baligacs2026Lower]. Megow, Mehlhorn and Schweitzer (2012) revisited the planar algorithm as Blocking and extended it to graphs of bounded genus (as reported by [Baligacs2026Exploration]); Baligács, Disser, Heinrich and Schweitzer extended it to every class that excludes a fixed minor, by relating Blocking to light spanners [Baligacs2026Exploration]. Lower bounds for deterministic algorithms rose from 2, which holds on unweighted planar graphs and is matched there by depth-first search [Miyazaki2009Restricted], through 2.5 (Dobrev, Královič and Markou, 2012, as reported by [Baligacs2026Lower]) and $10/3$, which also holds on planar graphs [Birx2021Improved], to 4 [Baligacs2026Lower]. On cycles the deterministic ratio is exactly $(1+\\sqrt3)/2$ [Miyazaki2009Restricted], and randomization was first shown to help there in 2026 [Baligacs2026Randomization]. Gehnen, Klasing and Naquin introduced a semi-online version in which the graph is known and only the weights are uncertain [Gehnen2025Graph].",
+  "history": "Kalyanasundaram and Pruhs posed the problem, asked whether some algorithm has a constant competitive ratio and gave one for planar graphs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Lower] and [Baligacs2026Exploration]. The question is still open. The nearest-neighbour rule (always go to the closest unvisited node), analysed as a travelling-salesperson heuristic by Rosenkrantz, Stearns and Lewis in 1977, is $\\Theta(\\log n)$-competitive, as reported by [Baligacs2026Lower]; no algorithm was known to do better on all graphs until 2026, when Baligács [Baligacs2026Sublogarithmic] and Klimm [Klimm2026Sublogarithmic] independently gave $O(\\log n/\\log\\log n)$-competitive algorithms, both modifications of the hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012). Megow, Mehlhorn and Schweitzer (2012) revisited the planar algorithm as Blocking and extended it to graphs of bounded genus (as reported by [Baligacs2026Exploration]); Baligács, Disser, Heinrich and Schweitzer extended it to every class that excludes a fixed minor, by relating Blocking to light spanners [Baligacs2026Exploration]. Lower bounds for deterministic algorithms rose from 2, which holds on unweighted planar graphs and is matched there by depth-first search [Miyazaki2009Restricted], through 2.5 (Dobrev, Královič and Markou, 2012, as reported by [Baligacs2026Lower]) and $10/3$, which also holds on planar graphs [Birx2021Improved], to 4 [Baligacs2026Lower]. On cycles the deterministic ratio is exactly $(1+\\sqrt3)/2$ [Miyazaki2009Restricted], and randomization was first shown to help there in 2026 [Baligacs2026Randomization]. Gehnen, Klasing and Naquin introduced a semi-online version in which the graph is known and only the weights are uncertain [Gehnen2025Graph].",
   "measures": [
     {
       "id": "time",
@@ -195,7 +195,7 @@
         "direction": "undirected",
         "node-ids": "labelled"
       },
-      "summary": "The question of Kalyanasundaram and Pruhs: the competitive ratio is between 4 and $O(\\log n)$, and whether it is constant is open.",
+      "summary": "The question of Kalyanasundaram and Pruhs: the competitive ratio is between 4 and $O(\\log n/\\log\\log n)$, and whether it is constant is open.",
       "lower_bounds": [
         {
           "measure": "time",
@@ -212,24 +212,40 @@
       ],
       "results": [
         {
-          "ref": "Baligacs2026Exploration",
+          "ref": "Baligacs2026Sublogarithmic",
           "role": "best",
+          "time": "O(\\log n/\\log\\log n)",
+          "note": "Theorem 2, proved as Theorem 9: Adaptive-hDFS runs Threshold-hDFS$_b$ with $b = \\max\\{2, \\sqrt{\\log N}\\}$ for a guess $N$ of $n$, and restarts with the guess $N^2$ once more than $N$ nodes are known, so $n$ need not be known. Threshold-hDFS$_b$ modifies the hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012, as reported): the thresholds are powers of $b$, the agent explores the component of edges of weight at most $W$ by a depth-first search between components of lighter edges, and inside an explored component it follows a tour of a minimum spanning tree for the original weights, so $b$ may grow with $n$. It is $O(b + \\log n/\\log b)$-competitive (Theorem 4), and this is tight for the algorithm (Remark 8). Edges of weight 0 are allowed. Found independently of [Klimm2026Sublogarithmic] and posted on the same day; neither cites the other. No leading constant is stated."
+        },
+        {
+          "ref": "Klimm2026Sublogarithmic",
+          "role": "best",
+          "time": "(2+o(1))\\,\\ln n/\\ln\\ln n",
+          "assumes": [
+            "positive weights (Section 2)"
+          ],
+          "note": "Theorem 7 for known $n$, with base $\\max\\{2, \\ln n/(\\ln\\ln n)^2\\}$; without knowing $n$, restarts with growing guesses give $(4+o(1))\\ln n/\\ln\\ln n$ (Theorem 11(b)), and a randomly shifted schedule gives $(2+o(1))\\ln n/\\ln\\ln n$ in expectation against an oblivious adversary (Theorems 9 and 11(a)). The algorithm hDFS$^*_b$ rests on the same idea as [Baligacs2026Sublogarithmic]: weight classes with base $b$ define the hierarchy of hierarchical depth-first search, but inside a fully visited component the agent follows a depth-first tour of a minimum spanning tree for the original weights, so only crossings between components pay for rounding. For every base the algorithm is $\\Omega(\\log n/\\log\\log n)$-competitive, and the constant 2 is attained for the chosen base (Theorem 10). If all weights lie in a known range $[1, 2^{\\sigma}]$ (their $k$), base $\\sigma/\\log_2\\sigma$ gives $O(\\sigma/\\log\\sigma)$ without knowing $n$ (Theorem 8), against $O(\\sigma)$ for power-of-two hierarchical depth-first search. Found independently of [Baligacs2026Sublogarithmic] and posted on the same day; neither cites the other. Klimm states the leading constants and adds the randomized and weight-range versions."
+        },
+        {
+          "ref": "Baligacs2026Exploration",
+          "role": "other",
           "time": "O(\\log n)",
-          "note": "Theorem 2 (Corollary 13c): Blocking with parameter $\\log n$. The same ratio as the nearest-neighbour rule of Rosenkrantz, Stearns and Lewis (1977) and hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012), as reported; neither paper is in the bibliography."
+          "note": "Current best until 2026. Theorem 2 (Corollary 13c): Blocking with parameter $\\log n$. The same ratio as the nearest-neighbour rule of Rosenkrantz, Stearns and Lewis (1977) and hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012), as reported; neither paper is in the bibliography."
         }
       ],
       "optimality": {
         "time": {
-          "status": "gap",
-          "note": "$O(\\log n)$ against 4."
+          "status": "near",
+          "note": "$O(\\log n/\\log\\log n)$ against 4: a factor $\\log n/\\log\\log n$. Whether the ratio is constant is the open question of Kalyanasundaram and Pruhs."
         }
       },
       "open": [
         "Is there a deterministic algorithm with a constant competitive ratio (Kalyanasundaram and Pruhs [Kalyanasundaram1994Constructing], as reported by [Baligacs2026Lower])?",
-        "Is there an $o(\\log n)$-competitive algorithm? Blocking with parameter $\\chi$ (their $\\delta$) is $\\Omega(\\log n)$-competitive for $\\chi = o(\\log n/\\log\\log n)$ and for $\\chi = \\Omega(\\log n)$, and $\\Omega(\\log n/\\log\\log n)$-competitive for every $\\chi$; the range in between is open [Baligacs2026Exploration].",
-        "Does randomization lower the competitive ratio on general graphs? It does on cycles [Baligacs2026Randomization]."
+        "Is there an $o(\\log n/\\log\\log n)$-competitive algorithm, deterministic or randomized against an oblivious adversary [Klimm2026Sublogarithmic]? Both hierarchical algorithms are $\\Omega(\\log n/\\log\\log n)$-competitive for every choice of base (Remark 8 of [Baligacs2026Sublogarithmic], Theorem 10 of [Klimm2026Sublogarithmic]), and so is Blocking for every parameter [Baligacs2026Exploration].",
+        "Does randomization lower the competitive ratio on general graphs? It does on cycles [Baligacs2026Randomization]. On general graphs the random shift of [Klimm2026Sublogarithmic] improves only the leading constant when $n$ is unknown, from 4 to 2.",
+        "Can the $O(\\sigma/\\log\\sigma)$ bound for weights in $[1, 2^{\\sigma}]$ be obtained without knowing $\\sigma$ [Klimm2026Sublogarithmic]?"
       ],
-      "notes": "The restrictions of [Baligacs2026Lower] (Proposition 2) also say what a sensible algorithm may not need: the identifiers of unvisited neighbours, knowledge of $n$, degrees above 3 and weights that violate the triangle inequality do not change the ratio; they are lost when proving bounds that grow with $n$. Theorem 3 of [Baligacs2026Exploration] rules out Blocking with any parameter as a constant-competitive algorithm. Bounds checked against the full texts (arXiv versions).",
+      "notes": "The restrictions of [Baligacs2026Lower] (Proposition 2) also say what a sensible algorithm may not need: the identifiers of unvisited neighbours, knowledge of $n$, degrees above 3 and weights that violate the triangle inequality do not change the ratio; they are lost when proving bounds that grow with $n$. Theorem 3 of [Baligacs2026Exploration] rules out Blocking with any parameter as a constant-competitive algorithm. Whether some algorithm is $o(\\log n)$-competitive was open until 2026: the rounded hierarchical depth-first search of Megow, Mehlhorn and Schweitzer (2012) is $\\Theta(\\log n)$-competitive (as reported by [Baligacs2026Sublogarithmic]), and Blocking with parameter $\\chi$ (their $\\delta$) is $\\Omega(\\log n)$-competitive for $\\chi = o(\\log n/\\log\\log n)$ and for $\\chi = \\Omega(\\log n)$, and $\\Omega(\\log n/\\log\\log n)$-competitive for every $\\chi$ [Baligacs2026Exploration]. Baligács [Baligacs2026Sublogarithmic] and Klimm [Klimm2026Sublogarithmic] answered it independently, both with $O(\\log n/\\log\\log n)$; both are preprints. Both are listed as current best: they were posted on the same day, neither cites the other, and their ratios agree asymptotically; Klimm states the constant ($2+o(1)$ for known $n$), and Baligács allows edges of weight zero. Bounds checked against the full texts (arXiv versions).",
       "status": "verified"
     },
     {

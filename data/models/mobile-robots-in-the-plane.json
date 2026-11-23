@@ -23,7 +23,7 @@
     },
     {
       "heading": "Where the standard setting sits",
-      "body": "The usual setting is weak on the axes that concern computability (anonymous, oblivious, disoriented, deterministic, SSYNC or ASYNC, often non-rigid) and idealised on the geometric ones: point robots, transparent, with unlimited visibility and exact sensing [Flocchini2023Asynchrony] [Bandettini2011Survey]. The idealisations were kept because they make the questions about synchrony, memory and agreement clean, and they were later relaxed one at a time: limited visibility [Ando1999Convergence] [Flocchini2005Limited], fat bodies [Czyzowicz2009Fat] [Agathangelou2013Fat], opacity [DiLuna2014Robots], faults [Agmon2006Fault]. In the catalogue every axis starts at its most hostile value, so that the root of each tree is the setting in which nothing is assumed; the standard variant of a problem is then a point well above the root on the geometric axes and close to it on the others."
+      "body": "The usual setting is weak on the axes that concern computability (anonymous, oblivious, disoriented, deterministic, SSYNC or ASYNC, often non-rigid) and idealised on the geometric ones: point robots, transparent, with unlimited visibility and exact sensing [Flocchini2023Asynchrony] [Bandettini2011Survey]. The idealisations were kept because they make the questions about synchrony, memory and agreement clean, and they were later relaxed one at a time: limited visibility [Ando1999Convergence] [Flocchini2005Limited], fat bodies [Czyzowicz2009Fat] [Agathangelou2013Fat], opacity [DiLuna2014Robots], faults [Agmon2006Fault]. Exact sensing was relaxed as well: with a defected view a robot sees only some of the others, chosen by an adversary or as its nearest [Kim2023Gathering]. In the catalogue every axis starts at its most hostile value, so that the root of each tree is the setting in which nothing is assumed; the standard variant of a problem is then a point well above the root on the geometric axes and close to it on the others."
     }
   ],
   "axes": [
@@ -74,7 +74,7 @@
           "label": "sequential: exactly one robot is activated per round",
           "short": "sequential",
           "description": "Stronger than SSYNC and incomparable with FSYNC [Flocchini2026Universal].",
-          "definition": "**Sequential**: an SSYNC scheduler that activates exactly one robot per round (fairly). Also called a *centralized* scheduler [Terai2023Gathering]; a *round-robin* scheduler is a fair special case."
+          "definition": "**Sequential**: an SSYNC scheduler that activates exactly one robot per round (fairly). Also called a *centralized* scheduler [Terai2023Gathering]; a *round-robin* scheduler (value `round-robin`) is a fair special case."
         },
         {
           "id": "fsync",
@@ -82,9 +82,20 @@
           "label": "fully synchronous (FSYNC)",
           "short": "FSYNC",
           "definition": "**FSYNC**: every robot executes one atomic cycle in every round."
+        },
+        {
+          "id": "round-robin",
+          "level": 3,
+          "refines": [
+            "sequential"
+          ],
+          "label": "round-robin: one robot per round, in a fixed cyclic order",
+          "short": "round-robin",
+          "description": "A special case of the sequential scheduler; incomparable with FSYNC as far as is known.",
+          "definition": "**Round-robin**: a sequential scheduler whose order is fixed: with the robots numbered $r_0, \\dots, r_{n-1}$ in an order chosen by the adversary, at time $t = 0, 1, 2, \\dots$ only robot $r_{t \\bmod n}$ executes one atomic Look–Compute–Move cycle, and its move ends before the next robot looks [Frei2026Byzantine]. Every robot is activated exactly once in every $n$ consecutive rounds, Byzantine robots included. It is not RSYNC of the landscape below: RSYNC activates any non-empty set of robots in a round, only requiring the sets of two consecutive rounds to be disjoint, and includes round-robin as a particular case [Buchin2022Energy] [Flocchini2023Asynchrony]."
         }
       ],
-      "origin": "Suzuki and Yamashita [Suzuki1999Formation] introduced the semi-synchronous model: robots act \"at infinitely many unpredictable time instants\", and in each round of a discrete time an arbitrary non-empty set of robots observes and moves instantaneously, every robot being active infinitely often; Prencipe calls it *Atom* [Prencipe2007Impossibility] and FSYNC, where every robot acts in every round, is its special case [Das2016Lights]. The asynchronous model (later named CORDA) is due to Flocchini, Prencipe, Santoro and Widmayer [Flocchini1999Hard], as [Flocchini2023Asynchrony] and [Prencipe2007Impossibility] also state: they assume \"asynchronicity within one step\", so that \"the actual move of a robot may be based on a situation that lies arbitrarily far in the past\", and a robot \"may be seen an arbitrary number of times by other robots\" while moving; they call this \"the most radical deviation\" from Suzuki and Yamashita's atomic steps [Flocchini1999Hard]. In Prencipe's words, \"computations can be made based on obsolete observations\" [Prencipe2007Impossibility]. Prencipe motivates delays inside a cycle as a way \"to model also different motorial speeds of the robots\" [Prencipe2007Impossibility]. The schedulers are interesting because they form a hierarchy: rendezvous of two oblivious robots is solvable in FSYNC and not in SSYNC [Suzuki1999Formation] (Theorem 3.1 and footnote 5), while a problem separating SSYNC from ASYNC for oblivious robots was sought \"for more than two decades\" and is known only under limited visibility [Flocchini2023Asynchrony] [Kirkpatrick2024Separating]. Intermediate schedulers (RSYNC, LC-, CM- and Move-atomic ASYNC) were introduced to locate exactly where the power is lost [Flocchini2023Asynchrony] [Buchin2022Energy]. Sequential schedulers, which activate one robot per round, break symmetry by themselves; Flocchini, Navarra, Pattanayak, Piselli and Santoro note that their relationship with FSYNC \"has so far been ignored\" and show that the two are orthogonal [Flocchini2026Universal]."
+      "origin": "Suzuki and Yamashita [Suzuki1999Formation] introduced the semi-synchronous model: robots act \"at infinitely many unpredictable time instants\", and in each round of a discrete time an arbitrary non-empty set of robots observes and moves instantaneously, every robot being active infinitely often; Prencipe calls it *Atom* [Prencipe2007Impossibility] and FSYNC, where every robot acts in every round, is its special case [Das2016Lights]. The asynchronous model (later named CORDA) is due to Flocchini, Prencipe, Santoro and Widmayer [Flocchini1999Hard], as [Flocchini2023Asynchrony] and [Prencipe2007Impossibility] also state: they assume \"asynchronicity within one step\", so that \"the actual move of a robot may be based on a situation that lies arbitrarily far in the past\", and a robot \"may be seen an arbitrary number of times by other robots\" while moving; they call this \"the most radical deviation\" from Suzuki and Yamashita's atomic steps [Flocchini1999Hard]. In Prencipe's words, \"computations can be made based on obsolete observations\" [Prencipe2007Impossibility]. Prencipe motivates delays inside a cycle as a way \"to model also different motorial speeds of the robots\" [Prencipe2007Impossibility]. The schedulers are interesting because they form a hierarchy: rendezvous of two oblivious robots is solvable in FSYNC and not in SSYNC [Suzuki1999Formation] (Theorem 3.1 and footnote 5), while a problem separating SSYNC from ASYNC for oblivious robots was sought \"for more than two decades\" and is known only under limited visibility [Flocchini2023Asynchrony] [Kirkpatrick2024Separating]. Intermediate schedulers (RSYNC, LC-, CM- and Move-atomic ASYNC) were introduced to locate exactly where the power is lost [Flocchini2023Asynchrony] [Buchin2022Energy]. Sequential schedulers, which activate one robot per round, break symmetry by themselves; Flocchini, Navarra, Pattanayak, Piselli and Santoro note that their relationship with FSYNC \"has so far been ignored\" and show that the two are orthogonal [Flocchini2026Universal]. The round-robin scheduler fixes the cyclic order as well; Frei, Sudo and Wada report that it is, to their knowledge, the only scheduler besides FSYNC under which deterministic gathering tolerates a number of Byzantine robots growing with $n$, while general fair sequential schedulers defeat a single Byzantine robot for even $n$ [Frei2026Byzantine] [Defago2006Fault]."
     },
     {
       "id": "memory",
@@ -252,6 +263,41 @@
       "origin": "In Suzuki and Yamashita's model and in CORDA robots are transparent: \"three or more collinear agents are assumed to be mutually visible\" [DiLuna2014Robots]. Di Luna, Flocchini, Gan Chaudhuri, Santoro and Viglietta [DiLuna2014Robots] [DiLuna2017Mutual] started \"the study of computing when visibility is obstructable\" for point robots, since \"given three collinear agents, the one in the middle blocks the visibility between the other two\". Before them obstruction had been studied for fat robots [Czyzowicz2009Fat] [Agathangelou2013Fat] and for robots on a line, according to [DiLuna2014Robots]. The basic problem they posed, Complete (Mutual) Visibility, asks the robots to reach a configuration in which all see each other; they solved it in ASYNC without collisions with a constant number of colours [DiLuna2014Robots]. Opaque robots with lights then became a line of work on time and colours [Vaidyanathan2015Log] [Sharma2021Constant] and on pattern formation [Bose2021Opaque], and Feletti, Mambretti, Mereghetti and Palano compare the computational power of transparent and opaque robots directly [Feletti2025Transparency]."
     },
     {
+      "id": "view",
+      "name": "View",
+      "values": [
+        {
+          "id": "adversarial-defected",
+          "level": 0,
+          "label": "adversarial defected view: an adversary picks the $K$ robots seen",
+          "short": "adversarial defected view",
+          "definition": "Defected view [Kim2023Gathering]: in each Look a robot $r$ sees the points of only $K$ robots, $1 \\le K \\le n-2$, chosen by the adversary among the robots that are not on $r$'s own point; if at most $K$ robots are off $r$'s point, $r$ sees all of them. Robots on $r$'s point are never counted among the $K$. The choice may differ between robots on the same point and between Looks. Multiplicity detection applies to the robots seen: with weak detection, $r$ tells a point at which it sees one robot from a point at which it sees two or more, and tells whether it is alone on its own point. A variant in which the adversary chooses points is the value *defected view over points*."
+        },
+        {
+          "id": "distance-defected",
+          "level": 1,
+          "label": "distance-based defected view: each robot sees its $K$ nearest robots",
+          "short": "distance-based defected view",
+          "definition": "Distance-based defected view [Kim2023Gathering]: as in the adversarial defected view, but $r$ sees the $K$ robots nearest to it among those not on its own point; the adversary only breaks ties between robots at equal distance. Every such view is one that the adversary of the adversarial defected view may choose, so an algorithm for that view works here [Kim2023Gathering] (Section 2.3)."
+        },
+        {
+          "id": "points-defected",
+          "level": 1,
+          "label": "defected view over points: an adversary picks the occupied points seen",
+          "short": "defected view over points",
+          "definition": "Defected view over points [Shukla2026Gathering]: robots have no multiplicity detection, and in each Look the adversary chooses which points occupied by other robots a robot $r$ sees, at most $K$ of them; at a point occupied by several robots, $r$ senses one of them and never two. The choice may change at every Look. Every such view shows one robot at each of at most $K$ points, so it is a view that the adversary of the adversarial defected view may choose; the converse fails, because that adversary may show two robots on one point and hide a third point. It is incomparable with the distance-based defected view."
+        },
+        {
+          "id": "full",
+          "level": 2,
+          "label": "full view: each robot sees every robot",
+          "short": "full view",
+          "definition": "A robot sees every robot, subject only to the visibility radius and to opacity; this is the defected view with $K = n-1$ [Kim2023Gathering]."
+        }
+      ],
+      "origin": "Kim, Shibata, Sudo, Nakamura, Katayama and Masuzawa [Kim2023Gathering] introduced the *defected view*, in which a robot sees only $K$ of the other robots \"regardless of distances to them\", and asked \"what occurs if a robot cannot observe some of the other robots?\". They motivate it by robots whose working memory cannot hold a whole snapshot, by memory failures and by sensing failures, and they set it apart from limited visibility: \"But visibility is limited by distance in the limited visibility model and thus all robots can be observed when they gather closely enough.\" They defined two versions, one in which the adversary chooses the robots seen and one in which each robot sees its $K$ nearest, and noted that an algorithm for the first works in the second (Section 2.3). Robots on the observer's own point are never among the $K$, because a robot would sense them in another way (\"by, for example, a contact sensor\"); without this rule no algorithm gathers when $K = n-2$ [Kim2023Gathering] (Theorem 19). Kim et al. call the defected view \"a new type of fault in autonomous mobile robot systems\". Their algorithms are for FSYNC; Aliberti, Kim and Katayama [Aliberti2025Defected] showed that four robots that each see two cannot gather under SSYNC, and Shukla, Peddinti and Bhagat [Shukla2026Gathering] let the adversary choose occupied points rather than robots, at every activation, and gathered asynchronous robots that agree on one axis. The catalogue puts the adversarial choice of robots at level 0, the nearest robots and the adversarial choice of points at level 1 (neither implies the other) and the full view at level 2; the number $K$ is a parameter of each result, not an axis value."
+    },
+    {
       "id": "faults",
       "name": "Faults",
       "values": [
@@ -270,6 +316,13 @@
           "definition": "Up to $f$ robots stop forever at adversarial times and remain visible at their last position."
         },
         {
+          "id": "mobility",
+          "level": 1,
+          "label": "up to $f$ robots may lose mobility",
+          "short": "mobility faults",
+          "definition": "Up to $f$ robots may, at adversarial times, lose the ability to move: a faulty robot never moves again (a move in progress ends where the robot is), but it keeps performing Look and Compute and setting its light as the algorithm prescribes, and it is not told that it is faulty. It remains visible at its position. For oblivious robots this is the same as a crash. With lights, neither value implies the other, so both are on level 1: a mobility-fault-tolerant algorithm may rely on the lights of faulty robots, which a crashed robot does not keep updating, and a crash-tolerant algorithm may be misled by the light of a robot that changes colour as if it moved. Both are special cases of Byzantine faults."
+        },
+        {
           "id": "none",
           "level": 2,
           "label": "no faults",
@@ -277,7 +330,7 @@
           "definition": "All robots follow the algorithm forever."
         }
       ],
-      "origin": "Agmon and Peleg [Agmon2006Fault] (SODA 2004) brought crash and Byzantine robots into the Look–Compute–Move model, requiring the algorithm \"to successfully gather the nonfaulty robots, independently of the behavior of the faulty ones\". They observed that most existing algorithms fail with a single crash, gathered $n \\ge 3$ robots with one crash in SSYNC (Theorem 3.8), proved that three robots cannot gather, or even converge, in SSYNC if one may be Byzantine (Theorem 4.4; hence also in ASYNC, which their abstract states), and gathered $n \\ge 3f+1$ robots with $f$ Byzantine faults in FSYNC (Theorem 5.10) [Agmon2006Fault]. Their robots share handedness, see multiplicities (a Look returns a multiset) and make non-rigid moves of at least a fixed distance [Agmon2006Fault]. The motivation is deployment in adverse environments, where a swarm must \"ensure coordination in spite of faulty robots\" [Clement2010Cost], and oblivious algorithms are already self-stabilizing, so transient faults come for free and permanent ones are the question [Defago2006Fault]. Défago et al. [Defago2006Fault] extended the feasibility study to bounded schedulers and to probabilistic gathering under crash and Byzantine faults. A crashed robot \"simply stops moving\" and, since correct robots may also stay still, cannot be identified [Efrima2009Partition]; crash-tolerant gathering of many faults was obtained with strong multiplicity detection [Bouzid2013Crash] and with weak multiplicity detection [Pattanayak2019Crash]."
+      "origin": "Agmon and Peleg [Agmon2006Fault] (SODA 2004) brought crash and Byzantine robots into the Look–Compute–Move model, requiring the algorithm \"to successfully gather the nonfaulty robots, independently of the behavior of the faulty ones\". They observed that most existing algorithms fail with a single crash, gathered $n \\ge 3$ robots with one crash in SSYNC (Theorem 3.8), proved that three robots cannot gather, or even converge, in SSYNC if one may be Byzantine (Theorem 4.4; hence also in ASYNC, which their abstract states), and gathered $n \\ge 3f+1$ robots with $f$ Byzantine faults in FSYNC (Theorem 5.10) [Agmon2006Fault]. Their robots share handedness, see multiplicities (a Look returns a multiset) and make non-rigid moves of at least a fixed distance [Agmon2006Fault]. The motivation is deployment in adverse environments, where a swarm must \"ensure coordination in spite of faulty robots\" [Clement2010Cost], and oblivious algorithms are already self-stabilizing, so transient faults come for free and permanent ones are the question [Defago2006Fault]. Défago et al. [Defago2006Fault] extended the feasibility study to bounded schedulers and to probabilistic gathering under crash and Byzantine faults. A crashed robot \"simply stops moving\" and, since correct robots may also stay still, cannot be identified [Efrima2009Partition]; crash-tolerant gathering of many faults was obtained with strong multiplicity detection [Bouzid2013Crash] and with weak multiplicity detection [Pattanayak2019Crash]. With lights, a fault may stop only movement: an early use is the fault-tolerant mutual visibility of Poudel, Aljohani and Sharma, whose crashed robots must keep changing their lights [Poudel2021FaultTolerant]; Pramanick, Jana, Mandal and Sharma call this a *mobility fault*, note that for oblivious robots it is a crash, and study gathering at the position of a faulty robot under it [Pramanick2025Mobility]."
     },
     {
       "id": "algorithm",

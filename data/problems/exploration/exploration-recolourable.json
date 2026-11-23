@@ -2537,6 +2537,10 @@
     {
       "ref": "Chalopin2015Limit",
       "note": "Parallel rotor walks need not settle into a period of length at most $2m$, as Yanovski et al. observed experimentally: the period can be superpolynomial; the limit behaviour is characterised by subcycle decompositions, and the system stabilises within $O(m^4D^2 + mD\\log k)$ and $O(m^5k^2)$ steps. Read (HAL version)."
+    },
+    {
+      "ref": "Kim2026Field",
+      "note": "Oblivious Look-Compute-Move robot on a torus or bounded grid, agreeing on the four directions, visibility range 1, FSYNC, that cannot write: the floor is a cellular automaton whose cell advances its pointer in every round in which a robot stands on it, so the floor runs the rotor-router. Four pointer states explore every torus (cover time $wh + h - 1$) and every bounded grid ($O(wh(w+h))$ cover time); two states suffice on a torus and one state is impossible (Theorems 5, 6, Proposition 1(iii)). Exploring the infinite grid with a finite-state floor is open. Read; the floor, not the agent, changes the colour, so it is not placed in a setting. A preprint."
     }
   ]
 }

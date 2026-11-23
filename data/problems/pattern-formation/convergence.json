@@ -147,7 +147,9 @@
       "description": "colours of the light per robot (0 for oblivious robots)"
     }
   ],
-  "ignore_axes": [],
+  "ignore_axes": [
+    "view"
+  ],
   "axis_order": [
     "body",
     "visibility",

@@ -668,7 +668,8 @@
           "ref": "DiLuna2025DynamicBHS",
           "bottleneck": "adversarial edge changes",
           "preconditions": [
-            "co-located agents, whiteboards"
+            "co-located agents, whiteboards",
+            "three agents"
           ]
         }
       ],

@@ -112,7 +112,11 @@ Model  ──►  Problem family  ──►  Problem  ──►  assumption tree
    the axis allows: a temporal graph, asynchronous or silent agents, strong
    Byzantine faults); each higher level is a stronger assumption, so the problem
    gets easier. Values on the same level are alternatives that do not imply each
-   other (ring, tree, grid). Every axis has exactly one level-0 value. The order of
+   other (ring, tree, grid). Every axis has exactly one level-0 value. A value that is a
+   special case of some values only (a path is a tree, not a grid; round-robin is a sequential
+   scheduler, not FSYNC) lists them in `refines: [value ids]`; it is then above those values and
+   what lies below them, and above nothing else. Its `level` must exceed theirs and is used for
+   display only. The validator checks the ids and the levels. The order of
    the `axes` array is the order in which the tree adds assumptions.
 2. **Problem family.** Registered in `data/index.json` under `families`
    (`{id, name, summary, problems[]}`): problems that share a core task, e.g.

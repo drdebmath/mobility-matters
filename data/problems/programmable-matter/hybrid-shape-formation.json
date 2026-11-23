@@ -2580,10 +2580,6 @@
   },
   "further": [
     {
-      "ref": "Nokhanji2023Dynamic",
-      "note": "Several agents (finite automata) keep a line of tiles while tiles fail at any time and must be removed and replaced, under a semi-synchronous scheduler. No deterministic algorithm works for every number of agents and every placement, even fully synchronously with one failure (Theorem 1); algorithms for one agent, for one agent per tile, and for any number of agents placed at one end of the line (Theorems 3, 6 and 7). Read (journal version)."
-    },
-    {
       "ref": "Gmyr2018Shape",
       "note": "A finite-automaton robot decides whether hexagonal tiles form a parallelogram with sides $h$ and $f(h)$: possible for $f$ linear without pebbles, impossible for superlinear $f$; with one pebble, any polynomial of constant degree. Abstract read."
     },

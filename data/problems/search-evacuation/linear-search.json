@@ -8,7 +8,7 @@
     "note": "Bellman posed the problem in 1963 and Beck analysed it in 1964; computer scientists rediscovered it in the late 1980s as the cow-path problem [Kupavskii2018Lower]."
   },
   "summary": "A robot on a line (or on $m$ rays from a point) must find a target at unknown distance; how small can the competitive ratio be?",
-  "statement": "One or more unit-speed robots start at the origin of a line (or of $m$ rays sharing an endpoint). A target lies at an unknown point at distance $d \\ge 1$. **Time** is the competitive ratio: the worst case, over target positions, of the time until the target is found (in **search**: by the first robot; in **evacuation**: by all robots) divided by $d$.",
+  "statement": "One or more unit-speed robots start at the origin of a line (or of $m$ rays sharing an endpoint). A target lies at an unknown point at distance $d \\ge 1$. **Time** is the competitive ratio: the worst case, over target positions, of the time until the target is found (in **search**: by the first robot; in **evacuation**: by all robots) divided by $d$. In some settings the target emerges at an unknown time $\\tau$ and can be found only from then on; the time is then divided by $\\max\\{d, \\tau\\}$.",
   "primer": {
     "intro": "A cow stands at a gate on an endless straight fence and knows that a hole is somewhere along the fence, but not on which side or how far. She walks at unit speed and sees the hole only when she reaches it. In linear search the cow is a **robot**, a point that moves at unit speed and sees the target only when it reaches it; the gate is the **origin**, the point $0$ of an infinite line where the robot starts; and the hole is the **target**, at an unknown distance $d \\ge 1$ on an unknown side. We measure the **competitive ratio**: the worst case, over all target positions, of (time to find the target) divided by $d$. A competitive ratio of 9 means the robot never walks more than about nine times the distance it would walk if it knew where the target was.",
     "ideas": [
@@ -107,7 +107,7 @@
       "avoid": []
     }
   ],
-  "history": "The first question was the **optimal search plan** for one searcher on a line [Beck1964Linear], posed by Bellman. Computer scientists recast it as competitive analysis and found that doubling is optimal with ratio 9, and the exact ratio for $m$ rays, where the turning distances grow by the factor $m/(m-1)$ [BaezaYates1993Searching]; randomization lowers the ratio on the line to about 4.5911 [Kao1996Randomized]. Recent work asks for **group search with faulty robots** [Czyzowicz2019FaultyLine] [Kupavskii2018Lower] [Czyzowicz2021Byzantine] and robots of different speeds [Bampas2019Speeds].",
+  "history": "The first question was the **optimal search plan** for one searcher on a line [Beck1964Linear], posed by Bellman. Computer scientists recast it as competitive analysis and found that doubling is optimal with ratio 9, and the exact ratio for $m$ rays, where the turning distances grow by the factor $m/(m-1)$ [BaezaYates1993Searching]; randomization lowers the ratio on the line to about 4.5911 [Kao1996Randomized]. Recent work asks for **group search with faulty robots** [Czyzowicz2019FaultyLine] [Kupavskii2018Lower] [Czyzowicz2021Byzantine] and robots of different speeds [Bampas2019Speeds]. Georgiou, Jones and Krupsky let the target emerge at an unknown time, so that searched points must be visited again; one robot keeps ratio 9, while two wireless robots do worse than with the target present [Georgiou2026Emerging].",
   "measures": [
     {
       "id": "time",
@@ -161,6 +161,13 @@
           "label": "two robots",
           "short": "two robots",
           "definition": "Two robots."
+        },
+        {
+          "id": "three",
+          "level": 1,
+          "label": "three robots",
+          "short": "three robots",
+          "definition": "Three robots."
         }
       ],
       "origin": "The classical problem has one searcher [Beck1964Linear] [BaezaYates1993Searching]. Chrobak et al. and Czyzowicz et al. proposed parallel versions with $k$ robots on the line, where communication and faults make the team size matter: Chrobak et al. show that robots that communicate only when they meet need time $9d - o(d)$ to evacuate, whatever their number [Chrobak2015GroupSearch], and Czyzowicz et al. let up to $f$ robots fail to detect the target [Czyzowicz2019FaultyLine]. With $k$ fault-free robots, two of them already finish in time equal to the distance by going in opposite directions, so the multi-robot questions are interesting only with faults, with evacuation, or with unequal speeds [Kupavskii2018Lower] [Bampas2019Speeds]. Two robots are the smallest team in which speeds and communication interact, and Bampas et al. solve that case for every speed ratio [Bampas2019Speeds]."
@@ -185,9 +192,31 @@
         }
       ],
       "origin": "In search the time is the first arrival at the target, while in group evacuation it is the arrival of the last robot [Bampas2019Speeds] [Czyzowicz2021GroupEvacuation]. Chrobak et al. showed that evacuating any number of unit-speed robots that communicate only when they meet takes time $9d - o(d)$ on the line, as for one robot in the cow-path problem (Theorem 3, Corollary 1) [Chrobak2015GroupSearch]. Bampas et al. compare search with rendezvous: in both the time is set by the last robot to arrive, but in search the meeting point is chosen by the adversary [Bampas2019Speeds]. With faults the two goals are closely linked: when $k = 2f+1$ all agents may have to reach the target, and crash evacuation is then \"a sub-problem of the more difficult byzantine search problem\" [Czyzowicz2021NearMajority]."
+    },
+    {
+      "id": "emergence",
+      "name": "Emergence of the target",
+      "values": [
+        {
+          "id": "emerges",
+          "level": 0,
+          "label": "the target emerges at an unknown time $\\tau$",
+          "short": "emerging target",
+          "definition": "The target can be detected only from an unknown emergence time $\\tau \\ge 0$ on (Georgiou, Jones and Krupsky write $T$), chosen by the adversary with its position: a robot at the target before time $\\tau$ learns nothing, and $\\tau$ is never revealed. The competitive ratio divides the time by $\\max\\{d, \\tau\\}$, the time of an offline algorithm that knows the position from the start (fully-informed); the emergence-aware ratio divides by $\\tau + d$, the time of one that learns the position at time $\\tau$."
+        },
+        {
+          "id": "present",
+          "level": 1,
+          "label": "the target is present from the start",
+          "short": "target present",
+          "definition": "The target can be detected from time $0$ on (the case $\\tau = 0$); the competitive ratio divides the time by $d$."
+        }
+      ],
+      "origin": "Georgiou, Jones and Krupsky let the target become detectable only at an unknown time, so that a visit rules a point out only up to the time of the visit and searched points may have to be visited again; they write that the problem has, \"to the best of our knowledge\", not been studied before [Georgiou2026Emerging]. They relate it to the eventually-emerging black hole of Bonnet, Bramas and Lamani, where a node visited safely may later become a black hole [Bonnet2026Searching] (see also [Kaur2026Black] for arbitrary graphs), and contrast it with probabilistic detection [Coleman2025Linear]: there any visit may find the target, here every visit before the emergence time fails and every later visit succeeds [Georgiou2026Emerging]. With $\\tau = 0$ the problem is the classical one, so the target present from the start is the stronger assumption; every other setting of this problem assumes it."
     }
   ],
   "axis_order": [
+    "emergence",
     "domain",
     "robots",
     "goal",
@@ -206,7 +235,8 @@
         "speeds": "equal",
         "domain": "line",
         "robots": "one",
-        "goal": "search"
+        "goal": "search",
+        "emergence": "present"
       },
       "summary": "Doubling the turning point each time gives competitive ratio 9, and nothing deterministic does better.",
       "lower_bounds": [
@@ -248,7 +278,8 @@
         "faults": "none",
         "speeds": "equal",
         "robots": "one",
-        "goal": "search"
+        "goal": "search",
+        "emergence": "present"
       },
       "summary": "On $m$ rays the optimal deterministic ratio is $1 + 2m^m/(m-1)^{m-1}$.",
       "lower_bounds": [
@@ -293,7 +324,8 @@
         "domain": "line",
         "robots": "one",
         "goal": "search",
-        "algorithm": "randomized"
+        "algorithm": "randomized",
+        "emergence": "present"
       },
       "summary": "Randomization lowers the optimal expected ratio on the line to about 4.5911.",
       "lower_bounds": [
@@ -337,7 +369,8 @@
         "speeds": "equal",
         "robots": "one",
         "goal": "search",
-        "algorithm": "randomized"
+        "algorithm": "randomized",
+        "emergence": "present"
       },
       "summary": "A randomized robot that visits the $m$ rays in a random cyclic order, with turning points growing by a fixed factor from a random start, has the optimal expected ratio, about $3.088\\,m$ for large $m$.",
       "lower_bounds": [
@@ -381,7 +414,8 @@
         "speeds": "equal",
         "domain": "line",
         "goal": "search",
-        "communication": "wireless"
+        "communication": "wireless",
+        "emergence": "present"
       },
       "summary": "With $k$ wireless robots of which $f$ may fail to report the target, the optimal ratio is known exactly.",
       "lower_bounds": [
@@ -421,7 +455,8 @@
         "speeds": "equal",
         "domain": "line",
         "goal": "search",
-        "communication": "wireless"
+        "communication": "wireless",
+        "emergence": "present"
       },
       "summary": "Byzantine robots may lie about the target; the optimal ratio is known only for some densities $f/k$.",
       "lower_bounds": [
@@ -462,7 +497,8 @@
       "assumptions": {
         "faults": "none",
         "domain": "line",
-        "robots": "two"
+        "robots": "two",
+        "emergence": "present"
       },
       "summary": "For two robots with different maximum speeds that must both reach the target, the optimal strategy is known for every speed ratio when they communicate by meeting.",
       "lower_bounds": [
@@ -499,6 +535,149 @@
       },
       "open": [],
       "notes": "Introduced by Chrobak, Gąsieniec, Gorry and Martin, who also show that two unit-speed robots and further robots of speed at least $1/5$ still finish in time $9d$ (Section 3.2) [Chrobak2015GroupSearch]. Checked against the full texts of [Chrobak2015GroupSearch] and [Bampas2019Speeds].",
+      "status": "verified"
+    },
+    {
+      "id": "line-emerging",
+      "title": "One robot on a line, target emerging at an unknown time",
+      "assumptions": {
+        "emergence": "emerges",
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "one",
+        "goal": "search"
+      },
+      "summary": "When the target emerges at an unknown time, one robot still has optimal competitive ratio 9 under both ratios: the doubling strategy keeps it (a preprint).",
+      "statement": "The target at $x$, $|x| \\ge 1$ (so $d = |x|$), can be detected only from an unknown emergence time $\\tau \\ge 0$ on: a robot at $x$ before time $\\tau$ learns nothing, and $\\tau$ is never revealed; the adversary chooses $x$ and $\\tau$. One robot of unit speed starts at the origin; the task ends when it is at $x$ at a time $t \\ge \\tau$. The time is divided by $\\max\\{d, \\tau\\}$ (the fully-informed ratio, the measure shown here); the emergence-aware ratio divides it by $\\tau + d$ instead and is never larger.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "9",
+          "ref": "Georgiou2026Emerging",
+          "bottleneck": "unknown distance",
+          "preconditions": [
+            "Theorem 1",
+            "the adversary takes $\\tau = 0$: the bound of the setting with the target present [BaezaYates1993Searching]",
+            "holds for both ratios"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2026Emerging",
+          "role": "best",
+          "time": "9",
+          "note": "Introductory and current best (Theorem 1, Lemma 3 with $b = 2$): the robot turns at $(-1)^i b^i$, $i \\in \\mathbb{Z}$; fully-informed ratio at most $1 + 2b^2/(b-1)$, which is 9 at $b = 2$; the emergence-aware ratio is never larger. The robot need not revisit points on purpose: its zig-zag passes every point again on later trips."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "Exactly 9 under both ratios, as when the target is present."
+        }
+      },
+      "open": [],
+      "notes": "From the preprint [Georgiou2026Emerging], read in full (arXiv v1, the full version of a paper accepted to WALCOM 2027). The emergence time does not change the one-robot optimum.",
+      "status": "verified"
+    },
+    {
+      "id": "line-two-emerging",
+      "title": "Two wireless robots on a line, target emerging at an unknown time",
+      "assumptions": {
+        "emergence": "emerges",
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "two",
+        "goal": "evacuation",
+        "communication": "wireless"
+      },
+      "summary": "Two wireless robots that must both reach a target emerging at an unknown time need competitive ratio between $4.38$ and $3+\\sqrt6 \\approx 5.449$, more than the 3 of line evacuation (a preprint).",
+      "statement": "The target at $x$, $|x| \\ge 1$ (so $d = |x|$), can be detected only from an unknown emergence time $\\tau \\ge 0$ on: a robot at $x$ before time $\\tau$ learns nothing, and $\\tau$ is never revealed; the adversary chooses $x$ and $\\tau$. Two robots of unit speed start at the origin and communicate wirelessly: the first robot at $x$ at a time $t \\ge \\tau$ finds the target, both learn $x$ at once, and the task ends when both robots are at $x$. The time is divided by $\\max\\{d, \\tau\\}$ (the fully-informed ratio, the measure shown here); the emergence-aware ratio divides it by $\\tau + d$ instead and is never larger.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "219/50 = 4.38",
+          "ref": "Georgiou2026Emerging",
+          "bottleneck": "unknown emergence time",
+          "preconditions": [
+            "Theorem 5",
+            "any deterministic algorithm",
+            "computer-assisted: finitely many target positions, linear constraints for every order in which they are visited, infeasibility certified by exact rational Farkas certificates checked by an independent verifier",
+            "fully-informed ratio; $87/20 = 4.35$ for the emergence-aware ratio"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2026Emerging",
+          "role": "best",
+          "time": "3+\\sqrt6 \\approx 5.449",
+          "note": "Introductory and current best (Theorem 3, Lemma 4 with $b = 3+\\sqrt6$): each robot keeps to its own half-line and makes trips from the origin to distance $b^i$ and back, $i \\in \\mathbb{Z}$, both robots in step; fully-informed ratio at most $\\max\\{3 + 2b/(b-1), b\\}$, so $3+\\sqrt6$ under both ratios. Theorem 4: every origin-separated algorithm (each robot on its own half-line, returning to the origin after every trip, with strictly growing trips) has both ratios at least $3+\\sqrt6$; this bound holds only for that class."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap: $3+\\sqrt6 \\approx 5.449$ against $4.38$ (fully-informed) and $4.35$ (emergence-aware); $3+\\sqrt6$ is optimal among origin-separated algorithms."
+        }
+      },
+      "open": [
+        "Is $3+\\sqrt6$ optimal for two robots among all algorithms, under either ratio? Georgiou, Jones and Krupsky conjecture that it is [Georgiou2026Emerging].",
+        "Are the optimal fully-informed and emergence-aware ratios ever different, for any number of robots [Georgiou2026Emerging]?",
+        "How does the emergence time change the ratio 9 of robots that communicate only when they meet (face-to-face) [Georgiou2026Emerging]?"
+      ],
+      "notes": "From the preprint [Georgiou2026Emerging], read in full (arXiv v1); the linear programs and the Farkas certificates of Theorem 5 were not checked. Since $4.38 > 3$, the emergence time makes two wireless robots strictly worse off than in line evacuation with the target present, whose ratio is 3; with one robot it changes nothing.",
+      "status": "verified"
+    },
+    {
+      "id": "line-three-emerging",
+      "title": "Three wireless robots on a line, target emerging at an unknown time",
+      "assumptions": {
+        "emergence": "emerges",
+        "faults": "none",
+        "speeds": "equal",
+        "domain": "line",
+        "robots": "three",
+        "goal": "evacuation",
+        "communication": "wireless"
+      },
+      "summary": "Three wireless robots do strictly better than two against a target emerging at an unknown time: competitive ratio between $\\approx 3.2823$ and $\\approx 4.3404$ (a preprint).",
+      "statement": "The target at $x$, $|x| \\ge 1$ (so $d = |x|$), can be detected only from an unknown emergence time $\\tau \\ge 0$ on: a robot at $x$ before time $\\tau$ learns nothing, and $\\tau$ is never revealed; the adversary chooses $x$ and $\\tau$. Three robots of unit speed start at the origin and communicate wirelessly: the first robot at $x$ at a time $t \\ge \\tau$ finds the target, all learn $x$ at once, and the task ends when all three robots are at $x$. The time is divided by $\\max\\{d, \\tau\\}$ (the fully-informed ratio, the measure shown here); the emergence-aware ratio divides it by $\\tau + d$ instead and is never larger.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\approx 3.2823",
+          "ref": "Georgiou2026Emerging",
+          "bottleneck": "unknown emergence time",
+          "preconditions": [
+            "Theorem 10",
+            "any deterministic algorithm",
+            "the root in $(3,4)$ of $\\alpha^3-\\alpha^2+5\\alpha-41=0$, proved without computer: targets emerging at time $0$ force two robots far out on opposite sides, and two targets with the same late emergence time cannot both be visited in time by the third robot",
+            "fully-informed ratio; $\\approx 3.1014$, the root in $(3, 7/2)$ of $\\alpha^3-2\\alpha^2+4\\alpha-23=0$, for the emergence-aware ratio"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Georgiou2026Emerging",
+          "role": "best",
+          "time": "868089/200000 = 4.340445",
+          "note": "Introductory and current best (Theorems 7 and 9): one robot follows the zig-zag of the one-robot setting; each of the other two keeps to one half-line and, between consecutive distances $b^{2i}$ and $b^{2i+2}$, turns at three outer and two inner points (three peaks). Other parameters give emergence-aware ratio $4010599/1000000 = 4.010599$; the two bounds come from different choices. With one outer point per trip (Theorem 8) the ratios are only $\\approx 4.770597$ and $\\approx 4.475300$, above the two-robot lower bounds."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Constant gap: $4.340445$ against $\\approx 3.2823$ (fully-informed) and $4.010599$ against $\\approx 3.1014$ (emergence-aware)."
+        }
+      },
+      "open": [
+        "Close the gap between $\\approx 3.2823$ and $4.340445$ (fully-informed) and between $\\approx 3.1014$ and $4.010599$ (emergence-aware) [Georgiou2026Emerging].",
+        "Does every further robot lower the optimal ratio, for every $k \\ge 3$, and how does the ratio behave as $k$ grows? Georgiou, Jones and Krupsky conjecture a strict decrease [Georgiou2026Emerging]."
+      ],
+      "notes": "From the preprint [Georgiou2026Emerging], read in full (arXiv v1); the computations behind Theorem 9 were not checked. The upper bounds lie below the two-robot lower bounds ($4.340445 < 4.38$, $4.010599 < 4.35$), so a third robot helps under both ratios; adding a robot never hurts, since it may follow another one.",
       "status": "verified"
     }
   ],
@@ -1869,6 +2048,10 @@
     {
       "ref": "Jawhar2020Bike",
       "note": "A master's thesis on linear search and evacuation by two robots sharing a bike that one robot at a time can ride; the basis of [Jawhar2021Bike]. Abstract read."
+    },
+    {
+      "ref": "Dobrev2026Pebbles",
+      "note": "The cow-path problem for a deterministic finite-state agent with pebbles on the discrete infinite line. Its results are a setting of *Treasure hunt* in the graph model (finite-state agent with pebbles on the infinite path): 2 pebbles are necessary, and $\\Theta(d\\log d)$ steps are necessary and sufficient with $O(\\log\\log d)$ pebbles. Read (publisher version)."
     }
   ]
 }

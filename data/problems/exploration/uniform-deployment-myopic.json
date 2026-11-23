@@ -1,0 +1,403 @@
+{
+  "id": "uniform-deployment-myopic",
+  "model": "mobile-agents-on-graphs",
+  "name": "Uniform deployment of myopic luminous robots",
+  "origin": {
+    "ref": "Shibata2026Myopic",
+    "year": 2026,
+    "note": "Myopic, opaque Look–Compute–Move robots with lights on rings (SIROCCO 2026); by the authors' account the problem for myopic luminous robots on rings had not been considered before. Elor and Bruckstein had studied myopic oblivious robots on rings (TCS 2011), as reported by [Shibata2026Myopic]."
+  },
+  "derived_from": {
+    "problem": "uniform-deployment-graphs",
+    "kind": "variant of",
+    "relation": "The target is the same, consecutive entities $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ edges apart on a ring, but the entities are myopic Look–Compute–Move robots whose only memory is a light of $c$ colours, instead of agents with memory that see only their own node. Results do not transfer directly in either direction: the agents of the parent problem keep $O(k\\log n)$ bits and know $k$ or $n$ [Shibata2022Almost], which a light of constant $c$ cannot hold, while the robots here see the adjacent robots within distance $\\varphi$ and their lights, which the agents cannot [Shibata2026Myopic]."
+  },
+  "summary": "$k$ myopic robots with lights start on distinct nodes of an $n$-node ring and must become evenly spread, every two adjacent robots $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ edges apart, and then stop moving. Without a common sense of direction, with visibility range $\\varphi < \\lfloor n/k\\rfloor$, or with explicit termination this is impossible; otherwise 20 colours suffice under SSYNC.",
+  "statement": "$k$ anonymous **robots** stand on distinct nodes of an anonymous, undirected **ring** of $n$ **nodes** (a cycle in which each node is joined by an **edge** to the next); the robots know neither $k$ nor $n$. Each robot carries a **light** that shows one of $c$ colours. The light is the robot's only memory: it is kept between cycles, and every robot that sees the robot reads it. At the start all lights show the same colour. The robots are **myopic**: each sees only the nodes within distance $\\varphi$, its **visibility range** in hops, which all robots share and know. They are **opaque**: in each direction a robot sees only its **adjacent robot**, the first robot in that direction, with its distance and its colour, and only when that distance is at most $\\varphi$. Each robot repeats **Look–Compute–Move cycles**: Look takes a **snapshot** (the two adjacent robots it sees, their distances and colours, and its own colour); Compute, a deterministic function of the snapshot that is the same for all robots, gives a new colour and a destination, the robot's node or a neighbour; Move goes there. A fair **scheduler** (FSYNC, SSYNC or ASYNC) chooses when robots are activated. A **configuration** is the positions and colours of all robots. The robots must reach a configuration in which they are **evenly spread**: every two adjacent robots are at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$. In **quiescent** uniform deployment no robot moves after that configuration is reached; in **explicit termination** all robots must, in addition, show a colour that declares termination and never move again. Whether the robots share a **common sense of direction** (agree on which way is forward) is fixed by the setting. The algorithm must work from every initial configuration with the robots on distinct nodes. **Measures:** the visibility range $\\varphi$ needed, as a function of $n$ and $k$, and the number of colours $c$.",
+  "history": "Uniform deployment asks entities that start on distinct nodes to end evenly spread. For robots that see a bounded distance on a ring, Elor and Bruckstein showed that myopic oblivious robots cannot reach quiescent uniform deployment, and cannot spread evenly at all without a common sense of direction or with too small a visibility range, as reported by Shibata, Kamei, Ooshita and Kakugawa [Shibata2026Myopic]. Shibata, Kamei, Ooshita and Kakugawa gave the robots a light: the impossibilities without a common sense of direction and with $\\varphi < \\lfloor n/k\\rfloor$ remain, explicit termination is impossible even with unbounded visibility, and with a common sense of direction, $\\varphi \\ge \\lfloor n/k\\rfloor$ and 20 colours the robots reach quiescent uniform deployment under SSYNC [Shibata2026Myopic]. Lights had already been used for uniform deployment on grids and on perfect trees, as listed in [Shibata2026Myopic] [Shibata2022Semiuniform].",
+  "primer": {
+    "intro": "Picture $k$ guards on a circular wall with $n$ towers who must spread out so that the gaps between neighbouring guards are as equal as possible, and then stand still. The wall is a **ring**: $n$ **nodes** (the towers) in a cycle, each joined by an **edge** to the next. The guards are **robots**: identical machines that stand on nodes and repeat a **Look–Compute–Move cycle**: they look around, decide, and either stay or step along one edge. They remember nothing, except that each robot carries a **light** that shows one of $c$ colours; a robot can set its own colour and read the colours of the robots it sees. The robots are **myopic**: each sees only the nodes within distance $\\varphi$, its **visibility range**. They are also **opaque**: a robot sees at most one robot in each direction, its **adjacent robot**, the first robot that way, and only if it is at most $\\varphi$ edges away. What a robot sees in a Look is its **snapshot**. The robots share a **common sense of direction**: they agree on which way is forward. A **scheduler**, an opponent who knows the algorithm, chooses which robots act at each step; in the standard version (SSYNC) it picks any non-empty set of robots at each step, but must pick every robot again and again. The positions and colours of all robots form a **configuration**. The robots start on distinct nodes with equal colours and must become **evenly spread**: every two adjacent robots are $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ edges apart. The task is **quiescent**: once they are evenly spread no robot may move again, but the robots need not know that they are done. We count the colours $c$ and the visibility range $\\varphi$ needed.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Elect bases, widen the gaps, merge the groups",
+        "variant": "ssync-quiescent",
+        "ref": "Shibata2026Myopic",
+        "idea": "The robots need $\\varphi \\ge \\lfloor n/k\\rfloor$; the colours record which step each robot is in.\n1. Every robot compares the distance to its adjacent robot behind with the distance to its adjacent robot in front. Roughly, a robot that is closer to the robot behind than to the robot in front, while the robot behind is not closer to its own robot behind, becomes a **base**; so does a robot that sees a robot behind but none in front. If all gaps are equal from the start, the robots are already evenly spread and never move.\n2. Each base leads a **group**: the robots behind it up to the next base. The robots of a group close up until each is 2 edges behind the next.\n3. The last robot of the group then steps back one edge, and the change passes forward from robot to robot through their colours, until every gap of the group has grown by one. This repeats, so the gaps grow 2, 3, 4, ….\n4. When the last robot of a group comes within sight of the base of the group behind it, the two groups compare their gaps and merge, keeping the smaller gap. A robot that never saw anyone joins the group that reaches it.\n5. When one group is left and its gaps can grow no more, every gap is $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ edges, all lights show the same final colour, and no robot moves again.",
+        "analysis": "Merging keeps the smaller gap because the larger one may already exceed the right gap. Lemmas 1–3 of [Shibata2026Myopic] show that at least one base is elected, that groups keep meeting and merging until one is left, and that it then ends evenly spread. The algorithm uses 20 colours. Without lights it cannot work: myopic robots with no memory cannot reach quiescent uniform deployment, as reported by [Shibata2026Myopic] from Elor and Bruckstein. The range $\\varphi \\ge \\lfloor n/k\\rfloor$ cannot be lowered: with a smaller range there are starts from which some robot never sees an adjacent robot, whatever it does (Theorem 2 of [Shibata2026Myopic]). How few colours suffice is open; the paper does not count rounds or moves.",
+        "why_it_matters": "Robots that may not see one another at the start, and that remember only a colour, still reach a common spacing. The colours act as a short memory and as messages passed from robot to robot."
+      },
+      {
+        "kind": "impossibility",
+        "title": "No robot can know that it is done",
+        "variant": "explicit-termination",
+        "ref": "Shibata2026Myopic",
+        "idea": "Explicit termination asks more than quiescence: each robot must show a colour that says \"done\" and never move again. Suppose an algorithm did this, even in FSYNC (every robot acts at every step), with unbounded visibility, any number of colours and a common sense of direction.\n1. First run: $k$ robots stand evenly spread on a ring whose number of nodes is a multiple of $k$, all gaps equal. They all see the same snapshot and act alike, so at some step they all declare that they are done.\n2. Second run: many more robots stand on a much longer ring, with almost all gaps equal to the gaps of the first run, so that the right gap on this ring is three times larger.\n3. A robot sees only its adjacent robots, so robots far from the place where the gaps differ see exactly what the robots of the first run saw, step after step.",
+        "analysis": "Those robots act as in the first run and declare that they are done while their gaps are a third of the right size, so the second run fails (Theorem 3 of [Shibata2026Myopic], which gives only this outline of the proof). The robots do not know $n$ or $k$, so nothing in a snapshot tells them which ring they are on. Quiescent deployment escapes the argument: robots may stop without declaring anything and start again when they see a change.",
+        "why_it_matters": "It explains why the task asks only that the robots stop moving, not that they know they have finished."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "robot",
+      "definition": "an anonymous Look–Compute–Move entity on the ring, with a light; $k$ is their number",
+      "avoid": [
+        "agent",
+        "agents"
+      ]
+    },
+    {
+      "term": "ring",
+      "definition": "the graph whose $n$ nodes are joined in one cycle",
+      "avoid": []
+    },
+    {
+      "term": "node",
+      "definition": "a node of the ring; robots stand on nodes, at most one per node at the start",
+      "avoid": [
+        "vertex",
+        "vertices"
+      ]
+    },
+    {
+      "term": "edge",
+      "definition": "an edge of the ring; a robot crosses at most one edge per cycle",
+      "avoid": [
+        "link",
+        "links"
+      ]
+    },
+    {
+      "term": "light",
+      "definition": "a register of each robot that shows one of $c$ colours, kept between cycles, visible to the robot and to every robot that sees it; the robot's only memory",
+      "avoid": []
+    },
+    {
+      "term": "myopic",
+      "definition": "a robot sees only the nodes within distance $\\varphi$",
+      "avoid": []
+    },
+    {
+      "term": "visibility range",
+      "definition": "the distance $\\varphi$, in hops, up to which a robot sees; common to all robots and known to them",
+      "avoid": []
+    },
+    {
+      "term": "opaque",
+      "definition": "a robot does not see past another robot",
+      "avoid": []
+    },
+    {
+      "term": "adjacent robot",
+      "definition": "in each direction, the first robot along the ring; the only robots a robot can see",
+      "avoid": []
+    },
+    {
+      "term": "snapshot",
+      "definition": "what a Look returns: the distance and colour of each adjacent robot within distance $\\varphi$, and the robot's own colour",
+      "avoid": [
+        "view"
+      ]
+    },
+    {
+      "term": "Look–Compute–Move cycle",
+      "definition": "one activation of a robot: Look (take a snapshot), Compute (a new colour and a destination), Move (stay or cross one edge)",
+      "avoid": []
+    },
+    {
+      "term": "scheduler",
+      "definition": "the adversary (FSYNC, SSYNC or ASYNC) that chooses which robots are activated and when; it is fair",
+      "avoid": []
+    },
+    {
+      "term": "configuration",
+      "definition": "the positions and colours of all robots at a time",
+      "avoid": []
+    },
+    {
+      "term": "evenly spread",
+      "definition": "every two adjacent robots at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$",
+      "avoid": []
+    },
+    {
+      "term": "quiescent",
+      "definition": "the robots reach an evenly spread configuration and no robot moves afterwards; they need not detect it",
+      "avoid": []
+    },
+    {
+      "term": "explicit termination",
+      "definition": "the robots reach an evenly spread configuration, all show a colour that declares termination, and never move again",
+      "avoid": []
+    },
+    {
+      "term": "common sense of direction",
+      "definition": "all robots agree on which direction of the ring is forward",
+      "avoid": []
+    },
+    {
+      "term": "base",
+      "definition": "in the algorithm of [Shibata2026Myopic], a robot elected to lead a group (colour B)",
+      "avoid": []
+    },
+    {
+      "term": "group",
+      "definition": "in the algorithm of [Shibata2026Myopic], a base and the robots behind it up to the next base",
+      "avoid": []
+    }
+  ],
+  "measures": [
+    {
+      "id": "visibility",
+      "name": "Visibility range",
+      "description": "visibility range $\\varphi$ (in hops) needed, as a function of $n$ and $k$"
+    },
+    {
+      "id": "colours",
+      "name": "Colours",
+      "description": "number of colours $c$ of each light; $c = 1$ means oblivious robots"
+    }
+  ],
+  "ignore_axes": [
+    "count",
+    "communication",
+    "timing",
+    "node-memory",
+    "node-ids",
+    "initial"
+  ],
+  "axis_order": [
+    "dynamics",
+    "direction",
+    "faults",
+    "topology",
+    "chirality",
+    "termination",
+    "scheduler",
+    "ids",
+    "algorithm"
+  ],
+  "axes": [
+    {
+      "id": "scheduler",
+      "name": "Scheduler",
+      "values": [
+        {
+          "id": "async",
+          "level": 0,
+          "label": "asynchronous (ASYNC)",
+          "short": "ASYNC",
+          "definition": "**ASYNC**: each robot's Look, Compute and Move phases take finite but unbounded, adversarially chosen time; a robot may Look while others are between phases, so it may move on an outdated snapshot. A robot is always seen on a node (an edge traversal is instantaneous), and its new colour is visible from the end of its Compute phase. The scheduler is fair: every robot is activated infinitely often."
+        },
+        {
+          "id": "ssync",
+          "level": 1,
+          "label": "semi-synchronous (SSYNC)",
+          "short": "SSYNC",
+          "definition": "**SSYNC**: time is divided into rounds; in each round a fair adversary chooses a non-empty subset of robots, which execute one atomic Look–Compute–Move cycle together."
+        },
+        {
+          "id": "fsync",
+          "level": 2,
+          "label": "fully synchronous (FSYNC)",
+          "short": "FSYNC",
+          "definition": "**FSYNC**: in every round every robot executes one atomic Look–Compute–Move cycle."
+        }
+      ],
+      "origin": "The three schedulers come from robots in the plane (see the plane model); for myopic robots on rings they were compared by Datta, Lamani, Larmore and Petit [Datta2013Local], and with lights by Ooshita and Tixeuil [Ooshita2022Ring]. Shibata, Kamei, Ooshita and Kakugawa prove their impossibilities under FSYNC, so that they hold under every weaker scheduler, give their algorithm under SSYNC, and leave ASYNC open [Shibata2026Myopic]. This axis replaces the model's timing axis."
+    },
+    {
+      "id": "chirality",
+      "name": "Common sense of direction",
+      "values": [
+        {
+          "id": "none",
+          "level": 0,
+          "label": "no common sense of direction",
+          "short": "no common direction",
+          "definition": "The robots do not agree on which direction of the ring is forward: each robot's forward direction is fixed by the adversary and may differ from robot to robot."
+        },
+        {
+          "id": "common",
+          "level": 1,
+          "label": "common sense of direction (chirality)",
+          "short": "common direction",
+          "definition": "All robots agree on the forward direction (from $v_i$ to $v_{i+1}$ for the nodes $v_0, \\dots, v_{n-1}$ in ring order) and on the backward one; a snapshot reports the backward and the forward adjacent robot separately [Shibata2026Myopic]. On a ring this is common chirality."
+        }
+      ],
+      "origin": "Elor and Bruckstein showed that myopic oblivious robots cannot spread evenly on a ring unless they share a sense of direction, as reported by [Shibata2026Myopic]; Shibata, Kamei, Ooshita and Kakugawa show that lights do not help, so their algorithm assumes that all robots agree on the forward direction [Shibata2026Myopic]. Without it, there is a start that is not evenly spread in which every robot takes the same snapshot, and the gaps never change or only oscillate (the paper's outline of Theorem 1)."
+    },
+    {
+      "id": "termination",
+      "name": "Termination",
+      "values": [
+        {
+          "id": "explicit",
+          "level": 0,
+          "label": "explicit termination",
+          "short": "explicit termination",
+          "definition": "Every execution reaches a configuration in which every two adjacent robots are at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$ and all robots show a colour that declares termination; from then on no robot moves (Definition 1 of [Shibata2026Myopic])."
+        },
+        {
+          "id": "quiescent",
+          "level": 1,
+          "label": "quiescent",
+          "short": "quiescent",
+          "definition": "Every execution reaches a configuration in which every two adjacent robots are at distance $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$, and no robot moves thereafter (Definition 2 of [Shibata2026Myopic]). The robots need not detect that this configuration has been reached; a robot may stay ready to move should it see a change."
+        }
+      ],
+      "origin": "Elor and Bruckstein asked myopic oblivious robots for quiescent uniform deployment and showed it impossible, as reported by [Shibata2026Myopic]. Shibata, Kamei, Ooshita and Kakugawa defined both goals (Definitions 1 and 2) and showed that explicit termination cannot be reached even under FSYNC, with unbounded visibility and infinitely many colours, because robots that see only their adjacent robots cannot tell an evenly spread ring from part of a longer ring [Shibata2026Myopic]. Explicit termination asks more, so it is at level 0; quiescence is the weaker requirement."
+    }
+  ],
+  "variants": [
+    {
+      "id": "no-direction",
+      "title": "No common sense of direction",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "topology": "ring",
+        "chirality": "none",
+        "termination": "quiescent",
+        "scheduler": "fsync"
+      },
+      "summary": "Without a common sense of direction no algorithm makes the robots evenly spread, even under FSYNC with unbounded visibility and infinitely many colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\text{impossible}",
+          "ref": "Shibata2026Myopic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "Theorem 1; the proof is omitted, and the paper says it follows the proof of Elor and Bruckstein for myopic oblivious robots",
+            "a start that is not evenly spread in which every robot takes the same snapshot, so the gaps never change or only oscillate (the paper's outline)",
+            "holds even under FSYNC, with unbounded visibility and any number of colours",
+            "the paper says uniform deployment; read here as quiescent, the weaker goal, since explicit termination is a separate impossibility (Theorem 3)"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "visibility": {
+          "status": "impossible",
+          "note": "No visibility range suffices (Theorem 1)."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "No number of colours suffices (Theorem 1)."
+        }
+      },
+      "open": [
+        "Does the impossibility without a common sense of direction still hold for robots with distinct identifiers or robots that know $n$? Posed in [Shibata2026Myopic]."
+      ],
+      "notes": "Checked against Sections 2 and 3 of the publisher version of [Shibata2026Myopic]; only the statement and an outline are given. The oblivious case is due to Elor and Bruckstein (TCS 2011), not in this atlas and not read.",
+      "status": "verified"
+    },
+    {
+      "id": "explicit-termination",
+      "title": "Explicit termination",
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "topology": "ring",
+        "chirality": "common",
+        "termination": "explicit",
+        "scheduler": "fsync"
+      },
+      "summary": "Robots cannot reach an evenly spread configuration and declare termination, even under FSYNC with a common sense of direction, unbounded visibility and infinitely many colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "\\text{impossible}",
+          "ref": "Shibata2026Myopic",
+          "bottleneck": "deciding when to stop",
+          "preconditions": [
+            "Theorem 3; only an outline of the proof is given",
+            "first run: $k$ robots evenly spread on a ring whose $n$ is a multiple of $k$; second run: $k'$ robots on a ring of $3k' \\cdot n/k$ nodes, almost all gaps $n/k$; some adjacent robots of the second run act as in the first run and terminate $n/k$ edges apart instead of $3n/k$",
+            "robots know neither $n$ nor $k$",
+            "holds even under FSYNC, with a common sense of direction, unbounded visibility and any number of colours"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "visibility": {
+          "status": "impossible",
+          "note": "No visibility range suffices (Theorem 3)."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "No number of colours suffices (Theorem 3)."
+        }
+      },
+      "open": [
+        "Can robots that know $n$, or that have distinct identifiers, reach uniform deployment with explicit termination? Posed in [Shibata2026Myopic] as the question whether the impossibilities hold for such robots."
+      ],
+      "notes": "Checked against Sections 2 and 3 of the publisher version of [Shibata2026Myopic]; only the statement and an outline are given. This impossibility is why the algorithm of the setting with quiescent termination never declares that it is done.",
+      "status": "verified"
+    },
+    {
+      "id": "ssync-quiescent",
+      "title": "Common sense of direction, SSYNC, quiescent",
+      "standard": true,
+      "assumptions": {
+        "dynamics": "static",
+        "direction": "undirected",
+        "faults": "none",
+        "topology": "ring",
+        "chirality": "common",
+        "termination": "quiescent",
+        "scheduler": "ssync"
+      },
+      "summary": "With a common sense of direction and $\\varphi \\ge \\lfloor n/k\\rfloor$, robots with 20 colours reach quiescent uniform deployment under SSYNC; the visibility range is optimal.",
+      "lower_bounds": [
+        {
+          "measure": "visibility",
+          "bound": "\\lfloor n/k\\rfloor",
+          "ref": "Shibata2026Myopic",
+          "bottleneck": "locality",
+          "preconditions": [
+            "Theorem 2: no algorithm exists when $\\varphi < \\lfloor n/k\\rfloor$; the proof is omitted, and the paper says it follows the proof of Elor and Bruckstein for myopic oblivious robots",
+            "a start that is not evenly spread from which some robot never sees an adjacent robot, whether it moves or stays (the paper's outline)",
+            "proved under FSYNC, so it holds under SSYNC",
+            "holds even with a common sense of direction and any number of colours"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Shibata2026Myopic",
+          "role": "best",
+          "visibility": "\\lfloor n/k\\rfloor",
+          "colours": "20",
+          "assumes": [
+            "robots know $\\varphi$",
+            "opaque robots: each sees only its two adjacent robots",
+            "$k$ and $n$ unknown",
+            "every start with the robots on distinct nodes, all lights showing the same colour"
+          ],
+          "note": "Introductory and current best (Theorem 4). Three phases: base electing (Lemma 1: at least one base unless the start is evenly spread), interval adjusting, in which each group closes up to gaps of 2 and widens them one edge at a time (Lemma 2), and merging, in which two groups adopt the smaller of their gaps (Lemma 3: all lights end in colour Q with gaps $\\lfloor n/k\\rfloor$ or $\\lceil n/k\\rceil$). Time and moves are not analysed."
+        }
+      ],
+      "optimality": {
+        "visibility": {
+          "status": "tight",
+          "note": "$\\varphi = \\lfloor n/k\\rfloor$ is necessary (Theorem 2, even under FSYNC) and sufficient (Theorem 4); the paper calls the algorithm visibility-optimal."
+        },
+        "colours": {
+          "status": "unknown",
+          "note": "No lower bound on $c$ is proved for this setting. The paper reports that Elor and Bruckstein showed quiescent uniform deployment impossible for myopic oblivious robots ($c = 1$); that result is not in this atlas and its conditions were not checked. If it covers this setting, the answer lies between 2 and 20 colours."
+        }
+      },
+      "open": [
+        "Can myopic luminous robots reach quiescent uniform deployment under ASYNC, with $\\varphi \\ge \\lfloor n/k\\rfloor$ and a constant number of colours? Posed in [Shibata2026Myopic].",
+        "How many colours are needed? The algorithm of [Shibata2026Myopic] uses 20; the authors ask how few colours suffice from specific initial configurations.",
+        "How many rounds and moves does quiescent uniform deployment take? [Shibata2026Myopic] does not analyse either."
+      ],
+      "notes": "Checked against the model (Section 2), the problem definitions (Definitions 1 and 2), Lemmas 1–3 and Theorem 4 of the publisher version of [Shibata2026Myopic]. The paper omits several proofs, and the lemma proofs it gives were not checked line by line. A robot elects itself base by comparing its gaps to its adjacent robots and their colours; the groups widen their gaps one edge at a time from 2, and when two groups meet they merge and keep the smaller gap, since the larger one may already exceed the target. The colours are F, B, C, NB, E (base electing), I2-A to I2-D (interval adjusting), and M, MF, MB, RI, W, MD, ME, RM, Q, RIB, MDB (merging).",
+      "status": "verified"
+    }
+  ]
+}

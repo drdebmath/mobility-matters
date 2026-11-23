@@ -1,0 +1,376 @@
+{
+  "id": "hybrid-maintenance",
+  "model": "programmable-matter",
+  "name": "Dynamic structure maintenance by hybrid programmable matter",
+  "origin": {
+    "ref": "Nokhanji2023Dynamic",
+    "year": 2022,
+    "note": "First announced in 2022, at ICARA 2022 (\"Fully Dynamic Line Maintenance by a Simple Robot\", not read) and at the IPDPS Workshops (APDCM) 2022, both cited as announcements by the journal version; journal version in the International Journal of Networking and Computing, 2023."
+  },
+  "related": [
+    {
+      "problem": "hybrid-shape-formation",
+      "relation": "Same hybrid model (passive tiles on the triangular lattice, finite-automaton agents that lift, carry and place one tile, connectivity at all times), different task. Shape formation builds a target shape from any connected structure and no tile fails; maintenance starts from the shape (a line or a tree) and must keep it forever while any tile may fail. Results do not transfer in either direction: a formation algorithm never looks for faulty tiles, and a maintenance algorithm assumes the shape is already there. The two meet at the start: line formation [Gmyr2020Tile] produces the kind of structure that line maintenance [Nokhanji2023Dynamic] starts from."
+    }
+  ],
+  "summary": "Agents that carry passive tiles keep the working tiles connected and in shape (a line or a tree) forever, while any tile may fail at any time.",
+  "statement": "$n$ passive hexagonal **tiles** occupy distinct **nodes** of the **triangular lattice**; the posed tiles form the **structure**, which is initially a **line** (tiles on consecutive nodes of one **lattice line** $L_0$) or a **tree** (connected, with no cycle of adjacent tiles), depending on the setting. One or more **agents**, each a **finite automaton**, start on distinct tiles; an agent sees its node and the six adjacent nodes, and in each **round** it moves to an adjacent node, lifts the tile at its node, or places the tile it carries; it carries at most one tile, and two agents never share a node. At any time any tile may become a **faulty tile**: there is no bound on the number of faults, on when or where they happen, or on how many happen at once, and a tile may fail while it is carried. An agent detects whether the tile at its node or the tile it carries is faulty. Forever, the agents must (1) keep the non-faulty posed tiles **connected** at every time, where connections may pass through nodes that hold an agent; (2) move every faulty tile out of the line or tree within finite time: off $L_0$ [Nokhanji2023Dynamic], or discarded, that is, put on an empty node and left behind for good [Wang2026Tree]; and (3) whenever no tile fails after some time, make the non-faulty tiles, within finite time, form a structure of the initial kind again: a line on $L_0$, or a tree. **Time** counts the rounds from the last fault until (3) holds.",
+  "primer": {
+    "intro": "Imagine a long row of tiles in which any tile may stop working at any moment, and a small machine that walks along the row, takes out each tile that stopped working and fills the gap with a good one, without ever letting the row fall apart. Here the machine is an **agent** and the floor is the **triangular lattice**: the infinite tiling of the plane by equilateral triangles, whose corners are its **nodes**. $n$ passive hexagonal **tiles** sit on nodes, one tile per node; together they form the **structure**, which must stay **connected**: from every tile one can reach every other tile by moving between tiles on adjacent nodes. In the basic version the structure is a **line**: tiles on consecutive nodes of one straight **lattice line**, the row of nodes reached by moving again and again in one direction or its opposite. The agent has only a fixed finite memory (it is a **finite automaton**), sees only its node and the six adjacent nodes, and in each **round** does one thing: it moves to an adjacent node, lifts the tile under it, or places the tile it carries. At any moment any tile may become a **faulty tile** (one that stopped working), even the tile the agent is carrying, and the agent notices this only when it stands on that tile or carries it. The task never ends: the agent must remove every faulty tile, and whenever the faults stop, the good tiles must again form a line on the same lattice line. Other settings keep a **tree** (a connected structure without cycles) instead of a line, or use several agents.",
+    "ideas": [
+      {
+        "kind": "algorithm",
+        "title": "Patrol the line and fill a gap with an end tile",
+        "variant": "line",
+        "ref": "Nokhanji2023Dynamic",
+        "idea": "Call the two **end tiles** of the line its left end and its right end.\n\n1. **Patrol.** The agent walks from one end of the line to the other and back, again and again, checking each tile it stands on.\n2. If the faulty tile it finds is the right end, it lifts that tile and places it on the adjacent lattice line above, next to the right end, then continues patrolling.\n3. Otherwise it walks to the right end and lifts the tile there: this is its **replacement tile**. (If that tile turns out to be faulty, it places it on the lattice line above and resumes patrolling.)\n4. It carries the replacement tile left until it stands on a faulty tile. It places the replacement tile on a node just below the faulty tile, lifts the faulty tile and puts it on the other node below, then lifts the replacement tile again and places it on the node the faulty tile left.\n5. It carries the faulty tile to the right end, places it on the lattice line above, and resumes patrolling.",
+        "analysis": "Taking the end tile of a line never disconnects it, and during the exchange in item 4 the tiles placed just below the line, together with the agent, bridge the gap, so the good tiles stay connected throughout. Each repair takes at least one faulty tile off the line, so once the faults stop, finitely many repairs leave only good tiles, on consecutive nodes of the original lattice line [Nokhanji2023Dynamic] (Theorem 3). The paper proves that the method is correct; it gives no bound on the number of rounds a repair or a recovery takes.",
+        "why_it_matters": "It shows that one agent with constant memory can repair a structure forever, using only the end tile as a safe source of material."
+      },
+      {
+        "kind": "impossibility",
+        "title": "An agent that ever stops patrolling can miss a fault",
+        "variant": "tree",
+        "ref": "Wang2026Tree",
+        "idea": "Say a tile is **covered** when an agent stands on it or carries it. Suppose some method lets a good tile $b$ go uncovered forever after some time $t$. Now run the same method on the same structure, but let $b$ fail right after $t$. Up to that moment the two runs are identical, and afterwards the agent never comes to $b$, so it behaves as before: it never sees that $b$ failed and never removes it.",
+        "analysis": "So in every correct method the agent covers every good tile again and again, forever [Wang2026Tree] (Theorem 1), as observed earlier for the line [Nokhanji2023Dynamic] (Theorem 2). A maintenance method can never stop: when nothing is wrong, the agent must keep patrolling. This says nothing yet about how fast a fault must be found; no paper bounds that.",
+        "why_it_matters": "It explains why every algorithm for this problem is built around a patrol that never ends."
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "agent",
+      "definition": "an active entity: a finite automaton that stands on or next to a tile, sees its node and the adjacent nodes, and carries at most one tile (the papers say robot)",
+      "avoid": [
+        "robot"
+      ]
+    },
+    {
+      "term": "tile",
+      "definition": "a passive hexagonal particle that occupies one node; it moves only when an agent carries it",
+      "avoid": [
+        "module"
+      ]
+    },
+    {
+      "term": "faulty tile",
+      "definition": "a tile that has stopped working; any tile may become faulty at any time, also while it is carried, and an agent detects it only on its own node or in its hands",
+      "avoid": [
+        "defective",
+        "broken"
+      ]
+    },
+    {
+      "term": "triangular lattice",
+      "definition": "the infinite graph whose nodes are the corners of the tiling of the plane by equilateral triangles; each node has six adjacent nodes",
+      "avoid": [
+        "grid"
+      ]
+    },
+    {
+      "term": "node",
+      "definition": "a point of the lattice; it holds at most one posed tile",
+      "avoid": [
+        "cell",
+        "vertex"
+      ]
+    },
+    {
+      "term": "lattice line",
+      "definition": "a straight line of the lattice: the nodes reached from one node by moving repeatedly in one direction or its opposite; $L_0$ is the lattice line of the initial line",
+      "avoid": [
+        "grid line"
+      ]
+    },
+    {
+      "term": "structure",
+      "definition": "the set of posed tiles",
+      "avoid": []
+    },
+    {
+      "term": "connected",
+      "definition": "said of the non-faulty tiles when every one can be reached from every other by moving between adjacent nodes that hold a tile or an agent",
+      "avoid": []
+    },
+    {
+      "term": "line",
+      "definition": "a structure whose tiles occupy consecutive nodes of one lattice line",
+      "avoid": []
+    },
+    {
+      "term": "end tile",
+      "definition": "a tile of a line with only one adjacent tile",
+      "avoid": []
+    },
+    {
+      "term": "tree",
+      "definition": "a connected structure with no cycle of tiles on adjacent nodes",
+      "avoid": []
+    },
+    {
+      "term": "finite automaton",
+      "definition": "a machine with a constant number of memory states, independent of $n$",
+      "avoid": []
+    },
+    {
+      "term": "round",
+      "definition": "one action of an agent: a move to an adjacent node, lifting the tile at its node, or placing the tile it carries",
+      "avoid": [
+        "step",
+        "steps"
+      ]
+    },
+    {
+      "term": "replacement tile",
+      "definition": "a non-faulty tile that an agent carries to the node of a faulty tile to take its place",
+      "avoid": [
+        "substitute tile"
+      ]
+    },
+    {
+      "term": "covered",
+      "definition": "said of a tile that an agent stands on or carries",
+      "avoid": []
+    },
+    {
+      "term": "patrol",
+      "definition": "to walk over the whole structure again and again, checking every tile",
+      "avoid": []
+    }
+  ],
+  "history": "Earlier work on faults in programmable matter assumed that all faults happen before the algorithm starts (the static case), for example line recovery by amoebot particles [DiLuna2018Line], as Nokhanji, Flocchini and Santoro point out [Nokhanji2023Dynamic]. Nokhanji, Flocchini and Santoro moved the question to the hybrid model and made the faults dynamic: any tile may fail at any time, also during a repair, so the agents can never stop. They kept a line, with one agent, with one agent per tile, and with any number of agents under a semi-synchronous scheduler [Nokhanji2023Dynamic]. Their conclusion asked for \"the study of the maintenance of more complex shapes\"; Wang, Flocchini, Nokhanji and Santoro answered for trees with a single agent [Wang2026Tree].",
+  "ignore_axes": [
+    "scheduler",
+    "memory",
+    "algorithm",
+    "shape",
+    "connectivity",
+    "communication"
+  ],
+  "axes": [
+    {
+      "id": "structure",
+      "name": "Maintained structure",
+      "values": [
+        {
+          "id": "tree",
+          "level": 0,
+          "label": "a tree",
+          "short": "tree",
+          "definition": "The initial structure is a tree: the subgraph of the lattice induced by the nodes holding tiles is connected and acyclic (so every node of it has at most three neighbours in it). After the last fault, the non-faulty tiles must again form a tree; where they lie is free."
+        },
+        {
+          "id": "line",
+          "level": 1,
+          "label": "a line on a fixed lattice line",
+          "short": "line",
+          "definition": "The initial structure is a line: the tiles occupy consecutive nodes of one lattice line $L_0$. After the last fault, the non-faulty tiles must occupy consecutive nodes of $L_0$ again, and no faulty tile may remain on $L_0$."
+        }
+      ],
+      "origin": "The two values come from the two papers on the problem. Nokhanji, Flocchini and Santoro chose the line because, among the basic shapes, \\\"the line is especially important, as it is utilized as a foundation for constructing more complicated shapes or to perform more complex tasks\\\" [Nokhanji2023Dynamic]. They named the maintenance of more complex shapes as an open direction, and Wang, Flocchini, Nokhanji and Santoro took up trees, in which the non-faulty tiles \\\"must remain connected as an acyclic structure\\\" [Wang2026Tree]. A line is a tree, but the line value also fixes where the result lies (on $L_0$), so an algorithm for trees carries over to lines only if it keeps a line on its lattice line. Algorithm DTM of [Wang2026Tree] does, because it always takes its replacement tile from a leaf, which on a line is an end tile (an observation of this atlas, not a statement of the paper). Both catalogued necessity and impossibility results hold for trees as well as for lines: [Wang2026Tree] (Theorem 1) states the necessity for any connected structure."
+    },
+    {
+      "id": "agents",
+      "name": "Number of agents",
+      "values": [
+        {
+          "id": "any",
+          "level": 0,
+          "label": "any number of agents",
+          "short": "any number of agents",
+          "definition": "$r$ agents, $1 \\le r \\le n$, start on distinct tiles; they do not know $r$ or $n$, and one algorithm must work for every $r$. Several agents act concurrently and may not share a node."
+        },
+        {
+          "id": "one",
+          "level": 1,
+          "label": "a single agent",
+          "short": "one agent",
+          "definition": "$r = 1$: one agent, so there is no concurrency and no collision."
+        }
+      ],
+      "origin": "The hybrid model has a few active agents and many passive tiles, but its early papers used a single agent; Nokhanji, Flocchini and Santoro note that concurrency problems \\\"are sidestepped by assuming that r = 1\\\", the one exception being [Gmyr2020Tile], which uses several agents under a sequential scheduler [Nokhanji2023Dynamic]. They solved line maintenance for one agent, for one agent per tile, and for any number of agents activated by a semi-synchronous scheduler, and showed that several identical agents need some way to break symmetry [Nokhanji2023Dynamic]. The tree paper uses a single agent [Wang2026Tree]. Here $r$ is the number of agents; it is defined only in this problem."
+    }
+  ],
+  "axis_order": [
+    "structure",
+    "agents",
+    "orientation"
+  ],
+  "measures": [
+    {
+      "id": "time",
+      "name": "Time",
+      "description": "rounds from the last fault until the non-faulty tiles again form the required structure (recovery time); the agents never terminate"
+    }
+  ],
+  "variants": [
+    {
+      "id": "tree",
+      "title": "Tree, one agent",
+      "assumptions": {
+        "structure": "tree",
+        "agents": "one"
+      },
+      "summary": "One finite-automaton agent keeps a tree of tiles connected and acyclic forever, by a clockwise patrol that replaces each faulty tile by a leaf (correctness proofs omitted).",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{every tile covered infinitely often}",
+          "ref": "Wang2026Tree",
+          "bottleneck": "fault detection",
+          "preconditions": [
+            "faults at any time and place, unbounded in number",
+            "an agent notices a fault only on a tile it stands on or carries",
+            "holds for the maintenance of any connected structure, whatever the algorithm"
+          ],
+          "note": "Theorem 1: \"In any protocol solving the Dynamic Maintenance problem of a connected structure, the robot must cover all non-faulty tiles infinitely often.\" The proof (given) is an indistinguishability argument: let an uncovered tile fail. So the agent patrols forever; this is a necessity, not a bound on the recovery time."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Wang2026Tree",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "a sense of direction: the agent labels its six adjacent nodes up, up-right, right-down, down, left-down, left-up in clockwise order (with one agent, the orientation axis is vacuous)",
+            "faulty tiles are discarded: the agent puts a faulty tile on an empty node off the structure, which disconnects it for good",
+            "the agent's node and the posed tiles stay connected at all times"
+          ],
+          "note": "Introductory and current best. Theorem 2: algorithm DTM solves the problem. DTM alternates a patrol, which follows the \"right end rule\" (at each tile, continue to the next occupied neighbour clockwise from the direction it came from, like a pre-order traversal; Lemma 1: without faults every tile is visited perpetually), and a reconfiguration: find a leaf to use as the replacement tile (a faulty leaf is discarded), carry it to the nearest faulty tile, exchange the two using one or two temporary empty nodes next to the faulty tile chosen so that the tree stays connected (Lemma 5), and discard the faulty tile. The authors state that a fault is detected within one traversal and a faulty tile is discarded within another; no bound in rounds is given. Correctness proofs are omitted (\"Due to space limitations\"); Lemmas 1 to 5 are stated without proof."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No bound on the recovery time is proved, and no lower bound in rounds is known; Theorem 1 only forces a perpetual patrol."
+        }
+      },
+      "open": [
+        "Give a bound in rounds on the recovery time of algorithm DTM, after the last fault, as a function of $n$ and of the number of faults, and a matching lower bound.",
+        "Can several agents maintain a tree under a semi-synchronous scheduler, as [Nokhanji2023Dynamic] do for a line, and with what speed-up?",
+        "Which structures with cycles can one agent maintain? Wang et al. require the non-faulty tiles to stay acyclic; in a structure with cycles a non-leaf tile may be safe to remove, but an agent with finite memory cannot in general find a tile whose removal keeps the structure connected [Gmyr2020Tile] (Theorem 1)."
+      ],
+      "notes": "Model of [Wang2026Tree]: the infinite triangular lattice, $n \\ge 1$ identical tiles initially forming a tree, one agent that starts on an arbitrary tile, has no knowledge of the structure and sees only its neighbourhood, and is a finite automaton with five control states (patrol, find leaf, find target, substitute, discard). The paper states no scheduler: with one agent, a round is one action. Statements checked against the full text (8 pages, EECSS 2026); the proofs of Theorem 2 and Lemmas 1 to 5 are omitted in the paper, so correctness rests on the authors' sketch. The exchange in a node with two opposite neighbours (a straight part of the tree, Case B of Substitute) uses a different choice of temporary nodes than the general case.",
+      "status": "verified"
+    },
+    {
+      "id": "line",
+      "title": "Line, one agent",
+      "standard": true,
+      "assumptions": {
+        "structure": "line",
+        "agents": "one"
+      },
+      "summary": "One finite-automaton agent patrols a line of tiles back and forth and replaces each faulty tile by the tile at one end, keeping the line on its lattice line.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{every tile covered infinitely often}",
+          "ref": "Nokhanji2023Dynamic",
+          "bottleneck": "fault detection",
+          "preconditions": [
+            "faults at any time and place, unbounded in number",
+            "holds for any number of agents and any algorithm"
+          ],
+          "note": "Theorem 2: \"In any algorithm solving the Dynamic Line Maintenance problem, should no more failures occur after time t, all non-faulty tiles must be covered infinitely often.\" Proof sketched in the paper; [Wang2026Tree] (Theorem 1) restates it for any connected structure."
+        }
+      ],
+      "results": [
+        {
+          "ref": "Nokhanji2023Dynamic",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "the agent has its own sense of orientation that distinguishes its six adjacent nodes (with one agent, the orientation axis is vacuous)",
+            "the agent starts on an end tile; the preprocessing of Section 4.2.6 brings it there from any tile",
+            "faulty tiles are placed on the lattice line next to $L_0$, where they stay; connectivity is required of the non-faulty tiles, through nodes holding a posed tile or an agent"
+          ],
+          "note": "Introductory and current best. Theorem 3: algorithm DLR1 solves the problem for one agent. The agent patrols the line back and forth; on a faulty tile it fetches the tile at the right end as a replacement tile, carries it to the nearest faulty tile, exchanges the two through the two nodes below (operation Substitute), and carries the faulty tile back to the right end, where it places it on the lattice line above. If the faulty tile is the right end tile, it is moved off directly. Lemma 2: if $n > f$, with $f$ the number of faulty tiles, from some time on the non-faulty tiles form a line on $L_0$ and the faulty ones a line on the adjacent lattice line; the agent stops when at most one non-faulty tile is left. No bound in rounds is given. A version for one agent was announced at ICARA 2022 (title per Crossref; not read)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No bound on the recovery time is proved; Theorem 2 only forces a perpetual patrol."
+        }
+      },
+      "open": [
+        "Give a bound in rounds on the recovery time of algorithm DLR1 after the last fault, as a function of $n$ and of the number $f$ of faults, and a matching lower bound."
+      ],
+      "notes": "Model of [Nokhanji2023Dynamic], Section 2.1: the infinite triangular lattice; $n \\ge r$ tiles that initially form a line on a lattice line $L_0$; each agent a finite automaton that sees its node and its neighbourhood, and detects whether the tile at its node, at an adjacent node, or in its hands is faulty. The task requires every faulty tile to leave $L_0$ within finite time, all non-faulty tiles to end in one segment of $L_0$, and the non-faulty tiles to be connected at all times. Checked against the full text of the journal version (IJNC 2023), with its proofs.",
+      "status": "verified"
+    },
+    {
+      "id": "line-many",
+      "title": "Line, any number of agents, common direction",
+      "assumptions": {
+        "structure": "line",
+        "agents": "any",
+        "orientation": "direction"
+      },
+      "summary": "Any number of finite-automaton agents that agree on the direction of the line maintain it under a semi-synchronous scheduler: a patroller and a team of agents, each guarding one tile.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Nokhanji2023Dynamic",
+          "role": "best",
+          "time": "\\text{finite}",
+          "assumes": [
+            "the agents agree on the left/right direction of $L_0$ (the Assumption of Section 2.2); from it they build a common orientation of all six directions",
+            "semi-synchronous scheduler: in each round the adversary activates any subset of the agents, each active agent performs one atomic Look-Compute-Move cycle, and every agent is activated infinitely often",
+            "agents exchange constant-size messages with agents on adjacent nodes and can hand a tile to an adjacent agent",
+            "agents know neither $r$ nor $n$; a preprocessing phase decides whether $r = 1$, $r = n$ or $1 < r < n$ (Section 4.2.6)"
+          ],
+          "note": "Introductory and current best. Theorem 7: algorithm DLR solves the problem for any number $r$ of agents, $1 \\le r \\le n$; it avoids collisions and deadlocks (Lemmas 4 to 7). For $r = 1$ it is DLR1 (Theorem 3) and for $r = n$ it is DLR* (Theorem 6), in which every agent guards the tile it stands on, a faulty tile triggers a request, and a replacement tile is handed from agent to agent from one end of the line. For $1 < r < n$, $r - 1$ agents guard consecutive tiles at one end and one agent patrols the rest; agents freed by disposals rejoin the guards. Lemma 9: after the last fault, the non-faulty tiles form a line on $L_0$ and the faulty ones one or two lines on the adjacent lattice line. No bound in rounds is given."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No bound on the recovery time is proved, and no lower bound in rounds is known."
+        }
+      },
+      "open": [
+        "Do several agents recover faster than one? [Nokhanji2023Dynamic] name \"the examination of possible speed-up vs the increased complexity due to coordination among the robots\" as a research direction; no bound in rounds is known for either case."
+      ],
+      "notes": "Checked against the full text of the journal version (IJNC 2023), with its proofs. The semi-synchronous scheduler includes the sequential and the fully synchronous ones as special cases (footnote 3 of the paper), so the algorithm works under both. Theorem 1 shows that without agreement on the direction of the line, no deterministic algorithm works for every $r > 1$: see the setting without a common direction.",
+      "status": "verified"
+    },
+    {
+      "id": "line-many-no-direction",
+      "title": "Line, any number of agents, no common direction",
+      "assumptions": {
+        "structure": "line",
+        "agents": "any",
+        "orientation": "none"
+      },
+      "summary": "Impossible: identical agents without a common direction cannot always maintain a line, even with one fault and a fully synchronous scheduler.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Nokhanji2023Dynamic",
+          "bottleneck": "symmetry breaking",
+          "preconditions": [
+            "deterministic, identical agents with no agreement on the direction of the line",
+            "a line with an odd number of tiles whose centre tile is faulty ($f = 1$), and two agents on the two end tiles, placed symmetrically",
+            "holds even with a fully synchronous scheduler",
+            "the claim is for an algorithm that must work for every $r > 1$ and every placement of the agents"
+          ],
+          "note": "Theorem 1: \"There exists no deterministic algorithm that solves the Dynamic Line Maintenance problem for all r > 1, regardless of the initial position of the robots and of the location of the faulty tiles. This results holds even in FSYNC with f = 1.\" In a synchronous run the configuration stays symmetric, since the agents may not collide, but some agent must move onto the faulty tile to remove it, which breaks the symmetry. Agreement on the direction of the line (setting line-many) escapes it; so would distinct identifiers or a leader, which the authors call strong assumptions."
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "impossible",
+          "note": "Theorem 1 of [Nokhanji2023Dynamic]; with one agent (setting line) or a common direction (setting line-many) the problem is solvable."
+        }
+      },
+      "open": [],
+      "notes": "Checked against the full text of the journal version (IJNC 2023); the proof of Theorem 1 is given in full. The argument does not depend on the shape being a line beyond the instance used, so it also rules out tree maintenance by several identical agents without a common direction (an observation of this atlas: the instance is a tree).",
+      "status": "verified"
+    }
+  ]
+}

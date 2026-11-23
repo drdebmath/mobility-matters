@@ -4340,6 +4340,14 @@
     {
       "ref": "Clements2019Balanced",
       "note": "Online exploration of an unknown orthogonal region with rectangular holes, discretised into $n$ grid points (their $N$), by $k$ agents that talk only when adjacent: they alternate between following the walls and sweeping rooms, for $O(n)$ moves in total and $O(n/k)$ per agent (Theorem 2); when the rooms have no holes and are large, the time is $\\Theta(n/k)$, which is optimal (Corollary 5). Read (model and theorems)."
+    },
+    {
+      "ref": "Cosson2026Predictions",
+      "note": "Collective tree exploration with complete communication (synchronous, $k$ agents at the root) in which every newly revealed node $u$ comes with a prediction $\\hat n_u$ of the number $n_u$ of nodes of its subtree. With additive error $\\xi=\\max_u|\\hat n_u-n_u|$ (their $E$), unknown to the agents, a deterministic algorithm (seed and sweep) explores in $O(n/k+D+\\xi)$ rounds, and no deterministic algorithm achieves $O(n/k+D)+o(\\xi)$ (Theorem 1.1, the lower bound by rescaling the $\\Omega(\\log k/\\log\\log k)$ bound of [Dynia2007Maps]). With multiplicative distortion $\\sigma=\\max_u(\\hat n_u/n_u)\\cdot\\max_u(n_u/\\hat n_u)$ (their $\\mu$), also unknown, the competitive ratio is $\\tilde O(\\min\\{\\sigma\\log\\log k+\\sigma^{3/2},\\ \\sqrt\\sigma\\log k\\})$, $\\tilde O$ hiding factors polylogarithmic in $\\sigma$ (Theorem 1.2). Exact predictions give $O(n/k+D)$ (Lemma B.1); nothing new follows for the setting without predictions. A remark (Remark 3.5, not proved in detail) says the additive-error algorithm needs only a one-bit whiteboard per node. Read in full (arXiv v1, a preprint)."
+    },
+    {
+      "ref": "Higashikawa2026Grid",
+      "note": "Collaborative exploration of an unknown grid graph (a finite connected induced subgraph of the infinite square grid, possibly with holes) by $k$ agents that start at $s$, move in synchronous rounds, communicate only by writing at the nodes they visit and must return to $s$. The algorithm WRAP grows a tree of shortest paths (up to detours at holes) using grid directions and explores it with the tree algorithm of [Higashikawa2014Online]; with $c$ hole corners (convex corners of the bounded faces of area at least 2) its competitive ratio is $\\Theta(k/\\log k+\\min(c,k))$, the lower bound being for WRAP itself (Theorem 1), so it is $O(k/\\log k)$-competitive when $c$ is a constant. No tree-greedy algorithm (one that, on a tree, sends agents into unexplored subtrees and brings each back after its subtree is done) beats $\\lceil k/(1+\\lfloor\\log k\\rfloor)\\rceil$ on grid graphs (Theorem 2, proof omitted). Not placed: the topology value grid means a $\\sqrt n\\times\\sqrt n$ grid. Read in full (publisher version)."
     }
   ]
 }

@@ -249,7 +249,8 @@
         "meaning": "number of states of a finite-automaton agent",
         "where": [
           "exploration",
-          "exploration-recolourable"
+          "exploration-recolourable",
+          "treasure-hunt"
         ]
       },
       {
@@ -293,14 +294,16 @@
         "papers_write": "$\\kappa$, $\\ell$",
         "where": [
           "exploration-luminous",
-          "exploration-recolourable"
+          "exploration-recolourable",
+          "uniform-deployment-myopic"
         ]
       },
       {
         "symbol": "\\varphi",
         "meaning": "visibility range of a myopic robot, in hops",
         "where": [
-          "exploration-luminous"
+          "exploration-luminous",
+          "uniform-deployment-myopic"
         ]
       },
       {
@@ -409,11 +412,11 @@
       {
         "symbol": "n",
         "meaning": "number of robots",
-        "papers_write": "$N$ in some mutual visibility papers"
+        "papers_write": "$N$ in some mutual visibility papers and in the defected-view papers"
       },
       {
         "symbol": "f",
-        "meaning": "maximum number of faulty robots (crashed or Byzantine)"
+        "meaning": "maximum number of faulty robots (crashed, with mobility faults, or Byzantine)"
       },
       {
         "symbol": "\\ell",
@@ -427,6 +430,11 @@
       {
         "symbol": "V",
         "meaning": "visibility radius (limited visibility)"
+      },
+      {
+        "symbol": "K",
+        "meaning": "number of other robots a robot sees in a Look under a defected view",
+        "papers_write": "$k$ in the defected-view papers; one of them counts occupied points instead of robots"
       },
       {
         "symbol": "\\delta",
@@ -527,6 +535,14 @@
       {
         "symbol": "x",
         "meaning": "position of the target on the line"
+      },
+      {
+        "symbol": "\\tau",
+        "meaning": "emergence time of the target: the unknown time from which it can be detected",
+        "papers_write": "$T$",
+        "where": [
+          "linear-search"
+        ]
       },
       {
         "symbol": "R",
@@ -645,6 +661,13 @@
         "meaning": "symmetricity of a configuration (a $k$-symmetric configuration admits up to $k$ leaders)",
         "where": [
           "leader-election-amoebots"
+        ]
+      },
+      {
+        "symbol": "r",
+        "meaning": "number of agents (robots) that carry tiles in hybrid programmable matter",
+        "where": [
+          "hybrid-maintenance"
         ]
       }
     ]

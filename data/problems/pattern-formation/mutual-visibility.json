@@ -122,7 +122,9 @@
       "description": "colours of the light per robot (0 for oblivious robots)"
     }
   ],
-  "ignore_axes": [],
+  "ignore_axes": [
+    "view"
+  ],
   "axis_order": [
     "body",
     "visibility",
@@ -606,21 +608,21 @@
       "open": [
         "Tolerating three or more crashes, and using 2 colours [Aljohani2018Faults]."
       ],
-      "notes": "With up to $f \\le n$ crashes, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours (setting *Lights, crash faults, ASYNC, one axis*), and in SSYNC with 2 colours [Poudel2021FaultTolerant] (Theorems 1.1 and 4.10, $n \\ge 3$). Their crash stops only movement: a crashed robot must still change its light, and Poudel, Aljohani and Sharma leave the case of lights that stop with the robot as \"a major open problem\". Checked against the full texts of [Aljohani2018Faults] and [Poudel2021FaultTolerant].",
+      "notes": "With up to $f \\le n$ crashes, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours (setting *Lights, mobility faults, ASYNC, one axis*), and in SSYNC with 2 colours [Poudel2021FaultTolerant] (Theorems 1.1 and 4.10, $n \\ge 3$). Their crash stops only movement: a crashed robot must still change its light, and Poudel, Aljohani and Sharma leave the case of lights that stop with the robot as \"a major open problem\". Checked against the full texts of [Aljohani2018Faults] and [Poudel2021FaultTolerant].",
       "status": "verified"
     },
     {
       "id": "crash-one-axis",
-      "title": "Lights, crash faults, ASYNC, one axis",
+      "title": "Lights, mobility faults, ASYNC, one axis",
       "assumptions": {
         "visibility": "unlimited",
-        "faults": "crash",
+        "faults": "mobility",
         "memory": "lights",
         "frames": "one-axis",
         "body": "point"
       },
-      "summary": "With up to $n$ crashed robots, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours.",
-      "statement": "Up to $f \\le n$ robots may crash, at unknown times; a crashed robot never moves again. The correct robots must reach, without collisions, a configuration in which no three correct robots are collinear and no crashed robot lies between two correct ones [Poudel2021FaultTolerant].",
+      "summary": "With up to $n$ robots under mobility faults, robots that agree on one axis reach mutual visibility in non-rigid ASYNC in $O(n)$ epochs with 3 colours.",
+      "statement": "Up to $f \\le n$ robots may crash, at unknown times; a crashed robot never moves again, but its light keeps working (a mobility fault; the paper says crash). The correct robots must reach, without collisions, a configuration in which no three correct robots are collinear and no crashed robot lies between two correct ones [Poudel2021FaultTolerant].",
       "lower_bounds": [
         {
           "measure": "colours",
@@ -668,7 +670,7 @@
       "title": "Lights, mobility faults, SSYNC, non-rigid",
       "assumptions": {
         "visibility": "unlimited",
-        "faults": "crash",
+        "faults": "mobility",
         "memory": "lights",
         "scheduler": "ssync",
         "body": "point"
@@ -715,7 +717,63 @@
         "Can mobility-fault-tolerant mutual visibility under a movement budget be solved without the common reference point and without any axis agreement [Shukla2026BudgetConstrained]?",
         "Does the budget-constrained algorithm extend to ASYNC [Shukla2026BudgetConstrained]?"
       ],
-      "notes": "Shukla, Maiti, Kumar and Bhagat add a movement budget: each robot may travel a total distance of at most $B$, so robots cannot be sent to the corners of a distant convex hull. Their algorithm moves robots by small steps, at most a fixed fraction of the distances to the other robots it sees and to the lines through them, in four phases encoded by the light colours (Section 3): every non-faulty robot first makes one step off the lines through it, the robots at the ends of each line before those between them; then robots that are still between two others step towards the reference point, the farthest from it first, which breaks cyclic dependencies; finally robots at the ends of lines make one step towards it, to get past faulty robots. Their goal is stronger than that of [Poudel2021FaultTolerant]: a non-faulty robot must also see every faulty robot. As reported by [Shukla2026BudgetConstrained] (Section 1.1 and Table 1), Pramanick, Jana and Mandal solve mobility-fault-tolerant mutual visibility without axis agreement and without a reference point: for one fault in SSYNC and ASYNC and any number in FSYNC (TCS 2025), and for any number of faults in ASYNC with 35 colours in $O(n)$ epochs (SIROCCO 2026); neither paper is in the bibliography and neither was read. An algorithm for ASYNC would carry over to this setting. Checked against the full text of [Shukla2026BudgetConstrained] (arXiv v1: model in Section 2, Theorem 1, Lemmas 10 and 21–23) and Section 7 of [DiLuna2017Mutual].",
+      "notes": "Shukla, Maiti, Kumar and Bhagat add a movement budget: each robot may travel a total distance of at most $B$, so robots cannot be sent to the corners of a distant convex hull. Their algorithm moves robots by small steps, at most a fixed fraction of the distances to the other robots it sees and to the lines through them, in four phases encoded by the light colours (Section 3): every non-faulty robot first makes one step off the lines through it, the robots at the ends of each line before those between them; then robots that are still between two others step towards the reference point, the farthest from it first, which breaks cyclic dependencies; finally robots at the ends of lines make one step towards it, to get past faulty robots. Their goal is stronger than that of [Poudel2021FaultTolerant]: a non-faulty robot must also see every faulty robot. As reported by [Shukla2026BudgetConstrained] (Section 1.1 and Table 1), Pramanick, Jana and Mandal solve mobility-fault-tolerant mutual visibility without axis agreement and without a reference point for one fault in SSYNC and ASYNC and any number in FSYNC (TCS 2025; not in the bibliography and not read). Their ASYNC algorithm for any number of faults [Pramanick2026Mutual] is the setting *Lights, mobility faults, ASYNC, rigid*; it does not carry over here, because it assumes rigid moves, excludes some initial configurations and reaches only the weaker goal of [Poudel2021FaultTolerant]. Checked against the full text of [Shukla2026BudgetConstrained] (arXiv v1: model in Section 2, Theorem 1, Lemmas 10 and 21–23) and Section 7 of [DiLuna2017Mutual].",
+      "status": "verified"
+    },
+    {
+      "id": "mobility-async",
+      "title": "Lights, mobility faults, ASYNC, rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "faults": "mobility",
+        "memory": "lights",
+        "movement": "rigid",
+        "body": "point"
+      },
+      "summary": "With any number of mobility faults, disoriented luminous robots reach mutual visibility in ASYNC in $O(n)$ epochs with 35 colours, from every initial configuration outside a few impossible ones.",
+      "statement": "Up to $f < n$ robots, $f$ and $n$ unknown to the robots, may suffer a mobility fault at any time: a faulty robot never moves again, but its light keeps working and it keeps executing the algorithm. The robots share no coordinate system, orientation or chirality, and visibility is obstructed. The non-faulty robots must reach, without collisions, a configuration in which no three non-faulty robots are collinear and no faulty robot lies between two non-faulty ones [Pramanick2026Mutual]. Initial configurations in which this is impossible (three collinear robots whose middle one is faulty; a faulty robot at the centre of a regular polygon formed by the others) are excluded.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "2",
+          "ref": "DiLuna2017Mutual",
+          "bottleneck": "memory",
+          "preconditions": [
+            "fault-free bound (no robot faulty): one colour does not suffice when $n$ is unknown and robots must terminate (Section 7 of [DiLuna2017Mutual])"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pramanick2026Mutual",
+          "role": "best",
+          "time": "O(n)",
+          "colours": "35",
+          "assumes": [
+            "any $f < n$ mobility faults, $f$ and $n$ unknown",
+            "a faulty robot's light keeps working: the fault stops only its movement",
+            "rigid moves, implicit: the Move phase takes a robot \"straight to its destination\" and a robot that has not reached its target concludes that it is faulty",
+            "initial configurations other than the impossible ones, and other than a linear innermost convex layer with an odd number of robots whose central robot is faulty and equidistant from its two neighbours on the layer"
+          ],
+          "note": "Introductory and current best (Theorem 1): $O(n)$ epochs (their $N$ is $n$ here), $O(1)$ colours, 35 by Section 1, collision-free, and no robot leaves the convex hull of the initial configuration. The algorithm first colours the innermost convex layer of the initial configuration and then moves the corner robots of the outer layers onto it, one at a time, or, when that layer is a segment, onto two half-ellipses whose major axis lies on it. Theorem 1 is stated without proof in this version."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "$O(n)$ epochs; no lower bound beyond the trivial one."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$: between 2 and 35 colours."
+        }
+      },
+      "open": [
+        "Lower bounds on the time and on the number of colours for mutual visibility with mobility faults in ASYNC without axis agreement [Pramanick2026Mutual].",
+        "Is mutual visibility solvable when the innermost convex layer is a segment with an odd number of robots whose central robot is faulty and equidistant from its two neighbours, a configuration that the algorithm of [Pramanick2026Mutual] excludes without proving it impossible?",
+        "The same with non-rigid moves."
+      ],
+      "notes": "Pramanick, Jana and Mandal remove the one-axis agreement of [Poudel2021FaultTolerant] (setting *Lights, mobility faults, ASYNC, one axis*) at the price of 35 colours instead of 3 and of rigid moves. Without a common coordinate system some configurations are unsolvable: if the middle robot of three collinear robots is faulty, the adversary mirrors the local coordinate systems of the other two, so they move symmetrically and stay collinear (Section 1, citing their TCS 2025 paper, which is not in the bibliography). The paper does not say whether moves are rigid; its fault detection treats a robot that stops before its target as faulty, which is correct only with rigid moves, hence `movement: rigid` here. Its epoch is the smallest interval in which every robot completes a cycle. Checked against the full text of the publisher version (model in Section 2, problem definition and contributions in Section 1, Theorem 1); the paper contains no proofs.",
       "status": "verified"
     },
     {

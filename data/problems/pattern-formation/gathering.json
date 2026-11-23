@@ -215,6 +215,7 @@
     "frames",
     "movement",
     "multiplicity",
+    "view",
     "algorithm",
     "ids",
     "team",
@@ -231,7 +232,8 @@
         "faults": "none",
         "multiplicity": "weak",
         "team": "three-plus",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With weak multiplicity detection, $n \\ge 3$ oblivious, disoriented, asynchronous robots gather from any initial configuration.",
       "lower_bounds": [],
@@ -269,7 +271,8 @@
         "faults": "none",
         "scheduler": "ssync",
         "team": "three-plus",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Without multiplicity detection, deterministic oblivious robots cannot gather, for any $n \\ge 2$, in SSYNC or ASYNC.",
       "lower_bounds": [
@@ -310,7 +313,8 @@
         "faults": "none",
         "scheduler": "ssync",
         "team": "two",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Two oblivious robots without a common orientation cannot meet in SSYNC: rendezvous needs extra power.",
       "lower_bounds": [
@@ -350,7 +354,8 @@
         "faults": "none",
         "scheduler": "ssync",
         "ids": "homonymous",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Two distinct identifiers (two different algorithms) are necessary and sufficient for gathering in SSYNC.",
       "lower_bounds": [
@@ -403,7 +408,8 @@
         "scheduler": "ssync",
         "multiplicity": "weak",
         "team": "three-plus",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With weak multiplicity detection and no common orientation, the correct robots gather despite up to $n-1$ crashes.",
       "lower_bounds": [
@@ -497,7 +503,8 @@
         "multiplicity": "weak",
         "team": "three-plus",
         "body": "point",
-        "start": "restricted"
+        "start": "restricted",
+        "view": "full"
       },
       "summary": "In ASYNC with instantaneous computation, up to $\\lfloor n/2\\rfloor - 2$ crashes are tolerated for $n \\ge 7$, from initial configurations that exclude some symmetric families.",
       "lower_bounds": [],
@@ -539,7 +546,8 @@
         "opacity": "opaque",
         "faults": "crash",
         "frames": "one-axis",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Robots that agree on one axis gather in ASYNC with non-rigid moves and no multiplicity detection despite up to $n-1$ crashes, even when robots block each other's view.",
       "lower_bounds": [],
@@ -579,7 +587,8 @@
         "opacity": "transparent",
         "scheduler": "ssync",
         "team": "three-plus",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Three robots with one Byzantine robot can neither gather nor converge in SSYNC.",
       "lower_bounds": [
@@ -619,7 +628,8 @@
         "opacity": "transparent",
         "faults": "none",
         "scheduler": "fsync",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Under FSYNC, oblivious disoriented robots gather from any start of distinct points without detecting multiplicities, even with non-rigid moves.",
       "lower_bounds": [],
@@ -654,7 +664,8 @@
         "opacity": "transparent",
         "scheduler": "fsync",
         "team": "three-plus",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "In FSYNC, gathering tolerates $f$ Byzantine robots when $n \\ge 3f+1$.",
       "lower_bounds": [],
@@ -687,13 +698,74 @@
       "status": "verified"
     },
     {
+      "id": "byzantine-round-robin",
+      "title": "Byzantine faults, round-robin, rigid moves, strong multiplicity detection",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "byzantine",
+        "scheduler": "round-robin",
+        "memory": "oblivious",
+        "frames": "none",
+        "movement": "rigid",
+        "multiplicity": "strong",
+        "body": "point",
+        "view": "full"
+      },
+      "summary": "Under a round-robin scheduler, oblivious robots gather despite $f \\le \\lfloor\\sqrt{n}/2\\rfloor$ Byzantine robots; no algorithm tolerates $f = \\lceil n/2\\rceil$.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Frei2026Byzantine",
+          "bottleneck": "indistinguishable Byzantine agents",
+          "preconditions": [
+            "$f = \\lceil n/2 \\rceil$ Byzantine robots, every $n \\ge 2$: no deterministic algorithm solves both the fault-free and the $f$-fault problem (Theorem 2), so the resilience is at most $\\lfloor (n-1)/2 \\rfloor$",
+            "the instance: a fault-free start with $n - f$ robots on one point and $f$ on another, from which some robot must move; the Byzantine robots wait until the correct robots meet, then rebuild that snapshot next to them",
+            "holds with identity coordinate systems (so also with a common compass), rigid moves and strong multiplicity detection"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Frei2026Byzantine",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$f \\le \\lfloor\\sqrt{n}/2\\rfloor$, i.e. $n \\ge 4f^2$",
+            "$f$ is not known to the robots",
+            "any initial configuration, multiplicities allowed",
+            "coordinate systems may change between activations by rotation, reflection and uniform scaling"
+          ],
+          "note": "Introductory and current best (Theorem 1, algorithm ToMax: move to a point of maximum multiplicity; on a tie, to such a point other than the own position; stay only on the unique one). Corollary 1: the resilience is $\\Omega(\\sqrt{n})$. ToMax itself fails for $f = \\lceil (n+2)/3\\rceil$ (Theorem 3). For $f = 1$ the same strategy gathers for every $n \\ge 3$ (an argument in Section 1.1 of [Frei2026Byzantine], extending the case $n = 3$ noted in the DISC 2006 version of [Defago2006Fault])."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "gap",
+          "note": "Only solvability is known. The tolerated number of Byzantine robots lies between $\\lfloor\\sqrt{n}/2\\rfloor$ (Theorem 1) and $\\lfloor (n-1)/2\\rfloor$ (Theorem 2) [Frei2026Byzantine]: a factor $\\sqrt{n}$."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Under a round-robin scheduler with rigid moves and strong multiplicity detection, does some deterministic algorithm gather oblivious robots despite $f = \\Theta(n)$ Byzantine robots, as $n \\ge 3f+1$ allows in FSYNC [Agmon2006Fault]? Known: the resilience lies between $\\lfloor\\sqrt{n}/2\\rfloor$ and $\\lfloor (n-1)/2\\rfloor$ [Frei2026Byzantine]."
+      ],
+      "notes": "Checked against the full text of [Frei2026Byzantine] (arXiv v1): the model (Section 2, Definitions 1 and 2) and Theorems 1–3 with their proofs as written; the proofs were read but not re-derived line by line. Correct and Byzantine robots alike are activated in the cyclic order. The fixed order is essential: under a general fair sequential scheduler, Lemma 17 of the journal version of [Defago2006Fault] rules out gathering with one Byzantine robot for even $n$, even with multiplicity detection (as reported by [Frei2026Byzantine]; the statement was compared with the journal text, the proof was not checked), and without multiplicity detection Lemma 15 there rules out even weak gathering under round-robin for $f \\ge 1$, $n > f+1$. [Frei2026Byzantine] also give a counterexample to Note 5.2 of the DISC 2006 version of [Defago2006Fault] (not checked against that version). The case $n = 3$, $f = 1$ is solvable here although [Agmon2006Fault] prove it impossible in SSYNC: their adversary uses non-rigid moves and simultaneous activations, both excluded here.",
+      "status": "verified"
+    },
+    {
       "id": "limited-compass",
       "title": "Limited visibility with a compass, ASYNC",
       "assumptions": {
         "opacity": "transparent",
         "faults": "none",
         "frames": "compass",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With a common compass, asynchronous robots with limited visibility gather in finite time.",
       "lower_bounds": [
@@ -746,7 +818,8 @@
         "faults": "none",
         "movement": "rigid",
         "frames": "compass",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With a common compass and rigid moves, asynchronous robots with limited visibility gather at a point in time linear in the initial diameter, which is optimal.",
       "lower_bounds": [
@@ -798,7 +871,8 @@
         "faults": "none",
         "movement": "rigid",
         "frames": "one-axis",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With one common axis and rigid moves, asynchronous robots with limited visibility reach a horizontal segment of length 1 in time linear in the initial diameter; gathering at a point is not shown.",
       "lower_bounds": [
@@ -848,7 +922,8 @@
         "opacity": "transparent",
         "faults": "none",
         "scheduler": "fsync",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Disoriented robots with limited visibility gather in $O(\\Delta_0^2)$ synchronous rounds, $\\Delta_0$ the initial diameter.",
       "lower_bounds": [
@@ -904,7 +979,8 @@
         "faults": "none",
         "team": "two",
         "memory": "lights",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Two robots whose lights both can see meet in ASYNC with non-rigid moves using 2 colours, which is optimal, from any initial colours.",
       "lower_bounds": [
@@ -971,7 +1047,8 @@
         "team": "two",
         "memory": "fcom",
         "scheduler": "ssync",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With a light only the other robot sees, two robots meet in SSYNC with 3 colours, and 2 colours are impossible.",
       "lower_bounds": [
@@ -1030,7 +1107,8 @@
         "faults": "none",
         "team": "two",
         "memory": "fcom",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "In ASYNC with non-rigid moves, robots with external lights meet with 3 colours if they know the minimum move $\\delta$; without $\\delta$ the question is open, and colour-only algorithms cannot work.",
       "lower_bounds": [
@@ -1082,7 +1160,8 @@
         "team": "two",
         "memory": "fcom",
         "movement": "rigid",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With rigid moves, robots with external lights meet in ASYNC; the best count is 6 colours against a lower bound of 3.",
       "lower_bounds": [
@@ -1128,7 +1207,7 @@
       "open": [
         "Close the gap between 3 and 6 colours [Masuzawa2026Disorientation]."
       ],
-      "notes": "If the adversary may also rescale a robot's frame at every Look, rendezvous with external lights is impossible in ASYNC for any number of colours (Theorem 1(ii) of [Masuzawa2026Disorientation]). Checked against the full texts.",
+      "notes": "If no robot looks between another robot's Compute and the end of its Move (CM-atomic ASYNC), 4 colours suffice (Theorem 9 of [Masuzawa2026Disorientation], a preprint). If the adversary may also rescale a robot's frame at every Look, rendezvous with external lights is impossible in ASYNC for any number of colours (Theorem 1(ii) of [Masuzawa2026Disorientation]). Checked against the full texts.",
       "status": "verified"
     },
     {
@@ -1141,7 +1220,8 @@
         "team": "two",
         "memory": "fsta",
         "scheduler": "ssync",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "A light only its owner sees, that is constant memory, lets two robots meet in SSYNC with 3 colours if they know $\\delta$; 2 colours are impossible.",
       "lower_bounds": [
@@ -1195,7 +1275,8 @@
         "memory": "fsta",
         "scheduler": "ssync",
         "movement": "rigid",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With rigid moves, robots with internal lights meet in SSYNC with exactly 3 colours.",
       "lower_bounds": [
@@ -1251,7 +1332,8 @@
         "faults": "none",
         "team": "two",
         "memory": "fsta",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "Whether robots with internal lights can meet in ASYNC is open.",
       "lower_bounds": [
@@ -1294,7 +1376,8 @@
         "scheduler": "ssync",
         "movement": "rigid",
         "frames": "compass",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "statement": "Stand-up indulgent rendezvous: if one robot crashes, the other must reach the crashed robot's position.",
       "summary": "If the correct robot must reach a crashed one, two robots cannot meet in SSYNC, even with unboundedly many colours, rigid moves and a common coordinate system.",
@@ -1306,7 +1389,8 @@
           "bottleneck": "indistinguishable crashes",
           "preconditions": [
             "Theorem 1: SSYNC",
-            "holds with full lights of infinitely many colours, rigid moves and a common coordinate system"
+            "holds with full lights of infinitely many colours, rigid moves and a common coordinate system",
+            "indulgent goal: meet at the faulty robot's position"
           ]
         }
       ],
@@ -1322,8 +1406,129 @@
         }
       },
       "open": [],
-      "notes": "With mobility faults, where a faulty robot stops moving but its light keeps working, 3 colours are necessary and sufficient for two robots in ASYNC [Pramanick2025Mobility], a preprint. Checked against the full texts.",
+      "notes": "If the faulty robot's light keeps working (a mobility fault), two robots without a common compass solve the task in ASYNC with exactly 3 colours (setting *Rendezvous, full lights, a mobility fault, ASYNC*). Checked against the full texts. The goal here is indulgent: the robots must meet at a faulty robot's position. The other fault settings of this problem ask only that the non-faulty robots meet, so results do not transfer between the two kinds of setting even where the assumptions compare.",
       "status": "verified"
+    },
+    {
+      "id": "two-lights-mobility",
+      "title": "Rendezvous, full lights, a mobility fault, ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "mobility",
+        "team": "two",
+        "memory": "lights",
+        "movement": "rigid",
+        "body": "point",
+        "view": "full"
+      },
+      "statement": "Stand-up indulgent rendezvous with a mobility fault: if one robot becomes faulty, it never moves again but its light keeps working, and the other robot must reach its position; if no robot is faulty, the two robots must meet.",
+      "summary": "If a faulty robot keeps its light working, two robots meet at the faulty robot's position in ASYNC with exactly 3 colours.",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Pramanick2025Mobility",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 2: 2 colours are impossible in ASYNC",
+            "the adversary gives robots of the same colour local coordinate systems that mirror each other across the perpendicular bisector of the two robots, so the proof needs robots without a common compass or chirality",
+            "indulgent goal: meet at the faulty robot's position"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pramanick2025Mobility",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "3",
+          "note": "Introductory and current best (Theorem 3); $O(1)$ epochs when no robot is faulty. A preprint, not peer reviewed.",
+          "assumes": [
+            "every move of a correct robot reaches its destination (implicit in the paper)"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No time bound is given when a fault occurs."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "Exactly 3 colours."
+        }
+      },
+      "open": [],
+      "notes": "If the faulty robot's light stops too (a crash), the task is impossible even in SSYNC with a common compass (setting *Rendezvous, full lights, a crash, SSYNC*). Checked against the full text of [Pramanick2025Mobility] (arXiv v2: Section 2, Theorems 2 and 3). The goal here is indulgent: the robots must meet at a faulty robot's position. The other fault settings of this problem ask only that the non-faulty robots meet, so results do not transfer between the two kinds of setting even where the assumptions compare.",
+      "status": "verified"
+    },
+    {
+      "id": "lights-mobility-opaque",
+      "title": "Gathering, full lights, mobility faults, opaque, ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "opaque",
+        "faults": "mobility",
+        "memory": "lights",
+        "movement": "rigid",
+        "body": "point",
+        "view": "full"
+      },
+      "statement": "Up to $f < n$ robots, with $n$ and $f$ unknown to the robots, may suffer a mobility fault at any time: a faulty robot never moves again but its light keeps working. The non-faulty robots must gather at one point, which is the position of a faulty robot if some robot is faulty (indulgent gathering) [Pramanick2025Mobility].",
+      "summary": "Opaque luminous robots with any number of mobility faults gather at a faulty robot's position in ASYNC, in $O(n)$ epochs with 7 colours or in $O(\\max\\{h, f\\})$ epochs with 26 colours, where $h$ is the number of convex layers of the initial configuration (their $\\ell$ is $h$ here).",
+      "lower_bounds": [
+        {
+          "measure": "colours",
+          "bound": "3",
+          "ref": "Pramanick2025Mobility",
+          "bottleneck": "memory",
+          "preconditions": [
+            "Theorem 2: $n = 2$ with at most one faulty robot",
+            "the adversary gives robots of the same colour mirrored local coordinate systems",
+            "indulgent goal: meet at the faulty robot's position"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Pramanick2025Mobility",
+          "role": "best",
+          "time": "O(\\max\\{h, f\\})",
+          "colours": "26",
+          "note": "Theorem 5; $h$ is the number of convex layers of the initial configuration (the boundary of the convex hull of all robots, then of the robots inside it, and so on). Introductory as well: Theorem 4 is in the same paper. A preprint, not peer reviewed.",
+          "assumes": [
+            "robots on one point act as a single entity: activated together, one snapshot, one destination (necessary: Theorem 1)",
+            "every move of a correct robot reaches its destination (implicit in the paper)"
+          ]
+        },
+        {
+          "ref": "Pramanick2025Mobility",
+          "role": "other",
+          "time": "O(n)",
+          "colours": "7",
+          "note": "Theorem 4: fewer colours, more time. A preprint, not peer reviewed.",
+          "assumes": [
+            "robots on one point act as a single entity (necessary: Theorem 1)",
+            "every move of a correct robot reaches its destination (implicit in the paper)"
+          ]
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "No lower bound in terms of $n$, $h$ or $f$; the authors call Theorem 5 optimal when $h$ and $f$ are constants."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "$\\Theta(1)$: between 3 and 7 colours."
+        }
+      },
+      "open": [
+        "Lower bounds on time for indulgent gathering with mobility faults [Pramanick2025Mobility]."
+      ],
+      "notes": "If robots on one point may act independently, indulgent gathering is impossible for any number of colours, even in FSYNC (Theorem 1 of [Pramanick2025Mobility]: two faulty robots and two correct robots at their midpoint with mirrored local coordinate systems). The authors state that the algorithms also gather the non-faulty robots when the gathering point need not be a faulty robot's position. Theorem statements checked against arXiv v2; the proofs of Theorems 4 and 5 were not checked. The goal here is indulgent: the robots must meet at a faulty robot's position. The other fault settings of this problem ask only that the non-faulty robots meet, so results do not transfer between the two kinds of setting even where the assumptions compare.",
+      "status": "draft"
     },
     {
       "id": "lights-ssync",
@@ -1336,7 +1541,8 @@
         "memory": "lights",
         "scheduler": "ssync",
         "frames": "chirality",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With lights and chirality, $n \\ge 3$ robots that cannot detect multiplicities gather in SSYNC with 2 colours, which is optimal.",
       "lower_bounds": [
@@ -1385,7 +1591,8 @@
         "team": "three-plus",
         "memory": "lights",
         "frames": "chirality",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With lights and chirality, $n \\ge 3$ robots gather in ASYNC with non-rigid moves and no multiplicity detection using 3 colours; whether 2 suffice is open.",
       "lower_bounds": [
@@ -1443,7 +1650,8 @@
         "scheduler": "ssync",
         "movement": "rigid",
         "multiplicity": "strong",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With 2 colours and strong multiplicity detection, any number of robots gather in SSYNC with rigid moves from any configuration and any initial colours; one colour (oblivious robots) does not suffice.",
       "statement": "The robots start from an arbitrary configuration with arbitrary colours: several robots may share a point (a multiplicity), and the configuration may be bivalent, with $n/2$ robots on each of two points. An algorithm that gathers from every such start is self-stabilizing [Bonnet2026Deterministic].",
@@ -1497,7 +1705,8 @@
         "scheduler": "ssync",
         "movement": "rigid",
         "frames": "chirality",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With external lights, $n \\ge 3$ robots gather in rigid SSYNC with 3 colours, which is optimal; 2 suffice if a robot sees who shares its point.",
       "lower_bounds": [
@@ -1548,7 +1757,8 @@
         "memory": "fsta",
         "scheduler": "ssync",
         "frames": "chirality",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "With internal lights, 2 colours gather $n \\ge 3$ robots in SSYNC only from restricted starts; 2 colours do not suffice in general, and whether more do is open.",
       "lower_bounds": [
@@ -1612,7 +1822,8 @@
         "team": "three-plus",
         "memory": "fcom",
         "scheduler": "sequential",
-        "body": "point"
+        "body": "point",
+        "view": "full"
       },
       "summary": "If one robot moves per round, 2 external colours gather $n \\ge 3$ robots, self-stabilizing, without chirality; oblivious robots cannot.",
       "lower_bounds": [
@@ -1656,7 +1867,8 @@
         "visibility": "unlimited",
         "faults": "none",
         "body": "fat",
-        "team": "three-plus"
+        "team": "three-plus",
+        "view": "full"
       },
       "statement": "Fat robots (unit discs) cannot share a point: gathering asks for a connected configuration of touching discs in which every robot sees all others.",
       "summary": "Three and four oblivious fat robots, which block each other's view and motion, gather in ASYNC without any common orientation.",
@@ -1698,7 +1910,8 @@
         "faults": "none",
         "body": "fat",
         "team": "three-plus",
-        "frames": "chirality"
+        "frames": "chirality",
+        "view": "full"
       },
       "statement": "Gathering is Definition 1 of [Agathangelou2013Fat]: a connected configuration (every disc tangent to another), fully visible (every robot sees all others) and terminal, with all centres on the convex hull.",
       "summary": "With chirality and known $n$, any number of opaque fat robots gather in ASYNC with non-rigid moves.",
@@ -1741,7 +1954,8 @@
         "faults": "none",
         "body": "fat",
         "team": "three-plus",
-        "opacity": "transparent"
+        "opacity": "transparent",
+        "view": "full"
       },
       "statement": "Transparent fat robots do not block sight but block movement. Gathering asks for a layered pattern around the centre of the smallest enclosing circle, with a unique robot at the centre [GanChaudhuri2015Leader].",
       "summary": "Transparent fat robots without chirality gather into a layered pattern from every start whose robots can be ordered, which is exactly the asymmetric starts.",
@@ -1786,6 +2000,258 @@
       ],
       "notes": "Gathering at a given point with limited visibility (dense packing around the point) is a different goal; it is studied by Cord-Landwehr et al. (SOFSEM 2011) and Sharma et al. (TAAS 2017), not yet read. Checked against the full texts of [GanChaudhuri2015Leader] (arXiv 1208.4484) and [GanChaudhuri2010Transparent].",
       "status": "verified"
+    },
+    {
+      "id": "defected-fsync",
+      "title": "Adversarial defected view, FSYNC, weak multiplicity detection",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point",
+        "memory": "oblivious",
+        "frames": "none",
+        "team": "three-plus",
+        "view": "adversarial-defected",
+        "scheduler": "fsync",
+        "movement": "rigid",
+        "multiplicity": "weak"
+      },
+      "summary": "When each robot sees only $K = n-2$ of the others, chosen by an adversary, $n \\ge 5$ oblivious disoriented robots gather in at most three FSYNC rounds.",
+      "statement": "In each Look a robot sees the points of $K$ robots chosen by the adversary among those not on its own point, with weak multiplicity detection over the robots it sees and on its own point. Robots are oblivious and disoriented, move rigidly and act in FSYNC; they must gather from any initial configuration.",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Kim2023Gathering",
+          "role": "best",
+          "time": "O(1)",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 5$ and $K = n-2$",
+            "rigid moves"
+          ],
+          "note": "Introductory and current best (Theorem 7: \"In the adversarial (N, N − 2)-defected model (N ≥ 5), Algorithm 1 solves the gathering problem in three rounds\"; their $N$ is $n$ here). A robot that sees only points with several robots, or only single robots, moves to the centre of the smallest enclosing circle of the points it sees; a single robot that sees a point with several robots moves to it; a robot that shares its point and sees a single robot stays. The proof rests on one property of $K = n-2$: a robot that shares its point sees every other robot. The algorithm fails for $n = 4$ (Section 3: three robots on an equilateral triangle and one at its centre)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "At most three rounds for $n \\ge 5$ and $K = n-2$ [Kim2023Gathering]. For $n = 4$, $K = 2$ the adversarial view of this setting is open: the four-robot algorithm of [Shukla2026Gathering] (a preprint) relies on an adversary that must show $K$ distinct occupied points, whereas here it chooses $K$ robots and may show two robots on one point while hiding a third point; for $n = 3$, $K = 1$ gathering is impossible already in the distance-based view ([Kim2023Gathering], Theorem 18). Smaller $K$ is open."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "What is the smallest $K$, as a function of $n$, for which $n$ robots gather under FSYNC in the adversarial defected view? [Kim2023Gathering] solve only $K = n-2$ and name the minimum $K$ as future work (Section 6)."
+      ],
+      "notes": "Kim, Shibata, Sudo, Nakamura, Katayama and Masuzawa introduced the defected view in this paper [Kim2023Gathering]. In their relaxed version, in which the $K$ robots seen may include robots on the observer's own point, no algorithm gathers for $K = n-2$ (Theorem 19), so the exclusion of those robots is needed. They left open whether four robots gather in the adversarial $(4,2)$ view and state, without proof, that no set-based algorithm (one that uses only the set of points seen, not the observer's place in it) can (Section 6); [Shukla2026Gathering] give an algorithm that uses the observer's place, for an adversary that chooses points rather than robots (setting *Defected view over points, FSYNC, non-rigid*), so the question stays open for this view. Checked against the full text of [Kim2023Gathering] (LIPIcs version).",
+      "status": "verified"
+    },
+    {
+      "id": "defected-fsync-non-rigid",
+      "title": "Defected view over points, FSYNC, non-rigid",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point",
+        "memory": "oblivious",
+        "frames": "none",
+        "team": "three-plus",
+        "view": "points-defected",
+        "scheduler": "fsync",
+        "movement": "non-rigid",
+        "multiplicity": "none"
+      },
+      "summary": "Four oblivious disoriented robots that each see only two of the other occupied points, chosen by an adversary, gather in finite FSYNC time without multiplicity detection and with non-rigid moves (a preprint).",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Shukla2026Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n = 4$ and $K = 2$",
+            "non-rigid moves of at least $\\delta$"
+          ],
+          "note": "Introductory and current best (Theorem 4.1: \"Algorithm 1 gathers all synchronized robots in finite time under the adversarial (4, 2)-defected view model\"). A robot that sees one other point moves to the midpoint. A robot that sees two other points moves to the centroid of an equilateral triangle, to the midpoint of the base of an isosceles one (but waits if it is the apex and the apex angle is $120^\\circ$), to the midpoint of the longest side of any other triangle, and, on a line, to the midpoint of the outer points or of itself and the farther point. Unlike the algorithm of [Kim2023Gathering] for the distance-based view, the destination depends on where the observer is in the triangle, which Kim et al. state is necessary in the adversarial view."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Finite time only; no bound on rounds is proved. Impossible for $n = 3$, $K = 1$ (setting *Distance-based defected view, FSYNC*)."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "How many FSYNC rounds do four robots need in the $(4,2)$ defected view over points? [Kim2023Gathering] need at most four rounds in the distance-based view and three rounds for $n \\ge 5$, $K = n-2$; [Shukla2026Gathering] prove only finite time."
+      ],
+      "notes": "Shukla, Peddinti and Bhagat answer a variant of the question of [Kim2023Gathering] for four robots, in a setting incomparable with Kim et al.'s: robots detect no multiplicities and the adversary may stop a move after $\\delta$, but the adversary chooses occupied points rather than robots, so it cannot show two robots on one point and hide a third point: the adversary chooses at most $K$ of the points occupied by other robots, and \"when two robots, say r1 and r2, are co-located, an observing robot may sense either r1 or r2, but never both simultaneously\" (Section 3). The proofs (Lemmas 4.1 to 4.6) are sketched, and several cases are argued from figures. A preprint; read in full (arXiv v1).",
+      "status": "draft"
+    },
+    {
+      "id": "defected-distance-fsync",
+      "title": "Distance-based defected view, FSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point",
+        "memory": "oblivious",
+        "frames": "none",
+        "team": "three-plus",
+        "view": "distance-defected",
+        "scheduler": "fsync",
+        "movement": "rigid",
+        "multiplicity": "weak"
+      },
+      "summary": "When each robot sees its two nearest robots off its own point, four oblivious disoriented robots gather in at most four FSYNC rounds; three robots that each see one robot cannot gather.",
+      "statement": "In each Look a robot sees the points of the $K$ robots nearest to it among those not on its own point (ties broken by the adversary), with weak multiplicity detection over the robots it sees and on its own point. Robots are oblivious and disoriented, move rigidly and act in FSYNC.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Kim2023Gathering",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "$n = 3$ and $K = 1$: three robots at the vertices of an equilateral triangle, each seeing one other robot (the adversary breaks the tie)",
+            "no agreement on chirality: all robots get the same view, so they keep forming an equilateral triangle; if they aim at its centre, the adversary reverses their chirality",
+            "Theorem 18; it holds in the adversarial defected view too"
+          ]
+        }
+      ],
+      "results": [
+        {
+          "ref": "Kim2023Gathering",
+          "role": "best",
+          "time": "O(1)",
+          "colours": "0",
+          "assumes": [
+            "$n = 4$ and $K = 2$",
+            "rigid moves"
+          ],
+          "note": "Introductory and current best (Theorem 17: \"In the distance-based (4, 2)-defected model, Algorithm 2 solves the gathering problem in at most four rounds\"). A single robot that sees two single robots moves to the centre of an equilateral triangle, to the midpoint of the base of an isosceles one, and otherwise to the midpoint of the longest side; the destination depends only on the set of points seen, so robots with equal views meet. When all four views differ, the robots form a convex quadrilateral whose diagonals join robots that do not see each other (Lemmas 10 to 12), and two robots meet within two rounds (Lemmas 14 to 16)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "tight",
+          "note": "At most four rounds for $n = 4$, $K = 2$ (Theorem 17) and three for $n \\ge 5$, $K = n-2$ (the algorithm for the adversarial view); impossible for $n = 3$, $K = 1$ (Theorem 18) [Kim2023Gathering]. Smaller $K$ is open."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "What is the smallest $K$, as a function of $n$, for which $n$ robots gather under FSYNC in the distance-based defected view? $K = n-2$ suffices for $n \\ge 4$, and $K = 1$ fails for $n = 3$ [Kim2023Gathering]."
+      ],
+      "notes": "A robot never sees its farthest robot, and the four-robot algorithm relies on this: if the four robots do not form a convex quadrilateral, two of them have the same view (Lemma 10). Checked against the full text of [Kim2023Gathering] (LIPIcs version).",
+      "status": "verified"
+    },
+    {
+      "id": "defected-distance-ssync",
+      "title": "Distance-based defected view, SSYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point",
+        "memory": "oblivious",
+        "frames": "none",
+        "team": "three-plus",
+        "view": "distance-defected",
+        "scheduler": "ssync",
+        "movement": "rigid",
+        "multiplicity": "weak"
+      },
+      "summary": "Under SSYNC, four oblivious disoriented robots that each see their two nearest robots off their own point cannot gather, even from four distinct points.",
+      "lower_bounds": [
+        {
+          "measure": "time",
+          "bound": "\\text{impossible}",
+          "ref": "Aliberti2025Defected",
+          "bottleneck": "symmetry",
+          "preconditions": [
+            "$n = 4$ and $K = 2$, starting at four distinct points (Theorem 2)",
+            "deterministic, oblivious, no agreement on coordinates, weak multiplicity detection over the robots seen",
+            "the core is a configuration of two points with two robots each, where all robots have the same view and activating one pair repeats it or halves its distance (Theorem 1); the reduction from distinct starts (Lemmas 1 to 4) is only sketched",
+            "the paper does not say whether moves are rigid; the proofs use only moves that reach their destination, so they hold with rigid moves"
+          ]
+        }
+      ],
+      "results": [],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Impossible for $(n,K)=(4,2)$ ([Aliberti2025Defected], Theorem 2) and $(3,1)$ (inherited from [Kim2023Gathering], Theorem 18); open for every other $n$ and $K$, and no algorithm is known. Corollary 1 of [Aliberti2025Defected] claims impossibility for every $n$ and $K$ without a proof."
+        },
+        "colours": {
+          "status": "impossible",
+          "note": "Oblivious robots cannot do it for $n = 4$, $K = 2$; lights have not been studied with defected views."
+        }
+      },
+      "open": [
+        "Can $n$ robots gather under SSYNC in the distance-based or the adversarial defected view for any $K \\le n-2$? Corollary 1 of [Aliberti2025Defected] says no, by an argument of one sentence.",
+        "Which extra capability (chirality, one common axis, lights) makes gathering possible under SSYNC with defected views? With one common axis and views over points, [Shukla2026Gathering] gather even under ASYNC (a preprint)."
+      ],
+      "notes": "Aliberti, Kim and Katayama show that the FSYNC algorithm of [Kim2023Gathering] has no SSYNC counterpart. Theorem 1 (\"There is no deterministic algorithm to solve the gathering problem under the distance-based (4,2)-defected model from any initial configuration\") uses a start with two robots on each of two points, which the problem statement here excludes; Theorem 2 (\"There is no deterministic algorithm to solve the distinct gathering problem under the distance-based (4,2)-defected model from any initial configuration\") covers starts at four distinct points. Its proof argues that the only algorithm that gathers from every configuration of three points is A3P, in which a single robot that sees two single robots moves to the farther one (Lemma 3), and that A3P creates two pairs from a symmetric configuration of four points (Lemma 4). Lemma 3 dismisses moves to unoccupied points in one sentence; this step was not checked in detail. Read in full (publisher version).",
+      "status": "draft"
+    },
+    {
+      "id": "defected-adversarial-one-axis",
+      "title": "Defected view over points, one common axis, ASYNC",
+      "assumptions": {
+        "visibility": "unlimited",
+        "opacity": "transparent",
+        "faults": "none",
+        "body": "point",
+        "memory": "oblivious",
+        "frames": "one-axis",
+        "team": "three-plus",
+        "view": "points-defected",
+        "scheduler": "async",
+        "movement": "non-rigid",
+        "multiplicity": "none"
+      },
+      "summary": "Robots that agree on one axis gather under ASYNC, with non-rigid moves and no multiplicity detection, even if each sees only one other robot, chosen by an adversary at every Look (a preprint).",
+      "lower_bounds": [],
+      "results": [
+        {
+          "ref": "Shukla2026Gathering",
+          "role": "best",
+          "time": "\\text{finite}",
+          "colours": "0",
+          "assumes": [
+            "$n \\ge 3$ and any $1 \\le K \\le n-2$, which may differ between robots",
+            "agreement on the direction and orientation of the $y$-axis",
+            "non-rigid moves of at least $\\delta$"
+          ],
+          "note": "Introductory and current best (Theorem 6.1: \"In the adversarial (N, K) defected view model (N ≥ 3), Algorithm 2 solves gathering for asynchronous robots without multiplicity detection, provided they have agreement on the vertical axis of the local coordinate system\"). A robot that sees points north of it moves north, along one of two lines at $60^\\circ$ to the horizontal, toward the northernmost horizontal line it sees; a robot on that line waits while it sees robots below it, and otherwise an outermost robot moves to the apex of the equilateral triangle on the two outermost points of the line. The rule resembles that of [Bhagat2016Faulttolerant] for full views (setting *Crash faults, one common axis, opaque robots*)."
+        }
+      ],
+      "optimality": {
+        "time": {
+          "status": "unknown",
+          "note": "Finite time only; the paper reports simulations but proves no bound on epochs."
+        },
+        "colours": {
+          "status": "tight",
+          "note": "No colours."
+        }
+      },
+      "open": [
+        "Can robots with defected views over points gather under ASYNC without agreement on an axis, for instance with chirality only? [Shukla2026Gathering] (Section 8) ask to relax the axis agreement; without any agreement, four robots that see two each cannot gather even under SSYNC in the distance-based view (setting *Distance-based defected view, SSYNC*)."
+      ],
+      "notes": "Shukla, Peddinti and Bhagat let the adversary choose, at every activation, which occupied points a robot sees. The model section is not consistent about the count: \"an adversary selects an arbitrary subset of at most K robot positions\" (Section 2), and \"at most K robot positions are visible in any observation, including the robot's own position\" (Section 5); the algorithm is meant to work whenever a robot sees at least one other point. With full views, one common axis and no faults, gathering under ASYNC follows from [Bhagat2016Faulttolerant], which also tolerates crashes. The proofs (Lemmas 6.1 to 6.3) are short; Theorem 6.1 is derived from \"Lemmas 2.1, 2.2, and 2.3\", which do not exist, and Lemma 6.3 cites \"Lemmas 7 and 8\". A preprint; read in full (arXiv v1).",
+      "status": "draft"
     }
   ],
   "figure": {
@@ -2368,10 +2834,6 @@
   },
   "further": [
     {
-      "ref": "Shukla2026Gathering",
-      "note": "Gathering under the adversarial $(n, K)$-defected view model of Kim, Shibata, Sudo, Nakamura, Katayama and Masuzawa (OPODIS 2022, not in the bibliography): in each Look the adversary shows a robot only $K$ of the occupied points other than its own (all of them if there are at most $K$), and may change its choice at every Look. Oblivious robots without multiplicity detection and with non-rigid moves gather in finite time for $n = 4$ and $K = 2$ in FSYNC without any agreement on coordinates (Theorem 4.1), and for any $n \\ge 3$ and $1 \\le K \\le n-2$ in ASYNC if they agree on one axis (Theorem 6.1); no time bound. The plane model has no value for such defective views, so the results have no setting here. A preprint; several proofs are sketched, and some lemma references do not match the lemmas. Read."
-    },
-    {
       "ref": "DiLuna2025Gathering",
       "note": "Robots confined to a circle, with chirality, rigid moves, SSYNC, and visibility limited to angular distance below $\\vartheta$, gather from every rotationally asymmetric configuration when $\\vartheta = \\pi$ (Theorem 4.14); for $\\vartheta \\le \\pi/2$ no algorithm gathers, even from asymmetric configurations with a connected visibility graph (Theorem 3.7), by a new random-perturbation argument. Read (arXiv v3)."
     },
@@ -2402,10 +2864,6 @@
     {
       "ref": "Pattanayak2021Randomized",
       "note": "Randomized gathering of two robots under ASYNC, by what the adversary controls (waiting time, computation delay, speed) and knows: possible against an oblivious adversary with zero computation delay or with waiting time plus delay bounded below, impossible against an adaptive one; extended to many robots with merging. Read (arXiv v1)."
-    },
-    {
-      "ref": "Kim2023Gathering",
-      "note": "Defected views: each robot sees only some of the others. Gathering for $N \\ge 5$ robots when each sees at most $N-2$ chosen by the adversary, and for four robots that each see their two nearest; impossible when each of three robots sees only one. Read (LIPIcs version)."
     },
     {
       "ref": "Czyzowicz2020Gathering",
