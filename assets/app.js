@@ -1242,19 +1242,33 @@
         <p class="small"><b>Why it matters.</b> ${mdInline(it.why)}</p>
         <div class="chips">${(it.settings || []).map(([pid, vid]) => state.problems[pid] && state.problems[pid].nodes && state.problems[pid].nodes[vid] ? `<a class="chip assume" href="${L('problem', pid, vid)}">${esc(state.problems[pid].name)}: ${fmt(state.problems[pid].nodes[vid].variant ? state.problems[pid].nodes[vid].variant.title : vid)}</a>` : (state.problems[pid] ? `<a class="chip assume" href="${L('problem', pid)}">${esc(state.problems[pid].name)}</a>` : '')).join('')}</div></li>`).join('')}</ol>
       ${state.overviews['consequential-open-problems'] ? `<p class="small"><a href="${L('overview', 'consequential-open-problems')}">Read the ranking as an essay →</a></p>` : ''}</section>` : '';
-    const sections = state.index.problems.map(id => state.problems[id]).filter(Boolean).map(p => {
+    // broad categories: model, then family (in the order of index.json), then problem
+    const nOpenOf = p => p.variants.reduce((n, v) => n + (v.open || []).length, 0);
+    const problemSec = p => {
       const items = p.order.filter(n => n.variant && (n.variant.open || []).length);
       if (!items.length) return '';
-      return `<section class="panel"><h2><a href="${L('problem', p.id)}">${esc(p.name)}</a></h2>
+      return `<section class="panel"><h2><a href="${L('problem', p.id)}">${esc(p.name)}</a> <span class="muted count">${nOpenOf(p)}</span></h2>
         ${items.map(n => `<h3><a href="${L('problem', p.id, n.id)}">${fmt(n.variant.title)}</a> <span class="small muted">${fmt(settingText(p, n))}</span></h3>
           <ol class="open">${n.variant.open.map(q => `<li>${md(q)}</li>`).join('')}</ol>`).join('')}</section>`;
-    }).join('');
+    };
+    const cats = state.index.models.map(mid => {
+      const probs = state.index.problems.map(id => state.problems[id]).filter(p => p && p.model === mid && nOpenOf(p));
+      const fams = (state.index.families || []).map(f => ({ f, ps: probs.filter(p => (f.problems || []).includes(p.id)) })).filter(x => x.ps.length);
+      const loose = probs.filter(p => !fams.some(x => x.ps.includes(p)));
+      if (loose.length) fams.push({ f: { id: 'other', name: 'Other problems' }, ps: loose });
+      return { mid, fams, n: probs.reduce((n, p) => n + nOpenOf(p), 0) };
+    }).filter(c => c.n);
+    const famN = x => x.ps.reduce((n, p) => n + nOpenOf(p), 0);
+    const catNav = cats.length ? `<nav class="panel ocats" aria-label="Categories">${cats.map(c => `<div><a href="#" data-jump="oc-${esc(c.mid)}"><b>${esc(state.models[c.mid].name)}</b></a> <span class="muted small">${c.n}</span>
+      <ul>${c.fams.map(x => `<li><a href="#" data-jump="oc-${esc(c.mid)}-${esc(x.f.id)}">${esc(x.f.name)}</a> <span class="muted small">${famN(x)}</span></li>`).join('')}</ul></div>`).join('')}</nav>` : '';
+    const sections = cats.map(c => `<h2 class="ocat-model" id="sec-oc-${esc(c.mid)}"><a href="${L('model', c.mid)}">${esc(state.models[c.mid].name)}</a> <span class="muted count">${c.n}</span></h2>
+      ${c.fams.map(x => `<h3 class="eyebrow ocat-fam" id="sec-oc-${esc(c.mid)}-${esc(x.f.id)}">${esc(x.f.name)} <span class="muted">${famN(x)} open</span></h3>${x.ps.map(problemSec).join('')}`).join('')}`).join('');
     return `<h1>Open questions</h1><p class="muted lead">The questions a solution to which would matter most, every problem ranked by how far a solution would reach and by how many people have worked on it, and then every open question in the catalogue.</p>
       ${top}
       <h2>Problems ranked</h2><p class="small muted"><b>Reach</b> counts the problems a solution feeds: problems derived from it, problems whose family builds on it (for example every computing-with-agents problem starts by dispersing), and problems linked to it. <b>People</b> counts the distinct authors of the papers the atlas cites for the problem, which measures the atlas's coverage rather than the whole literature.</p>
       <section class="panel" id="open-table">${openTable()}</section>
-      <h2>All open questions</h2><p class="small muted">Grouped by problem and ordered along each problem's assumption tree.</p>
-      ${sections || '<p class="empty">Nothing yet.</p>'}`;
+      <h2>All open questions</h2><p class="small muted">Grouped by model, then by problem family and problem, and ordered along each problem's assumption tree.</p>
+      ${catNav}${sections || '<p class="empty">Nothing yet.</p>'}`;
   }
 
   /* ---------- where the atlas cites each paper: model, problem, role, kind of publication ---------- */

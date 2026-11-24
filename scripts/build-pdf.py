@@ -969,13 +969,28 @@ def open_questions_appendix():
         for x in unnumbered[1:]:
             out.append(r"\subsection*{%s}" % esc_plain(x["heading"]) + "\n" + block(x["body"]))
         out.append(r"\section*{Every open question}\markright{Every open question}")
-    out.append("Every open question recorded in the atlas, grouped by problem and ordered along each problem's assumption tree.")
-    for pid in IDX["problems"]:
-        p = PROBLEMS[pid]
-        items = [n for n in p["_order"] if n["variant"] and n["variant"].get("open")]
-        if not items:
+    out.append("Every open question recorded in the atlas, grouped by model, then by problem family and problem, and ordered along each problem's assumption tree.")
+    nopen = lambda p: sum(len(v.get("open", [])) for v in p["variants"])
+    for mid in IDX["models"]:
+        probs = [PROBLEMS[x] for x in IDX["problems"] if PROBLEMS[x]["model"] == mid and nopen(PROBLEMS[x])]
+        if not probs:
             continue
-        out.append(r"\section*{%s}\markright{%s}" % (pref(p), esc_plain(p["name"])))
+        groups = [(f["name"], [p for p in probs if p["id"] in f["problems"]]) for f in IDX.get("families", [])]
+        loose = [p for p in probs if not family_of(p["id"])]
+        groups = [g for g in groups if g[1]] + ([("Other problems", loose)] if loose else [])
+        out.append(r"\section*{%s}\markright{%s}" % (esc_plain(MODELS[mid]["name"]), esc_plain(MODELS[mid]["name"])) +
+                   "\n" + r"{\small\color{muted}%d open questions.}" % sum(nopen(p) for p in probs))
+        for fname, fps in groups:
+            out.append(r"\subsection*{%s}" % esc_plain(fname) + "\n" + r"{\small\color{muted}%d open questions.}" % sum(nopen(p) for p in fps))
+            for p in fps:
+                out.append(open_questions_of(p))
+    return "\n\n".join(out)
+
+def open_questions_of(p):
+    out = []
+    items = [n for n in p["_order"] if n["variant"] and n["variant"].get("open")]
+    if items:
+        out.append(r"\subsubsection*{%s}" % pref(p))
         for n in items:
             v = n["variant"]
             out.append(r"\noindent\textbf{\hyperref[%s]{%s}} {\footnotesize\textcolor{muted}{(p.~\pageref{%s})}}" % (vlabel(p, v), inline(v["title"]), vlabel(p, v)) +

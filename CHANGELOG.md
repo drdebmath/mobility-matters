@@ -3,6 +3,14 @@
 What changed in each version of the atlas, newest first. Versions are dated; the website
 footer and the book's title page show the current one.
 
+## 2026-11-24 — Open questions by category
+
+### Site and book
+
+- The list of all open questions is grouped by model, then by problem family, with the number
+  of open questions in each. On the site a menu at the top jumps to each group; the book's
+  open-questions appendix follows the same order.
+
 ## 2026-11-23 — Online exploration below the logarithm, defected views
 
 ### New problems
